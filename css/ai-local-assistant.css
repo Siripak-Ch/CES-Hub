@@ -1,0 +1,147 @@
+/* CES AI Local Assistant V2 */
+.ces-ai-local-root{font-family:'Prompt',sans-serif;position:fixed;z-index:10020;right:18px;bottom:18px}
+.ces-ai-local-root.hidden,.ces-ai-local-panel.hidden,.ces-ai-admin-modal.hidden,.ces-ai-admin-workspace.hidden,.ces-ai-local-icon-btn.hidden,.ces-ai-admin-editor-actions .hidden{display:none!important}
+.ces-ai-local-launcher{display:flex;align-items:center;gap:9px;border:0;border-radius:999px;background:#003da5;color:#fff;padding:12px 17px;font-weight:700;box-shadow:0 14px 35px rgba(0,61,165,.28);cursor:pointer;transition:.18s ease}
+.ces-ai-local-launcher:hover{transform:translateY(-2px);box-shadow:0 17px 40px rgba(0,61,165,.34)}
+.ces-ai-local-launcher i{font-size:18px}
+.ces-ai-local-panel{position:absolute;right:0;bottom:60px;width:min(340px,calc(100vw - 20px));height:min(470px,calc(100vh - 88px));display:flex;flex-direction:column;background:#fff;border:1px solid #dbe5f3;border-radius:24px;overflow:hidden;box-shadow:0 25px 70px rgba(15,23,42,.25)}
+.ces-ai-local-header{display:flex;align-items:center;gap:10px;padding:13px 12px;background:linear-gradient(135deg,#003da5,#175cc8);color:#fff}
+.ces-ai-local-header-icon{width:38px;height:38px;border-radius:12px;background:rgba(255,255,255,.16);display:grid;place-items:center;font-size:18px;flex:0 0 auto}
+.ces-ai-local-header-copy{min-width:0;flex:1;display:flex;flex-direction:column;line-height:1.2}
+.ces-ai-local-header-copy strong{font-size:14px}.ces-ai-local-header-copy small{font-size:10px;opacity:.85;margin-top:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ces-ai-local-status-dot{display:inline-block;width:7px;height:7px;border-radius:50%;background:#fbbf24;margin-right:5px}.ces-ai-local-status-dot.ready{background:#4ade80}.ces-ai-local-status-dot.error{background:#fb7185}
+.ces-ai-local-icon-btn{width:31px;height:31px;border:0;border-radius:9px;background:rgba(255,255,255,.12);color:inherit;display:grid;place-items:center;cursor:pointer;flex:0 0 auto}.ces-ai-local-icon-btn:hover{background:rgba(255,255,255,.24)}
+.ces-ai-local-messages{flex:1;overflow:auto;padding:14px;background:#f7f9fc;scroll-behavior:smooth}
+.ces-ai-local-message{display:flex;margin:0 0 10px}.ces-ai-local-message-user{justify-content:flex-end}.ces-ai-local-message-bot{justify-content:flex-start}
+.ces-ai-local-bubble{max-width:88%;padding:10px 12px;border-radius:16px;font-size:12.5px;line-height:1.65;white-space:pre-wrap;word-break:break-word}
+.ces-ai-local-message-user .ces-ai-local-bubble{background:#003da5;color:#fff;border-bottom-right-radius:5px}.ces-ai-local-message-bot .ces-ai-local-bubble{background:#fff;color:#26354d;border:1px solid #e1e8f2;border-bottom-left-radius:5px;box-shadow:0 3px 12px rgba(15,23,42,.05)}
+.ces-ai-local-meta{display:block;color:#7c8ba1;font-size:10px;margin-top:7px;border-top:1px dashed #dfe6ef;padding-top:5px}
+.ces-ai-local-actions{display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-top:8px}.ces-ai-local-action,.ces-ai-local-feedback{border:0;border-radius:9px;padding:6px 9px;font:inherit;font-size:10px;cursor:pointer}.ces-ai-local-action{background:#e8f0ff;color:#003da5;font-weight:700}.ces-ai-local-feedback{background:#f1f5f9;color:#64748b}.ces-ai-local-feedback:hover,.ces-ai-local-action:hover{filter:brightness(.96)}
+.ces-ai-local-related{display:flex;gap:5px;flex-wrap:wrap;margin-top:8px}.ces-ai-local-related button{border:1px solid #dbe5f3;background:#fff;color:#53657e;border-radius:999px;padding:4px 8px;font-size:9.5px;cursor:pointer}
+.ces-ai-local-suggestions{padding:8px 10px;display:flex;gap:6px;overflow-x:auto;background:#fff;border-top:1px solid #edf1f7}.ces-ai-local-suggestions button{white-space:nowrap;border:1px solid #dbe5f3;background:#f8fafc;color:#465a76;border-radius:999px;padding:6px 9px;font-size:10px;font-weight:600;cursor:pointer}
+.ces-ai-local-form{display:flex;gap:8px;padding:10px;border-top:1px solid #e7edf5;background:#fff}.ces-ai-local-form textarea{resize:none;flex:1;max-height:90px;border:1px solid #d8e1ee;border-radius:13px;padding:10px 11px;font:inherit;font-size:12px;outline:none}.ces-ai-local-form textarea:focus{border-color:#4e86dc;box-shadow:0 0 0 3px rgba(0,61,165,.08)}.ces-ai-local-form button{width:40px;border:0;border-radius:12px;background:#003da5;color:#fff;cursor:pointer}.ces-ai-local-form button:disabled{opacity:.45;cursor:not-allowed}
+.ces-ai-local-footer{text-align:center;padding:5px 8px 7px;color:#9aa8b9;background:#fff;font-size:8.5px;letter-spacing:.3px}
+.ces-ai-local-typing{display:inline-flex;gap:3px}.ces-ai-local-typing span{animation:cesAiPulse 1s infinite}.ces-ai-local-typing span:nth-child(2){animation-delay:.15s}.ces-ai-local-typing span:nth-child(3){animation-delay:.3s}@keyframes cesAiPulse{0%,100%{opacity:.25}50%{opacity:1}}
+
+/* Admin modal */
+.ces-ai-admin-modal{position:fixed;inset:0;z-index:9200;background:rgba(15,23,42,.62);backdrop-filter:blur(5px);display:flex;align-items:center;justify-content:center;padding:18px}
+.ces-ai-admin-dialog{width:min(880px,92vw);height:min(640px,86vh);background:#f5f7fb;border-radius:24px;overflow:hidden;display:flex;flex-direction:column;box-shadow:0 30px 100px rgba(0,0,0,.35)}
+.ces-ai-admin-header{display:flex;align-items:center;justify-content:space-between;padding:18px 22px;background:#0f2f65;color:#fff}.ces-ai-admin-header h2{font-size:18px;font-weight:800;margin:0}.ces-ai-admin-header h2 i{margin-right:8px}.ces-ai-admin-header p{font-size:11px;opacity:.75;margin:3px 0 0}.ces-ai-admin-header .ces-ai-local-icon-btn{color:#fff}
+
+.ces-ai-admin-workspace{flex:1;min-height:0;padding:14px;overflow:auto}.ces-ai-admin-toolbar{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:12px}.ces-ai-admin-toolbar button{border:1px solid #d4deec;background:#fff;color:#334866;border-radius:10px;padding:8px 11px;font:inherit;font-size:11px;font-weight:700;cursor:pointer}.ces-ai-admin-toolbar button:first-child{background:#003da5;color:#fff;border-color:#003da5}.ces-ai-admin-toolbar span{margin-left:auto;color:#5d6c82;font-size:11px}
+.ces-ai-admin-grid{display:grid;grid-template-columns:minmax(320px,.9fr) minmax(430px,1.4fr);gap:12px}.ces-ai-admin-list-card,.ces-ai-admin-editor-card,.ces-ai-admin-unanswered-card{background:#fff;border:1px solid #dfe6f0;border-radius:17px;box-shadow:0 5px 18px rgba(15,23,42,.04);overflow:hidden}.ces-ai-admin-card-title{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:12px 14px;border-bottom:1px solid #edf1f6}.ces-ai-admin-card-title h3{font-size:13px;font-weight:800;color:#263752;margin:0}.ces-ai-admin-card-title p{font-size:10px;color:#8593a6;margin:3px 0 0}.ces-ai-admin-card-title input{width:210px;border:1px solid #dce4ef;border-radius:9px;padding:7px 9px;font:inherit;font-size:10px}.ces-ai-admin-card-title span{font-size:9px;background:#eaf1ff;color:#003da5;border-radius:999px;padding:5px 8px}
+.ces-ai-admin-list{height:390px;overflow:auto;padding:7px}.ces-ai-admin-list-item{border:1px solid transparent;border-radius:11px;padding:9px;cursor:pointer;margin-bottom:5px}.ces-ai-admin-list-item:hover,.ces-ai-admin-list-item.active{border-color:#bcd0ee;background:#f4f8ff}.ces-ai-admin-list-item strong{display:block;font-size:11.5px;color:#243752}.ces-ai-admin-list-item small{display:block;font-size:9.5px;color:#7c8b9f;margin-top:3px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.ces-ai-admin-list-item .inactive{color:#dc2626}
+.ces-ai-form-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:14px}.ces-ai-form-grid label{font-size:10px;font-weight:700;color:#54657c}.ces-ai-form-grid label.wide{grid-column:1/-1}.ces-ai-form-grid input,.ces-ai-form-grid textarea,.ces-ai-form-grid select{width:100%;margin-top:4px;border:1px solid #d8e1ed;border-radius:10px;padding:8px 9px;font:inherit;font-size:11px;color:#263752;outline:none;background:#fff}.ces-ai-form-grid textarea{resize:vertical}.ces-ai-form-grid input:focus,.ces-ai-form-grid textarea:focus,.ces-ai-form-grid select:focus{border-color:#6e9cdd;box-shadow:0 0 0 3px rgba(0,61,165,.07)}
+.ces-ai-admin-editor-actions{display:flex;gap:8px;padding:0 14px 14px}.ces-ai-admin-editor-actions button{border:1px solid #d8e1ed;background:#fff;color:#455b78;border-radius:10px;padding:8px 13px;font:inherit;font-size:11px;font-weight:700;cursor:pointer}.ces-ai-admin-editor-actions button.primary{background:#003da5;border-color:#003da5;color:#fff}.ces-ai-admin-editor-actions button.danger{background:#fff1f2;border-color:#fecdd3;color:#be123c}
+.ces-ai-admin-unanswered-card{margin-top:12px}.ces-ai-admin-unanswered{max-height:280px;overflow:auto;padding:8px}.ces-ai-unanswered-row{display:grid;grid-template-columns:1fr auto;align-items:center;gap:10px;padding:9px;border-bottom:1px solid #edf1f6}.ces-ai-unanswered-row:last-child{border-bottom:0}.ces-ai-unanswered-row strong{font-size:11px;color:#2a3e5c}.ces-ai-unanswered-row small{display:block;font-size:9px;color:#8492a6;margin-top:2px}.ces-ai-unanswered-row button{border:0;border-radius:9px;padding:7px 9px;background:#e9f1ff;color:#003da5;font:inherit;font-size:9.5px;font-weight:700;cursor:pointer}
+.ces-ai-setting-card{background:linear-gradient(135deg,#f4f8ff,#fff);border:1px solid #dce8fa;border-radius:22px;padding:16px}.ces-ai-setting-card button{border:0;border-radius:10px;padding:8px 11px;font-weight:700;font-size:11px;cursor:pointer}.ces-ai-setting-card .primary{background:#003da5;color:#fff}.ces-ai-setting-card .secondary{background:#eaf1ff;color:#003da5}
+@media(max-width:850px){.ces-ai-admin-grid{grid-template-columns:1fr}.ces-ai-admin-list{height:280px}.ces-ai-admin-dialog{height:98vh}.ces-ai-admin-toolbar span{width:100%;margin-left:0}.ces-ai-form-grid{grid-template-columns:1fr}.ces-ai-form-grid label.wide{grid-column:auto}}
+@media(max-width:640px){.ces-ai-local-root{right:10px;bottom:10px}.ces-ai-local-launcher span{display:none}.ces-ai-local-launcher{width:48px;height:48px;padding:0;justify-content:center}.ces-ai-local-panel{position:fixed;inset:8px;width:auto;height:auto;border-radius:18px}.ces-ai-admin-modal{padding:5px}.ces-ai-admin-dialog{border-radius:15px}.ces-ai-admin-header{padding:12px}.ces-ai-admin-workspace{padding:8px}.ces-ai-admin-card-title{align-items:flex-start;flex-direction:column}.ces-ai-admin-card-title input{width:100%}}
+
+
+/* CES AI Local V4 — compact chat, compact admin and rating/table output */
+.ces-ai-local-panel{bottom:56px!important;border-radius:18px!important}
+.ces-ai-local-header{padding:10px 11px!important}
+.ces-ai-local-messages{padding:10px!important}
+.ces-ai-local-suggestions{padding:7px 9px!important;gap:5px!important}
+.ces-ai-local-suggestions button{font-size:9px!important;padding:6px 8px!important}
+.ces-ai-local-footer{font-size:8px!important;padding:5px 8px!important}
+.ces-ai-local-table-wrap{margin-top:9px;border:1px solid #dce5f0;border-radius:10px;overflow:auto;max-height:180px;background:#fff}
+.ces-ai-local-table{width:100%;border-collapse:collapse;font-size:9px;min-width:270px}
+.ces-ai-local-table th,.ces-ai-local-table td{padding:6px 7px;border-bottom:1px solid #edf2f7;text-align:left;vertical-align:top;white-space:normal}
+.ces-ai-local-table th{position:sticky;top:0;background:#eff5ff;color:#21416f;font-weight:900;z-index:1}
+.ces-ai-local-download{border:1px solid #b9d3f5;background:#f5f9ff;color:#004aad;border-radius:8px;padding:6px 8px;font-size:9px;font-weight:800;cursor:pointer}
+.ces-ai-eval-toggle{border:1px solid #d8e3f0;background:#fff;color:#52657e;border-radius:8px;padding:6px 8px;font-size:9px;font-weight:800;cursor:pointer}
+.ces-ai-eval-card{margin-top:8px;padding:9px;border:1px solid #dfe8f3;border-radius:11px;background:#f8fbff}
+.ces-ai-eval-title{font-size:10px;font-weight:900;color:#17345b;margin-bottom:6px}
+.ces-ai-eval-row{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:8px;margin:5px 0;font-size:9px;color:#52657e}
+.ces-ai-stars{display:flex;gap:2px}
+.ces-ai-star{border:0;background:transparent;color:#cbd5e1;font-size:15px;line-height:1;cursor:pointer;padding:1px}
+.ces-ai-star.active{color:#f59e0b}
+.ces-ai-eval-card textarea{width:100%;min-height:50px;resize:vertical;border:1px solid #d8e3ef;border-radius:8px;padding:7px;font:inherit;font-size:9px;margin-top:5px}
+.ces-ai-eval-submit{width:100%;margin-top:6px;border:0;border-radius:8px;background:#003da5;color:#fff;padding:7px;font-size:9px;font-weight:900;cursor:pointer}
+.ces-ai-eval-thanks{font-size:9px;font-weight:800;color:#047857;padding:5px 0}
+.ces-ai-admin-dialog{border-radius:20px!important}
+.ces-ai-admin-workspace{padding:10px!important}
+.ces-ai-admin-grid{grid-template-columns:minmax(280px,.8fr) minmax(380px,1.25fr)!important}
+@media(max-width:850px){.ces-ai-admin-grid{grid-template-columns:1fr!important}.ces-ai-admin-list{height:230px!important}}
+@media(max-width:640px){.ces-ai-local-panel{inset:auto 7px 7px 7px!important;width:auto!important;height:min(82vh,560px)!important}.ces-ai-admin-dialog{width:98vw!important;height:94vh!important}}
+
+/* V19: evaluation is shown directly after each matched answer. */
+.ces-ai-eval-card{display:block!important;margin-top:7px!important;padding:8px!important}
+.ces-ai-eval-card.hidden{display:block!important}
+.ces-ai-local-bubble{max-width:94%}
+
+/* CES AI V20 — evaluation popup inside compact chat panel */
+.ces-ai-local-panel{position:fixed;overflow:hidden}
+.ces-ai-evaluation-popup{position:absolute;inset:0;z-index:80;background:rgba(15,23,42,.48);display:flex;align-items:flex-end;padding:10px}
+.ces-ai-evaluation-popup.hidden{display:none!important}
+.ces-ai-evaluation-dialog{width:100%;max-height:92%;overflow:auto;background:#fff;border:1px solid #dbe5f1;border-radius:18px;padding:14px;box-shadow:0 20px 50px rgba(15,23,42,.24)}
+.ces-ai-evaluation-head{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;margin-bottom:10px}.ces-ai-evaluation-head strong{display:block;color:#0f172a;font-size:13px}.ces-ai-evaluation-head small{display:block;color:#94a3b8;font-size:10px;margin-top:2px}.ces-ai-evaluation-head button{width:28px;height:28px;border-radius:9px;background:#f1f5f9;color:#475569}
+.ces-ai-evaluation-item{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:8px 0;border-bottom:1px solid #eef2f7}.ces-ai-evaluation-item>span{font-size:10px;font-weight:800;color:#475569;max-width:52%}
+.ces-ai-evaluation-dialog textarea{width:100%;margin-top:10px;border:1px solid #dbe5f1;border-radius:12px;padding:9px;font-size:11px;resize:vertical;outline:none}.ces-ai-evaluation-dialog textarea:focus{border-color:#2563eb}
+.ces-ai-eval-error{min-height:16px;color:#dc2626;font-size:10px;font-weight:700;padding-top:3px}.ces-ai-eval-open{width:100%;margin-top:8px;border:1px solid #facc15!important;background:#fffbeb!important;color:#a16207!important;border-radius:10px!important;padding:7px!important;font-size:10px!important;font-weight:900!important}.ces-ai-eval-open i{margin-right:4px}
+.ces-ai-star{font-size:20px!important;line-height:1!important;color:#cbd5e1!important;background:transparent!important;padding:0 2px!important;border:0!important}.ces-ai-star.active{color:#f59e0b!important}.ces-ai-eval-submit{width:100%;border:0;border-radius:12px;background:#004aad;color:#fff;padding:10px;font-size:11px;font-weight:900}.ces-ai-eval-submit:disabled{opacity:.65}
+
+
+/* CES Hub V20.4 — delayed evaluation and keyboard shortcuts */
+.ces-ai-shortcut-hint{display:flex;justify-content:space-between;gap:8px;padding:7px 12px 2px;color:#7a8ca5;font-size:9px;font-weight:700}.ces-ai-shortcut-hint kbd,.ces-ai-local-suggestions kbd{font:inherit;font-size:8px;border:1px solid #cfdbea;background:#f8fbff;border-radius:5px;padding:1px 4px;color:#416181;box-shadow:0 1px 0 #dbe5f1}.ces-ai-local-suggestions button{display:inline-flex;align-items:center;gap:5px}.ces-ai-local-launcher.has-evaluation::after{content:'★';position:absolute;right:-5px;top:-6px;width:21px;height:21px;border-radius:999px;display:grid;place-items:center;background:#f59e0b;color:#fff;font-size:11px;border:2px solid #fff;box-shadow:0 4px 10px rgba(245,158,11,.35)}
+
+
+/* CES Assistant V20.8 — numbered, readable response flow */
+.ces-ai-answer-steps-v208{margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:8px;counter-reset:ces-ai-step}
+.ces-ai-answer-steps-v208 li{counter-increment:ces-ai-step;display:grid;grid-template-columns:25px minmax(0,1fr);gap:8px;align-items:start;line-height:1.55;color:#24364f}
+.ces-ai-answer-steps-v208 li::before{content:counter(ces-ai-step);width:24px;height:24px;border-radius:8px;display:grid;place-items:center;background:#e8f0ff;color:#0756c7;font-size:10px;font-weight:950}
+.ces-ai-answer-steps-v208 li span{padding-top:3px;white-space:pre-line}
+.ces-ai-function-link-v208,.ces-ai-eval-open{display:grid!important;grid-template-columns:26px minmax(0,1fr) 18px!important;align-items:center!important;gap:8px!important;text-align:left!important}
+.ces-ai-function-link-v208{width:100%;padding:8px 10px!important;background:#edf4ff!important;border:1px solid #bfd4f5!important;color:#073d95!important}
+.ces-ai-function-link-v208 span:nth-child(2),.ces-ai-eval-open span:nth-child(2){display:flex;flex-direction:column;gap:1px}
+.ces-ai-function-link-v208 b,.ces-ai-eval-open b{font-size:10px}.ces-ai-function-link-v208 small,.ces-ai-eval-open small{font-size:8px;font-weight:700;opacity:.76}
+.ces-ai-action-step-no{width:24px;height:24px;border-radius:8px;display:grid!important;place-items:center;background:#0756c7;color:#fff;font-size:10px;font-weight:950}
+.ces-ai-eval-open{padding:8px 10px!important}.ces-ai-eval-open .ces-ai-action-step-no{background:#f59e0b}
+.ces-ai-shortcut-hint{display:none!important}
+@media(max-width:520px){.ces-ai-local-panel{max-width:calc(100vw - 16px)}.ces-ai-answer-steps-v208 li{grid-template-columns:23px minmax(0,1fr);gap:7px}.ces-ai-local-actions{display:grid;grid-template-columns:1fr 1fr}.ces-ai-function-link-v208,.ces-ai-eval-open{grid-column:1/-1}.ces-ai-local-feedback,.ces-ai-local-download{min-height:34px}}
+
+/* V20.9 AI CES naming */
+.ces-ai-local-launcher i{font-size:18px}.ces-ai-local-launcher span{white-space:nowrap}
+@media(max-width:640px){.ces-ai-local-launcher{width:auto!important;min-width:92px!important;height:48px!important;padding:0 14px!important}.ces-ai-local-launcher span{display:inline!important;font-size:12px}}
+
+
+/* Compact AI CES chat */
+.ces-ai-local-panel{width:min(390px,calc(100vw - 20px))!important;height:min(520px,calc(100vh - 88px))!important}.ces-ai-local-header h3{font-size:15px!important}.ces-ai-local-header small{font-size:9px!important}.ces-ai-local-messages{padding:10px!important}.ces-ai-local-bubble{font-size:12px!important;line-height:1.55!important;padding:10px 11px!important}.ces-ai-answer-steps-v208{font-size:11px!important}.ces-ai-answer-steps-v208 li{gap:7px!important}.ces-ai-local-suggestions{padding:7px!important}.ces-ai-quick-grid{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:5px!important}.ces-ai-quick-grid>button{font-size:9px!important;min-height:32px!important;padding:6px 7px!important;white-space:normal!important;line-height:1.15!important}.ces-ai-local-form textarea{font-size:11px!important}.ces-ai-local-footer{font-size:8px!important}.ces-ai-evaluation-dialog{max-width:360px!important;padding:12px!important}.ces-ai-evaluation-head strong{font-size:13px!important}.ces-ai-evaluation-head small{font-size:9px!important}.ces-ai-evaluation-item>span{font-size:10px!important}.ces-ai-evaluation-dialog textarea{font-size:10px!important}
+
+
+/* Latest Stable — collapsible Quick Ask */
+.ces-ai-quick-head{display:flex;align-items:center;justify-content:space-between;padding:6px 9px 3px;border-top:1px solid #e6edf7;color:#64748b;font-size:9px;font-weight:900}
+.ces-ai-quick-head>span{display:flex;align-items:center;gap:5px}
+.ces-ai-quick-head button{width:24px;height:22px;border:0;border-radius:8px;background:#eef4ff;color:#0057c8;display:grid;place-items:center;font-size:9px;cursor:pointer}
+.ces-ai-quick-grid{max-height:96px;overflow:hidden;transition:max-height .18s ease,padding .18s ease,opacity .15s ease}
+.ces-ai-quick-grid.ces-ai-quick-collapsed{max-height:0!important;padding-top:0!important;padding-bottom:0!important;opacity:0;pointer-events:none}
+
+/* Latest Stable: six Quick Ask actions fit without horizontal clipping. */
+.ces-ai-quick-grid{display:grid!important;grid-template-columns:repeat(3,minmax(0,1fr))!important;gap:4px!important;max-height:92px!important;overflow:hidden!important}
+.ces-ai-quick-grid>button{min-width:0!important;min-height:31px!important;padding:5px 4px!important;font-size:8px!important;line-height:1.1!important;white-space:normal!important;justify-content:center!important;text-align:center!important}
+.ces-ai-quick-grid>button i{font-size:9px!important;flex:0 0 auto}
+@media(max-width:420px){.ces-ai-quick-grid{grid-template-columns:repeat(2,minmax(0,1fr))!important;max-height:132px!important}}
+
+
+/* CES Hub V22.4 — AI CES online status, bottom-right alignment and evaluation sending state */
+.ces-ai-local-root{right:10px!important;bottom:10px!important}
+.ces-ai-local-panel{right:8px!important;bottom:68px!important}
+.ces-ai-local-footer.online{color:#047857!important;background:#ecfdf5!important;font-weight:900!important}
+.ces-ai-local-footer.fallback{color:#b45309!important;background:#fffbeb!important;font-weight:900!important}
+.ces-ai-local-footer.checking{color:#475569!important;background:#f8fafc!important}
+.ces-ai-task-status .ces-ai-local-bubble{display:flex!important;align-items:center!important;gap:8px!important;border-style:dashed!important;color:#475569!important}
+.ces-ai-task-status .ces-ai-task-success{color:#047857!important;border-color:#a7f3d0!important;background:#ecfdf5!important}
+.ces-ai-task-status .ces-ai-task-error{color:#b45309!important;border-color:#fde68a!important;background:#fffbeb!important}
+.ces-ai-disabled{opacity:.45!important;pointer-events:none!important}
+@media(max-width:640px){.ces-ai-local-root{right:7px!important;bottom:7px!important}.ces-ai-local-panel{right:7px!important;bottom:62px!important}}
+
+
+/* V24.8 mobile: keep AI CES away from right-side carts/actions. */
+@media(max-width:768px){
+  .ces-ai-local-root{left:10px!important;right:auto!important;bottom:max(10px,env(safe-area-inset-bottom))!important}
+  .ces-ai-local-launcher{width:48px!important;min-width:48px!important;height:48px!important;padding:0!important;border-radius:50%!important;justify-content:center!important}
+  .ces-ai-local-launcher span{display:none!important}
+  .ces-ai-local-panel{left:8px!important;right:8px!important;bottom:66px!important;width:auto!important;max-width:none!important;height:min(520px,calc(100dvh - 90px))!important}
+}

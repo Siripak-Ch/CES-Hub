@@ -1,0 +1,167 @@
+/* CES Hub V31 — central visual theme
+   Primary: blue / red / white / grey
+   Team colors remain available as semantic identifiers. */
+:root {
+  --ces-blue:#003DA5;
+  --ces-blue-2:#1D4ED8;
+  --ces-red:#E4002B;
+  --ces-white:#FFFFFF;
+  --ces-grey-25:#F8FAFC;
+  --ces-grey-50:#F1F5F9;
+  --ces-grey-100:#E2E8F0;
+  --ces-grey-400:#94A3B8;
+  --ces-grey-600:#475569;
+  --ces-grey-800:#1E293B;
+  --ces-team-med:#004AAD;
+  --ces-team-lab:#19A7CE;
+  --ces-team-ehs:#0FC1A1;
+  --ces-team-env:#2E7D32;
+  --ces-team-tes:#F59E0B;
+  --ces-team-mng:#64748B;
+}
+
+html, body { background:var(--ces-grey-25); color:var(--ces-grey-800); }
+body, input, select, textarea, button { font-family:'Prompt',sans-serif; }
+
+/* Shared surfaces */
+.view-section > .bg-white,
+.ces-card,
+.vehicle-card {
+  background:var(--ces-white) !important;
+  border-color:var(--ces-grey-100) !important;
+}
+
+/* Primary actions */
+.ces-btn-primary,
+button[data-ces-action="primary"] {
+  background:var(--ces-blue) !important;
+  color:var(--ces-white) !important;
+  border-color:var(--ces-blue) !important;
+}
+.ces-btn-danger,
+button[data-ces-action="danger"] {
+  background:var(--ces-red) !important;
+  color:var(--ces-white) !important;
+  border-color:var(--ces-red) !important;
+}
+
+/* Inputs */
+.ces-book-input,
+.ces-setting-input {
+  background:var(--ces-white) !important;
+  border-color:#CBD5E1 !important;
+  color:var(--ces-grey-800) !important;
+}
+.ces-book-input:focus,
+.ces-setting-input:focus {
+  border-color:#60A5FA !important;
+  box-shadow:0 0 0 3px rgba(59,130,246,.16) !important;
+}
+
+
+/* Legacy Tailwind palette normalization.
+   Older modules may still emit green/purple/orange utility classes. V31 maps
+   those generic utilities to the system palette. Explicit KPI and team
+   classes below intentionally override these mappings. */
+body [class~="bg-indigo-50"], body [class~="bg-indigo-100"],
+body [class~="bg-purple-50"], body [class~="bg-purple-100"],
+body [class~="bg-violet-50"], body [class~="bg-violet-100"],
+body [class~="bg-cyan-50"], body [class~="bg-cyan-100"],
+body [class~="bg-sky-50"], body [class~="bg-sky-100"],
+body [class~="bg-green-50"], body [class~="bg-green-100"],
+body [class~="bg-emerald-50"], body [class~="bg-emerald-100"],
+body [class~="bg-teal-50"], body [class~="bg-teal-100"] {
+  background-color:#EFF6FF !important;
+}
+body [class~="bg-indigo-500"], body [class~="bg-indigo-600"], body [class~="bg-indigo-700"],
+body [class~="bg-purple-500"], body [class~="bg-purple-600"], body [class~="bg-purple-700"],
+body [class~="bg-violet-500"], body [class~="bg-violet-600"], body [class~="bg-violet-700"],
+body [class~="bg-cyan-500"], body [class~="bg-cyan-600"], body [class~="bg-cyan-700"],
+body [class~="bg-sky-500"], body [class~="bg-sky-600"], body [class~="bg-sky-700"],
+body [class~="bg-green-500"], body [class~="bg-green-600"], body [class~="bg-green-700"],
+body [class~="bg-emerald-500"], body [class~="bg-emerald-600"], body [class~="bg-emerald-700"],
+body [class~="bg-teal-500"], body [class~="bg-teal-600"], body [class~="bg-teal-700"] {
+  background-color:var(--ces-blue) !important;
+}
+body [class~="text-indigo-500"], body [class~="text-indigo-600"], body [class~="text-indigo-700"], body [class~="text-indigo-800"],
+body [class~="text-purple-500"], body [class~="text-purple-600"], body [class~="text-purple-700"], body [class~="text-purple-800"],
+body [class~="text-violet-500"], body [class~="text-violet-600"], body [class~="text-violet-700"], body [class~="text-violet-800"],
+body [class~="text-cyan-500"], body [class~="text-cyan-600"], body [class~="text-cyan-700"], body [class~="text-cyan-800"],
+body [class~="text-sky-500"], body [class~="text-sky-600"], body [class~="text-sky-700"], body [class~="text-sky-800"],
+body [class~="text-green-500"], body [class~="text-green-600"], body [class~="text-green-700"], body [class~="text-green-800"],
+body [class~="text-emerald-500"], body [class~="text-emerald-600"], body [class~="text-emerald-700"], body [class~="text-emerald-800"],
+body [class~="text-teal-500"], body [class~="text-teal-600"], body [class~="text-teal-700"], body [class~="text-teal-800"] {
+  color:var(--ces-blue) !important;
+}
+body [class~="border-indigo-100"], body [class~="border-indigo-200"], body [class~="border-purple-100"], body [class~="border-purple-200"],
+body [class~="border-violet-100"], body [class~="border-violet-200"], body [class~="border-cyan-100"], body [class~="border-cyan-200"],
+body [class~="border-sky-100"], body [class~="border-sky-200"], body [class~="border-green-100"], body [class~="border-green-200"],
+body [class~="border-emerald-100"], body [class~="border-emerald-200"], body [class~="border-teal-100"], body [class~="border-teal-200"] {
+  border-color:#BFDBFE !important;
+}
+body [class~="bg-yellow-50"], body [class~="bg-yellow-100"], body [class~="bg-amber-50"], body [class~="bg-amber-100"],
+body [class~="bg-orange-50"], body [class~="bg-orange-100"] { background-color:var(--ces-grey-50) !important; }
+body [class~="bg-yellow-500"], body [class~="bg-yellow-600"], body [class~="bg-amber-500"], body [class~="bg-amber-600"],
+body [class~="bg-orange-500"], body [class~="bg-orange-600"] { background-color:var(--ces-grey-600) !important; }
+body [class~="text-yellow-500"], body [class~="text-yellow-600"], body [class~="text-yellow-700"],
+body [class~="text-amber-500"], body [class~="text-amber-600"], body [class~="text-amber-700"],
+body [class~="text-orange-500"], body [class~="text-orange-600"], body [class~="text-orange-700"] { color:var(--ces-grey-600) !important; }
+body [class~="border-yellow-100"], body [class~="border-yellow-200"], body [class~="border-amber-100"], body [class~="border-amber-200"],
+body [class~="border-orange-100"], body [class~="border-orange-200"] { border-color:var(--ces-grey-100) !important; }
+
+/* Team semantic badges */
+.ces-team-code,
+.ces-team-label {
+  display:inline-flex;
+  align-items:center;
+  border-radius:999px;
+  border:1px solid transparent;
+  padding:.16rem .48rem;
+  font-size:9px;
+  font-weight:900;
+  line-height:1.25;
+  letter-spacing:.03em;
+}
+.ces-team-med,.ces-team-label.med { color:var(--ces-team-med)!important; background:#EFF6FF!important; border-color:#BFDBFE!important; }
+.ces-team-lab,.ces-team-label.lab { color:#087EA4!important; background:#ECFEFF!important; border-color:#A5F3FC!important; }
+.ces-team-ehs,.ces-team-label.ehs { color:#047857!important; background:#ECFDF5!important; border-color:#A7F3D0!important; }
+.ces-team-env,.ces-team-label.env { color:var(--ces-team-env)!important; background:#F0FDF4!important; border-color:#BBF7D0!important; }
+.ces-team-tes,.ces-team-label.tes { color:#B45309!important; background:#FFFBEB!important; border-color:#FDE68A!important; }
+.ces-team-mng,.ces-team-label.mng,.ces-team-default { color:var(--ces-team-mng)!important; background:var(--ces-grey-50)!important; border-color:var(--ces-grey-100)!important; }
+
+/* Vehicle booking theme */
+#view-car_booking .vehicle-mode-btn.active,
+#view-van_booking .vehicle-mode-btn.active { color:var(--ces-blue)!important; }
+#view-car_booking .vehicle-calendar-day.available,
+#view-van_booking .vehicle-calendar-day.available { background:var(--ces-white)!important; border-color:var(--ces-grey-100)!important; }
+#view-car_booking .vehicle-calendar-day.pending,
+#view-van_booking .vehicle-calendar-day.pending { background:#EFF6FF!important; border-color:#93C5FD!important; }
+#view-car_booking .vehicle-calendar-day.unavailable,
+#view-van_booking .vehicle-calendar-day.unavailable { background:#FEF2F2!important; border-color:#FCA5A5!important; }
+#view-car_booking .vehicle-calendar-day.completed,
+#view-van_booking .vehicle-calendar-day.completed { background:#DBEAFE!important; border-color:#60A5FA!important; }
+
+/* SweetAlert follows the same palette */
+.swal2-popup { border-radius:24px!important; color:var(--ces-grey-800)!important; }
+.swal2-confirm { background:var(--ces-blue)!important; }
+.swal2-cancel { background:var(--ces-grey-600)!important; }
+.swal2-deny { background:var(--ces-red)!important; }
+
+/* KPI semantic colors are intentionally limited to four states. */
+.ces-kpi-early { color:#047857!important; background:#ECFDF5!important; border-color:#A7F3D0!important; }
+.ces-kpi-on-time { color:#A16207!important; background:#FEFCE8!important; border-color:#FDE68A!important; }
+.ces-kpi-late { color:#B91C1C!important; background:#FEF2F2!important; border-color:#FCA5A5!important; }
+.ces-kpi-process { color:var(--ces-grey-600)!important; background:var(--ces-grey-50)!important; border-color:var(--ces-grey-100)!important; }
+
+/* V31 semantic override: semantic KPI/team classes must win over generic
+   legacy Tailwind palette normalization when both classes exist. */
+body .ces-team-med, body .ces-team-label.med { color:var(--ces-team-med)!important; background:#EFF6FF!important; border-color:#BFDBFE!important; }
+body .ces-team-lab, body .ces-team-label.lab { color:#087EA4!important; background:#ECFEFF!important; border-color:#A5F3FC!important; }
+body .ces-team-ehs, body .ces-team-label.ehs { color:#047857!important; background:#ECFDF5!important; border-color:#A7F3D0!important; }
+body .ces-team-env, body .ces-team-label.env { color:var(--ces-team-env)!important; background:#F0FDF4!important; border-color:#BBF7D0!important; }
+body .ces-team-tes, body .ces-team-label.tes { color:#B45309!important; background:#FFFBEB!important; border-color:#FDE68A!important; }
+body .ces-team-mng, body .ces-team-label.mng, body .ces-team-default { color:var(--ces-team-mng)!important; background:var(--ces-grey-50)!important; border-color:var(--ces-grey-100)!important; }
+body .ces-kpi-early { color:#047857!important; background:#ECFDF5!important; border-color:#A7F3D0!important; }
+body .ces-kpi-on-time { color:#A16207!important; background:#FEFCE8!important; border-color:#FDE68A!important; }
+body .ces-kpi-late { color:#B91C1C!important; background:#FEF2F2!important; border-color:#FCA5A5!important; }
+body .ces-kpi-process { color:var(--ces-grey-600)!important; background:var(--ces-grey-50)!important; border-color:var(--ces-grey-100)!important; }

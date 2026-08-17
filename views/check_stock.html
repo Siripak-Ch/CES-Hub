@@ -1,0 +1,49 @@
+<!-- CES Hub Stock Inventory — Confirm Workflow V7 Check Stock -->
+<section id="view-check_stock" class="hidden stockpro-page ces-stock-v5-page ces-stock-v7-page">
+  <div class="stockpro-shell">
+    <div class="stockpro-header-card">
+      <div class="stockpro-title-wrap"><div class="stockpro-icon blue ces-page-header-icon-v15"><i class="fas fa-qrcode"></i></div><div><h1>Check Stock</h1><p>ID/SN Lookup + Scan CAL/PM + Check-Out + Activity Log</p></div></div>
+      <div class="stockpro-actions"><button class="sp-btn ghost ces-action-neutral ces-action-icon-only" onclick="initStockCheckModule(true)" title="Refresh Log" aria-label="Refresh Log"><i class="fas fa-sync-alt"></i></button></div>
+    </div>
+
+    <div id="scWarning" class="stockpro-card hidden" style="border-color:#cbd5e1;background:#f8fafc;color:#334155;margin-bottom:16px;"><div class="stockpro-card-head"><h3><i class="fas fa-triangle-exclamation"></i> พบรายการไม่ตรงฐานข้อมูล</h3><button class="sp-btn ghost" onclick="sc_hideWarning()">ปิด</button></div></div>
+
+    <div class="stockpro-hero csv7-mode-panel">
+      <p class="sp-muted csv7-mode-title">เลือกโหมดการทำงาน</p>
+      <div class="sp-mode-grid csv7-four-mode">
+        <button id="scModeAdd" type="button" class="sp-mode csv7-mode-add" onclick="sc_openAddNewEquipment()">
+          <span class="csv7-mode-icon"><i class="fas fa-square-plus"></i></span><span class="csv212-mode-title">Add New</span><span class="csv212-mode-sub">เพิ่มอุปกรณ์ใหม่</span>
+        </button>
+        <button id="scModeIn" type="button" class="sp-mode csv7-mode-return active in" onclick="sc_requestMode('CHECK-IN')">
+          <span class="csv7-mode-icon"><i class="fas fa-arrow-right-to-bracket"></i></span><span class="csv212-mode-title">Return / Check-In</span><span class="csv212-mode-sub">รับคืน → รอสอบเทียบ</span>
+        </button>
+        <button id="scModeCal" type="button" class="sp-mode csv7-mode-cal" onclick="sc_requestMode('CAL/PM')">
+          <span class="csv7-mode-icon"><i class="fas fa-screwdriver-wrench"></i></span><span class="csv212-mode-title">Scan CAL/PM</span><span class="csv212-mode-sub">รอสอบเทียบ → พร้อมส่ง</span>
+        </button>
+        <button id="scModeOut" type="button" class="sp-mode csv7-mode-out" onclick="sc_requestMode('CHECK-OUT')">
+          <span class="csv7-mode-icon"><i class="fas fa-arrow-right-from-bracket"></i></span><span class="csv212-mode-title">Check-Out</span><span class="csv212-mode-sub">พร้อมส่ง → เช่ายืม</span>
+        </button>
+      </div>
+      <div id="scModeText" class="sp-muted csv7-mode-text">● โหมด: Return / รับคืนอุปกรณ์</div>
+    </div>
+
+    <div class="stockpro-card"><div class="sp-scan-box"><h3 style="justify-content:center"><i class="fas fa-barcode text-blue-500"></i> ค้นหาอุปกรณ์</h3><div class="sp-muted">ถ่ายรูปป้าย CESR / SN หรือพิมพ์รหัสเอง</div>
+      <input id="scImageInput" type="file" accept="image/*" class="hidden" onchange="sc_ocrImage(this)"><button class="sp-big-btn" onclick="document.getElementById('scImageInput').click()"><i class="fas fa-camera"></i> ถ่ายรูป / อัปโหลดป้าย</button>
+      <div style="display:flex;align-items:center;gap:12px;margin:14px 0;color:#94a3b8;font-size:12px;"><div style="height:1px;background:#e2e8f0;flex:1"></div>หรือพิมพ์รหัส<div style="height:1px;background:#e2e8f0;flex:1"></div></div>
+      <div class="sp-scan-input-row"><input id="scKeyword" class="stockpro-control" placeholder="ID Code หรือ Serial Number" onkeydown="if(event.key==='Enter')sc_lookup()"><button class="sp-btn primary" onclick="sc_lookup()"><i class="fas fa-search"></i></button></div>
+    </div></div>
+
+    <div id="scResult"></div>
+
+    <div id="scAccessoryIssueCard" class="stockpro-card">
+      <div class="stockpro-card-head"><h3><i class="fas fa-plug text-emerald-500"></i> เบิก Accessories</h3><button class="sp-btn ghost" onclick="sc_loadAccessoryOptions(true)"><i class="fas fa-sync-alt"></i> Refresh</button></div>
+      <div class="stockpro-filter-card" style="grid-template-columns:2fr 1fr 1fr auto;margin-bottom:12px"><div class="sp-search"><i class="fas fa-search"></i><input id="scAccSearch" oninput="sc_filterAccessoryOptions()" placeholder="ค้นหา accessories"></div><select id="scAccTeam" onchange="sc_filterAccessoryOptions()"><option value="all">All Team</option></select><select id="scAccSelect" onchange="sc_previewSelectedAccessory()"><option value="">เลือกอุปกรณ์</option></select><button class="sp-btn success" onclick="sc_issueSelectedAccessory()"><i class="fas fa-paper-plane"></i> ขออนุมัติ</button></div>
+      <div id="scAccPreview" class="sp-muted">เลือก accessories เพื่อดูจำนวนคงเหลือ</div>
+    </div>
+
+    <div class="stockpro-two-col">
+      <div class="stockpro-card"><div class="stockpro-card-head"><h3><i class="fas fa-clock-rotate-left text-indigo-500"></i> Activity Log</h3><span id="scActivityCount" class="sp-pill">0</span></div><div id="scActivityTable"></div></div>
+      <div class="stockpro-card"><div class="stockpro-card-head"><h3><i class="fas fa-barcode text-blue-500"></i> Scan Log</h3><span id="scScanCount" class="sp-pill">0</span></div><div id="scLogTable"></div></div>
+    </div>
+  </div>
+</section>

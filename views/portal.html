@@ -1,0 +1,77 @@
+<section id="view-portal" data-ces-no-standard class="view-section hidden ces-portal-page ces-portal-v186 pb-16">
+  <div id="ces-home-priority-overlay" class="ces-home-priority-overlay hidden" role="status" aria-live="polite" aria-busy="true">
+    <div class="ces-home-priority-card">
+      <div class="ces-home-priority-spinner"><i class="fas fa-house-chimney-window"></i></div>
+      <div>
+        <strong id="ces-home-priority-title">Loading Home</strong>
+        <span id="ces-home-priority-message">Loading applications, team solutions, events and dashboard summary…</span>
+      </div>
+      <div class="ces-home-priority-progress"><i></i></div>
+    </div>
+  </div>
+  <section class="ces-portal-welcome-v186">
+    <div class="ces-portal-welcome-copy-v186">
+      <span class="ces-portal-kicker-v186">CES HUB · EMPLOYEE PORTAL</span>
+      <h1>Good <span id="portal-daypart-v186">day</span>, <span id="portal-user-name">CES Team</span>.</h1>
+      <p>Strive not to be a success, but rather to be of value.</p>
+    </div>
+    <div class="ces-portal-status-grid-v186">
+      <div class="ces-portal-status-card-v186 ces-portal-date-card-v4"><i class="fas fa-calendar-day"></i><div><span>Bangkok</span><strong id="portal-local-date">—</strong></div></div>
+      <div class="ces-portal-status-card-v186"><i class="fas fa-clock"></i><div><span>Local time</span><strong id="portal-local-time">--:--:--</strong></div></div>
+      <div class="ces-portal-status-card-v186"><i class="fas fa-user-group"></i><div><span>Online now</span><strong><b id="portal-online-count-v186">0</b> users</strong></div></div>
+      <button type="button" class="ces-portal-refresh-v186" onclick="loadPortalDashboard(true)" title="Refresh portal"><i class="fas fa-rotate-right"></i></button>
+    </div>
+  </section>
+
+  <div class="ces-portal-layout-v186">
+    <main class="ces-portal-main-v186">
+      <section class="ces-portal-section">
+        <div class="ces-portal-section-heading"><div><span data-i18n-th="พอร์ทัล" data-i18n-en="Portal Section">Portal Section</span><h3 data-i18n-th="แอปพลิเคชันและบริการ" data-i18n-en="Applications & Services">Applications & Services</h3><p data-i18n-th="เปิดระบบ N Health และ CES ที่ใช้งานบ่อย" data-i18n-en="Open frequently used N Health and CES systems.">Open frequently used N Health and CES systems.</p></div></div>
+        <div id="portal-app-grid" class="ces-portal-app-grid ces-portal-app-grid-v186" data-portal-fallback="true">
+          <a class="ces-portal-app-card" href="https://nsmartplus.nhealth-asia.com/login?redirect=" target="_blank" rel="noopener"><div class="ces-portal-app-icon blue"><i class="fas fa-wand-magic-sparkles"></i></div><div><h4>N Smart Plus</h4><p>Hospital asset and repair management</p></div><i class="fas fa-arrow-up-right-from-square open"></i></a>
+          <a class="ces-portal-app-card" href="https://necert.nhealth-asia.com/" target="_blank" rel="noopener"><div class="ces-portal-app-icon amber"><i class="fas fa-certificate"></i></div><div><h4>N Certificate</h4><p>Certification and calibration services</p></div><i class="fas fa-arrow-up-right-from-square open"></i></a>
+          <a class="ces-portal-app-card" href="https://ihb.nhealth-asia.com/" target="_blank" rel="noopener"><div class="ces-portal-app-icon indigo"><i class="fas fa-id-card"></i></div><div><h4>IHB Web Portal</h4><p>N Health application portal</p></div><i class="fas fa-arrow-up-right-from-square open"></i></a>
+          <a class="ces-portal-app-card" href="https://apps.powerapps.com/play/e/fc9e2324-4803-e46b-bd37-c4595ba72885/a/4228a65b-7716-48fd-a633-61d0c9040025?appid=%2Fproviders%2FMicrosoft.PowerApps%2Fapps%2F4228a65b-7716-48fd-a633-61d0c9040025&amp;tenantId=325c40be-6d2b-4006-b2c5-078947c856d2" target="_blank" rel="noopener"><div class="ces-portal-app-icon blue"><i class="fas fa-link"></i></div><div><h4>E-MEMO</h4><p>Microsoft E-MEMO</p></div><i class="fas fa-arrow-up-right-from-square open"></i></a>
+          <a class="ces-portal-app-card" href="https://stepforward.nhealth-asia.com/" target="_blank" rel="noopener"><div class="ces-portal-app-icon pink"><i class="fas fa-heart-circle-check"></i></div><div><h4>Step Forward</h4><p>People and HR services</p></div><i class="fas fa-arrow-up-right-from-square open"></i></a>
+          <a class="ces-portal-app-card" href="https://survey.nhealth-asia.com/" target="_blank" rel="noopener"><div class="ces-portal-app-icon cyan"><i class="fas fa-chart-simple"></i></div><div><h4>Formbricks</h4><p>Survey environment and result summary</p></div><i class="fas fa-arrow-up-right-from-square open"></i></a>
+          <a class="ces-portal-app-card" href="https://anyflip.com/bookcase/spgdj/" target="_blank" rel="noopener"><div class="ces-portal-app-icon green"><i class="fas fa-book-open"></i></div><div><h4>E-Book</h4><p>Learning and reference library</p></div><i class="fas fa-arrow-up-right-from-square open"></i></a>
+          <a class="ces-portal-app-card" href="https://survey.nhealth-asia.com/s/cm1hci0mw00jf45vmps2myg1g" target="_blank" rel="noopener"><div class="ces-portal-app-icon teal"><i class="fas fa-face-smile"></i></div><div><h4>CES CSI</h4><p>Customer satisfaction survey</p></div><i class="fas fa-arrow-up-right-from-square open"></i></a>
+</div>
+      </section>
+
+      <section class="ces-portal-section">
+        <div class="ces-portal-section-heading"><div><span data-i18n-th="บริการ N Health" data-i18n-en="N Health Services">N Health Services</span><h3 data-i18n-th="ระบบบริการภายใน N Health" data-i18n-en="N Health Services">N Health Services</h3><p data-i18n-th="บริการสนับสนุนและระบบภายในองค์กร" data-i18n-en="Internal support and workforce services.">Internal support and workforce services.</p></div></div>
+        <div id="portal-services-grid" class="ces-portal-app-grid ces-portal-app-grid-v186" data-portal-fallback="true">
+          <a class="ces-portal-app-card featured vpn-card" href="http://10.101.20.47/" target="_blank" rel="noopener"><div class="ces-portal-app-icon blue"><i class="fas fa-shield-halved"></i></div><div><h4>N Health VPN Portal<span class="ces-portal-vpn-badge">VPN</span></h4><p>N Health internal VPN portal</p></div><i class="fas fa-arrow-up-right-from-square open"></i></a>
+          <a class="ces-portal-app-card vpn-card" href="http://10.101.20.47/HSC-Req/login.php" target="_blank" rel="noopener"><div class="ces-portal-app-icon indigo"><i class="fas fa-calendar-check"></i></div><div><h4>Room Reservation (VPN)<span class="ces-portal-vpn-badge">VPN</span></h4><p>Internal room reservation</p></div><i class="fas fa-arrow-up-right-from-square open"></i></a>
+          <a class="ces-portal-app-card vpn-card" href="http://10.101.20.47/Home/index.php" target="_blank" rel="noopener"><div class="ces-portal-app-icon sky"><i class="fas fa-network-wired"></i></div><div><h4>Intranet (VPN)<span class="ces-portal-vpn-badge">VPN</span></h4><p>N Health intranet</p></div><i class="fas fa-arrow-up-right-from-square open"></i></a>
+          <a class="ces-portal-app-card vpn-card" href="https://nhitsm.nhealth-asia.com/support/home" target="_blank" rel="noopener"><div class="ces-portal-app-icon violet"><i class="fas fa-headset"></i></div><div><h4>IT Support<span class="ces-portal-vpn-badge">VPN</span></h4><p>Service desk and technical support</p></div><i class="fas fa-arrow-up-right-from-square open"></i></a>
+          <a class="ces-portal-app-card" href="https://app-au3.wfs.cloud/#/login" target="_blank" rel="noopener"><div class="ces-portal-app-icon orange"><i class="fas fa-people-group"></i></div><div><h4>Workforce SAP</h4><p>Workforce management system</p></div><i class="fas fa-arrow-up-right-from-square open"></i></a>
+        </div>
+      </section>
+
+      <section class="ces-portal-section">
+        <div class="ces-portal-section-heading"><div><span data-i18n-th="เครื่องมือ" data-i18n-en="Tools">Tools</span><h3 data-i18n-th="เครื่องมือของทีม CES" data-i18n-en="CES Team Tools">CES Team Tools</h3><p data-i18n-th="เครื่องมือและโซลูชันดิจิทัลที่ทีมพัฒนา" data-i18n-en="Team-built digital tools and solutions.">Team-built digital tools and solutions.</p></div></div>
+        <div id="portal-innovation-grid" class="ces-portal-innovation-grid" data-portal-fallback="true">
+          <a class="ces-portal-innovation teal" href="https://www.smartsensemonitorseries.online/login" target="_blank" rel="noopener"><div class="ces-portal-tool-icon"><i class="fas fa-lightbulb"></i></div><div class="ces-portal-tool-copy"><span>CES Tool</span><h4>SmartSense</h4><p>Monitoring and smart environment solution</p></div><i class="fas fa-arrow-right"></i></a>
+          <a class="ces-portal-innovation slate" href="#"><div class="ces-portal-tool-icon"><i class="fas fa-book-medical"></i></div><div class="ces-portal-tool-copy"><span>CES Tool</span><h4>Promedguide</h4><p>Team-owned digital guide and solution</p></div><i class="fas fa-arrow-right"></i></a>
+        </div>
+      </section>
+
+      <section class="ces-portal-section">
+        <div class="ces-portal-section-heading"><div><span data-i18n-th="แบ่งปันความรู้และกิจกรรม" data-i18n-en="Knowledge Sharing & Events">Knowledge Sharing & Events</span><h3 data-i18n-th="แบ่งปันความรู้และกิจกรรม" data-i18n-en="Knowledge Sharing & Events">Knowledge Sharing & Events</h3><p data-i18n-th="ความรู้ ข่าวสาร ลิงก์กิจกรรม และประกาศจากทีม CES" data-i18n-en="Knowledge, event links and announcements from the CES team.">Knowledge, event links and announcements from the CES team.</p></div><button id="portal-add-event-btn" type="button" class="hidden ces-portal-add-event" onclick="openPortalEventEditor()"><i class="fas fa-plus"></i>Post Portal Event</button></div>
+        <div id="portal-event-grid" class="ces-portal-event-feed-v186"><div class="ces-portal-loading-card">Loading posts…</div></div>
+      </section>
+
+      <section class="ces-portal-section">
+        <div class="ces-portal-section-heading ces-portal-csi-heading-v186"><div><span>CSI</span><h3>CSI Summary</h3><p>Service and report response overview by team.</p></div><div class="ces-portal-csi-filter-v186"><select id="portal-csi-year-v186" onchange="changePortalCsiFilter()"></select><select id="portal-csi-month-v186" onchange="changePortalCsiFilter()"></select></div></div>
+        <div class="ces-portal-chart-grid"><div class="ces-portal-chart-card"><div class="ces-portal-chart-title"><i class="fas fa-chart-column"></i>Responses by Team</div><div class="ces-portal-chart-shell"><canvas id="portal-csi-bar"></canvas></div></div><div class="ces-portal-chart-card"><div class="ces-portal-chart-title"><i class="fas fa-chart-pie"></i>Service Share</div><div class="ces-portal-chart-shell"><canvas id="portal-csi-pie"></canvas></div></div></div>
+      </section>
+    </main>
+
+    <aside class="ces-portal-side-v186">
+      <section class="ces-portal-side-card"><div class="ces-portal-side-title"><div class="ces-portal-side-icon"><i class="fas fa-users"></i></div><div><h3>Top Active Users</h3><p>Detected from login and module usage</p></div></div><div id="portal-top-users" class="ces-portal-top-users"><div class="ces-portal-side-empty">Loading activity…</div></div></section>
+      <section class="ces-portal-side-card compact"><div class="ces-portal-side-title"><div class="ces-portal-side-icon"><i class="fas fa-clock-rotate-left"></i></div><div><h3>Recently Visited</h3><p>Your latest modules from usage log</p></div></div><div id="portal-recent-modules" class="ces-portal-recent-modules"></div></section>
+    </aside>
+  </div>
+</section>

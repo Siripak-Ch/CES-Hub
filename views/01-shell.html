@@ -1,0 +1,203 @@
+<div class="hidden min-h-screen flex" id="main-dashboard">
+<aside class="hidden md:flex flex-col w-72 bg-white border-r border-slate-100 h-screen transition-all duration-300 z-[100] fixed top-0 left-0 md:relative shrink-0 shadow-2xl md:shadow-[4px_0_24px_rgba(0,0,0,0.02)]" id="sidebar-menu">
+<div class="h-24 flex items-center justify-between px-8 pt-4">
+<div class="flex items-center gap-3">
+<img src="img/ces-logo.jpg" alt="CES Hub" class="w-10 h-10 rounded-xl shadow-lg shrink-0 object-cover">
+<div>
+<h1 class="font-black text-slate-800 text-xl tracking-tight leading-none">CES <span class="text-[#003DA5]">Hub</span></h1>
+<p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">Engineering Service</p>
+</div>
+</div>
+<button class="md:hidden text-slate-400 hover:text-red-500 transition-colors p-2" onclick="toggleSidebar()">
+<i class="fas fa-times text-xl"></i>
+</button>
+</div>
+<nav class="flex-1 overflow-y-auto py-8 px-6 pb-36 custom-scrollbar" data-ces-sidebar-scroll>
+<div class="menu-group flex flex-col space-y-1.5 mb-6">
+<div class="px-4 mb-2"><span class="text-[10px] font-extrabold text-slate-300 uppercase tracking-widest">Main Dashboard</span></div>
+<button class="nav-item group w-full flex items-center gap-4 px-4 py-3.5 rounded-xl text-sm font-bold text-slate-500 hover:bg-slate-50 transition-all relative overflow-hidden" id="btn-portal" data-ces-tab="portal" aria-label="Home Portal" onclick="switchTab('portal')">
+<div class="absolute left-0 top-0 bottom-0 w-1 bg-[#003DA5] rounded-r-full opacity-0 group-[.active]:opacity-100 transition-opacity"></div>
+<i class="fas fa-house w-5 text-center group-[.active]:text-[#003DA5] transition-colors"></i>
+<span class="group-[.active]:text-slate-800 transition-colors">Home</span>
+</button>
+<button class="nav-item group w-full flex items-center gap-4 px-4 py-3.5 rounded-xl text-sm font-bold text-slate-500 hover:bg-slate-50 transition-all relative overflow-hidden hidden" id="btn-management_overview" data-ces-tab="management_overview" aria-label="Management Overview" onclick="switchTab('management_overview')">
+<div class="absolute left-0 top-0 bottom-0 w-1 bg-[#003DA5] rounded-r-full opacity-0 group-[.active]:opacity-100 transition-opacity"></div>
+<i class="fas fa-chart-line w-5 text-center group-[.active]:text-[#003DA5] transition-colors"></i>
+<span class="group-[.active]:text-slate-800 transition-colors">Management Overview</span>
+</button>
+<button class="nav-item group w-full flex items-center gap-4 px-4 py-3.5 rounded-xl text-sm font-bold text-slate-500 hover:bg-slate-50 transition-all relative overflow-hidden hidden" id="btn-yearly" data-ces-tab="yearly" onclick="switchTab('yearly')">
+<div class="absolute left-0 top-0 bottom-0 w-1 bg-fuchsia-500 rounded-r-full opacity-0 group-[.active]:opacity-100 transition-opacity"></div>
+<i class="fas fa-chart-pie w-5 text-center group-[.active]:text-fuchsia-500 transition-colors"></i>
+<span class="group-[.active]:text-slate-800 transition-colors">Job Dashboard</span>
+</button>
+<button class="nav-item group w-full flex items-center gap-4 px-4 py-3.5 rounded-xl text-sm font-bold text-slate-500 hover:bg-slate-50 transition-all relative overflow-hidden hidden" id="btn-revenue" data-ces-tab="revenue" onclick="switchTab('revenue')">
+<div class="absolute left-0 top-0 bottom-0 w-1 bg-[#003DA5] rounded-r-full opacity-0 group-[.active]:opacity-100 transition-opacity"></div>
+<i class="fas fa-hand-holding-usd w-5 text-center group-[.active]:text-[#003DA5] transition-colors"></i>
+<span class="group-[.active]:text-slate-800 transition-colors">Revenue Dashboard</span>
+</button>
+<button class="nav-item group w-full flex items-center gap-4 px-4 py-3.5 rounded-xl text-sm font-bold text-slate-500 hover:bg-slate-50 transition-all relative overflow-hidden hidden" id="btn-ot" data-ces-tab="ot" onclick="switchTab('ot')">
+<div class="absolute left-0 top-0 bottom-0 w-1 bg-[#003DA5] rounded-r-full opacity-0 group-[.active]:opacity-100 transition-opacity"></div>
+<i class="fas fa-clock w-5 text-center group-[.active]:text-[#003DA5] transition-colors"></i>
+<span class="group-[.active]:text-slate-800 transition-colors">OT Dashboard</span>
+</button>
+</div>
+<div class="menu-group flex flex-col space-y-1.5 mb-6">
+<div class="px-4 mb-2"><span class="text-[10px] font-extrabold text-slate-300 uppercase tracking-widest">Performance</span></div>
+<button class="nav-item group w-full flex items-center gap-4 px-4 py-3.5 rounded-xl text-sm font-bold text-slate-500 hover:bg-slate-50 transition-all relative overflow-hidden hidden" id="btn-service" data-ces-tab="service" onclick="switchTab('service')">
+<div class="absolute left-0 top-0 bottom-0 w-1 bg-blue-500 rounded-r-full opacity-0 group-[.active]:opacity-100 transition-opacity"></div>
+<i class="fas fa-clipboard-check w-5 text-center group-[.active]:text-blue-500 transition-colors"></i>
+<span class="group-[.active]:text-slate-800 transition-colors">Service CSI</span>
+</button>
+<button class="nav-item group w-full flex items-center gap-4 px-4 py-3.5 rounded-xl text-sm font-bold text-slate-500 hover:bg-slate-50 transition-all relative overflow-hidden hidden" id="btn-report" data-ces-tab="report" onclick="switchTab('report')">
+<div class="absolute left-0 top-0 bottom-0 w-1 bg-[#003DA5] rounded-r-full opacity-0 group-[.active]:opacity-100 transition-opacity"></div>
+<i class="fas fa-chart-bar w-5 text-center group-[.active]:text-[#003DA5] transition-colors"></i>
+<span class="group-[.active]:text-slate-800 transition-colors">Report CSI</span>
+</button>
+<button class="nav-item group w-full flex items-center gap-4 px-4 py-3.5 rounded-xl text-sm font-bold text-slate-500 hover:bg-slate-50 transition-all relative overflow-hidden hidden" id="btn-memo_workorder" data-ces-tab="memo_workorder" aria-label="Memo & Work Order" onclick="switchTab('memo_workorder')">
+<div class="absolute left-0 top-0 bottom-0 w-1 bg-[#003DA5] rounded-r-full opacity-0 group-[.active]:opacity-100 transition-opacity"></div>
+<i class="fas fa-file-circle-check w-5 text-center group-[.active]:text-[#003DA5] transition-colors"></i>
+<span class="group-[.active]:text-slate-800 transition-colors">Memo & Work Order</span>
+</button>
+</div>
+<div class="menu-group flex flex-col space-y-1.5 mb-6">
+<div class="px-4 mb-2"><span class="text-[10px] font-extrabold text-slate-300 uppercase tracking-widest">Operation</span></div>
+<button class="nav-item group w-full flex items-center gap-4 px-4 py-3.5 rounded-xl text-sm font-bold text-slate-500 hover:bg-slate-50 transition-all relative overflow-hidden hidden" id="btn-calendar" data-ces-tab="calendar" onclick="switchTab('calendar')">
+<div class="absolute left-0 top-0 bottom-0 w-1 bg-[#003DA5] rounded-r-full opacity-0 group-[.active]:opacity-100 transition-opacity"></div>
+<i class="far fa-calendar-alt w-5 text-center group-[.active]:text-indigo-500 transition-colors"></i>
+<span class="group-[.active]:text-slate-800 transition-colors">Master Calendar</span>
+</button>
+<button class="nav-item group w-full flex items-center gap-4 px-4 py-3.5 rounded-xl text-sm font-bold text-slate-500 hover:bg-slate-50 transition-all relative overflow-hidden hidden" id="btn-checkin" data-ces-tab="checkin" onclick="switchTab('checkin')">
+<div class="absolute left-0 top-0 bottom-0 w-1 bg-[#003DA5] rounded-r-full opacity-0 group-[.active]:opacity-100 transition-opacity"></div>
+<i class="fas fa-map-marker-alt w-5 text-center group-[.active]:text-[#003DA5] transition-colors"></i>
+<span class="group-[.active]:text-slate-800 transition-colors">Check-in</span>
+</button>
+<button class="nav-item group w-full flex items-center gap-4 px-4 py-3.5 rounded-xl text-sm font-bold text-slate-500 hover:bg-slate-50 transition-all relative overflow-hidden hidden" id="btn-car_booking" data-ces-tab="car_booking" onclick="switchTab('car_booking')">
+<div class="absolute left-0 top-0 bottom-0 w-1 bg-[#003DA5] rounded-r-full opacity-0 group-[.active]:opacity-100 transition-opacity"></div>
+<i class="fas fa-car-side w-5 text-center group-[.active]:text-[#003DA5] transition-colors"></i>
+<span class="group-[.active]:text-slate-800 transition-colors">Car Booking</span>
+</button>
+<button class="nav-item group w-full flex items-center gap-4 px-4 py-3.5 rounded-xl text-sm font-bold text-slate-500 hover:bg-slate-50 transition-all relative overflow-hidden hidden" id="btn-van_booking" data-ces-tab="van_booking" onclick="switchTab('van_booking')">
+<div class="absolute left-0 top-0 bottom-0 w-1 bg-[#003DA5] rounded-r-full opacity-0 group-[.active]:opacity-100 transition-opacity"></div>
+<i class="fas fa-van-shuttle w-5 text-center group-[.active]:text-[#003DA5] transition-colors"></i>
+<span class="group-[.active]:text-slate-800 transition-colors">Van Booking</span>
+</button>
+<button class="nav-item group w-full flex items-center gap-4 px-4 py-3.5 rounded-xl text-sm font-bold text-slate-500 hover:bg-slate-50 transition-all relative overflow-hidden hidden" id="btn-weekly" data-ces-tab="weekly" onclick="switchTab('weekly')">
+<div class="absolute left-0 top-0 bottom-0 w-1 bg-[#003DA5] rounded-r-full opacity-0 group-[.active]:opacity-100 transition-opacity"></div>
+<i class="fas fa-calendar-check w-5 text-center group-[.active]:text-[#5B7F95] transition-colors"></i>
+<span class="group-[.active]:text-slate-800 transition-colors">Weekly Report</span>
+</button>
+<!-- ✅ ปุ่ม KPI Tracking ที่แก้ไขแล้ว -->
+<button class="nav-item group w-full flex items-center gap-4 px-4 py-3.5 rounded-xl text-sm font-bold text-slate-500 hover:bg-slate-50 transition-all relative overflow-hidden hidden" id="btn-kpi" data-ces-tab="kpi" onclick="switchTab('kpi')">
+<div class="absolute left-0 top-0 bottom-0 w-1 bg-[#003DA5] rounded-r-full opacity-0 group-[.active]:opacity-100 transition-opacity"></div>
+<i class="fas fa-chart-line w-5 text-center group-[.active]:text-[#003DA5] transition-colors"></i>
+<span class="group-[.active]:text-slate-800 transition-colors">KPI Tracking</span>
+</button>
+<button class="nav-item group w-full flex items-center gap-4 px-4 py-3.5 rounded-xl text-sm font-bold text-slate-500 hover:bg-slate-50 transition-all relative overflow-hidden hidden" id="btn-report_manage" data-ces-tab="report_manage" onclick="switchTab('report_manage')">
+<div class="absolute left-0 top-0 bottom-0 w-1 bg-[#003DA5] rounded-r-full opacity-0 group-[.active]:opacity-100 transition-opacity"></div>
+<i class="fas fa-file-invoice-dollar w-5 text-center group-[.active]:text-[#003DA5] transition-colors"></i>
+<span class="group-[.active]:text-slate-800 transition-colors">Report Management</span>
+</button>
+</div>
+<!-- ============================================================
+             INVENTORY / STOCK MODULE
+             Added for CES Stock Management
+             Tabs:
+             - stock_dashboard
+             - inventory
+             - check_stock
+        ============================================================ -->
+<div class="menu-group flex flex-col space-y-1.5 mb-6">
+<div class="px-4 mb-2">
+<span class="text-[10px] font-extrabold text-slate-300 uppercase tracking-widest">Inventory</span>
+</div>
+<button class="nav-item group w-full flex items-center gap-4 px-4 py-3.5 rounded-xl text-sm font-bold text-slate-500 hover:bg-slate-50 transition-all relative overflow-hidden hidden" id="btn-stock_dashboard" data-ces-tab="stock_dashboard" onclick="switchTab('stock_dashboard')">
+<div class="absolute left-0 top-0 bottom-0 w-1 bg-[#003DA5] rounded-r-full opacity-0 group-[.active]:opacity-100 transition-opacity"></div>
+<i class="fas fa-chart-pie w-5 text-center group-[.active]:text-[#003DA5] transition-colors"></i>
+<span class="group-[.active]:text-slate-800 transition-colors">Infusion Pump Dashboard</span>
+</button>
+<button class="nav-item group w-full flex items-center gap-4 px-4 py-3.5 rounded-xl text-sm font-bold text-slate-500 hover:bg-slate-50 transition-all relative overflow-hidden hidden" id="btn-inventory" data-ces-tab="inventory" onclick="switchTab('inventory')">
+<div class="absolute left-0 top-0 bottom-0 w-1 bg-sky-500 rounded-r-full opacity-0 group-[.active]:opacity-100 transition-opacity"></div>
+<i class="fas fa-boxes-stacked w-5 text-center group-[.active]:text-sky-500 transition-colors"></i>
+<span class="group-[.active]:text-slate-800 transition-colors">Inventory</span>
+</button>
+<button class="nav-item group w-full flex items-center gap-4 px-4 py-3.5 rounded-xl text-sm font-bold text-slate-500 hover:bg-slate-50 transition-all relative overflow-hidden hidden" id="btn-check_stock" data-ces-tab="check_stock" onclick="switchTab('check_stock')">
+<div class="absolute left-0 top-0 bottom-0 w-1 bg-[#003DA5] rounded-r-full opacity-0 group-[.active]:opacity-100 transition-opacity"></div>
+<i class="fas fa-qrcode w-5 text-center group-[.active]:text-[#003DA5] transition-colors"></i>
+<span class="group-[.active]:text-slate-800 transition-colors">Check Stock</span>
+</button>
+</div>
+<div class="menu-group flex flex-col space-y-1.5 mb-6">
+<div class="px-4 mb-2"><span class="text-[10px] font-extrabold text-slate-300 uppercase tracking-widest">Information</span></div>
+<button class="nav-item group w-full flex items-center gap-4 px-4 py-3.5 rounded-xl text-sm font-bold text-slate-500 hover:bg-slate-50 transition-all relative overflow-hidden hidden" id="btn-team_information" data-ces-tab="team_information" onclick="switchTab('team_information')">
+<div class="absolute left-0 top-0 bottom-0 w-1 bg-[#003DA5] rounded-r-full opacity-0 group-[.active]:opacity-100 transition-opacity"></div><i class="fas fa-address-book w-5 text-center group-[.active]:text-[#003DA5]"></i><span class="group-[.active]:text-slate-800">Team Information</span></button>
+<button class="nav-item group w-full flex items-center gap-4 px-4 py-3.5 rounded-xl text-sm font-bold text-slate-500 hover:bg-slate-50 transition-all relative overflow-hidden hidden" id="btn-team_plan" data-ces-tab="team_plan" onclick="switchTab('team_plan')">
+<div class="absolute left-0 top-0 bottom-0 w-1 bg-violet-500 rounded-r-full opacity-0 group-[.active]:opacity-100 transition-opacity"></div><i class="fas fa-calendar-days w-5 text-center group-[.active]:text-violet-500"></i><span class="group-[.active]:text-slate-800">Team Plan</span></button>
+<button class="nav-item group w-full flex items-center gap-4 px-4 py-3.5 rounded-xl text-sm font-bold text-slate-500 hover:bg-slate-50 transition-all relative overflow-hidden hidden" id="btn-monthly_report" data-ces-tab="monthly_report" onclick="switchTab('monthly_report')">
+<div class="absolute left-0 top-0 bottom-0 w-1 bg-sky-500 rounded-r-full opacity-0 group-[.active]:opacity-100 transition-opacity"></div><i class="fas fa-file-circle-check w-5 text-center group-[.active]:text-sky-500"></i><span class="group-[.active]:text-slate-800">Monthly Report</span></button>
+</div>
+<div class="menu-group flex flex-col space-y-1.5 mb-6">
+<div class="px-4 mb-2"><span class="text-[10px] font-extrabold text-slate-300 uppercase tracking-widest">System</span></div>
+<button class="nav-item group w-full flex items-center gap-4 px-4 py-3.5 rounded-xl text-sm font-bold text-slate-500 hover:bg-slate-50 transition-all relative overflow-hidden hidden" id="btn-setting" data-ces-tab="setting" onclick="switchTab('setting')"><div class="absolute left-0 top-0 bottom-0 w-1 bg-slate-600 rounded-r-full opacity-0 group-[.active]:opacity-100"></div><i class="fas fa-cogs w-5 text-center group-[.active]:text-slate-600"></i><span>Setting</span></button>
+<button class="nav-item group w-full flex items-center gap-4 px-4 py-3.5 rounded-xl text-sm font-bold text-slate-500 hover:bg-slate-50 transition-all relative overflow-hidden hidden" id="btn-users" data-ces-tab="users" onclick="switchTab('users')"><div class="absolute left-0 top-0 bottom-0 w-1 bg-cyan-500 rounded-r-full opacity-0 group-[.active]:opacity-100"></div><i class="fas fa-users-cog w-5 text-center group-[.active]:text-cyan-500"></i><span>User Management</span></button>
+<button class="nav-item group w-full flex items-center gap-4 px-4 py-3.5 rounded-xl text-sm font-bold text-slate-500 hover:bg-slate-50 transition-all relative overflow-hidden hidden" id="btn-ces_evaluation" data-ces-tab="ces_evaluation" onclick="switchTab('ces_evaluation')"><div class="absolute left-0 top-0 bottom-0 w-1 bg-amber-500 rounded-r-full opacity-0 group-[.active]:opacity-100"></div><i class="fas fa-star-half-stroke w-5 text-center group-[.active]:text-amber-500"></i><span>CES Hub Evaluation</span></button>
+<button class="nav-item group w-full flex items-center gap-4 px-4 py-3.5 rounded-xl text-sm font-bold text-slate-500 hover:bg-slate-50 transition-all relative overflow-hidden hidden" id="btn-ces_ai_knowledge" data-ces-tab="ces_ai_knowledge" onclick="switchTab('ces_ai_knowledge')"><div class="absolute left-0 top-0 bottom-0 w-1 bg-indigo-500 rounded-r-full opacity-0 group-[.active]:opacity-100"></div><i class="fas fa-robot w-5 text-center group-[.active]:text-indigo-500"></i><span>CES AI Knowledge</span></button>
+<button class="nav-item group w-full flex items-center gap-4 px-4 py-3.5 rounded-xl text-sm font-bold text-slate-500 hover:bg-slate-50 transition-all relative overflow-hidden hidden" id="btn-health" data-ces-tab="health" onclick="switchTab('health')"><div class="absolute left-0 top-0 bottom-0 w-1 bg-emerald-500 rounded-r-full opacity-0 group-[.active]:opacity-100"></div><i class="fas fa-heart-pulse w-5 text-center group-[.active]:text-emerald-500"></i><span>System Health</span></button>
+</div>
+</nav>
+<div class="p-6 border-t border-slate-50">
+<button class="w-full flex items-center justify-center gap-2 px-4 py-3 bg-blue-50 text-[#003DA5] rounded-xl text-sm font-bold hover:bg-[#003DA5] hover:text-white transition-all" onclick="logout()">
+<i class="fas fa-sign-out-alt"></i> Sign Out
+        </button>
+</div>
+<div class="px-8 py-4 border-t border-slate-100 flex items-center justify-center gap-2">
+<img src="img/nhealth-logo.png" alt="N Health" class="h-4 opacity-50">
+</div>
+</aside>
+<div class="flex-1 flex flex-col h-screen overflow-hidden relative">
+<div class="fixed inset-0 z-[200] hidden flex flex-col justify-center items-center transition-all duration-300" id="loadingOverlay">
+<div class="ces-loading-panel">
+<div class="ces-loading-mark">
+<div class="ces-loading-ring"></div>
+<i class="fas fa-bolt"></i>
+</div>
+<p id="loadingText">Processing Data...</p>
+<p class="ces-loading-subtext">CES Hub is syncing data securely</p>
+</div>
+</div>
+<header class="sticky top-0 z-40 px-6 py-4 bg-white/80 backdrop-blur-md border-b border-gray-100 shadow-sm">
+<div class="flex justify-between items-center">
+<div class="flex items-center gap-4">
+<button class="md:hidden w-10 h-10 flex items-center justify-center rounded-xl bg-slate-50 text-slate-500 hover:bg-indigo-50 hover:text-[#003DA5] transition-colors" onclick="toggleSidebar()">
+<i class="fas fa-bars text-xl"></i>
+</button>
+<div class="md:hidden flex items-center gap-3">
+<div class="bg-[#003DA5] text-white w-8 h-8 rounded-lg flex items-center justify-center shadow-md shadow-[#003DA5]/10">
+<i class="fas fa-cube text-sm"></i>
+</div>
+<span class="font-black text-gray-800 tracking-tight">CES <span class="text-[#003DA5]">Hub</span></span>
+</div>
+<h2 class="hidden md:block text-2xl font-black text-gray-800 tracking-tight" id="header-page-title">Home</h2>
+</div>
+<div class="flex items-center gap-3">
+<button id="ces-language-toggle-v4" type="button" class="ces-language-toggle-v4" onclick="toggleCesLanguageV4()" title="Switch language" aria-label="Switch Thai and English"><span class="ces-lang-option ces-lang-th">TH</span><span class="ces-lang-track"><span class="ces-lang-thumb"></span></span><span class="ces-lang-option ces-lang-en">EN</span><span id="ces-language-current-v4" class="sr-only">EN</span></button>
+<span class="hidden lg:inline-flex items-center gap-2 px-3 py-1 bg-[#003DA5]/10 text-[#003DA5] text-[10px] font-bold rounded-full border border-[#003DA5] uppercase tracking-wider" id="lastUpdateText">
+<i class="fas fa-sync-alt animate-spin text-[8px]"></i> Syncing...
+            </span>
+<a id="ces-line-oa-header-link" href="https://line.me/R/ti/p/@032jntyw" target="_blank" rel="noopener noreferrer" class="hidden sm:inline-flex items-center gap-2 px-3 py-2 rounded-full border border-emerald-200 bg-emerald-50 text-emerald-700 hover:bg-emerald-600 hover:text-white transition-all shadow-sm" title="Open CES Hub LINE OA" aria-label="Open CES Hub LINE OA">
+<i class="fab fa-line text-base"></i><span class="hidden xl:inline text-[10px] font-black tracking-wide">LINE OA</span>
+</a>
+<div class="flex items-center gap-3 bg-white px-2 py-1.5 md:px-3 md:py-1.5 rounded-full border border-gray-200 cursor-pointer hover:bg-indigo-50 hover:border-indigo-200 transition-all shadow-sm group" onclick="openProfileModal()">
+<div class="w-8 h-8 rounded-full bg-indigo-100 text-[#003DA5] flex items-center justify-center font-bold text-sm shadow-inner group-hover:bg-[#003DA5] group-hover:text-white transition-colors">
+<i class="fas fa-user"></i>
+</div>
+<div class="text-right hidden md:block pr-2">
+<p class="text-xs font-black text-gray-700 leading-tight" id="user-name-display">Loading...</p>
+<p class="text-[9px] font-bold text-gray-400 uppercase tracking-widest leading-tight" id="user-role-display">Role</p>
+</div>
+</div>
+</div>
+</div>
+</header>
+<main class="flex-1 overflow-y-auto p-4 md:p-8 space-y-6 scroll-smooth custom-scrollbar" id="app-main-content" data-ces-scroll-root></main>
+</div>
+</div>

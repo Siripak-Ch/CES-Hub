@@ -1,0 +1,29 @@
+<section id="view-memo_workorder" class="hidden ces-memo-workorder-page">
+  <div class="ces-mwo-header">
+    <div class="ces-mwo-title"><span class="ces-mwo-title-icon"><i class="fas fa-file-circle-check"></i></span><div><h1>Memo & Work Order</h1><p>รายการ Memo และ Work Order จากแหล่งข้อมูลเดียวกับ Service CSI</p></div></div>
+    <div class="ces-mwo-header-actions">
+      <button class="ces-mwo-icon-action ces-external-link-btn" type="button" onclick="cesOpenExternalLink('MEMO_WORKORDER_SOURCE')" title="Open Memo / Work Order source sheet" aria-label="Open Memo / Work Order source sheet"><i class="fas fa-link"></i></button>
+      <input id="mwoUploadFile" type="file" class="hidden" accept=".xlsx,.xls" onchange="handleMemoWorkOrderUpload(this.files && this.files[0]);this.value=''">
+      <button class="ces-mwo-icon-action ces-upload-icon-btn" type="button" onclick="document.getElementById('mwoUploadFile').click()" title="Upload Memo / Work Order" aria-label="Upload Memo / Work Order"><i class="fas fa-arrow-up-from-bracket"></i></button>
+      <button class="ces-mwo-icon-action ces-mwo-export" type="button" onclick="exportMemoWorkOrderExcel()" title="Download filtered Excel" aria-label="Download filtered Excel"><i class="fas fa-file-excel"></i></button>
+      <button class="ces-mwo-icon-action ces-mwo-refresh" type="button" onclick="initMemoWorkOrder(true)" title="Refresh" aria-label="Refresh"><i class="fas fa-rotate"></i></button>
+    </div>
+  </div>
+
+  <div id="mwoKpi" class="ces-mwo-kpi-grid"></div>
+  <div id="mwoTeamSummary" class="ces-mwo-team-summary"></div>
+
+  <div class="ces-mwo-filter-card">
+    <div class="ces-mwo-search"><i class="fas fa-magnifying-glass"></i><input id="mwoSearch" placeholder="ค้นหา Memo / Work Order / ลูกค้า" oninput="memoWorkOrderApply()"></div>
+    <select id="mwoTeam" onchange="memoWorkOrderApply()"><option value="ALL">All Teams</option></select>
+    <select id="mwoYear" onchange="memoWorkOrderApply()"><option value="ALL">All Years</option></select>
+    <select id="mwoMonth" onchange="memoWorkOrderApply()"><option value="ALL">All Months</option></select>
+    <select id="mwoType" onchange="memoWorkOrderApply()"><option value="ALL">Memo + Work Order</option><option value="MEMO">Memo</option><option value="WORK_ORDER">Work Order</option></select>
+  </div>
+
+  <div class="ces-mwo-card ces-mwo-table-card">
+    <div class="ces-mwo-card-head"><h3><i class="fas fa-list"></i> Memo & Work Order List</h3><span id="mwoCount">0 records</span></div>
+    <div class="ces-mwo-table-wrap"><table><thead><tr><th>Date</th><th>Team</th><th>Type</th><th>Document No.</th><th>Customer</th><th>File</th></tr></thead><tbody id="mwoTable"></tbody></table></div>
+    <div id="mwoPagination" class="ces-mwo-pagination"></div>
+  </div>
+</section>

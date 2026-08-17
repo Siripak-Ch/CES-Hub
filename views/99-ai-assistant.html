@@ -1,0 +1,143 @@
+<div id="ces-ai-local-root" class="ces-ai-local-root hidden" aria-live="polite">
+  <button id="ces-ai-local-launcher" class="ces-ai-local-launcher" type="button" aria-label="เปิด AI CES" aria-expanded="false">
+    <i class="fas fa-circle-info"></i><span>AI CES</span>
+  </button>
+
+  <section id="ces-ai-local-panel" class="ces-ai-local-panel hidden" aria-label="AI CES">
+    <header class="ces-ai-local-header">
+      <div class="ces-ai-local-header-icon"><i class="fas fa-circle-info"></i></div>
+      <div class="ces-ai-local-header-copy">
+        <strong>AI CES</strong>
+        <small><span id="ces-ai-local-status-dot" class="ces-ai-local-status-dot"></span><span id="ces-ai-local-status-text">กำลังโหลดคู่มือ...</span></small>
+      </div>
+      <button id="ces-ai-local-refresh" class="ces-ai-local-icon-btn" type="button" title="โหลดฐานความรู้ใหม่"><i class="fas fa-rotate"></i></button>
+      <button id="ces-ai-local-close" class="ces-ai-local-icon-btn" type="button" title="ปิด"><i class="fas fa-xmark"></i></button>
+    </header>
+
+    <div id="ces-ai-local-messages" class="ces-ai-local-messages">
+      <div class="ces-ai-local-message ces-ai-local-message-bot">
+        <div class="ces-ai-local-bubble">
+          สวัสดีค่ะ ถามเกี่ยวกับ CES Hub ได้เลย ระบบจะดึงข้อมูล/ฐานความรู้ที่เกี่ยวข้องตามคำถามก่อน แล้วใช้ Gemini วิเคราะห์จากข้อมูลที่ยืนยันได้ พร้อม fallback เป็นคำตอบภายในเมื่อ Online API ไม่พร้อม
+        </div>
+      </div>
+    </div>
+    <div class="ces-ai-quick-head">
+      <span><i class="fas fa-bolt"></i> Quick ask</span>
+      <button id="ces-ai-quick-toggle" type="button" aria-label="ซ่อนหรือแสดงคำถามลัด" title="Hide / Show quick ask"><i class="fas fa-chevron-up"></i></button>
+    </div>
+    <div id="ces-ai-local-suggestions" class="ces-ai-local-suggestions ces-ai-quick-grid">
+      <button type="button" data-ces-ai-evaluation-shortcut="true"><i class="fas fa-star"></i> แบบประเมิน</button>
+      <button type="button" data-ces-ai-question="วิธี Check-in"><i class="fas fa-location-dot"></i> วิธี Check-in</button>
+      <button type="button" data-ces-ai-question="วิธีจองรถยนต์"><i class="fas fa-car-side"></i> Car Booking</button>
+      <button type="button" data-ces-ai-question="วิธีทำ Weekly Report"><i class="fas fa-calendar-check"></i> Weekly Report</button>
+      <button type="button" data-ces-ai-question="ค้นหาอุปกรณ์ใน Inventory"><i class="fas fa-boxes-stacked"></i> Inventory</button>
+      <button type="button" data-ces-ai-question="สรุป Service CSI เดือนนี้"><i class="fas fa-chart-line"></i> สรุป CSI เดือนนี้</button>
+    </div>
+
+    <form id="ces-ai-local-form" class="ces-ai-local-form">
+      <textarea id="ces-ai-local-input" rows="1" maxlength="1000" placeholder="พิมพ์คำถามเกี่ยวกับ CES Hub..." aria-label="คำถาม"></textarea>
+      <button id="ces-ai-local-send" type="submit" aria-label="ส่งคำถาม"><i class="fas fa-paper-plane"></i></button>
+    </form>
+    <div id="ces-ai-evaluation-popup" class="ces-ai-evaluation-popup hidden" role="dialog" aria-modal="true" aria-label="ประเมินการใช้งาน CES Hub">
+      <div class="ces-ai-evaluation-dialog">
+        <div class="ces-ai-evaluation-head"><div><strong data-i18n-lock-th="true">ประเมินการใช้งาน CES Hub</strong><small data-i18n-lock-th="true">ให้คะแนนภาพรวมของ CES Hub 1–5 ดาว</small></div><button id="ces-ai-evaluation-close" type="button"><i class="fas fa-xmark"></i></button></div>
+<div class="ces-ai-evaluation-item"><span data-i18n-lock-th="true">1. ความสะดวกในการใช้งาน</span><div id="ces-ai-eval-ease" class="ces-ai-stars"></div></div>
+        <div class="ces-ai-evaluation-item"><span data-i18n-lock-th="true">2. ความรวดเร็วในการหาข้อมูล</span><div id="ces-ai-eval-speed" class="ces-ai-stars"></div></div>
+        <div class="ces-ai-evaluation-item"><span data-i18n-lock-th="true">3. ความครบของข้อมูล</span><div id="ces-ai-eval-completeness" class="ces-ai-stars"></div></div>
+        <textarea id="ces-ai-eval-suggestion" rows="3" placeholder="แนะนำการพัฒนาเพิ่มเติม (ไม่บังคับ)"></textarea>
+        <div id="ces-ai-eval-error" class="ces-ai-eval-error"></div>
+        <button id="ces-ai-eval-submit" class="ces-ai-eval-submit" type="button"><i class="fas fa-paper-plane"></i> ส่งแบบประเมิน</button>
+      </div>
+    </div>
+
+    <div id="ces-ai-local-footer" class="ces-ai-local-footer">CHECKING GEMINI ONLINE…</div>
+  </section>
+
+  <div id="ces-ai-admin-modal" class="ces-ai-admin-modal hidden" role="dialog" aria-modal="true" aria-label="CES AI Knowledge Training">
+    <div class="ces-ai-admin-dialog">
+      <header class="ces-ai-admin-header">
+        <div>
+          <h2><i class="fas fa-graduation-cap"></i> CES AI Knowledge Training</h2>
+          <p>จัดการคำตอบ คำถามที่ตอบไม่ได้ และผลประเมินการใช้งาน</p>
+        </div>
+        <button id="ces-ai-admin-close" class="ces-ai-local-icon-btn" type="button"><i class="fas fa-xmark"></i></button>
+      </header>
+
+      <div id="ces-ai-admin-workspace" class="ces-ai-admin-workspace hidden">
+        <div class="ces-ai-admin-toolbar">
+          <button id="ces-ai-admin-new" type="button"><i class="fas fa-plus"></i> เพิ่มคำตอบ</button>
+          <button id="ces-ai-admin-reload" type="button"><i class="fas fa-rotate"></i> Reload</button>
+          <button id="ces-ai-admin-seed" type="button"><i class="fas fa-seedling"></i> Starter Data</button>
+          <button id="ces-ai-admin-open-sheet" type="button"><i class="fas fa-table"></i> เปิด Google Sheet</button>
+          <span id="ces-ai-admin-summary">กำลังโหลด...</span>
+        </div>
+
+        <div class="ces-ai-admin-grid">
+          <section class="ces-ai-admin-list-card">
+            <div class="ces-ai-admin-card-title">
+              <h3>Knowledge Base</h3>
+              <input id="ces-ai-admin-search" type="search" placeholder="ค้นหา Title / Keyword">
+            </div>
+            <div id="ces-ai-admin-list" class="ces-ai-admin-list"></div>
+          </section>
+
+          <section class="ces-ai-admin-editor-card">
+            <div class="ces-ai-admin-card-title">
+              <h3 id="ces-ai-admin-editor-title">เพิ่มคำตอบใหม่</h3>
+              <span id="ces-ai-admin-entry-id">NEW</span>
+            </div>
+            <input id="ces-ai-field-id" type="hidden">
+            <div class="ces-ai-form-grid">
+              <label>หมวดหมู่<input id="ces-ai-field-category" type="text" placeholder="เช่น Check-in"></label>
+              <label>ชื่อหัวข้อ *<input id="ces-ai-field-title" type="text" placeholder="เช่น วิธี Check-in"></label>
+              <label class="wide">รูปแบบคำถาม<textarea id="ces-ai-field-patterns" rows="3" placeholder="แยกแต่ละคำถามด้วย | หรือขึ้นบรรทัดใหม่"></textarea></label>
+              <label class="wide">Keywords<textarea id="ces-ai-field-keywords" rows="2" placeholder="checkin | เช็กอิน | gps"></textarea></label>
+              <label class="wide">คำตอบ *<textarea id="ces-ai-field-answer" rows="7" placeholder="คำตอบที่ผู้ใช้จะได้รับ"></textarea></label>
+              <label>เปิดหน้า<select id="ces-ai-field-tab">
+                <option value="">ไม่เปิดหน้า</option>
+                <option value="portal">CES Hub Portal</option>
+                <option value="home">Management Overview</option>
+                <option value="yearly">Job Dashboard</option>
+                <option value="revenue">Revenue Dashboard</option>
+                <option value="ot">OT Dashboard</option>
+                <option value="service">Service CSI</option>
+                <option value="report">Report CSI</option>
+                <option value="calendar">Master Calendar</option>
+                <option value="checkin">Check-in</option>
+                <option value="car_booking">Car Booking</option>
+                <option value="van_booking">Van Booking</option>
+                <option value="weekly">Weekly Report</option>
+                <option value="kpi">KPI Tracking</option>
+                <option value="report_manage">Report Management</option>
+                <option value="stock_dashboard">Infusion Pump Dashboard</option>
+                <option value="inventory">Inventory</option>
+                <option value="check_stock">Check Stock</option>
+                <option value="team_information">Team Information</option>
+                <option value="users">User Management</option>
+                <option value="health">System Health</option>
+                <option value="setting">Setting</option>
+              </select></label>
+              <label>Priority<input id="ces-ai-field-priority" type="number" min="0" max="100" value="50"></label>
+              <label>Allowed Roles<input id="ces-ai-field-roles" type="text" placeholder="ว่าง = ทุก Role"></label>
+              <label>Allowed Teams<input id="ces-ai-field-teams" type="text" placeholder="ว่าง = ทุก Team"></label>
+              <label>Status<select id="ces-ai-field-status"><option value="ACTIVE">ACTIVE</option><option value="INACTIVE">INACTIVE</option></select></label>
+              <label class="wide">Notes<textarea id="ces-ai-field-notes" rows="2"></textarea></label>
+            </div>
+            <div class="ces-ai-admin-editor-actions">
+              <button id="ces-ai-admin-save" class="primary" type="button"><i class="fas fa-save"></i> Save</button>
+              <button id="ces-ai-admin-delete" class="danger hidden" type="button"><i class="fas fa-trash"></i> Delete</button>
+              <button id="ces-ai-admin-reset" type="button">Clear</button>
+            </div>
+          </section>
+        </div>
+
+        <section class="ces-ai-admin-unanswered-card">
+          <div class="ces-ai-admin-card-title">
+            <div><h3>คำถามที่ระบบตอบไม่ได้ / Feedback ไม่ดี</h3><p>กด “สร้างคำตอบ” เพื่อนำคำถามไปใส่ใน Knowledge Base</p></div>
+          </div>
+          <div id="ces-ai-admin-unanswered" class="ces-ai-admin-unanswered"></div>
+        </section>
+      </div>
+    </div>
+  </div>
+</div>

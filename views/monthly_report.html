@@ -1,0 +1,33 @@
+<section id="view-monthly_report" class="hidden animate-fade-in space-y-5 pb-20">
+  <div class="bg-white rounded-3xl border border-slate-100 shadow-sm p-5 flex flex-col md:flex-row md:items-center justify-between gap-4">
+    <div class="flex items-center gap-4">
+      <div class="w-12 h-12 rounded-2xl bg-blue-50 text-[#003DA5] grid place-items-center"><i class="fas fa-file-circle-check text-lg"></i></div>
+      <div><h2 class="text-xl font-black text-slate-800">Monthly Report</h2><p class="text-xs font-bold text-slate-400">Monthly meeting summary</p></div>
+    </div>
+    <div class="ces-page-header-actions-v226 flex items-center gap-2">
+      <a id="monthly-report-sheet-link-v229" class="ces-standard-icon-btn ces-external-link-btn" href="#" target="_blank" rel="noopener" title="Open Monthly Report Sheet" aria-label="Open Monthly Report Sheet"><i class="fas fa-table"></i></a>
+      <button id="monthly-report-add-v226" class="ces-standard-icon-btn ces-action-primary hidden" onclick="openMonthlyReportEditorV226()" title="Add Monthly Report" aria-label="Add Monthly Report"><i class="fas fa-plus"></i></button>
+      <button class="ces-standard-icon-btn ces-action-neutral" onclick="loadMonthlyReportV226(true)" title="Resync" aria-label="Resync"><i class="fas fa-rotate-right"></i></button>
+      <button class="ces-standard-icon-btn ces-action-excel" onclick="exportMonthlyReportExcelV226()" title="Export Excel" aria-label="Export Excel"><i class="fas fa-file-excel"></i></button>
+    </div>
+  </div>
+
+  <div class="ces-monthly-summary-v226">
+    <div class="ces-monthly-summary-card-v226"><span>Reports</span><strong id="monthly-report-total-v226">-</strong><small>available months</small></div>
+    <div class="ces-monthly-summary-card-v226"><span>Acknowledged</span><strong id="monthly-report-ack-v226">-</strong><small>by you</small></div>
+    <div class="ces-monthly-summary-card-v226"><span>Pending</span><strong id="monthly-report-pending-v226">-</strong><small>need acknowledgement</small></div>
+    <div class="ces-monthly-summary-card-v226"><span>Latest</span><strong id="monthly-report-latest-v226" class="text-base">-</strong><small>monthly report</small></div>
+  </div>
+
+  <div class="bg-white rounded-3xl border border-slate-100 shadow-sm p-5">
+    <div class="flex flex-col md:flex-row md:items-end justify-between gap-3 mb-4">
+      <div><h3 class="font-black text-slate-800">Monthly Report Archive</h3><p id="monthly-report-count-v226" class="text-xs text-slate-400 mt-1">Loading…</p></div>
+      <div class="flex flex-wrap gap-2">
+        <label class="text-[10px] font-black text-slate-500 uppercase">Year<select id="monthly-report-year-v226" class="ml-2 border border-slate-200 rounded-xl px-3 py-2 text-xs bg-white" onchange="renderMonthlyReportV226()"><option value="ALL">All Years</option></select></label>
+        <label class="text-[10px] font-black text-slate-500 uppercase">Status<select id="monthly-report-status-v226" class="ml-2 border border-slate-200 rounded-xl px-3 py-2 text-xs bg-white" onchange="renderMonthlyReportV226()"><option value="ALL">All</option><option value="PENDING">Pending</option><option value="ACK">Acknowledged</option></select></label>
+        <button class="sp-btn ghost ces-filter-reset-word-v227" onclick="resetMonthlyReportFiltersV226()" title="Reset Filters" aria-label="Reset Filters"><i class="fas fa-rotate-left"></i><span>Reset Filter</span></button>
+      </div>
+    </div>
+    <div id="monthly-report-grid-v226" class="ces-monthly-grid-v226"><div class="py-16 text-center text-slate-400 col-span-full"><i class="fas fa-circle-notch fa-spin"></i> Loading monthly reports…</div></div>
+  </div>
+</section>

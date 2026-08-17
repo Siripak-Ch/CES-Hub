@@ -1,0 +1,70 @@
+<!-- CES Hub Stock Inventory — Fast Cache V6 Equipment Dashboard -->
+<section id="view-inventory" class="hidden stockpro-page ces-stock-v5-page">
+  <div class="stockpro-shell">
+    <div class="stockpro-header-card">
+      <div class="stockpro-title-wrap">
+        <div class="stockpro-icon blue ces-page-header-icon-v15"><i class="fas fa-boxes-stacked"></i></div>
+        <div><h1>Inventory</h1><div class="ces-stock-header-meta"><span class="ces-stock-header-scope"><i class="fas fa-layer-group"></i> Equipment + Workflow + Accessories</span><span id="siDataFreshness" class="csv6-freshness stale"><i class="fas fa-database"></i> Cached data</span></div></div>
+      </div>
+      <div class="stockpro-actions">
+        <button class="sp-btn ghost csv5-icon-btn ces-action-neutral" onclick="initStockInventoryModule(true)" title="Refresh"><i class="fas fa-sync-alt"></i></button>
+        <button class="sp-btn ghost csv5-icon-btn ces-action-neutral" onclick="si_openInventoryHistory()" title="Activity History"><i class="fas fa-history"></i></button>
+        <button class="sp-btn warn csv5-icon-btn ces-action-warning ces-notification-icon-btn" onclick="si_openAccessoryLowStockAlerts()" title="Accessory Alerts"><i class="fas fa-bell"></i><span id="siLowStockHeaderCount" class="sp-mini-badge ces-notification-count">0</span></button>
+        <button class="sp-btn primary csv5-icon-btn ces-action-primary" onclick="si_toggleCart()" title="Checkout Cart"><i class="fas fa-shopping-cart"></i><span id="siCartCount" class="sp-mini-badge">0</span></button>
+        <button class="ces-standard-icon-btn ces-upload-icon-btn" onclick="si_triggerBulkUpload()" title="Bulk Upload CSV / XLSX" aria-label="Bulk Upload CSV / XLSX"><i class="fas fa-arrow-up-from-bracket"></i></button>
+        <input id="siBulkEquipmentFile" type="file" class="hidden" accept=".csv,.xlsx,.xls" onchange="si_handleBulkUpload(this.files && this.files[0]);this.value=''">
+        <button class="ces-standard-icon-btn ces-excel-icon-btn" onclick="si_exportCurrent()" title="Export Excel (.xlsx)" aria-label="Export Excel"><i class="fas fa-file-excel"></i></button>
+        <button class="sp-btn csv5-icon-btn ces-action-pdf-danger" onclick="si_printInventory()" title="Export PDF"><i class="fas fa-file-pdf"></i></button>
+      </div>
+    </div>
+
+    <div class="sp-tabs ces-inventory-mode-tabs">
+      <button id="siTabEquip" class="sp-tab active" onclick="si_switchTab('equip')"><i class="fas fa-microchip"></i> Equipment</button>
+      <button id="siTabAcc" class="sp-tab" onclick="si_switchTab('acc')"><i class="fas fa-plug"></i> Accessories</button>
+    </div>
+
+    <div class="stockpro-filter-card csv5-inventory-filters" id="siEquipFilters">
+      <div class="sp-search"><i class="fas fa-search"></i><input id="siSearch" oninput="si_applyFilters()" placeholder="ค้นหา ID / SN / Brand / Model / Location"></div>
+      <select id="siBrand" onchange="si_onBrandChange()"><option value="all">ทุกแบรนด์</option></select>
+      <select id="siModel" onchange="si_applyFilters()"><option value="all">ทุกโมเดล</option></select>
+      <select id="siLocation" onchange="si_applyFilters()"><option value="all">ทุกสถานที่</option></select>
+      <select id="siStatus" onchange="si_applyFilters()"><option value="all">ทุกสถานะ</option></select>
+      <button type="button" class="sp-btn ghost ces-stock-filter-reset-v226 ces-filter-reset-word-v227" onclick="si_resetMainFiltersV226()" title="Reset Filters" aria-label="Reset Filters"><i class="fas fa-rotate-left"></i><span>Reset Filter</span></button>
+    </div>
+
+    <div class="stockpro-filter-card hidden" id="siAccFilters">
+      <div class="sp-search"><i class="fas fa-search"></i><input id="siAccSearch" oninput="si_applyFilters()" placeholder="ค้นหา accessories"></div>
+      <select id="siAccTeam" onchange="si_applyFilters()"><option value="all">All Team</option></select>
+      <select id="siAccItem" onchange="si_applyFilters()"><option value="all">All Item</option></select>
+      <select id="siAccStatus" onchange="si_applyFilters()"><option value="all">All Status</option><option value="STOCK">STOCK</option><option value="LOW_STOCK">LOW_STOCK</option><option value="PENDING_APPROVAL">PENDING_APPROVAL</option></select>
+      <select id="siAccAction" onchange="si_applyFilters()"><option value="all">All Action</option></select>
+      <button type="button" class="sp-btn ghost ces-stock-filter-reset-v226 ces-filter-reset-word-v227" onclick="si_resetMainFiltersV226()" title="Reset Filters" aria-label="Reset Filters"><i class="fas fa-rotate-left"></i><span>Reset Filter</span></button>
+    </div>
+
+    <div id="siEquipKpiGrid" class="stockpro-kpi-grid csv5-kpi-six"></div>
+    <div id="siAccKpiGrid" class="stockpro-kpi-grid hidden"></div>
+
+    <div class="stockpro-card" id="siEquipSection">
+      <div class="stockpro-card-head"><h3><i class="fas fa-microchip text-blue-500"></i> Equipment List — compact view</h3><span id="siTableCount" class="sp-pill">0 items</span></div>
+      <div id="siTable"></div>
+      <div id="siPagination" class="sp-pagination"></div>
+    </div>
+
+    <div class="stockpro-card hidden" id="siAccSection">
+      <div class="stockpro-card-head"><h3><i class="fas fa-plug text-emerald-500"></i> Accessories Inventory</h3><span id="siAccCount" class="sp-pill">0 items</span></div>
+      <div id="siAccCards"></div><div id="siAccPagination" class="sp-pagination"></div>
+    </div>
+  </div>
+
+  <button id="siCartFab" class="sp-cart-fab" onclick="si_toggleCart()" title="Checkout Cart"><i class="fas fa-shopping-cart"></i><span id="siCartFabBadge">0</span></button>
+  <div id="siCartOverlay" class="hidden fixed inset-0 bg-slate-900/40 z-[180]" onclick="si_closeCart()"></div>
+  <div id="siCartDrawer" class="fixed top-0 right-[-520px] w-[min(520px,100vw)] h-screen bg-white z-[181] shadow-2xl transition-all duration-300 flex flex-col">
+    <div class="bg-[#2563eb] text-white p-5 flex justify-between items-center"><div><h2 class="font-black text-xl"><i class="fas fa-shopping-cart"></i> ตะกร้า Check-Out</h2><p class="text-xs text-blue-100"><span id="siCartDrawerCount">0</span> รายการ</p></div><button onclick="si_closeCart()" class="text-white/80 hover:text-white"><i class="fas fa-times text-xl"></i></button></div>
+    <div id="siCartItems" class="flex-1 overflow-y-auto p-4"></div><div id="siCartDetailSummary" class="px-4 pb-3"></div>
+    <div class="border-t border-slate-100 p-4 space-y-3">
+      <input id="siBorrower" class="stockpro-control" placeholder="ชื่อผู้ยืม / Borrower *"><input id="siCheckoutLocation" class="stockpro-control" placeholder="สถานที่ / Location *">
+      <div class="grid grid-cols-2 gap-2"><input id="siBorrowDate" class="stockpro-control" type="date" title="วันที่เบิกออก"><input id="siDueDate" class="stockpro-control" type="date" title="วันคืน"></div>
+      <input id="siNote" class="stockpro-control" placeholder="หมายเหตุ"><button class="sp-btn primary w-full" style="width:100%" onclick="si_submitCheckout()"><i class="fas fa-paper-plane"></i> ยืนยัน Check-Out</button>
+    </div>
+  </div>
+</section>

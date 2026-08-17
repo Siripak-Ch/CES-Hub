@@ -1,0 +1,66 @@
+<section id="view-van_booking" data-booking-version="v55" class="view-section hidden space-y-5 p-2 sm:p-4 lg:p-6">
+  <div class="bg-white rounded-3xl border border-slate-100 shadow-sm p-5 flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+    <div class="flex items-center gap-4">
+      <div class="ces-booking-header-icon w-12 h-12 rounded-2xl bg-white border border-blue-100 text-[#003DA5] grid place-items-center shadow-sm"><i class="fas fa-van-shuttle text-lg"></i></div>
+      <div><h2 class="text-xl font-black text-slate-800">Van Booking</h2><p class="text-xs font-bold text-slate-500">Live calendar, utilization and booking details</p></div>
+    </div>
+    <div class="ces-vehicle-header-actions flex items-center gap-3">
+      <a id="van-book-form-v55" href="https://forms.gle/Tra5UBHtbMWpXvhr7" target="_blank" rel="noopener" class="ces-vehicle-action ces-action-primary"><i class="fas fa-calendar-plus"></i><span>Book Van</span></a>
+      <a id="van-open-calendar-v55" href="https://calendar.google.com/calendar/u/0/r?cid=4a66f8df81e68d752715957a3805219e951d91c7b1c375e8996424ca2c55fef6%40group.calendar.google.com" target="_blank" rel="noopener" class="ces-vehicle-action ces-action-neutral"><i class="fas fa-arrow-up-right-from-square"></i><span>Google Calendar</span></a>
+      <button type="button" onclick="exportVanBookingExcel()" class="ces-vehicle-action ces-action-excel ces-action-icon-only" title="Download Van Booking Excel" aria-label="Download Van Booking Excel"><i class="fas fa-file-excel"></i></button>
+      <button id="van-refresh-v55" type="button" onclick="refreshVanBookingCalendarV55(this)" class="ces-vehicle-action ces-action-neutral ces-action-icon-only" title="Refresh calendar and details" aria-label="Refresh calendar and details"><i class="fas fa-rotate-right"></i></button>
+    </div>
+  </div>
+
+  <div class="bg-white rounded-2xl border border-slate-100 shadow-sm p-3 flex flex-wrap items-end gap-3">
+    <div><label class="ces-form-label">Year</label><select id="van-year-filter-v55" class="ces-book-input min-w-[120px]" onchange="changeVanBookingFilterV57()"></select></div>
+    <div><label class="ces-form-label">Month</label><select id="van-month-filter-v55" class="ces-book-input min-w-[140px]" onchange="changeVanBookingFilterV57()"><option value="ALL">All Months</option><option value="01">Jan</option><option value="02">Feb</option><option value="03">Mar</option><option value="04">Apr</option><option value="05">May</option><option value="06">Jun</option><option value="07">Jul</option><option value="08">Aug</option><option value="09">Sep</option><option value="10">Oct</option><option value="11">Nov</option><option value="12">Dec</option></select></div>
+    <div><label class="ces-form-label">Team</label><select id="van-team-filter-v55" class="ces-book-input min-w-[130px]" onchange="changeVanBookingFilterV57()"><option value="ALL">All Teams</option><option value="MED">MED</option><option value="LAB">LAB</option><option value="EHS">EHS</option><option value="ENV">ENV</option></select></div>
+    <div id="van-filter-note-v55" class="pb-2 text-[10px] font-bold text-slate-400">Loading schedule…</div>
+  </div>
+
+  <div class="ces-van-summary-layout-v186">
+    <div class="ces-van-summary-primary-v186">
+      <div class="ces-vehicle-kpi-card ces-van-primary-card-v186"><div>Total Events</div><strong id="van-kpi-jobs-v55">0</strong><small>Booking events</small></div>
+      <div class="ces-vehicle-kpi-card ces-van-primary-card-v186"><div>Booked Days</div><strong id="van-kpi-days-v55">0</strong><small>Calendar days occupied</small></div>
+      <div class="ces-vehicle-kpi-card ces-van-primary-card-v186 ces-vehicle-cost-card"><div>Total Cost</div><strong id="van-kpi-cost-v55">฿0</strong><small>฿2,200 / departure or return date</small><em id="van-kpi-billing-days-v57">0 billed date(s)</em></div>
+    </div>
+    <div class="ces-van-team-summary-v186">
+      <div class="ces-vehicle-kpi-card ces-team-edge" style="--team-color:#004aad"><div>MED</div><strong id="van-kpi-med-v55">0</strong></div>
+      <div class="ces-vehicle-kpi-card ces-team-edge" style="--team-color:#19a7ce"><div>LAB</div><strong id="van-kpi-lab-v55">0</strong></div>
+      <div class="ces-vehicle-kpi-card ces-team-edge" style="--team-color:#0fc1a1"><div>EHS</div><strong id="van-kpi-ehs-v55">0</strong></div>
+      <div class="ces-vehicle-kpi-card ces-team-edge" style="--team-color:#7ed957"><div>ENV</div><strong id="van-kpi-env-v55">0</strong></div>
+    </div>
+  </div>
+
+  <div class="space-y-5">
+    <div class="bg-white rounded-3xl border border-slate-100 shadow-sm p-3 sm:p-5 min-w-0">
+      <div class="flex items-center justify-between gap-3 mb-3"><div><h3 class="font-black text-slate-800"><i class="fas fa-calendar-days text-[#003DA5] mr-2"></i>Van Booking Calendar</h3><p class="text-xs text-slate-400 mt-1">Calendar source: shared CES van calendar</p></div><span class="text-[10px] font-black text-slate-400">Asia/Bangkok</span></div>
+      <div class="van-calendar-shell relative rounded-2xl overflow-hidden border border-slate-200 bg-slate-50">
+        <div class="van-calendar-toolbar absolute inset-x-0 top-0 z-10 flex items-center justify-between gap-3 px-3 bg-white border-b border-slate-200">
+          <div class="flex items-center gap-2">
+            <button type="button" onclick="goVanCalendarTodayV57()" class="h-8 px-3 rounded-lg border border-slate-300 bg-white text-[10px] font-black text-slate-700 hover:bg-slate-50">Today</button>
+            <button type="button" onclick="changeVanCalendarMonthV57(-1)" class="vehicle-calendar-nav" title="Previous month"><i class="fas fa-chevron-left"></i></button>
+            <button type="button" onclick="changeVanCalendarMonthV57(1)" class="vehicle-calendar-nav" title="Next month"><i class="fas fa-chevron-right"></i></button>
+          </div>
+          <div id="van-calendar-period-v57" class="text-sm font-black text-slate-700">Calendar</div>
+          <div class="h-8 px-3 inline-flex items-center rounded-lg border border-slate-200 bg-slate-50 text-[10px] font-black text-slate-600">Month</div>
+        </div>
+        <iframe id="van-google-calendar-v55" class="van-calendar-frame" title="Van Booking Google Calendar" data-src="https://calendar.google.com/calendar/u/0/embed?src=4a66f8df81e68d752715957a3805219e951d91c7b1c375e8996424ca2c55fef6%40group.calendar.google.com&ctz=Asia%2FBangkok&mode=MONTH&showTitle=0&showPrint=0&showTabs=0&showCalendars=0&showTz=0&showNav=0&showDate=0" src="https://calendar.google.com/calendar/u/0/embed?src=4a66f8df81e68d752715957a3805219e951d91c7b1c375e8996424ca2c55fef6%40group.calendar.google.com&ctz=Asia%2FBangkok&mode=MONTH&showTitle=0&showPrint=0&showTabs=0&showCalendars=0&showTz=0&showNav=0&showDate=0" style="border:0;width:100%;height:100%" frameborder="0" scrolling="no"></iframe>
+      </div>
+    </div>
+
+    <div class="van-detail-grid grid grid-cols-1 gap-5">
+      <div class="bg-white rounded-3xl border border-slate-100 shadow-sm p-5 min-w-0">
+        <div class="flex items-center justify-between gap-3 mb-4"><div><h3 class="font-black text-slate-800"><i class="fas fa-list-check text-[#003DA5] mr-2"></i>Van Job List Details</h3><p class="text-xs text-slate-400 mt-1">Date, route, traveller team and calculated cost</p></div><span id="van-list-count-v55" class="px-3 py-1.5 rounded-full bg-slate-100 text-slate-600 text-[10px] font-black">0 events</span></div>
+        <div id="van-source-warning-v56" class="hidden mb-4 rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-xs text-amber-800"></div>
+        <div id="van-job-list-v55" class="min-h-[320px] text-sm text-slate-400"><div class="py-16 text-center"><i class="fas fa-circle-notch fa-spin text-xl mb-3"></i><div class="text-xs font-bold">Loading van bookings…</div></div></div>
+      </div>
+
+      <div class="bg-white rounded-3xl border border-slate-100 shadow-sm p-5 min-w-0">
+        <div class="flex items-center justify-between gap-3 mb-4"><div><h3 class="font-black text-slate-800"><i class="fas fa-calendar-check text-emerald-600 mr-2"></i>Available Dates</h3><p class="text-xs text-slate-400 mt-1">Weekdays with no van booking in the selected period</p></div><span id="van-available-count-v56" class="px-3 py-1.5 rounded-full bg-emerald-50 text-emerald-700 text-[10px] font-black">0 dates</span></div>
+        <div id="van-available-list-v56" class="min-h-[320px] text-sm text-slate-400"><div class="py-16 text-center"><i class="fas fa-circle-notch fa-spin text-xl mb-3"></i><div class="text-xs font-bold">Loading available dates…</div></div></div>
+      </div>
+    </div>
+  </div>
+</section>

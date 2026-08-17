@@ -1,0 +1,174 @@
+<section id="view-car_booking" data-booking-version="v243" class="view-section hidden space-y-5 p-2 sm:p-4 lg:p-6">
+  <div class="bg-white rounded-3xl border border-slate-100 shadow-sm p-5 flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+    <div class="flex items-center gap-4"><div class="ces-booking-header-icon w-12 h-12 rounded-2xl bg-white border border-blue-100 text-[#003DA5] grid place-items-center shadow-sm"><i class="fas fa-car-side text-lg"></i></div><div><h2 class="text-xl font-black text-slate-800">Car Booking</h2><p class="text-xs font-bold text-slate-500">Fast request approval · Quick return</p></div></div>
+    <div class="ces-vehicle-header-actions flex items-center gap-3 justify-end"><a href="https://drive.google.com/drive/folders/16B-1JX6RfyxTQRz7KMMgaAA13kOgSbvm?usp=drive_link" target="_blank" rel="noopener" class="ces-vehicle-action ces-action-neutral ces-action-icon-only" title="Open Vehicle Booking Drive" aria-label="Open Vehicle Booking Drive"><i class="fab fa-google-drive"></i></a><button class="ces-vehicle-action ces-action-neutral ces-action-icon-only" onclick="resyncVehicleBookingV55('CAR',this)" title="Resync booking data" aria-label="Resync booking data"><i class="fas fa-rotate-right"></i></button><button type="button" class="ces-vehicle-action ces-action-excel ces-action-icon-only" onclick="exportVehicleUsageExcelV56('CAR')" title="Export Car Booking Excel" aria-label="Export Car Booking Excel"><i class="fas fa-file-excel"></i></button></div>
+  </div>
+
+  <div class="ces-car-workspace-tabs-v204 ces-car-workspace-tabs-v222" role="tablist" aria-label="Car Booking workspace">
+    <button id="car-workspace-dashboard-btn" type="button" class="active" onclick="switchCarBookingWorkspaceV204('DASHBOARD')"><i class="fas fa-chart-pie"></i><span data-i18n-th="แดชบอร์ด" data-i18n-en="Dashboard">Dashboard</span></button>
+    <button id="car-workspace-booking-btn" type="button" onclick="switchCarBookingWorkspaceV204('BOOKING')"><i class="fas fa-file-signature"></i><span data-i18n-th="จอง / คืนรถ" data-i18n-en="Booking / Return">Booking / Return</span></button>
+    <button id="car-workspace-evaluation-btn" type="button" onclick="switchCarBookingWorkspaceV204('EVALUATION')"><i class="fas fa-star-half-stroke"></i><span data-i18n-th="แบบประเมิน" data-i18n-en="Evaluation">Evaluation</span></button>
+  </div>
+
+  <div id="car-workspace-dashboard-panel" class="space-y-5">
+  <div class="vehicle-summary-filter-bar bg-white rounded-2xl border border-slate-100 shadow-sm p-3 flex flex-wrap items-end gap-3">
+    <div><label class="ces-form-label">Summary Year</label><select id="car-summary-year-filter" onchange="renderVehicleSummaryV36('CAR')" class="ces-book-input min-w-[130px]"><option value="All">All Years</option></select></div>
+    <div><label class="ces-form-label">Summary Month</label><select id="car-summary-month-filter" onchange="renderVehicleSummaryV36('CAR')" class="ces-book-input min-w-[140px]"><option value="All">All Months</option><option value="01">Jan</option><option value="02">Feb</option><option value="03">Mar</option><option value="04">Apr</option><option value="05">May</option><option value="06">Jun</option><option value="07">Jul</option><option value="08">Aug</option><option value="09">Sep</option><option value="10">Oct</option><option value="11">Nov</option><option value="12">Dec</option></select></div>
+    <div><label class="ces-form-label">Summary Team</label><select id="car-summary-team-filter" onchange="renderVehicleSummaryV36('CAR')" class="ces-book-input min-w-[130px]"><option value="All">All Teams</option><option value="MED">MED</option><option value="LAB">LAB</option><option value="EHS">EHS</option><option value="ENV">ENV</option><option value="TES">TES</option><option value="MNG">MNG</option></select></div>
+    <div id="car-summary-filter-note" class="text-[10px] font-bold text-slate-400 pb-2">Current month</div>
+  </div>
+
+  <div class="ces-car-summary-layout-v186 ces-summary-card-row-v186">
+    <div class="ces-car-mini-grid-v186">
+      <div class="ces-vehicle-kpi-card"><div>Total KM</div><strong id="car-summary-km">0</strong></div>
+      <div class="ces-vehicle-kpi-card"><div>Days of Use</div><strong id="car-summary-days">0</strong></div>
+      <div class="ces-vehicle-kpi-card"><div>Total Jobs</div><strong id="car-summary-jobs">0</strong></div>
+      <div class="ces-vehicle-kpi-card"><div>Electric Bill</div><strong id="car-summary-bill">฿0</strong></div>
+      <div class="ces-vehicle-kpi-card ces-car-cost-reference-v203"><div>Regular Car Fee</div><strong id="car-summary-regular">฿0</strong><small id="car-summary-regular-note" class="ces-car-rate-note-v4"><span>5 Baht/km</span><span>Van ฿2,200/day</span></small></div>
+      <div class="ces-vehicle-kpi-card ces-car-saving-card-v203"><div>Total Fee Saved</div><strong id="car-summary-saved">฿0</strong><small id="car-summary-saved-note">Compared with regular car fee</small></div>
+    </div>
+    <div class="ces-car-utilization-panel-v186"><div class="ces-car-utilization-title-v186"><i class="fas fa-chart-pie"></i><span>Day Utilization</span></div><div id="car-summary-usage-pie" class="ces-booking-usage-pie ces-booking-usage-pie-v186" style="--usage:0%"><span>0%</span></div><strong><span id="car-summary-working">0</span> working days</strong><p id="car-summary-usage-note">0 used weekdays / 0 working days</p></div>
+  </div>
+
+    <div class="space-y-5 min-w-0">
+      <div class="bg-white rounded-3xl border border-slate-100 shadow-sm p-5">
+        <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-3 mb-4"><div><h3 class="font-black text-slate-800"><i class="fas fa-calendar-days text-[#003DA5] mr-2"></i>Car Booking Availability</h3><p class="text-xs text-slate-400 mt-1">White = fully available · Yellow = partly available · Red = fully booked</p></div><div class="flex items-center gap-2"><button class="vehicle-calendar-nav" onclick="changeVehicleCalendarMonthV31('CAR',-1)"><i class="fas fa-chevron-left"></i></button><div id="car-calendar-title" class="min-w-[140px] text-center text-sm font-black text-slate-700"></div><button class="vehicle-calendar-nav" onclick="changeVehicleCalendarMonthV31('CAR',1)"><i class="fas fa-chevron-right"></i></button></div></div>
+        <div id="car-availability-calendar" class="vehicle-calendar-grid"></div>
+      </div>
+
+      <div class="bg-white rounded-3xl border border-slate-100 shadow-sm p-5 min-w-0">
+        <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-3 mb-4"><div><h3 class="font-black text-slate-800"><i class="fas fa-list-check text-[#003DA5] mr-2"></i>Car Booking Requests</h3><p class="text-xs text-slate-400 mt-1">Request, approval and return history</p></div><div class="flex gap-2"><div class="relative"><i class="fas fa-search absolute left-3 top-3 text-slate-400 text-xs"></i><input id="car-book-search" oninput="renderVehicleBookingsV31('CAR')" class="pl-9 pr-3 py-2.5 rounded-xl border border-slate-200 bg-slate-50 text-xs font-bold" placeholder="Search job / destination"></div><select id="car-book-status" onchange="renderVehicleBookingsV31('CAR')" class="px-3 py-2.5 rounded-xl border border-slate-200 bg-slate-50 text-xs font-bold"><option value="all">All Status</option><option>PENDING_APPROVAL</option><option>CONFIRMED</option><option>IN_PROGRESS</option><option>COMPLETED</option><option>REJECTED</option></select></div></div>
+        <div id="car-book-list" class="text-sm text-slate-400 py-12 text-center">Loading bookings...</div>
+      </div>
+    </div>
+  </div>
+
+  <div id="car-workspace-booking-panel" class="hidden ces-car-booking-fullwidth-v209">
+    <div class="bg-white rounded-3xl border border-slate-100 shadow-sm p-5 min-w-0">
+      <div class="grid grid-cols-2 gap-2 rounded-2xl bg-slate-100 p-1 mb-5">
+        <button id="car-mode-request" class="vehicle-mode-btn active" onclick="switchVehicleBookingModeV31('CAR','REQUEST')"><i class="fas fa-calendar-plus mr-2"></i>Booking</button>
+        <button id="car-mode-return" class="vehicle-mode-btn" onclick="switchVehicleBookingModeV31('CAR','RETURN')"><i class="fas fa-rotate-left mr-2"></i>Return</button>
+      </div>
+
+      <div id="car-request-panel" class="space-y-4 ces-car-request-v243">
+        <div class="rounded-2xl border border-blue-100 bg-blue-50/40 p-4">
+          <div class="flex items-center justify-between gap-3 mb-3"><div class="text-[11px] font-black uppercase tracking-wider text-blue-600">User Profile / Contact · Auto-filled from Login</div><div class="flex gap-2"><button type="button" class="ces-profile-clear-v4" onclick="clearVehicleProfileV31('CAR')"><i class="fas fa-eraser"></i><span>Clear form</span></button></div></div>
+          <div class="ces-car-profile-grid-v243">
+            <div><label class="ces-form-label">Name</label><input id="car-requester-name" class="ces-book-input bg-white"></div>
+            <div><label class="ces-form-label">Employee ID</label><input id="car-requester-id" class="ces-book-input bg-white"></div>
+            <div><label class="ces-form-label">Team</label><select id="car-requester-team" class="ces-book-input bg-white" onchange="changeVehicleBookingTeamV31('CAR')"><option value="">— Select Team —</option><option value="MED">MED</option><option value="LAB">LAB</option><option value="EHS">EHS</option><option value="ENV">ENV</option><option value="TES">TES</option><option value="MNG">MNG</option></select></div>
+            <div><label class="ces-form-label">Position</label><input id="car-requester-position" class="ces-book-input bg-white"></div>
+            <div class="ces-span-2-v243"><label class="ces-form-label">Email</label><input id="car-requester-email" type="email" class="ces-book-input bg-white"></div>
+            <div class="ces-span-2-v243"><label class="ces-form-label">Contact</label><input id="car-book-contact" class="ces-book-input bg-white" placeholder="Phone / extension"></div>
+          </div>
+        </div>
+
+        <div class="rounded-2xl border border-slate-200 bg-white p-4 ces-car-work-card-v243">
+          <div class="flex flex-col xl:flex-row xl:items-end gap-3 mb-3">
+            <div class="flex-1"><label class="ces-form-label">Onsite Work <span class="text-red-500">*</span></label><select id="car-onsite-plan" class="ces-book-input" onchange="applyVehicleOnsitePlanV31('CAR')"><option value="">— Select team first —</option></select><p class="text-[10px] text-slate-400 mt-1">เลือกจาก Master Calendar หรือเลือก “Manual / งานไม่มีใน Calendar” เพื่อกรอกเอง</p></div>
+            <div class="shrink-0"><button type="button" class="ces-manual-work-btn-v243" onclick="enableManualVehicleWorkV243('CAR')"><i class="fas fa-pen-to-square"></i> Manual work</button></div>
+          </div>
+          <input type="hidden" id="car-calendar-key"><input type="hidden" id="car-calendar-team">
+
+          <div class="ces-car-job-grid-v243 ces-car-job-grid-v263">
+            <div class="ces-job-main-v243"><label class="ces-form-label">Job / Customer <span class="text-red-500">*</span></label><input id="car-job-title" class="ces-book-input" placeholder="Select from calendar or type onsite work / customer"></div>
+            <div><label class="ces-form-label">Passengers</label><input id="car-book-passengers" type="number" min="1" value="1" class="ces-book-input"></div>
+          </div>
+          <div class="ces-car-schedule-grid-v263" aria-label="Booking date and time">
+            <div class="ces-book-picker-v262 ces-book-picker-v263" onclick="cesOpenNativePickerV262('car-book-date',event)"><label class="ces-form-label">Planned Start Date <span class="text-red-500">*</span></label><input id="car-book-date" type="date" class="ces-book-input"></div>
+            <div class="ces-book-picker-v262 ces-book-picker-v263" onclick="cesOpenNativePickerV262('car-book-return-date',event)"><label class="ces-form-label">Planned Return Date <span class="text-red-500">*</span></label><input id="car-book-return-date" type="date" class="ces-book-input"></div>
+            <div class="ces-book-picker-v262 ces-book-picker-v263" onclick="cesOpenNativePickerV262('car-book-start',event)"><label class="ces-form-label">Start Time <span class="text-red-500">*</span></label><input id="car-book-start" type="time" step="900" value="08:00" class="ces-book-input"></div>
+            <div class="ces-book-picker-v262 ces-book-picker-v263" onclick="cesOpenNativePickerV262('car-book-end',event)"><label class="ces-form-label">End Time <span class="text-red-500">*</span></label><input id="car-book-end" type="time" step="900" value="17:00" class="ces-book-input"></div>
+          </div>
+
+          <div class="ces-time-presets-v243" aria-label="Car booking time presets">
+            <span>Quick time:</span>
+            <button type="button" onclick="setVehicleCustomTimeV243('08:00','17:00')">08:00–17:00</button>
+            <button type="button" onclick="setVehicleCustomTimeV243('08:00','12:00')">08:00–12:00</button>
+            <button type="button" onclick="setVehicleCustomTimeV243('12:00','17:00')">12:00–17:00</button>
+            <button type="button" onclick="setVehicleCustomTimeV243('08:00','10:00')">08:00–10:00</button>
+            <button type="button" onclick="setVehicleCustomTimeV243('10:00','12:00')">10:00–12:00</button>
+            <button type="button" onclick="setVehicleCustomTimeV243('12:00','14:00')">12:00–14:00</button>
+            <button type="button" onclick="setVehicleCustomTimeV243('14:00','16:00')">14:00–16:00</button>
+            <button type="button" onclick="setVehicleCustomTimeV243('15:00','17:00')">15:00–17:00</button>
+            <small>หรือกดช่องเวลาเพื่อเลือก Custom ได้เอง</small>
+          </div>
+
+          <div class="ces-car-detail-grid-v243 mt-3">
+            <div><label class="ces-form-label">Destination <span class="text-red-500">*</span></label><input id="car-book-destination" class="ces-book-input" placeholder="สถานที่ / ปลายทาง"></div>
+            <div><label class="ces-form-label">Purpose / Onsite Work Detail</label><textarea id="car-book-purpose" rows="2" class="ces-book-input" placeholder="รายละเอียดงาน onsite / วัตถุประสงค์"></textarea></div>
+          </div>
+
+          <div class="ces-car-approval-box-v260 mt-3">
+            <div class="ces-car-approval-main-v260">
+              <label class="ces-form-label">Approver <span class="text-red-500">*</span></label>
+              <select id="car-approver" class="ces-book-input bg-white" onchange="updateVehicleApproverNoteV55()">
+                <option value="">— Select Approver —</option>
+              </select>
+              <p id="car-approver-signature-note" class="text-[10px] text-slate-500 mt-1"><i class="fas fa-envelope mr-1"></i>Select the approver who will receive the Confirm / Reject alert.</p>
+            </div>
+            <div class="ces-car-cc-panel-v260">
+              <span class="ces-car-cc-label-v260"><i class="fas fa-copy"></i> Always CC</span>
+              <span class="ces-car-cc-chip-v260">SIRIPAK CHATTANUPAKORN</span>
+              <span class="ces-car-cc-chip-v260">THIPPAYAWAREE KHOWONG</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="ces-car-attachment-grid-v243">
+          <div><label class="ces-form-label">MEMO / Work Order <span class="text-red-500">*</span></label><input id="car-memo-file" type="file" accept=".pdf,.doc,.docx,.jpg,.jpeg,.png" class="ces-book-input bg-white"><p class="text-[10px] text-slate-400 mt-1">PDF / Word / image, maximum 10 MB</p></div>
+          <div><label class="ces-form-label">Attachment Link</label><input id="car-attachment-link" type="url" class="ces-book-input" placeholder="Optional Drive / SharePoint link"></div>
+        </div>
+        <button id="car-submit-request-v243" class="w-full py-3.5 rounded-xl bg-[#003DA5] text-white font-black text-sm shadow-sm hover:bg-blue-800" onclick="submitVehicleRequestV31('CAR')"><i class="fas fa-paper-plane mr-2"></i>Submit Request</button>
+      </div>
+
+      <div id="car-return-panel" class="space-y-4 hidden ces-car-return-v243">
+        <div class="rounded-2xl border border-blue-100 bg-blue-50/40 p-4"><div class="text-sm font-black text-[#003DA5]">Return vehicle / close job</div><div class="text-[11px] text-slate-500 mt-1">เลือกงานที่ Confirmed แล้วกรอกระยะทางจริง ค่าไฟ และแนบหลักฐาน ระบบจะแสดง Loading จนบันทึกเสร็จ</div></div>
+        <div><label class="ces-form-label">Select Job <span class="text-red-500">*</span></label><select id="car-return-booking" class="ces-book-input" onchange="applyVehicleReturnJobV31('CAR')"><option value="">— Select active booking —</option></select></div>
+        <div class="rounded-2xl border border-slate-200 bg-slate-50 p-4 text-xs" id="car-return-detail">Select a booking to view details.</div>
+        <div class="ces-car-return-grid-v243">
+          <div><label class="ces-form-label">Return Date</label><input id="car-return-date" type="date" class="ces-book-input"></div>
+          <div><label class="ces-form-label">Return Time</label><input id="car-return-time" type="time" class="ces-book-input"></div>
+          <div><label class="ces-form-label">Actual Total (km) <span class="text-red-500">*</span></label><input id="car-return-km" type="number" min="0" step="0.1" class="ces-book-input"></div>
+          <div><label class="ces-form-label">Electric Bill (THB) <span class="text-red-500">*</span></label><input id="car-electric-bill" type="number" min="0" step="0.01" class="ces-book-input"></div>
+        </div>
+        <div class="ces-car-attachment-grid-v243">
+          <div class="ces-upload-box-v262"><label class="ces-form-label">Bill / Receipt <span class="text-red-500">*</span> <span class="ces-multi-badge-v262">Multiple</span></label><input id="car-return-bill-file" type="file" multiple accept=".pdf,.jpg,.jpeg,.png,.heic,.webp" class="ces-book-input bg-white ces-multi-file-v262"><p class="text-[10px] text-slate-400 mt-1">แนบได้หลายไฟล์ · PDF / รูปภาพ · maximum 8 MB each</p></div>
+          <div class="ces-upload-box-v262"><label class="ces-form-label">Car Return Pictures <span class="text-red-500">*</span> <span class="ces-multi-badge-v262">Multiple</span></label><input id="car-return-car-photos" type="file" multiple accept=".jpg,.jpeg,.png,.heic,.webp" class="ces-book-input bg-white ces-multi-file-v262"><p class="text-[10px] text-slate-400 mt-1">แนบได้หลายรูป · maximum 10 MB each</p></div>
+        </div>
+        <div class="ces-car-detail-grid-v243">
+          <div><label class="ces-form-label">Return Note</label><textarea id="car-return-note" rows="2" class="ces-book-input" placeholder="Optional note"></textarea></div>
+          <div><label class="ces-form-label">Returned By</label><input id="car-returned-by" class="ces-book-input bg-slate-50" readonly placeholder="Original requester"><p class="text-[10px] text-slate-400 mt-1">Auto-filled from original requester · Return approval is not required.</p></div>
+        </div>
+        <button id="car-submit-return-v243" class="w-full py-3.5 rounded-xl bg-[#003DA5] text-white font-black text-sm shadow-sm hover:bg-blue-800" onclick="submitVehicleReturnV31('CAR')"><i class="fas fa-check-circle mr-2"></i>Confirm Return</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="car-workspace-evaluation-panel" class="hidden space-y-5">
+    <div class="vehicle-summary-filter-bar bg-white rounded-2xl border border-slate-100 shadow-sm p-3 flex flex-wrap items-end gap-3">
+      <div><label class="ces-form-label">Evaluation Year</label><select id="car-evaluation-year-filter" onchange="renderCarEvaluationWorkspaceV222()" class="ces-book-input min-w-[130px]"><option value="All">All Years</option></select></div>
+      <div><label class="ces-form-label">Evaluation Month</label><select id="car-evaluation-month-filter" onchange="renderCarEvaluationWorkspaceV222()" class="ces-book-input min-w-[140px]"><option value="All">All Months</option><option value="01">Jan</option><option value="02">Feb</option><option value="03">Mar</option><option value="04">Apr</option><option value="05">May</option><option value="06">Jun</option><option value="07">Jul</option><option value="08">Aug</option><option value="09">Sep</option><option value="10">Oct</option><option value="11">Nov</option><option value="12">Dec</option></select></div>
+      <div><label class="ces-form-label">Evaluation Team</label><select id="car-evaluation-team-filter" onchange="renderCarEvaluationWorkspaceV222()" class="ces-book-input min-w-[130px]"><option value="All">All Teams</option><option value="LAB">LAB</option><option value="MED">MED</option><option value="EHS">EHS</option><option value="ENV">ENV</option><option value="TES">TES</option><option value="MNG">MNG</option></select></div>
+      <div id="car-evaluation-filter-note" class="text-[10px] font-bold text-slate-400 pb-2">All evaluation records</div>
+    </div>
+
+    <div class="ces-car-evaluation-panel-v22 bg-white rounded-3xl border border-slate-100 shadow-sm p-5">
+      <div class="flex flex-col md:flex-row md:items-center justify-between gap-3 mb-4">
+        <div><h3 class="font-black text-slate-800"><i class="fas fa-star-half-stroke text-amber-500 mr-2"></i>Post-use Evaluation Summary</h3><p class="text-xs text-slate-400 mt-1">สรุปแบบประเมินหลังใช้งานรถตาม Year / Month / Team · คะแนนเต็ม 5</p></div>
+        <div id="car-evaluation-response-count-v22" class="ces-eval-response-pill-v22">0 evaluations</div>
+      </div>
+      <div class="ces-car-evaluation-grid-v22">
+        <div class="ces-eval-score-card-v22"><span>Vehicle Performance</span><strong id="car-eval-performance-v22">-</strong><small>/ 5</small></div>
+        <div class="ces-eval-score-card-v22"><span>Comfort</span><strong id="car-eval-comfort-v22">-</strong><small>/ 5</small></div>
+        <div class="ces-eval-score-card-v22"><span>Value / Suitability</span><strong id="car-eval-value-v22">-</strong><small>/ 5</small></div>
+        <div class="ces-eval-score-card-v22 ces-eval-score-overall-v22"><span>Overall Average</span><strong id="car-eval-overall-v22">-</strong><small>/ 5</small></div>
+      </div>
+    </div>
+
+    <div class="bg-white rounded-3xl border border-slate-100 shadow-sm p-5">
+      <div class="flex items-center justify-between gap-3 mb-4"><div><h3 class="font-black text-slate-800">Evaluation Responses</h3><p class="text-xs text-slate-400 mt-1">รายละเอียดแบบประเมินหลังใช้งานรถ</p></div></div>
+      <div id="car-evaluation-list-v222" class="py-10 text-center text-slate-400">No evaluation data loaded.</div>
+    </div>
+  </div>
+</section>
