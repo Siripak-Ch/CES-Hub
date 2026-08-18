@@ -21,17 +21,61 @@
   let seq = 0;
   const inflightReads = new Map();
   let activeUserRequestsV262 = 0;
+  let activeNormalRequestsV266 = 0;
+  let activeBackgroundRequestsV266 = 0;
   let lastUserInteractionV262 = 0;
   const backgroundQueueV262 = [];
+  const normalQueueV266 = [];
+  const MAX_NORMAL_REQUESTS_V266 = 2;
+  const MAX_BACKGROUND_REQUESTS_V266 = 1;
   try{['click','submit','change'].forEach(function(evt){document.addEventListener(evt,function(){lastUserInteractionV262=Date.now();},true);});}catch(ignore){}
-  function flushBackgroundV262_(){if(activeUserRequestsV262>0)return;while(backgroundQueueV262.length){const job=backgroundQueueV262.shift();try{job();}catch(e){}}}
-  function scheduleRequestV262_(factory, options, writeLike){
-    const recentUserAction=(Date.now()-lastUserInteractionV262)<1200;
-    const priority=(options&&options.priority)||((writeLike||options&&options.userAction||recentUserAction)?'user':(options&&options.background?'background':'normal'));
-    if(priority==='background'&&activeUserRequestsV262>0){return new Promise((resolve,reject)=>backgroundQueueV262.push(()=>Promise.resolve().then(factory).then(resolve,reject)));}
-    if(priority==='user'){activeUserRequestsV262++;return Promise.resolve().then(factory).finally(()=>{activeUserRequestsV262=Math.max(0,activeUserRequestsV262-1);flushBackgroundV262_();});}
-    return Promise.resolve().then(factory);
+
+  function startNormalV266_(job){
+    activeNormalRequestsV266 += 1;
+    Promise.resolve().then(job.factory).then(job.resolve,job.reject).finally(function(){
+      activeNormalRequestsV266=Math.max(0,activeNormalRequestsV266-1);
+      flushBackgroundV262_();
+    });
   }
+  function startBackgroundV266_(job){
+    activeBackgroundRequestsV266 += 1;
+    Promise.resolve().then(job.factory).then(job.resolve,job.reject).finally(function(){
+      activeBackgroundRequestsV266=Math.max(0,activeBackgroundRequestsV266-1);
+      flushBackgroundV262_();
+    });
+  }
+  function flushBackgroundV262_(){
+    // A click/save/import on the active page always gets the next free slot.
+    if(activeUserRequestsV262>0)return;
+    while(normalQueueV266.length && activeNormalRequestsV266<MAX_NORMAL_REQUESTS_V266){
+      startNormalV266_(normalQueueV266.shift());
+    }
+    // Background work is deliberately single-flight. This prevents a page from
+    // launching 10–20 simultaneous sheet reads while the user is trying to act.
+    if(activeNormalRequestsV266===0 && activeBackgroundRequestsV266<MAX_BACKGROUND_REQUESTS_V266 && backgroundQueueV262.length){
+      startBackgroundV266_(backgroundQueueV262.shift());
+    }
+  }
+  function queuedPromiseV266_(queue,factory){
+    return new Promise(function(resolve,reject){queue.push({factory:factory,resolve:resolve,reject:reject});flushBackgroundV262_();});
+  }
+  function scheduleRequestV262_(factory, options, writeLike){
+    options=options||{};
+    const recentUserAction=(Date.now()-lastUserInteractionV262)<1200;
+    const priority=options.priority||((writeLike||options.userAction||recentUserAction)?'user':(options.background?'background':'normal'));
+    if(priority==='user'){
+      activeUserRequestsV262++;
+      return Promise.resolve().then(factory).finally(function(){activeUserRequestsV262=Math.max(0,activeUserRequestsV262-1);flushBackgroundV262_();});
+    }
+    if(priority==='background')return queuedPromiseV266_(backgroundQueueV262,factory);
+    if(activeUserRequestsV262>0 || activeNormalRequestsV266>=MAX_NORMAL_REQUESTS_V266)return queuedPromiseV266_(normalQueueV266,factory);
+    activeNormalRequestsV266++;
+    return Promise.resolve().then(factory).finally(function(){activeNormalRequestsV266=Math.max(0,activeNormalRequestsV266-1);flushBackgroundV262_();});
+  }
+  window.CES_TASK_PRIORITY_V266={
+    stats:function(){return{user:activeUserRequestsV262,normal:activeNormalRequestsV266,background:activeBackgroundRequestsV266,normalQueued:normalQueueV266.length,backgroundQueued:backgroundQueueV262.length};},
+    version:'V26.6'
+  };
   let writeLoadingCount = 0;
   let writeLoadingTimer = null;
   let loadingShowDelayTimer = null;
@@ -381,10 +425,15 @@
       : '';
     if (key && inflightReads.has(key)) return inflightReads.get(key);
 
-    const loadingTicket = beginWriteLoading(fnName, Object.assign({}, options, { loadingLabel:(options&&options.loadingLabel)||(writeLike?undefined:'Loading data…') }));
-    const requestFactory = function(){ return transport === 'iframe' ? iframePostCall(fnName, args, options) : jsonpCall(fnName, args, options); };
+    // V26.6: queued background/normal calls do not inflate the header "Syncing N requests" count.
+    // Loading begins only when the request actually gets a scheduler slot.
+    const requestFactory = function(){
+      const loadingTicket = beginWriteLoading(fnName, Object.assign({}, options, { loadingLabel:(options&&options.loadingLabel)||(writeLike?undefined:'Loading data…') }));
+      const actual = transport === 'iframe' ? iframePostCall(fnName, args, options) : jsonpCall(fnName, args, options);
+      return Promise.resolve(actual).finally(function(){ endWriteLoading(loadingTicket); });
+    };
     const request = scheduleRequestV262_(requestFactory, options, writeLike);
-    const wrapped = Promise.resolve(request).finally(function () { endWriteLoading(loadingTicket); });
+    const wrapped = Promise.resolve(request);
     if (!key) return wrapped;
 
     const tracked = wrapped.finally(function () { inflightReads.delete(key); });

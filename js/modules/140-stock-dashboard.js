@@ -561,6 +561,8 @@ function sd_showLocationDetail(location){
       <td>${i+1}</td>
       <td><b>${spEsc(d.idCode||d.id_code||'-')}</b></td>
       <td>${spEsc(d.sn||d.serialNumber||'-')}</td>
+      <td>${spEsc(d.acPlugSn||d.ac_plug_sn||'-')}</td>
+      <td>${spEsc(d.clampSn||d.clamp_sn||'-')}</td>
       <td><b>${spEsc(d.brand||'-')}</b><br><small>${spEsc(d.model||d.itemName||'-')}</small></td>
       <td>${spEsc(d.borrower||'-')}</td>
       <td>${mail?`<a href="mailto:${spEsc(mail)}">${spEsc(mail)}</a>`:'-'}</td>
@@ -582,7 +584,7 @@ function sd_showLocationDetail(location){
       <div><span>Borrower Email / Contract Contact</span><div class="ces-v255-rental-email-edit"><input id="sd-v245-borrower-email" type="email" value="${spEsc(borrowerEmail)}"><button class="sp-btn" onclick='sd_saveRentalEmailV245(${JSON.stringify(location)})'>Save Email</button></div></div>
     </div>
     <div class="ces-v255-rental-detail-table-wrap">
-      <table class="ces-v255-rental-detail-table"><thead><tr><th>#</th><th>ID Code</th><th>SN</th><th>Brand / Model</th><th>Borrower</th><th>Borrower Email</th><th>Borrow Date</th><th>Due Date</th><th>Status</th><th>Action Required</th></tr></thead><tbody>${tableRows}</tbody></table>
+      <table class="ces-v255-rental-detail-table"><thead><tr><th>#</th><th>ID Code</th><th>SN</th><th>AC Plug SN</th><th>Clamp SN</th><th>Brand / Model</th><th>Borrower</th><th>Borrower Email</th><th>Borrow Date</th><th>Due Date</th><th>Status</th><th>Action Required</th></tr></thead><tbody>${tableRows}</tbody></table>
     </div>`;
   Swal.fire({title:'Rental Contract Detail',width:'min(1460px,98vw)',html,confirmButtonText:'Close',customClass:{popup:'ces-v255-rental-detail-popup'}});
 }
@@ -624,9 +626,13 @@ function sd_primeRentalWorkflowV263_(){
   return false;
 }
 function sd_readyStockBenchmarkDataV263_(){
-  // Prefer the counts produced by the final Stock runtime that renders the
-  // visible "พร้อมส่ง" numbers. This keeps the yellow benchmark bell 1:1
-  // with the model cards on screen.
+  // V26.6: read the exact counts attached to the visible Model Cards first.
+  // This guarantees Ready Stock Benchmark = the "พร้อมส่ง" number users see.
+  const visible=[...document.querySelectorAll('#sdModelCards .sp-model-card[data-ready-stock]')].map(el=>({
+    brand:el.getAttribute('data-brand')||'',model:el.getAttribute('data-model')||'',
+    readyStock:Number(el.getAttribute('data-ready-stock')||0)
+  }));
+  if(visible.length)return visible.map(x=>{const minimum=10,ready=Number(x.readyStock||0);return{brand:x.brand,model:x.model,readyStock:ready,minimum,gap:Math.max(0,minimum-ready),low:ready<minimum};});
   const live=Array.isArray(window.CES_READY_STOCK_MODEL_COUNTS_V264)?window.CES_READY_STOCK_MODEL_COUNTS_V264:[];
   if(live.length)return live.map(x=>{const ready=Number(x.readyStock||0),minimum=10;return{brand:x.brand||'',model:x.model||'',readyStock:ready,minimum,gap:Math.max(0,minimum-ready),low:ready<minimum};});
   const rows=typeof sd_v11FilteredDevices==='function'?sd_v11FilteredDevices():[];
@@ -646,6 +652,16 @@ function sd_openReadyStockBenchmarkV263(){
 }
 window.sd_openReadyStockBenchmarkV263=sd_openReadyStockBenchmarkV263;
 window.sd_updateReadyStockBenchmarkV263=sd_updateReadyStockBenchmarkV263;
+
+async function sd_testRentalNotificationV266(){
+  try{
+    const r=await window.CES_API.callFunction('sd_sendRentalNotificationTestV266',[],{transport:'iframe',timeoutMs:90000,priority:'user',userAction:true,loadingLabel:'Sending rental test mail…'});
+    if(!r||r.success===false)throw new Error((r&&r.message)||'Rental test mail failed.');
+    const sent=Number(r.sent||r.emailsSent||((r.test&&r.to)?1:0));const recipient=r.recipient||r.to||'';
+    Swal.fire({icon:'success',title:'Rental Test Mail',html:`Test complete.<br><b>${sent}</b> email(s) sent.${recipient?`<br>${spEsc(recipient)}`:''}`});
+  }catch(e){Swal.fire({icon:'error',title:'Rental Test Mail',text:e.message||String(e)});}
+}
+window.sd_testRentalNotificationV266=sd_testRentalNotificationV266;
 function sd_v262Summary_(cards){cards=cards||[];const open=cards.filter(x=>String(x.workflowStatus||'').toUpperCase()!=='COMPLETED').length;return{total:cards.length,open:open,completed:cards.length-open,followupSent:cards.filter(x=>String(x.workflowStatus||'').toUpperCase()==='FOLLOW_UP_SENT').length,waitingReturn:cards.filter(x=>String(x.workflowStatus||'').toUpperCase()==='WAITING_RETURN').length,waitingRenewal:cards.filter(x=>String(x.workflowStatus||'').toUpperCase()==='WAITING_RENEWAL').length};}
 function sd_v262IndexDevices_(){const map={};((SD_DASH.raw&&SD_DASH.raw.devices)||[]).forEach(d=>{const due=sd_v260IsoDate_(d.expectedReturn||d.expectedReturnDate||d.dueDate||''),k=[String(d.location||''),String(d.borrower||''),due].join('||');(map[k]||(map[k]=[])).push(d);});return map;}
 function sd_rentalDueLabelV260_(days){
@@ -686,13 +702,13 @@ function sd_openRentalWorkflowDetailV260(index){
   const targetDue=sd_v260IsoDate_(c.dueDate),targetLocation=String(c.location||''),targetBorrower=String(c.borrower||'');
   const deviceKey=[targetLocation,targetBorrower,targetDue].join('||');
   const devices=((SD_RENTAL_WORKFLOW_V260.deviceIndex||{})[deviceKey]||[]).slice();
-  const rows=devices.map((d,i)=>`<tr><td>${i+1}</td><td><b>${spEsc(d.idCode||d.id_code||'-')}</b></td><td>${spEsc(d.sn||d.serialNumber||'-')}</td><td>${spEsc(d.brand||'-')}<span class="sp-sub">${spEsc(d.model||d.itemName||'-')}</span></td><td>${spEsc(d.status||'-')}</td><td>${spEsc(d.actionRequired||d.action_required||'-')}</td></tr>`).join('');
+  const rows=devices.map((d,i)=>`<tr><td>${i+1}</td><td><b>${spEsc(d.idCode||d.id_code||'-')}</b></td><td>${spEsc(d.sn||d.serialNumber||'-')}</td><td>${spEsc(d.acPlugSn||d.ac_plug_sn||'-')}</td><td>${spEsc(d.clampSn||d.clamp_sn||'-')}</td><td>${spEsc(d.brand||'-')}<span class="sp-sub">${spEsc(d.model||d.itemName||'-')}</span></td><td>${spEsc(d.status||'-')}</td><td>${spEsc(d.actionRequired||d.action_required||'-')}</td></tr>`).join('');
   const status=String(c.workflowStatus||'OPEN').toUpperCase(),canComplete=status!=='COMPLETED';
   const html=`<div class="ces-rental-v260-detail">
     <div class="ces-rental-v260-detail-grid"><div><small>LOCATION</small><b>${spEsc(c.location||'-')}</b></div><div><small>BORROWER</small><b>${spEsc(c.borrower||'-')}</b></div><div><small>BORROWER EMAIL</small><b>${c.borrowerEmail?`<a href="mailto:${spEsc(c.borrowerEmail)}">${spEsc(c.borrowerEmail)}</a>`:'-'}</b></div><div><small>DUE DATE</small><b>${spEsc(c.dueDate||'-')}</b></div><div><small>ITEMS</small><b>${spNum(c.itemCount||devices.length||0)}</b></div><div><small>STATUS</small><b>${spEsc(status.replaceAll('_',' '))}</b></div><div><small>BORROWER ACTION</small><b>${spEsc(sd_rentalActionLabelV248_(c.borrowerAction))}</b></div><div><small>LAST EMAIL</small><b>${spEsc(c.lastEmailType||'Not sent')} ${c.lastEmailAt?'· '+spEsc(c.lastEmailAt):''}</b></div></div>
     ${c.newRenewalDate||c.renewalName||c.renewalEmail?`<div class="ces-renewal-summary-v262"><div><small>RENEWAL REQUESTED</small><b>${spEsc(c.renewalRequestedAt||'-')}</b></div><div><small>NEW RENEWAL DATE</small><b>${spEsc(c.newRenewalDate||'-')}</b></div><div><small>CONTACT NAME</small><b>${spEsc(c.renewalName||'-')}</b></div><div><small>EMAIL</small><b>${spEsc(c.renewalEmail||'-')}</b></div></div>`:''}
     ${c.lastError?`<div class="ces-rental-v260-error">${spEsc(c.lastError)}</div>`:''}
-    <div class="sp-table-wrap ces-rental-v260-device-wrap"><table class="sp-table"><thead><tr><th>#</th><th>ID Code</th><th>SN</th><th>Brand / Model</th><th>Status</th><th>Action Required</th></tr></thead><tbody>${rows||'<tr><td colspan="6" class="sp-muted">No item-level rows matched this contract key.</td></tr>'}</tbody></table></div>
+    <div class="sp-table-wrap ces-rental-v260-device-wrap"><table class="sp-table"><thead><tr><th>#</th><th>ID Code</th><th>SN</th><th>AC Plug SN</th><th>Clamp SN</th><th>Brand / Model</th><th>Status</th><th>Action Required</th></tr></thead><tbody>${rows||'<tr><td colspan="8" class="sp-muted">No item-level rows matched this contract key.</td></tr>'}</tbody></table></div>
     <div class="ces-rental-v260-detail-actions">${canComplete?`<button class="sp-btn primary" onclick="sd_updateRentalWorkflowV248('${encodeURIComponent(c.contractKey||'')}','FOLLOW_UP_SENT',true)"><i class="fas fa-paper-plane"></i> Send Follow-up</button><button class="sp-btn warn" onclick="sd_updateRentalWorkflowV248('${encodeURIComponent(c.contractKey||'')}','WAITING_RETURN',true)"><i class="fas fa-rotate-left"></i> Return</button><button class="sp-btn success" onclick="sd_updateRentalWorkflowV248('${encodeURIComponent(c.contractKey||'')}','WAITING_RENEWAL',true)"><i class="fas fa-calendar-plus"></i> Renewal</button><button class="sp-btn dark" onclick="sd_updateRentalWorkflowV248('${encodeURIComponent(c.contractKey||'')}','COMPLETED',true)"><i class="fas fa-check"></i> Complete</button>`:'<span class="sp-chip ok"><i class="fas fa-check"></i> Closed</span>'}<a class="sp-btn ghost" href="${SD_RENTAL_SOURCE_V248}" target="_blank" rel="noopener"><i class="fas fa-link"></i> Source</a></div>
   </div>`;
   Swal.fire({title:'Rental Contract Follow-up Detail',width:'min(1220px,97vw)',html,confirmButtonText:'Close',animation:false,customClass:{popup:'ces-rental-v260-detail-popup'}});

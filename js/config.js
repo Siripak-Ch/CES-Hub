@@ -6,7 +6,7 @@
 
 window.CES_CONFIG = {
   // IMPORTANT: After deploying Apps Script backend, paste the latest /exec URL here.
-  GAS_API_URL: 'https://script.google.com/macros/s/AKfycbzA9RFAL6c0MVXyf1WYbPXkdWp8QLiBwU5gXYGSJVHUPDW8OkdAr_N0Md7AovWQnhLorA/exec',
+  GAS_API_URL: 'https://script.google.com/macros/s/AKfycbxjYTqrDSjowV5Qd7Cd7kzsN6lWzzJ1AYgjPQis4nBxxv6S7W4T_BJHwLPndVQwOsW1EQ/exec',
 
   CSI_SURVEY_URL: 'https://survey.nhealth-asia.com/s/cm1hci0mw00jf45vmps2myg1g',
 
@@ -24,7 +24,7 @@ window.CES_CONFIG = {
   },
 
   DEBUG: false,
-  RELEASE: 'CES-HUB-V26.5-LATEST-CLEAN',
+  RELEASE: 'CES-HUB-V26.6-PERFORMANCE-SYNC',
 
   // External links are kept in one place. Config sheet values override these defaults at runtime.
   EXTERNAL_LINKS: {

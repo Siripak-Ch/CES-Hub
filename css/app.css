@@ -3263,3 +3263,38 @@ textarea.ces-detail-input-v243{min-height:58px;resize:vertical;margin-bottom:9px
 /* CES Hub V26.4 — larger non-blocking Memo/Work Order ↔ CSI popup */
 .ces-service-memo-popup-v264{max-height:96vh!important;overflow:hidden!important}
 .ces-service-memo-popup-v264 .swal2-html-container{max-height:82vh!important;overflow:hidden!important;margin-left:12px!important;margin-right:12px!important}
+
+/* CES Hub V26.6 — Stock dashboard focused layout */
+#view-stock_dashboard .csv5-dashboard-filters{
+  display:grid!important;
+  grid-template-columns:repeat(3,minmax(0,1fr))!important;
+  gap:8px!important;
+}
+#view-stock_dashboard .csv5-dashboard-filters .sp-search{grid-column:auto!important}
+#view-stock_dashboard .csv5-dashboard-filters .ces-stock-filter-reset-v226{
+  width:100%!important;min-height:40px!important;background:#f8fafc!important;
+  color:#64748b!important;border:1px solid #cbd5e1!important;box-shadow:none!important;
+}
+#view-stock_dashboard .ces-ready-stock-alert-v263{
+  background:#fef3c7!important;color:#a16207!important;border:1px solid #fbbf24!important;
+  box-shadow:0 0 0 2px rgba(245,158,11,.08)!important;
+}
+#view-stock_dashboard .ces-ready-stock-alert-v263:hover{background:#fde68a!important;color:#92400e!important}
+@media(max-width:900px){
+  #view-stock_dashboard .csv5-dashboard-filters{grid-template-columns:repeat(2,minmax(0,1fr))!important}
+}
+@media(max-width:560px){
+  #view-stock_dashboard .csv5-dashboard-filters{grid-template-columns:1fr!important}
+}
+
+/* CES Hub V26.6 — Service CSI tabs / inline Memo Mapping */
+#view-service .ces-service-tabs-v266{display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:5px;background:#eef3f8;border:1px solid #dde6f0;border-radius:16px}
+#view-service .ces-service-tabs-v266 button{min-height:42px;border:0;border-radius:12px;background:transparent;color:#64748b;font:800 12px 'Prompt',sans-serif;display:flex;align-items:center;justify-content:center;gap:7px;cursor:pointer}
+#view-service .ces-service-tabs-v266 button.active{background:#fff;color:#003da5;box-shadow:0 2px 8px rgba(15,23,42,.06)}
+#serviceMemoPanelV266 .ces-service-memo-inline-v266{min-height:420px}
+#serviceMemoPanelV266 .max-h-\[72vh\]{max-height:68vh!important}
+@media(max-width:640px){#view-service .ces-service-tabs-v266{grid-template-columns:1fr 1fr}#view-service .ces-service-tabs-v266 button{font-size:10px}}
+
+/* V26.6 — Serialized infusion-pump rental accessories */
+#view-inventory .ces-rental-accessory-row-v266{background:#f0fdfa!important;border-color:#99f6e4!important}
+#view-inventory .ces-rental-accessory-row-v266 .acc-title{color:#0f766e!important}

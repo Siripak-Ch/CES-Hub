@@ -502,23 +502,21 @@ function si_v17AccRow(a,i){
   const id=a.accessoryId||a.accessory_id||a.idCode||a.id_code||a.itemName||a.name||('ACC'+i);
   const name=a.itemName||a.item_name||a.name||'-';
   const team=String(a.team||'-').toUpperCase();
-  const qty=Number(a.stockQty||a.stock_qty||a.qty||0), min=Number(a.minStockQty||a.min_stock_qty||a.minStock||0);
-  const low=qty<=min, inputId=`siAccQty_${i}`;
+  const serial=String(a.serialNumber||a.serial_number||'').trim();
+  const rental=!!a.rentalAccessory;
+  const qty=rental?1:Number(a.stockQty||a.stock_qty||a.qty||0), min=rental?0:Number(a.minStockQty||a.min_stock_qty||a.minStock||0);
+  const low=!rental&&qty<=min, inputId=`siAccQty_${i}`;
   const teamCls=team.includes('MED')?'med':team.includes('LAB')?'lab':team.includes('EHS')?'ehs':team.includes('TES')?'tes':'';
-  return `<div class="sp-acc-row-v17 ${low?'low':''}">
+  const sub=[team,id,serial?('SN '+serial):''].filter(Boolean).map(spEsc).join(' • ');
+  return `<div class="sp-acc-row-v17 ${low?'low':''} ${rental?'ces-rental-accessory-row-v266':''}">
     <div class="acc-ico ${teamCls}"><i class="fas ${(typeof si_v16AccIcon==='function')?si_v16AccIcon(a):'fa-plug'}"></i></div>
-    <div><div class="acc-title">${spEsc(name)}</div><div class="acc-sub">${spEsc(team)} • ${spEsc(id)}</div></div>
-    <div><div class="acc-stock" style="color:${low?'#dc2626':'#059669'}">${spNum(qty)}</div><div class="acc-sub">Stock qty</div></div>
-    <div><b>${spNum(min)}</b><div class="acc-sub">Min stock</div></div>
-    <div>${low?'<span class="sp-badge Overdue">LOW STOCK</span>':spBadge(a.status||'STOCK')}</div>
+    <div><div class="acc-title">${spEsc(name)}</div><div class="acc-sub">${sub}</div>${rental?'<div class="acc-sub" style="color:#0f766e;font-weight:800">Assigned with '+spEsc(a.equipmentId||'-')+' · '+spEsc(a.borrower||'-')+'</div>':''}</div>
+    <div><div class="acc-stock" style="color:${low?'#dc2626':(rental?'#0f766e':'#059669')}">${spNum(qty)}</div><div class="acc-sub">${rental?'Assigned qty':'Stock qty'}</div></div>
+    <div><b>${rental?'—':spNum(min)}</b><div class="acc-sub">${rental?'Rental item':'Min stock'}</div></div>
+    <div>${rental?'<span class="sp-badge In-Use">IN USE</span>':(low?'<span class="sp-badge Overdue">LOW STOCK</span>':spBadge(a.status||'STOCK'))}</div>
     <div class="acc-sub">${spEsc(a.actionRequired||a.action_required||'No action')}</div>
     <div class="acc-actions">
-      <button class="acc-mini" onclick="si_v16Qty('${inputId}',-1)">−</button>
-      <input id="${inputId}" type="number" min="1" step="1" value="1">
-      <button class="acc-mini" onclick="si_v16Qty('${inputId}',1)">+</button>
-      <button class="acc-mini green" ${low?'disabled':''} title="Add to cart" onclick='si_addAccessoryToCart(${si_json(a)},"${inputId}")'><i class="fas fa-cart-plus"></i></button>
-      <button class="acc-mini orange" title="Restock" onclick='si_restockPrompt(${si_json(a)})'><i class="fas fa-box-open"></i></button>
-      <button class="acc-mini blue" title="Min stock" onclick='si_editMinStockPrompt(${si_json(a)})'><i class="fas fa-sliders"></i></button>
+      ${rental?'<span class="sp-muted" style="font-size:10px">Synced from rental</span>':`<button class="acc-mini" onclick="si_v16Qty('${inputId}',-1)">−</button><input id="${inputId}" type="number" min="1" step="1" value="1"><button class="acc-mini" onclick="si_v16Qty('${inputId}',1)">+</button><button class="acc-mini green" ${low?'disabled':''} title="Add to cart" onclick='si_addAccessoryToCart(${si_json(a)},"${inputId}")'><i class="fas fa-cart-plus"></i></button><button class="acc-mini orange" title="Restock" onclick='si_restockPrompt(${si_json(a)})'><i class="fas fa-box-open"></i></button><button class="acc-mini blue" title="Min stock" onclick='si_editMinStockPrompt(${si_json(a)})'><i class="fas fa-sliders"></i></button>`}
     </div>
   </div>`;
 }

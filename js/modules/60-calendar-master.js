@@ -824,7 +824,7 @@
     function medIsoV53_(date){return `${date.getFullYear()}-${String(date.getMonth()+1).padStart(2,'0')}-${String(date.getDate()).padStart(2,'0')}`;}
     function medWeekRangeV53_(month,week){const startDay=[1,1,8,15,22,29][week]||1;const last=new Date(2026,month,0).getDate();if(startDay>last)return null;const endDay=week<5?Math.min(last,startDay+7):last+1;return{start:new Date(2026,month-1,startDay),end:week<5?new Date(2026,month-1,endDay):new Date(2026,month,1)};}
     function parseMedWorkbookV53_(workbook){
-      const sheet=workbook.Sheets['Master Plan']||workbook.Sheets['Calendar Upload']||workbook.Sheets[workbook.SheetNames[0]];if(!sheet)return[];
+      const preferredName=workbook.Sheets['MED Fast Import']?'MED Fast Import':(workbook.Sheets['Master Plan']?'Master Plan':(workbook.Sheets['Calendar Upload']?'Calendar Upload':workbook.SheetNames[0]));const sheet=workbook.Sheets[preferredName];if(!sheet)return[];
       const rows=XLSX.utils.sheet_to_json(sheet,{header:1,defval:'',raw:true});
       const clean=v=>String(v==null?'':v).replace(/\s+/g,' ').trim();
       const normalized=v=>clean(v).toLowerCase();
@@ -850,7 +850,7 @@
         else {const d=new Date(endKey+'T00:00:00');if(!isNaN(d.getTime())){d.setDate(d.getDate()+1);endKey=medIsoV53_(d);}}
         const qty=Number(at('engineerQty')||0)||0,detail=clean(at('engineerDetail'));
         const engineer=detail||(qty?qty+' engineer'+(qty===1?'':'s'):'');
-        const item={startDate:startKey,endDate:endKey,title,customer:title,location:title,teamGroup:clean(at('team')),engineer,month:clean(at('month'))||String(month),weekLabel:'Week '+week,sourceSheet:'Master Plan',sourceRow:i+1,note:clean(at('note')),status:clean(at('status')),calendarSubject:clean(at('subject')),calendarDescription:clean(at('description'))};
+        const item={startDate:startKey,endDate:endKey,title,customer:title,location:title,teamGroup:clean(at('team')),engineer,month:clean(at('month'))||String(month),weekLabel:'Week '+week,sourceSheet:preferredName||'Master Plan',sourceRow:i+1,note:clean(at('note')),status:clean(at('status')),calendarSubject:clean(at('subject')),calendarDescription:clean(at('description'))};
         const previous=out[out.length-1];
         if(previous&&previous.title===item.title&&previous.teamGroup===item.teamGroup&&previous.engineer===item.engineer&&previous.endDate===item.startDate){previous.endDate=item.endDate;previous.weekLabel+='–'+week;continue;}
         out.push(item);
@@ -865,10 +865,10 @@
         const workbook=XLSX.read(await file.arrayBuffer(),{type:'array',cellDates:true}),rows=parseMedWorkbookV53_(workbook);Swal.close();
         if(!rows.length)throw new Error('No MED weekly plan rows were found.');
         const sample=rows.slice(0,10).map(r=>`<tr><td class="p-2">${calendarEscV37_(r.startDate)} → ${calendarEscV37_(r.endDate)}</td><td class="p-2">${calendarEscV37_(r.teamGroup)}</td><td class="p-2">${calendarEscV37_(r.title)}</td><td class="p-2">${calendarEscV37_(r.engineer||'-')}</td></tr>`).join('');
-        const answer=await Swal.fire({title:'Import MED Monthly Work Plan Jul–Oct 2026?',html:`<div class="text-left text-xs"><div class="mb-3"><b>${rows.length}</b> MED work-plan blocks found in <b>${calendarEscV37_(file.name)}</b>.</div><div class="max-h-72 overflow-auto border rounded-xl"><table class="w-full"><thead class="bg-slate-50"><tr><th class="p-2">Date range</th><th class="p-2">Team</th><th class="p-2">Work plan</th><th class="p-2">Engineer</th></tr></thead><tbody>${sample}</tbody></table></div><p class="mt-3 text-slate-500">Only Monday–Friday are added. Re-import deletes only CES-imported MED events, then recreates weekday events from this workbook. Manual MED Calendar events remain unchanged.</p></div>`,icon:'question',showCancelButton:true,confirmButtonText:'Import to MED Calendar',confirmButtonColor:'#004aad',width:820});
+        const answer=await Swal.fire({title:'Import MED Monthly Work Plan Jul–Oct 2026?',html:`<div class="text-left text-xs"><div class="mb-3"><b>${rows.length}</b> MED work-plan blocks found in <b>${calendarEscV37_(file.name)}</b>.</div><div class="max-h-72 overflow-auto border rounded-xl"><table class="w-full"><thead class="bg-slate-50"><tr><th class="p-2">Date range</th><th class="p-2">Team</th><th class="p-2">Work plan</th><th class="p-2">Engineer</th></tr></thead><tbody>${sample}</tbody></table></div><p class="mt-3 text-slate-500">Only Monday–Friday are added. V26.6 creates compact weekday date-ranges and updates only changed CES-imported MED events. Existing matching imports and manual MED Calendar events are kept.</p></div>`,icon:'question',showCancelButton:true,confirmButtonText:'Import to MED Calendar',confirmButtonColor:'#004aad',width:820});
         if(!answer.isConfirmed)return;
-        Swal.fire({title:'Importing MED calendar…',html:'Replacing previous CES-imported MED work-plan events with Monday–Friday events and refreshing the dashboard.',allowOutsideClick:false,showConfirmButton:false,didOpen:()=>Swal.showLoading()});
-        const result=await window.CES_API.callFunction('importMedMonthlyWorkPlan',[{rows,sourceFile:file.name},{calendarId:'cescalmedteam@gmail.com',syncDashboard:true,hardReplace:true}],{transport:'iframe',timeoutMs:300000});
+        Swal.fire({title:'Importing MED calendar…',html:'Syncing compact Monday–Friday work-plan blocks. Matching events are reused; only changed events are updated.',allowOutsideClick:false,showConfirmButton:false,didOpen:()=>Swal.showLoading()});
+        const result=await window.CES_API.callFunction('importMedMonthlyWorkPlan',[{rows,sourceFile:file.name},{calendarId:'cescalmedteam@gmail.com',syncDashboard:false,hardReplace:false}],{transport:'iframe',timeoutMs:180000,priority:'user',userAction:true,loadingLabel:'Importing MED calendar…'});
         if(!result||(!result.success&&Number(result.created||0)===0)){
           const details=result&&Array.isArray(result.errors)&&result.errors.length?'\n'+result.errors.join('\n'):'';
           throw new Error((result&&result.message)||'MED import failed.'+details);
@@ -877,11 +877,11 @@
         const warnings=Array.isArray(result.errors)?result.errors:[];
         if(result.partial||warnings.length){
           const warningHtml=warnings.slice(0,8).map(x=>'<li>'+calendarEscV37_(x)+'</li>').join('');
-          await Swal.fire({title:'MED Import Complete with Warnings',html:`<div class="text-left text-sm"><p><b>${result.created||0}</b> / <b>${result.validRows||rows.length}</b> events created · <b>${result.deleted||0}</b> previous CES MED imports removed.</p>${warningHtml?'<div class="mt-3 text-amber-700"><b>Warnings</b><ul class="list-disc pl-5 mt-1 space-y-1">'+warningHtml+'</ul></div>':''}</div>`,icon:'warning',confirmButtonColor:'#004aad',width:720});
+          await Swal.fire({title:'MED Import Complete with Warnings',html:`<div class="text-left text-sm"><p><b>${result.created||0}</b> compact events created · <b>${result.skippedExisting||0}</b> unchanged reused · <b>${result.deleted||0}</b> stale imports removed · <b>${result.validRows||rows.length}</b> source blocks.</p>${warningHtml?'<div class="mt-3 text-amber-700"><b>Warnings</b><ul class="list-disc pl-5 mt-1 space-y-1">'+warningHtml+'</ul></div>':''}</div>`,icon:'warning',confirmButtonColor:'#004aad',width:720});
         }else{
-          await Swal.fire('MED Import Complete',`${result.created||0} weekday events created · ${result.deleted||0} previous CES MED imports removed · ${result.validRows||rows.length} source blocks`,'success');
+          await Swal.fire('MED Import Complete',`${result.created||0} compact weekday events created · ${result.skippedExisting||0} unchanged reused · ${result.deleted||0} stale imports removed · ${result.validRows||rows.length} source blocks`,'success');
         }
-        if(typeof loadAllData==='function')loadAllData(true);
+        if(typeof cesRefreshCalendarV20_==='function')await cesRefreshCalendarV20_(); else if(typeof loadAllData==='function')loadAllData(false);
       }catch(error){
         Swal.close();
         const message=String(error&&error.message||error||'MED import failed.');
