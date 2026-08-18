@@ -29,7 +29,7 @@
     function cesLoadCoreDataOnDemand_(){
         if(CES_CORE_LOAD_PROMISE)return CES_CORE_LOAD_PROMISE;
         if(!window.CES_API||typeof window.CES_API.callFunction!=='function')return Promise.resolve(null);
-        CES_CORE_LOAD_PROMISE=window.CES_API.callFunction('getCoreReadModel',[false],{transport:'jsonp',timeoutMs:60000,dedupe:true})
+        CES_CORE_LOAD_PROMISE=window.CES_API.callFunction('getCoreReadModel',[false],{transport:'jsonp',timeoutMs:60000,dedupe:true,priority:'active',userAction:true,module:currentTab||'portal'})
           .then(function(data){if(data&&typeof data==='object'){cesApplyCoreData_(data);cesStoreCoreCache_(data);}return data;})
           .catch(function(error){console.warn('[Core lazy load]',error);return null;})
           .finally(function(){CES_CORE_LOAD_PROMISE=null;});
@@ -52,11 +52,39 @@
         return Date.now()-Number(CES_TAB_RUNTIME_V20.lastSync[tab]||0)>Number(CES_SYNC_POLICY[tab]||60000);
     }
     let CES_CALENDAR_SYNC_PROMISE = null;
-    function cesSyncCalendarRuntime_(force){
+    let CES_DEFERRED_IDLE_SCHEDULED = false;
+    let CES_CALENDAR_IDLE_SCHEDULED = false;
+    function cesRunWhenForegroundIdle_(callback, delayMs, timeoutMs){
+        var start=function(){
+            if(window.CES_TASK_PRIORITY&&typeof window.CES_TASK_PRIORITY.whenIdle==='function'){
+                window.CES_TASK_PRIORITY.whenIdle(callback,{timeout:Number(timeoutMs||5000)});
+            }else{
+                setTimeout(callback,0);
+            }
+        };
+        var delay=Number(delayMs||0);
+        setTimeout(function(){
+            if('requestIdleCallback' in window)requestIdleCallback(start,{timeout:Number(timeoutMs||5000)});
+            else start();
+        },delay);
+    }
+    function cesScheduleDeferredModules_(){
+        if(CES_DEFERRED_IDLE_SCHEDULED)return;
+        CES_DEFERRED_IDLE_SCHEDULED=true;
+        cesRunWhenForegroundIdle_(function(){
+            if(typeof window.CES_loadDeferredModules==='function')window.CES_loadDeferredModules().catch(function(error){console.warn('[CES deferred modules]',error);});
+        },3200,6500);
+    }
+    function cesScheduleCalendarBackgroundSync_(){
+        if(CES_CALENDAR_IDLE_SCHEDULED)return;
+        CES_CALENDAR_IDLE_SCHEDULED=true;
+        cesRunWhenForegroundIdle_(function(){cesSyncCalendarRuntime_(false);},4600,8000);
+    }
+    function cesSyncCalendarRuntime_(force, foreground){
         if(CES_CALENDAR_SYNC_PROMISE && !force) return CES_CALENDAR_SYNC_PROMISE;
         if(!window.CES_API||typeof window.CES_API.callFunction!=='function')return Promise.resolve(null);
         CES_CALENDAR_SYNC_PROMISE=window.CES_API.callFunction('syncCalendarToSheet',[{force:!!force}],{
-            transport:'iframe',timeoutMs:240000,dedupe:!force,priority:force?'user':'background',userAction:!!force,
+            transport:'iframe',timeoutMs:240000,dedupe:!force,priority:(force||foreground)?'active':'background',userAction:!!(force||foreground),module:'calendar',silentLoading:!(force||foreground),
             loadingLabel:force?'Synchronizing current Calendar month…':''
         }).catch(function(error){console.warn('[Calendar runtime sync]',error);return null;})
           .finally(function(){CES_CALENDAR_SYNC_PROMISE=null;});
@@ -65,16 +93,18 @@
     function cesRefreshCalendar_(force){
         if(typeof initCalendar==='function')initCalendar(globalCalData);
         if(!window.CES_API||typeof window.CES_API.callFunction!=='function')return Promise.resolve(null);
-        return cesSyncCalendarRuntime_(!!force).then(function(){
-            return window.CES_API.callFunction('getCalendarData',[true],{transport:'jsonp',timeoutMs:60000,dedupe:false,priority:'user'});
+        return cesSyncCalendarRuntime_(!!force,true).then(function(){
+            return window.CES_API.callFunction('getCalendarData',[true],{transport:'jsonp',timeoutMs:60000,dedupe:false,priority:'active',userAction:true,module:'calendar'});
         }).then(function(rows){
             if(Array.isArray(rows)){globalCalData=rows;initCalendar(globalCalData);try{var cache=JSON.parse(localStorage.getItem(CES_CORE_CACHE_KEY_V20)||'{}');if(cache.data){cache.data.calSummary=rows;cache.at=Date.now();localStorage.setItem(CES_CORE_CACHE_KEY_V20,JSON.stringify(cache));}}catch(ignore){}}
             return rows;
         }).catch(function(error){console.warn('[Calendar refresh]',error);return null;});
     }
     function cesRunTabInit_(tab){
+        var wasInitialized=!!CES_TAB_RUNTIME_V20.initialized[tab];
         if(!cesTabNeedsInit_(tab))return;
         var isLive=!!CES_LIVE_TABS_V20[tab];
+        var forceRefresh=isLive&&wasInitialized;
         CES_TAB_RUNTIME_V20.initialized[tab]=true;CES_TAB_RUNTIME_V20.lastSync[tab]=Date.now();
         if      (tab === 'portal'        && typeof initPortalDashboard === 'function') initPortalDashboard(false);
         else if (tab === 'management_overview' && typeof renderManagementOverviewDashboard === 'function') { cesLoadCoreDataOnDemand_().then(function(){renderManagementOverviewDashboard();}); }
@@ -82,8 +112,8 @@
         else if (tab === 'yearly'        && typeof renderYearlyStats === 'function') { cesLoadCoreDataOnDemand_().then(function(){renderYearlyStats(globalYearlyStats, globalConfig);}); }
         else if (tab === 'checkin'       && typeof initCheckin === 'function') initCheckin();
         else if (tab === 'revenue'       && typeof loadRevenueData === 'function') loadRevenueData();
-        else if (tab === 'car_booking'   && typeof initVehicleBooking === 'function') initVehicleBooking('CAR', isLive);
-        else if (tab === 'van_booking'   && typeof initVehicleBooking === 'function') initVehicleBooking('VAN', isLive);
+        else if (tab === 'car_booking'   && typeof initVehicleBooking === 'function') initVehicleBooking('CAR', forceRefresh);
+        else if (tab === 'van_booking'   && typeof initVehicleBooking === 'function') initVehicleBooking('VAN', forceRefresh);
         else if (tab === 'team_information' && typeof initTeamInformation === 'function') initTeamInformation();
         else if (tab === 'team_plan' && typeof window.initTeamPlan === 'function') window.initTeamPlan();
         else if (tab === 'monthly_report' && typeof window.initMonthlyReport === 'function') window.initMonthlyReport();
@@ -99,9 +129,9 @@
         else if (tab === 'weekly'        && typeof initWeekly === 'function') initWeekly();
         else if (tab === 'report_manage' && typeof initReportManage === 'function') initReportManage();
         else if (tab === 'kpi'           && typeof initKPITab === 'function') initKPITab();
-        else if (tab === 'stock_dashboard' && typeof initStockDashboardModule === 'function') initStockDashboardModule(isLive);
-        else if (tab === 'inventory'       && typeof initStockInventoryModule === 'function') initStockInventoryModule(isLive);
-        else if (tab === 'check_stock'     && typeof initStockCheckModule === 'function') initStockCheckModule(isLive);
+        else if (tab === 'stock_dashboard' && typeof initStockDashboardModule === 'function') initStockDashboardModule(forceRefresh);
+        else if (tab === 'inventory'       && typeof initStockInventoryModule === 'function') initStockInventoryModule(forceRefresh);
+        else if (tab === 'check_stock'     && typeof initStockCheckModule === 'function') initStockCheckModule(forceRefresh);
     }
 
     // ---------- LIFF / LINE Variables ----------
@@ -260,7 +290,7 @@
             lastTab:session.lastTab, module:moduleKey, action:action || 'ACTIVE',
             source:session.source, sessionId:session.sessionId
         };
-        window.CES_API.callFunction('recordUserLastUsage', [payload], {transport:'jsonp', timeoutMs:15000}).catch(function(){});
+        window.CES_API.callFunction('recordUserLastUsage', [payload], {transport:'jsonp', timeoutMs:15000,priority:'background',background:true,silentLoading:true,module:'usage'}).catch(function(){});
     }
     function cesStartUsageHeartbeat_() {
         if (cesUsageHeartbeatV50) clearInterval(cesUsageHeartbeatV50);
@@ -551,8 +581,9 @@
             if (fallback !== tab) { setTimeout(function(){ switchTab(fallback); }, 0); }
             return;
         }
+        if(window.CES_TASK_PRIORITY&&typeof window.CES_TASK_PRIORITY.setActiveTab==='function')window.CES_TASK_PRIORITY.setActiveTab(tab);
         if (!document.getElementById('view-' + tab) && typeof window.CES_loadDeferredModules === 'function') {
-            window.CES_loadDeferredModules().then(function(){ switchTab(tab); }).catch(function(error){ console.warn('[V19 lazy module]', error); });
+            window.CES_loadDeferredModules(tab).then(function(){ switchTab(tab); }).catch(function(error){ console.warn('[lazy module]', error); });
             return;
         }
         currentTab = tab;
@@ -604,6 +635,7 @@
         if (headerTitle) headerTitle.innerText = titles[tab] || 'Dashboard';
         // Canonical active-state writer. Deferred views and runtime wrappers must not leave Home selected.
         window.CES_ACTIVE_TAB = tab;
+        if(window.CES_TASK_PRIORITY&&typeof window.CES_TASK_PRIORITY.setActiveTab==='function')window.CES_TASK_PRIORITY.setActiveTab(tab);
         setTimeout(function(){
           document.querySelectorAll('.nav-item').forEach(function(btn){var on=btn.getAttribute('data-ces-tab')===tab;btn.classList.toggle('active',on);btn.classList.toggle('bg-slate-50',on);btn.classList.toggle('text-indigo-600',on);});
           var h=document.getElementById('header-page-title');if(h)h.innerText=titles[tab]||'Dashboard';
@@ -844,7 +876,7 @@
         }
         setTimeout(function(){
           if(window.CES_API&&typeof window.CES_API.callFunction==='function'){
-            window.CES_API.callFunction('getStartupData',[],{transport:'jsonp',timeoutMs:25000}).then(function(data){
+            window.CES_API.callFunction('getStartupData',[],{transport:'jsonp',timeoutMs:25000,priority:'background',background:true,silentLoading:true,module:'portal'}).then(function(data){
               if(data&&data.config){globalConfig=data.config;try{if(data.config.ROLE_PERMISSIONS){globalPermissions=JSON.parse(data.config.ROLE_PERMISSIONS);localStorage.setItem('ces_role_permissions_v21',JSON.stringify(globalPermissions));}}catch(ignore2){}if(typeof window.cesApplyTeamColorConfig==='function')window.cesApplyTeamColorConfig(globalConfig);if(currentUser)applyRolePermissions(currentUser.role);}
             }).catch(function(){});
           }
@@ -852,13 +884,11 @@
         Promise.race([homeFirstPromise,new Promise(function(resolve){setTimeout(resolve,2200);})]).finally(function(){
           // Home is the first priority. Do not pull the large Calendar/Yearly payload at login.
           // Deferred UI modules are loaded after Home; data-heavy modules fetch only when opened or refreshed.
-          setTimeout(function(){
-            if(typeof window.CES_loadDeferredModules==='function')window.CES_loadDeferredModules().catch(function(){});
-            // Calendar is synchronized after Home becomes usable. Server side performs full sync only once;
-            // later website opens refresh the current month only and skip if another user just synced it.
-            cesSyncCalendarRuntime_(false);
-            var status=document.getElementById('lastUpdateText');if(status)status.innerHTML='<i class="fas fa-check-circle text-[#003DA5]"></i> Active';
-          },120);
+          // Make the visible page interactive first. Heavy deferred scripts and the
+          // website Calendar maintenance sync start only after foreground work is idle.
+          var status=document.getElementById('lastUpdateText');if(status)status.innerHTML='<i class="fas fa-check-circle text-[#003DA5]"></i> Active';
+          cesScheduleDeferredModules_();
+          cesScheduleCalendarBackgroundSync_();
         });
     }
 
@@ -977,7 +1007,7 @@
 
                 // Do not preload Service/Report/Stock dashboards at login. They are loaded only when the user opens that module.
                 // This keeps Home/Core as first priority and avoids the multi-request sync burst shown in the header.
-                if(typeof window.CES_loadDeferredModules==='function') window.CES_loadDeferredModules().catch(function(){});
+                cesScheduleDeferredModules_();
             })
             .withFailureHandler(err => {
                 if (isInitial && loader) loader.classList.add('hidden');

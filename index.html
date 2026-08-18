@@ -114,7 +114,7 @@
 
 
 
-    <script src="js/config.js?v=20260818-v268-priority-concurrency"></script>
+    <script src="js/config.js?v=20260818-v270-active-first"></script>
 
     <!-- LINE LIFF SDK V2 edge. Required for Rich Menu -> LINE identity auto-login. -->
     <script defer src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
@@ -122,7 +122,7 @@
 
 
 
-    <script src="js/gas-polyfill.js?v=20260818-v268-priority-concurrency"></script>
+    <script src="js/gas-polyfill.js?v=20260818-v270-active-first"></script>
 
 
 
@@ -281,7 +281,7 @@
 
 
 
-    <script src="js/core/include-loader.js?v=20260818-v268-priority-concurrency"></script>
+    <script src="js/core/include-loader.js?v=20260818-v270-active-first"></script>
 
 
 
@@ -291,8 +291,8 @@
 
 
 
-      window.CES_BUILD_HASH = 'CES-HUB-V26.9-STABLE-FUNCTIONS-CALENDAR-SYNC-20260818-1448';
-      window.CES_BUILD_VERSION = 'V26.9-STABLE-FUNCTIONS-CALENDAR-SYNC';
+      window.CES_BUILD_HASH = 'CES-HUB-V27.0-ACTIVE-FIRST-FAST-SYNC-20260818-1523';
+      window.CES_BUILD_VERSION = 'V27.0-ACTIVE-FIRST-FAST-SYNC';
 
       // CES_V221_CACHE_MIGRATION: force fresh shell/config/permissions after a release.
       try {
@@ -530,7 +530,8 @@
       }
 
       var deferredPromiseV19=null;
-      window.CES_loadDeferredModules=function(){
+      window.CES_loadDeferredModules=function(focusTab){
+        if(focusTab&&window.CES_TASK_PRIORITY&&typeof window.CES_TASK_PRIORITY.setActiveTab==='function')window.CES_TASK_PRIORITY.setActiveTab(focusTab);
         if(deferredPromiseV19)return deferredPromiseV19;
         deferredPromiseV19=CESBoot.loadHtml(window.CES_BOOT_MANIFEST.deferredHtml.map(cesPrepareBootItem))
           .then(function(){return CESBoot.loadScripts(window.CES_BOOT_MANIFEST.deferredScripts.map(cesPrepareBootItem));})
@@ -543,9 +544,11 @@
         .then(function(){
           if(window.CES_BOOT_WATCHDOG)clearTimeout(window.CES_BOOT_WATCHDOG);CES_hideSplash();
           try{window.dispatchEvent(new CustomEvent('ces:app-ready',{detail:CESBoot.getReport()}));}catch(ignore){}
-          var deferredStartedV205=false;var schedule=function(){if(deferredStartedV205)return;deferredStartedV205=true;window.CES_loadDeferredModules().catch(function(error){console.warn('[CES deferred modules]',error);});};
-          window.addEventListener('ces:home-ready',schedule,{once:true});
-          setTimeout(function(){if('requestIdleCallback' in window)requestIdleCallback(schedule,{timeout:700});else schedule();},2600);
+          // Do not execute the full deferred bundle immediately after Home.
+          // It is intentionally delayed until the browser is idle so a navigation
+          // click or active module request can paint/respond first.
+          var deferredStartedV205=false;var schedule=function(){if(deferredStartedV205)return;deferredStartedV205=true;var run=function(){if(window.CES_TASK_PRIORITY&&typeof window.CES_TASK_PRIORITY.whenIdle==='function')window.CES_TASK_PRIORITY.whenIdle(function(){window.CES_loadDeferredModules().catch(function(error){console.warn('[CES deferred modules]',error);});},{timeout:6500});else window.CES_loadDeferredModules().catch(function(error){console.warn('[CES deferred modules]',error);});};if('requestIdleCallback' in window)requestIdleCallback(run,{timeout:6000});else setTimeout(run,0);};
+          setTimeout(schedule,5200);
         })
         .catch(function(err){
           if(window.CES_BOOT_WATCHDOG)clearTimeout(window.CES_BOOT_WATCHDOG);console.error('[CES Hub boot failed]',err);CES_hideSplash();
