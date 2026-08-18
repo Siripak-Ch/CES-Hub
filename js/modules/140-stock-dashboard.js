@@ -501,9 +501,10 @@ function sdEnsureContractExportButton(){
   if(!head || document.getElementById('sdContractExportBtn')) return;
   const btn=document.createElement('button');
   btn.id='sdContractExportBtn';
-  btn.className='sp-btn soft';
-  btn.style.padding='8px 12px';
-  btn.innerHTML='<i class="fas fa-file-excel"></i> Export Contract';
+  btn.className='sp-btn csv5-icon-btn ces-action-excel ces-contract-export-icon';
+  btn.title='Export Contract Excel';
+  btn.setAttribute('aria-label','Export Contract Excel');
+  btn.innerHTML='<i class="fas fa-file-excel"></i>';
   btn.onclick=sd_exportContractSummaryExcel;
   head.appendChild(btn);
 }

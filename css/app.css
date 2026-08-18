@@ -1116,7 +1116,6 @@ body{background:var(--ces-bg)!important;color:var(--ces-text)!important}
 .ces-ot-toolbar{display:flex;align-items:center;justify-content:flex-end;gap:10px;flex-wrap:wrap}
 .ces-ot-state{display:inline-flex;align-items:center;gap:6px;border-radius:999px;padding:7px 10px;background:#f1f5f9;color:#64748b;border:1px solid #e2e8f0;font-size:10px;font-weight:900;white-space:nowrap}
 .ces-ot-state.live{background:#ecfdf5;color:#047857;border-color:#a7f3d0}
-.ces-ot-state.sample{background:#fff7ed;color:#b45309;border-color:#fed7aa}
 .ces-ot-team-tabs{display:flex;align-items:center;gap:4px;padding:4px;border-radius:13px;background:#f1f5f9;border:1px solid #e2e8f0}
 #view-ot .ot-team-btn{min-width:55px;height:34px;padding:0 14px;border-radius:10px;color:#64748b;font-size:11px;font-weight:900;transition:.18s}
 #view-ot .ot-team-btn.active{background:#003da5;color:#fff;box-shadow:0 5px 12px rgba(0,61,165,.18)}
@@ -1870,11 +1869,10 @@ body{background:var(--ces-bg)!important;color:var(--ces-text)!important}
 #view-revenue .ces-revenue-edit-row:focus{outline:2px solid rgba(0,61,165,.18);outline-offset:-2px}
 #view-revenue .ces-revenue-edit-row td{user-select:none}
 
-/* OT header exactly matches the standard function header and mock state is explicit. */
+/* OT header matches the standard function header; dashboard data is live-only. */
 #view-ot .ces-ot-header{min-height:88px!important;padding:20px!important;border-radius:24px!important}
 #view-ot .ces-ot-title-icon{width:48px!important;height:48px!important;min-width:48px!important;border-radius:14px!important;background:#fff!important;color:#003da5!important}
 #view-ot .ces-ot-toolbar{flex-wrap:nowrap!important;min-width:max-content!important;overflow-x:auto!important}
-#view-ot .ces-ot-state.mock{color:#a16207;background:#fffbeb;border-color:#fde68a}
 
 /* Car Booking uses the same readable scale as the other operation pages. */
 #view-car_booking{font-size:14px!important;padding:20px!important}
@@ -3435,4 +3433,31 @@ textarea.ces-detail-input-v243{min-height:58px;resize:vertical;margin-bottom:9px
 #view-health .ces-health-filter-tabs,
 #view-ot .ces-ot-team-tabs{
   margin-top:4px!important;margin-bottom:9px!important;
+}
+
+
+/* ============================================================
+   V27.4 targeted Infusion Pump readability / navigation alignment
+   ============================================================ */
+#view-stock_dashboard .sp-model-brand{
+  font-size:11px!important;font-weight:900!important;line-height:1.2!important;
+  letter-spacing:.01em!important;color:#334155!important;text-transform:none!important;
+  margin-top:1px!important;margin-bottom:4px!important;
+}
+#view-stock_dashboard .sp-model-label{
+  font-size:13.5px!important;font-weight:900!important;line-height:1.25!important;
+  color:#0f172a!important;letter-spacing:-.01em!important;min-height:17px!important;
+  margin-bottom:5px!important;white-space:normal!important;overflow-wrap:anywhere!important;
+}
+#view-stock_dashboard .ces-contract-export-icon{
+  width:40px!important;height:40px!important;min-width:40px!important;padding:0!important;
+  display:inline-flex!important;align-items:center!important;justify-content:center!important;
+  border-radius:12px!important;font-size:14px!important;
+}
+#sidebar-menu #btn-stock_dashboard{
+  justify-content:flex-start!important;text-align:left!important;
+}
+#sidebar-menu #btn-stock_dashboard > span:last-child{
+  flex:1 1 auto!important;min-width:0!important;text-align:left!important;
+  line-height:1.22!important;white-space:normal!important;
 }

@@ -52,7 +52,7 @@
       <div class="stockpro-card csv7-contract-card">
         <div class="stockpro-card-head csv7-contract-head">
           <div><h3><i class="fas fa-file-contract text-blue-500"></i> รายการสัญญา / Rental Contract Summary</h3><span id="sdContractCount" class="sp-pill">0 locations</span></div>
-          <button class="sp-btn soft" onclick="sd_exportContracts()"><i class="fas fa-file-excel"></i> Export Contract</button>
+          <button id="sdContractExportBtn" class="sp-btn csv5-icon-btn ces-action-excel ces-contract-export-icon" onclick="sd_exportContractSummaryExcel()" title="Export Contract Excel" aria-label="Export Contract Excel"><i class="fas fa-file-excel"></i></button>
         </div>
         <div class="stockpro-filter-card csv7-contract-filters">
           <div class="sp-search"><i class="fas fa-search"></i><input id="sdContractSearch" oninput="sd_renderContractSummary()" placeholder="ค้นหา Location / ID / SN / Model / Borrower"></div>

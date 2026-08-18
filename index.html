@@ -114,7 +114,7 @@
 
 
 
-    <script src="js/config.js?v=20260818-v273-stable-active"></script>
+    <script src="js/config.js?v=20260818-v274-seamless-tabs"></script>
 
     <!-- LINE LIFF SDK V2 edge. Required for Rich Menu -> LINE identity auto-login. -->
     <script defer src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
@@ -122,7 +122,7 @@
 
 
 
-    <script src="js/gas-polyfill.js?v=20260818-v273-stable-active"></script>
+    <script src="js/gas-polyfill.js?v=20260818-v274-seamless-tabs"></script>
 
 
 
@@ -281,7 +281,7 @@
 
 
 
-    <script src="js/core/include-loader.js?v=20260818-v273-stable-active"></script>
+    <script src="js/core/include-loader.js?v=20260818-v274-seamless-tabs"></script>
 
 
 
@@ -291,8 +291,8 @@
 
 
 
-      window.CES_BUILD_HASH = 'CES-HUB-V27.3-STABLE-ACTIVE-CALENDAR-TABS-20260818-1657';
-      window.CES_BUILD_VERSION = 'V27.3-STABLE-ACTIVE-CALENDAR-TABS';
+      window.CES_BUILD_HASH = 'CES-HUB-V27.4-CHECKIN-REAL-OT-SEAMLESS-TABS-20260818-1703';
+      window.CES_BUILD_VERSION = 'V27.4-CHECKIN-REAL-OT-SEAMLESS-TABS';
 
       // CES_V221_CACHE_MIGRATION: force fresh shell/config/permissions after a release.
       try {
@@ -534,6 +534,7 @@
       // warmed separately because it has no API side effects and keeps legacy DOM
       // assumptions intact without starting every module/runtime at once.
       var cesDeferredViewWarmPromise = null;
+      var cesDeferredViewPromises = Object.create(null);
       var cesDeferredGroupPromises = Object.create(null);
       var cesDeferredCodePromises = Object.create(null);
       var cesDeferredScriptPromises = Object.create(null);
@@ -585,6 +586,14 @@
         for(var i=0;i<list.length;i++)if(list[i].viewId===id)return cesPrepareBootItem(list[i]);
         return null;
       }
+      function cesEnsureDeferredView(tab){
+        tab=String(tab||'').trim();if(!tab||tab==='portal'||document.getElementById('view-'+tab))return Promise.resolve(true);
+        if(cesDeferredViewPromises[tab])return cesDeferredViewPromises[tab];
+        var item=cesDeferredViewItem(tab);if(!item)return Promise.resolve(false);
+        cesDeferredViewPromises[tab]=CESBoot.loadHtml([item]).then(function(){return !!document.getElementById('view-'+tab);}).catch(function(error){delete cesDeferredViewPromises[tab];throw error;});
+        return cesDeferredViewPromises[tab];
+      }
+      window.CES_ensureDeferredView=cesEnsureDeferredView;
       function cesPreloadDeferredViews(){
         if(cesDeferredViewWarmPromise)return cesDeferredViewWarmPromise;
         var missing=(window.CES_BOOT_MANIFEST.deferredHtml||[]).filter(function(item){return !document.getElementById(item.viewId);}).map(cesPrepareBootItem);
@@ -617,6 +626,11 @@
         var urls=(CES_DEFERRED_TAB_SCRIPTS[tab]||[]).slice();
         var seen=Object.create(null);return urls.filter(function(url){if(seen[url])return false;seen[url]=true;return true;});
       }
+      window.CES_prepareDeferredTab=function(tab){
+        tab=String(tab||'').trim();if(!tab||tab==='portal')return Promise.resolve(true);
+        var codePromises=cesDeferredScriptsForTab(tab).map(cesDeferredItemByUrl).map(cesPrepareDeferredCode);
+        return Promise.all([cesEnsureDeferredView(tab)].concat(codePromises)).then(function(){return true;}).catch(function(error){console.warn('[CES tab prepare]',tab,error);return false;});
+      };
       var cesDeferredSharedTailPromise=null;
       function cesLoadDeferredSharedTailLater_(){
         if(cesDeferredSharedTailPromise)return cesDeferredSharedTailPromise;
@@ -641,7 +655,7 @@
         if(window.CES_isDeferredTabReady(focusTab))return Promise.resolve(true);
         if(cesDeferredGroupPromises[focusTab])return cesDeferredGroupPromises[focusTab];
         var viewItem=cesDeferredViewItem(focusTab);
-        var ensureView=document.getElementById('view-'+focusTab)?Promise.resolve(true):(viewItem?CESBoot.loadHtml([viewItem]):Promise.resolve(true));
+        var ensureView=cesEnsureDeferredView(focusTab);
         // Do not warm unrelated views while the user is waiting for this page.
         // The selected view + selected business scripts get the network/main-thread first.
         var items=cesDeferredScriptsForTab(focusTab).map(cesDeferredItemByUrl);
@@ -664,10 +678,17 @@
         .then(function(){
           if(window.CES_BOOT_WATCHDOG)clearTimeout(window.CES_BOOT_WATCHDOG);CES_hideSplash();
           try{window.dispatchEvent(new CustomEvent('ces:app-ready',{detail:CESBoot.getReport()}));}catch(ignore){}
-          // Warm markup only. Business scripts remain demand-loaded by the
-          // active tab so background work can never create a multi-module sync burst.
-          var deferredWarmStarted=false;var schedule=function(){if(deferredWarmStarted)return;deferredWarmStarted=true;var run=function(){var warm=function(){if(window.CES_preloadDeferredViews)window.CES_preloadDeferredViews().catch(function(error){console.warn('[CES deferred HTML]',error);});};if(window.CES_TASK_PRIORITY&&typeof window.CES_TASK_PRIORITY.whenIdle==='function')window.CES_TASK_PRIORITY.whenIdle(warm,{timeout:9000});else setTimeout(warm,1200);};if('requestIdleCallback' in window)requestIdleCallback(run,{timeout:5000});else setTimeout(run,1200);};
-          setTimeout(schedule,3500);
+          // Warm static page markup immediately after the shell is ready. HTML has
+          // no business API side effects, so tab switches can reveal the real page
+          // instantly while only the selected tab's JS executes on demand.
+          setTimeout(function(){if(window.CES_preloadDeferredViews)window.CES_preloadDeferredViews().catch(function(error){console.warn('[CES deferred HTML]',error);});},180);
+          if(!window.CES_TAB_INTENT_PREFETCH_BOUND){
+            window.CES_TAB_INTENT_PREFETCH_BOUND=true;
+            var prepareIntent=function(event){var node=event.target&&event.target.closest?event.target.closest('[data-ces-tab]'):null;if(node&&window.CES_prepareDeferredTab)window.CES_prepareDeferredTab(node.getAttribute('data-ces-tab'));};
+            document.addEventListener('pointerover',prepareIntent,true);
+            document.addEventListener('focusin',prepareIntent,true);
+            document.addEventListener('pointerdown',prepareIntent,true);
+          }
         })
         .catch(function(err){
           if(window.CES_BOOT_WATCHDOG)clearTimeout(window.CES_BOOT_WATCHDOG);console.error('[CES Hub boot failed]',err);CES_hideSplash();

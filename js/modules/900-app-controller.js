@@ -42,7 +42,7 @@
         if(currentUser)applyRolePermissions(currentUser.role);
         if(typeof renderYearlyStats==='function')renderYearlyStats(globalYearlyStats,globalConfig);
         if(typeof initCalendar==='function'&&!CES_TAB_RUNTIME_V20.initialized.calendar)initCalendar(globalCalData);
-        if(typeof renderManagementOverviewDashboard==='function')renderManagementOverviewDashboard();
+        if(currentTab==='management_overview'&&typeof renderManagementOverviewDashboard==='function')renderManagementOverviewDashboard(true);
     }
     function cesRestoreCoreCache_(){try{var c=JSON.parse(localStorage.getItem(CES_CORE_CACHE_KEY_V20)||'null');if(c&&c.data)cesApplyCoreData_(c.data);}catch(e){}}
     function cesStoreCoreCache_(data){try{localStorage.setItem(CES_CORE_CACHE_KEY_V20,JSON.stringify({at:Date.now(),data:data}));}catch(e){}}
@@ -577,14 +577,19 @@
     }
     window.cesCanAccessTab = cesCanAccessTab_;
 
-    function cesShowTabLoadingPreview_(tab){
-        var main=document.getElementById('app-main-content');if(!main)return;
-        document.querySelectorAll('#app-main-content > [id^="view-"]').forEach(function(view){view.classList.add('hidden');});
-        var box=document.getElementById('ces-tab-loading-preview');
-        if(!box){box=document.createElement('section');box.id='ces-tab-loading-preview';box.className='ces-tab-loading-preview';main.appendChild(box);}
-        var label=String(tab||'module').replace(/_/g,' ').replace(/\b\w/g,function(ch){return ch.toUpperCase();});
-        box.innerHTML='<div class="ces-tab-loading-card"><div class="ces-tab-loading-icon"><i class="fas fa-bolt"></i></div><div class="min-w-0"><div class="ces-tab-loading-title">'+label+'</div><div class="ces-tab-loading-sub">Preparing this page first…</div><div class="ces-tab-loading-bars"><span></span><span></span><span></span></div></div></div>';
-        box.classList.remove('hidden');
+    function cesTabLabel_(tab){
+        var labels={portal:'Home',management_overview:'Management Overview',service:'Service CSI',report:'Report CSI',memo_workorder:'Memo & Work Order',yearly:'Job Dashboard',revenue:'Revenue Dashboard',calendar:'Master Calendar',checkin:'Check-in',car_booking:'Car Booking',van_booking:'Van Booking',team_information:'Team Information',team_plan:'Team Plan',monthly_report:'Monthly Report',users:'User Management',ces_evaluation:'CES Hub Evaluation',ces_ai_knowledge:'CES AI Knowledge',setting:'Setting',health:'System Health Check',ot:'OT Dashboard',weekly:'Weekly Report',report_manage:'Report Management',kpi:'KPI Tracking',stock_dashboard:'Infusion Pump Dashboard',inventory:'Inventory',check_stock:'Check Stock'};
+        return labels[tab] || String(tab||'Dashboard').replace(/_/g,' ').replace(/\b\w/g,function(ch){return ch.toUpperCase();});
+    }
+    function cesRevealDeferredViewShell_(tab){
+        var activeView=document.getElementById('view-'+tab);if(!activeView)return false;
+        document.querySelectorAll('#app-main-content > [id^="view-"]').forEach(function(view){view.classList.add('hidden');view.classList.remove('slide-up');});
+        activeView.classList.remove('hidden');
+        document.querySelectorAll('.nav-item').forEach(function(btn){var on=btn.getAttribute('data-ces-tab')===tab;btn.classList.toggle('active',on);btn.classList.toggle('bg-slate-50',on);btn.classList.toggle('text-indigo-600',on);});
+        var header=document.getElementById('header-page-title');if(header)header.innerText=cesTabLabel_(tab);
+        document.body.setAttribute('data-ces-active-tab',tab);
+        var old=document.getElementById('ces-tab-loading-preview');if(old)old.remove();
+        return true;
     }
     function cesHideTabLoadingPreview_(){var box=document.getElementById('ces-tab-loading-preview');if(box)box.remove();}
 
@@ -602,8 +607,13 @@
         if(window.CES_TASK_PRIORITY&&typeof window.CES_TASK_PRIORITY.setActiveTab==='function')window.CES_TASK_PRIORITY.setActiveTab(tab);
         var deferredReady=typeof window.CES_isDeferredTabReady==='function'?window.CES_isDeferredTabReady(tab):!!document.getElementById('view-'+tab);
         if (tab!=='portal' && typeof window.CES_loadDeferredModules === 'function' && !deferredReady) {
-            cesShowTabLoadingPreview_(tab);
-            window.CES_loadDeferredModules(tab).then(function(){cesHideTabLoadingPreview_();switchTab(tab);}).catch(function(error){
+            // Show the real page markup immediately; never replace it with a
+            // "Preparing page" placeholder. Business code is loaded next at
+            // active-tab priority, then the normal initializer runs once.
+            if(!cesRevealDeferredViewShell_(tab) && typeof window.CES_ensureDeferredView==='function'){
+                window.CES_ensureDeferredView(tab).then(function(){cesRevealDeferredViewShell_(tab);}).catch(function(error){console.warn('[lazy view]',error);});
+            }
+            window.CES_loadDeferredModules(tab).then(function(){switchTab(tab);}).catch(function(error){
                 console.warn('[lazy module]', error);cesHideTabLoadingPreview_();
                 var view=document.getElementById('view-'+tab);if(view){view.classList.remove('hidden');view.innerHTML='<div class="ces-standard-card ces-module-unavailable-card"><div class="ces-module-unavailable-icon"><i class="fas fa-triangle-exclamation"></i></div><h2>Page load error</h2><p>'+String(error&&error.message||error)+'</p><button class="ces-standard-icon-btn ces-action-neutral" onclick="switchTab(\''+tab+'\')"><i class="fas fa-rotate-right"></i></button></div>';}
             });

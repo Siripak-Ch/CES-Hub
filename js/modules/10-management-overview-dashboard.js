@@ -11,6 +11,13 @@ let homeCheckinData = [], homeRevCache = null, homeRevChart = null;
 let homeOTDataCache = [], homeYearlyOTPieChart = null, homeYearlyOTTrendChart = null;
 let currentHomeTab = 'yearly';
 let chartsCache = {}; // ระบบจัดการ Chart ใหม่ป้องกันการทับซ้อนและ Canvas ขัดข้อง
+let homeQualitySummary = null, homeQualityPromise = null;
+let homeSecondaryLoadAt = 0;
+const CES_MANAGEMENT_QUALITY_LOCAL_CACHE = 'CES_MANAGEMENT_QUALITY_LOCAL_CACHE';
+try {
+    const cachedQuality = JSON.parse(localStorage.getItem(CES_MANAGEMENT_QUALITY_LOCAL_CACHE) || 'null');
+    if (cachedQuality && cachedQuality.data) homeQualitySummary = cachedQuality.data;
+} catch (ignoreQualityCache) {}
 
 // ==========================================
 // 2. HELPER FUNCTIONS
@@ -74,43 +81,79 @@ function updateHomeMonthlyView() {
     renderMonthlyView(); 
 }
 
+function managementApiCall_(fn, args, options) {
+    args = Array.isArray(args) ? args : [];
+    options = options || {};
+    if (window.CES_API && typeof window.CES_API.callFunction === 'function') {
+        return window.CES_API.callFunction(fn, args, Object.assign({
+            transport:'jsonp', timeoutMs:90000, dedupe:true,
+            priority:'normal', module:'management_overview', silentLoading:true
+        }, options));
+    }
+    return new Promise((resolve, reject) => {
+        if (typeof google === 'undefined' || !google.script || !google.script.run) { reject(new Error('CES API is unavailable')); return; }
+        let runner = google.script.run.withSuccessHandler(resolve).withFailureHandler(reject);
+        runner[fn].apply(runner, args);
+    });
+}
+
+function loadManagementQualitySummary_(force) {
+    if (homeQualityPromise && !force) return homeQualityPromise;
+    homeQualityPromise = managementApiCall_('getManagementQualitySummary', [{force:!!force}], {
+        priority:'active', userAction:true, dedupe:!force,
+        loadingLabel:'Loading Quality & Satisfaction…'
+    }).then(data => {
+        if (data && data.success !== false) {
+            homeQualitySummary = data;
+            try { localStorage.setItem(CES_MANAGEMENT_QUALITY_LOCAL_CACHE, JSON.stringify({at:Date.now(), data:data})); } catch (ignoreStore) {}
+            currentHomeTab === 'yearly' ? calculateAndRenderQuality('y', 'All') : calculateAndRenderQuality('m', $id('m-filter-month')?.value || 'All');
+        }
+        return data;
+    }).catch(error => {
+        console.warn('[Management quality summary]', error);
+        return homeQualitySummary;
+    }).finally(() => { homeQualityPromise = null; });
+    return homeQualityPromise;
+}
+
 function renderManagementOverviewDashboard(skipFetch = false) {
-    // ระบบประกาศ Announcement
+    // Render cached/read-model content first so opening the page never waits for CSI modules.
     const announceBox = $id('home-announcement-container');
     if (announceBox && typeof globalConfig !== 'undefined') {
         const isActive = globalConfig.ANNOUNCE_ACTIVE === 'true' && globalConfig.ANNOUNCE_MSG?.trim();
         announceBox.classList.toggle('hidden', !isActive);
         if (isActive) $txt('home-announcement-text', globalConfig.ANNOUNCE_MSG);
     }
+    currentHomeTab === 'yearly' ? renderYearlyView() : renderMonthlyView();
+    if (skipFetch) return;
 
-    if (!skipFetch) {
+    // Quality is the first foreground request because it is the first card group on this page.
+    loadManagementQualitySummary_(false);
+
+    // Secondary sections start just after the quality read. Re-entry within 30 s reuses current data.
+    if (Date.now() - homeSecondaryLoadAt < 30000) return;
+    homeSecondaryLoadAt = Date.now();
+    setTimeout(() => {
         const d = new Date();
         const dStr = `${String(d.getDate()).padStart(2,'0')}/${String(d.getMonth()+1).padStart(2,'0')}/${d.getFullYear()}`;
-        
-        // 1. Fetch Activity Log & Checkin
-        google.script.run.withSuccessHandler(data => {
+
+        managementApiCall_('getCheckinDashboardData', [dStr, currentUser], {priority:'normal'}).then(data => {
             homeCheckinData = data?.activityLogs || [];
             if(currentHomeTab === 'monthly') renderHomeActivityTable();
-        }).getCheckinDashboardData(dStr, currentUser);
-        
-        // 2. Fetch Weekly Report
-        loadHomeWeeklyData();
+        }).catch(error => console.warn('[Management check-in]', error));
 
-        // 3. Fetch Revenue
-        google.script.run.withSuccessHandler(data => {
+        setTimeout(() => loadHomeWeeklyData(), 80);
+
+        managementApiCall_('getRevenueDashboardData', [d.getFullYear()], {priority:'normal'}).then(data => {
             homeRevCache = data;
             currentHomeTab === 'yearly' ? renderYearlyView() : renderMonthlyView();
-        }).getRevenueDashboardData(d.getFullYear());
+        }).catch(error => console.warn('[Management revenue]', error));
 
-        // 4. Fetch OT
-        google.script.run.withSuccessHandler(data => {
+        managementApiCall_('getOTDashboardData', [], {priority:'normal'}).then(data => {
             homeOTDataCache = data || [];
             if(currentHomeTab === 'yearly') renderYearlyOTView();
-        }).getOTDashboardData();
-
-    } else {
-        currentHomeTab === 'yearly' ? renderYearlyView() : renderMonthlyView();
-    }
+        }).catch(error => console.warn('[Management OT]', error));
+    }, 180);
 }
 
 function renderYearlyView() {
@@ -147,6 +190,29 @@ function calculateAndRenderQuality(prefix, monthFilter) {
     const mNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
     const pStr = prefix === 'y' ? 'yearly' : 'monthly';
     const yearFilter = String($id('m-filter-year')?.value || new Date().getFullYear());
+
+    // Preferred path: compact backend aggregate cached specifically for Management Overview.
+    // This avoids waiting for the full Service CSI / Report CSI tabs and their large datasets.
+    if (homeQualitySummary && Array.isArray(homeQualitySummary.service) && Array.isArray(homeQualitySummary.report)) {
+        const targetMonth = monthFilter === 'All' ? 0 : (mNames.indexOf(monthFilter) + 1);
+        const sumRows = rows => (rows || []).reduce((out, row) => {
+            if (String(row.year || '') !== yearFilter) return out;
+            if (targetMonth && Number(row.month || 0) !== targetMonth) return out;
+            if (!isTeamMatch(row.team)) return out;
+            out.sum += Number(row.sum || 0);
+            out.count += Number(row.count || 0);
+            return out;
+        }, {sum:0,count:0});
+        const svc = sumRows(homeQualitySummary.service);
+        const rpt = sumRows(homeQualitySummary.report);
+        const svcAvg = svc.count ? (svc.sum / svc.count) : 0;
+        const rptAvg = rpt.count ? (rpt.sum / rpt.count) : 0;
+        $txt(`kpi-${pStr}-service-score`, svcAvg ? svcAvg.toFixed(2) : '0.00');
+        $txt(`kpi-${pStr}-service-sat-pct`, svcAvg ? ((svcAvg / 5) * 100).toFixed(0) + '%' : '0%');
+        $txt(`kpi-${pStr}-report-sat`, rptAvg ? rptAvg.toFixed(2) : '0.00');
+        $txt(`kpi-${pStr}-report-sat-pct`, rptAvg ? ((rptAvg / 5) * 100).toFixed(0) + '%' : '0%');
+        return;
+    }
 
     // ฟังก์ชันจัดการวันที่: หา 'ปี' และ 'เดือน' ตรงๆ จากคอลัมน์ใหม่
     const checkDateMatch = (mVal, dateVal, yVal) => {
@@ -593,9 +659,9 @@ function renderHomeWeeklySection(data) {
     }).join(''));
 }
 
-window.CES_HOME_UI_V41_RECHECK=function(){return{version:'V41',teams:['MED','LAB','EHS','ENV','TES'],serviceCsi:{EHS:['EHS','ENV']}};};
+window.CES_HOME_UI_RECHECK=function(){return{version:'V41',teams:['MED','LAB','EHS','ENV','TES'],serviceCsi:{EHS:['EHS','ENV']}};};
 
-window.CES_HOME_UI_V40_RECHECK=window.CES_HOME_UI_V41_RECHECK;
+window.CES_HOME_UI_V40_RECHECK=window.CES_HOME_UI_RECHECK;
 
 // V18.6 canonical name; legacy alias is retained only for cached frontends.
 window.renderManagementOverviewDashboard = renderManagementOverviewDashboard;

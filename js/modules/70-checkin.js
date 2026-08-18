@@ -11,7 +11,34 @@ let currentLocationLink = '';
 let currentLocationName = ''; 
 let photoBase64Data = null;
 
-function checkinTeamStyleV40_(team){
+let checkinLoadSerial = 0;
+let checkinLoadPromise = null;
+const checkinDateCache = Object.create(null);
+
+function checkinEmptyData_() {
+    return { dailyJobs: [], recentActivity: [], activityLogs: [], kpi: {}, serviceShare: {}, diagnostics: {} };
+}
+
+function checkinApplyData_(data, dateStr) {
+    currentCheckinData = data && typeof data === 'object' ? data : checkinEmptyData_();
+    if (dateStr) checkinDateCache[dateStr] = currentCheckinData;
+    renderKPIs(); renderJobList(); renderRecentActivity(); filterActivityTable();
+    return currentCheckinData;
+}
+
+function checkinApiCall_(dateStr, userCtx) {
+    if (window.CES_API && typeof window.CES_API.callFunction === 'function') {
+        return window.CES_API.callFunction('getCheckinDashboardData', [dateStr, userCtx], {
+            transport:'jsonp', timeoutMs:60000, dedupe:true,
+            priority:'active', userAction:true, module:'checkin', loadingLabel:'Loading Daily Jobs…'
+        });
+    }
+    return new Promise((resolve, reject) => {
+        google.script.run.withSuccessHandler(resolve).withFailureHandler(reject).getCheckinDashboardData(dateStr, userCtx);
+    });
+}
+
+function checkinTeamStyle_(team){
     const code=String(team||'').trim().toUpperCase();
     if(typeof window.cesGetTeamStyle==='function'){const s=window.cesGetTeamStyle(code);return{bg:s.color,text:s.color,soft:s.soft,border:s.border,contrast:s.text};}
     const color=({MED:'#004aad',LAB:'#19a7ce',EHS:'#0fc1a1',ENV:'#7ed957',TES:'#ffde59'})[code]||'#64748B';
@@ -42,19 +69,28 @@ function changeCheckinDate(days) {
     fp.setDate(currentDate, true);
 }
 
-function loadCheckinData() {
+function loadCheckinData(forceRefresh) {
     window.scrollTo({ top: 0, behavior: 'smooth' });
     const dateStr = document.getElementById('display-date-text').innerText;
-    document.getElementById('job-list-container').innerHTML = `<div class="col-span-full flex flex-col items-center justify-center py-12 text-gray-300"><i class="fas fa-circle-notch fa-spin text-3xl mb-3"></i><span class="text-xs font-bold">Syncing Data...</span></div>`;
+    const cached = !forceRefresh && checkinDateCache[dateStr];
+    if (cached) checkinApplyData_(cached, dateStr);
+    else document.getElementById('job-list-container').innerHTML = `<div class="col-span-full flex flex-col items-center justify-center py-12 text-gray-300"><i class="fas fa-circle-notch fa-spin text-3xl mb-3"></i><span class="text-xs font-bold">Loading Daily Jobs...</span></div>`;
+
     const userCtx = { role: currentUser ? currentUser.role : 'USER', team: currentUser ? (currentUser.team || 'General') : 'General' };
-    google.script.run.withSuccessHandler(data => {
-        currentCheckinData = data && typeof data === 'object' ? data : { dailyJobs: [], recentActivity: [], activityLogs: [], kpi: {}, serviceShare: {} };
-        renderKPIs(); renderJobList(); renderRecentActivity(); filterActivityTable();
-    }).withFailureHandler(error => {
-        currentCheckinData = { dailyJobs: [], recentActivity: [], activityLogs: [], kpi: {}, serviceShare: {} };
-        renderKPIs(); renderJobList(); renderRecentActivity(); filterActivityTable();
-        Swal.fire({icon:'error',title:'Check-in data unavailable',text:(error && error.message) ? error.message : String(error || 'Unable to load Check-in data.'),confirmButtonColor:'#003DA5'});
-    }).getCheckinDashboardData(dateStr, userCtx);
+    const serial = ++checkinLoadSerial;
+    const request = checkinApiCall_(dateStr, userCtx);
+    checkinLoadPromise = Promise.resolve(request).then(data => {
+        if (serial !== checkinLoadSerial) return currentCheckinData;
+        return checkinApplyData_(data, dateStr);
+    }).catch(error => {
+        if (serial !== checkinLoadSerial) return currentCheckinData;
+        if (!cached) checkinApplyData_(checkinEmptyData_(), dateStr);
+        if (window.Swal) Swal.fire({icon:'error',title:'Check-in data unavailable',text:(error && error.message) ? error.message : String(error || 'Unable to load Check-in data.'),confirmButtonColor:'#003DA5'});
+        return currentCheckinData;
+    }).finally(() => {
+        if (serial === checkinLoadSerial) checkinLoadPromise = null;
+    });
+    return checkinLoadPromise;
 }
 
 function renderKPIs() {
@@ -82,7 +118,7 @@ function renderJobList() {
     if (jobs.length === 0) { container.innerHTML = `<div class="col-span-full text-center py-10 bg-gray-50 rounded-2xl border border-dashed border-gray-200"><i class="far fa-calendar-times text-gray-300 text-3xl mb-2"></i><p class="text-gray-400 font-bold text-xs">No Jobs Found</p></div>`; return; }
     
     container.innerHTML = jobs.map(job => {
-        const teamStyle = checkinTeamStyleV40_(job.team);
+        const teamStyle = checkinTeamStyle_(job.team);
         const teamColor = ''; 
         const count = job.totalPeople || 0;
         
@@ -167,7 +203,7 @@ function filterActivityTable() {
             ? `<a href="${row.gps}" target="_blank" class="text-blue-500 hover:text-blue-700 font-bold bg-blue-50 px-2 py-1 rounded-md border border-blue-100 text-[9px] flex items-center justify-center w-16 mx-auto" onclick="event.stopPropagation()"><i class="fas fa-map-marked-alt mr-1"></i> Map</a>` 
             : `<span class="text-gray-300 text-[9px] block text-center">-</span>`;
             
-        return `<tr onclick='openLogDetail(${JSON.stringify(row).replace(/'/g, "\\'")})' class="hover:bg-gray-50 transition-colors border-b last:border-0 border-gray-100 cursor-pointer"><td class="p-4 font-bold text-gray-600 text-xs">${time} <span class="ml-1 text-[9px] text-gray-400">${row.date}</span></td><td class="p-4 font-bold text-xs"><span style="color:${checkinTeamStyleV40_(row.team).text}">${row.team}</span></td><td class="p-4 font-bold text-gray-800 text-xs">${row.user}</td><td class="p-4"><span class="px-2 py-1 rounded text-[9px] font-bold ${badge}">${row.type}</span></td><td class="p-4 text-gray-500 text-xs truncate max-w-[150px]" title="${row.job}">${row.job}</td><td class="p-4 text-center">${photoHtml}</td><td class="p-4">${gpsHtml}</td></tr>`;
+        return `<tr onclick='openLogDetail(${JSON.stringify(row).replace(/'/g, "\\'")})' class="hover:bg-gray-50 transition-colors border-b last:border-0 border-gray-100 cursor-pointer"><td class="p-4 font-bold text-gray-600 text-xs">${time} <span class="ml-1 text-[9px] text-gray-400">${row.date}</span></td><td class="p-4 font-bold text-xs"><span style="color:${checkinTeamStyle_(row.team).text}">${row.team}</span></td><td class="p-4 font-bold text-gray-800 text-xs">${row.user}</td><td class="p-4"><span class="px-2 py-1 rounded text-[9px] font-bold ${badge}">${row.type}</span></td><td class="p-4 text-gray-500 text-xs truncate max-w-[150px]" title="${row.job}">${row.job}</td><td class="p-4 text-center">${photoHtml}</td><td class="p-4">${gpsHtml}</td></tr>`;
     }).join('');
 }
 
@@ -457,6 +493,6 @@ function getGPS() {
   attemptGetPosition(txt, ind, btn);
 }
 
-window.CES_CHECKIN_UI_V41_RECHECK=function(){return{version:'V41',teams:['MED','LAB','EHS','ENV','TES'],checkin:'#0057B8',checkout:'#E4002B'};};
+window.CES_CHECKIN_UI_RECHECK=function(){return{version:'V41',teams:['MED','LAB','EHS','ENV','TES'],checkin:'#0057B8',checkout:'#E4002B'};};
 
-window.CES_CHECKIN_UI_V40_RECHECK=window.CES_CHECKIN_UI_V41_RECHECK;
+window.CES_CHECKIN_UI_V40_RECHECK=window.CES_CHECKIN_UI_RECHECK;

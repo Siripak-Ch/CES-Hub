@@ -6,7 +6,7 @@
 
 window.CES_CONFIG = {
   // IMPORTANT: After deploying Apps Script backend, paste the latest /exec URL here.
-  GAS_API_URL: 'https://script.google.com/macros/s/AKfycbysQrmG7GPyjF_sAkzXxfU64cmWzQut_PAvcSmZtxlVZn5bKjPTGv63uXG_SOMXyhReDw/exec',
+  GAS_API_URL: 'https://script.google.com/macros/s/AKfycbwszWk73OlLgtODrDfg6f82VBfCkmXAFFlKHDF-WyrdVAOjSipkImAoH7oaZ0GMuCxocg/exec',
 
   CSI_SURVEY_URL: 'https://survey.nhealth-asia.com/s/cm1hci0mw00jf45vmps2myg1g',
 
@@ -24,7 +24,7 @@ window.CES_CONFIG = {
   },
 
   DEBUG: false,
-  RELEASE: 'CES-HUB-V27.3-STABLE-ACTIVE-CALENDAR-TABS',
+  RELEASE: 'CES-HUB-V27.4-CHECKIN-REAL-OT-SEAMLESS-TABS',
 
   // External links are kept in one place. Config sheet values override these defaults at runtime.
   EXTERNAL_LINKS: {

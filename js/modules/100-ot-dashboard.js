@@ -12,7 +12,6 @@ let otSystemInitialized = false;
 let otRequestInFlight = null;
 let otChartRetryTimer = null;
 let otRequestVersion = 0;
-let otUsingMockData = false;
 
 function initOTData() { return initOTSystem(); }
 
@@ -48,7 +47,7 @@ function setOTDataState_(mode, text) {
   const badge = document.getElementById('ot-data-state');
   if (!badge) return;
   badge.className = `ces-ot-state ${mode || ''}`.trim();
-  const icon = mode === 'live' ? 'fa-circle-check' : mode === 'error' ? 'fa-triangle-exclamation' : 'fa-circle-notch fa-spin';
+  const icon = mode === 'live' ? 'fa-circle-check' : mode === 'empty' ? 'fa-circle-info' : mode === 'error' ? 'fa-triangle-exclamation' : 'fa-circle-notch fa-spin';
   badge.innerHTML = `<i class="fas ${icon}"></i> ${escapeOTHtml_(text || '')}`;
 }
 
@@ -60,32 +59,28 @@ function fetchOTData(forceRefresh) {
   setOTDataState_('', forceRefresh ? 'Refreshing OT data' : 'Loading OT data');
 
   const request = (window.CES_API && typeof window.CES_API.callFunction === 'function')
-    ? window.CES_API.callFunction('getOTDashboardData', [!!forceRefresh], { transport:'jsonp', timeoutMs:120000, dedupe:!forceRefresh })
+    ? window.CES_API.callFunction('getOTDashboardData', [!!forceRefresh], { transport:'jsonp', timeoutMs:120000, dedupe:!forceRefresh, priority:'active', userAction:true, module:'ot' })
     : Promise.reject(new Error('CES API bridge is not available.'));
 
   otRequestInFlight = Promise.resolve(request).then(function(data) {
     if (requestVersion !== otRequestVersion) return rawOTData;
-    const liveRecords = normalizeOTRecords_(data && data.records ? data.records : data);
-    otUsingMockData = !liveRecords.length || liveRecords.every(function(record){ return Number(record.otHours || 0) <= 0; });
-    rawOTData = otUsingMockData ? buildOTMockData_(liveRecords) : liveRecords;
+    rawOTData = normalizeOTRecords_(data && data.records ? data.records : data);
     ensureOTYears_(rawOTData);
     selectLatestAvailableOTPeriod_(rawOTData, true);
-    setOTDataState_(otUsingMockData ? 'mock' : 'live', otUsingMockData ? 'Mock preview · no live OT hours' : `${rawOTData.length} live records`);
+    setOTDataState_(rawOTData.length ? 'live' : 'empty', rawOTData.length ? `${rawOTData.length} live records` : 'No calculated OT records');
     applyOTFilters();
     if (forceRefresh && window.Swal) {
-      Swal.fire({ icon:otUsingMockData ? 'info' : (rawOTData.length ? 'success' : 'info'), title:otUsingMockData ? 'OT mock preview' : 'OT data updated', text:otUsingMockData ? 'Live data has no OT hours. Sample data is shown for layout preview only.' : (rawOTData.length ? `${rawOTData.length} records loaded` : 'ไม่พบข้อมูล OT ที่คำนวณแล้ว'), timer:2000, showConfirmButton:false });
+      Swal.fire({ icon:rawOTData.length ? 'success' : 'info', title:'OT data updated', text:rawOTData.length ? `${rawOTData.length} real records loaded` : 'ไม่พบข้อมูล OT จริงที่คำนวณแล้ว', timer:2000, showConfirmButton:false });
     }
     return rawOTData;
   }).catch(function(error) {
     if (requestVersion !== otRequestVersion) return rawOTData;
-    otUsingMockData = true;
-    rawOTData = buildOTMockData_([]);
+    rawOTData = [];
     currentFilteredOTData = [];
     ensureOTYears_(rawOTData);
-    selectLatestAvailableOTPeriod_(rawOTData, false);
-    setOTDataState_('mock', 'Mock preview · OT API unavailable');
+    setOTDataState_('error', 'OT data unavailable');
     applyOTFilters();
-    if (window.Swal) Swal.fire({ icon:'warning', title:'OT API unavailable', text:otErrorMessage_(error) + ' — sample data is displayed for preview only.', confirmButtonColor:'#003DA5' });
+    if (window.Swal) Swal.fire({ icon:'warning', title:'OT data unavailable', text:otErrorMessage_(error), confirmButtonColor:'#003DA5' });
     return rawOTData;
   }).finally(function() {
     if (loadingToken && window.CES_UI) window.CES_UI.end(loadingToken);
@@ -115,22 +110,6 @@ function normalizeOTRecords_(records) {
       workHours:Number.isFinite(workHours) ? Math.max(0,workHours) : 0
     };
   }).filter(r => r.month >= 1 && r.month <= 12 && r.year >= 2020 && ['MED','LAB','EHS'].includes(r.team) && (r.otHours > 0 || r.workHours > 0));
-}
-
-function buildOTMockData_(liveRecords) {
-  const fallbackYear = Number(document.getElementById('ot-filter-year') && document.getElementById('ot-filter-year').value) || new Date().getFullYear();
-  const year = (Array.isArray(liveRecords) && liveRecords.find(function(record){ return record.year; }) || {}).year || fallbackYear;
-  const samples = [
-    ['MED','Sample MED Engineer',1,14.5,42.0],['LAB','Sample LAB Engineer',1,8.0,40.0],['EHS','Sample EHS Engineer',1,5.5,38.0],
-    ['MED','Sample MED Engineer',2,18.0,44.0],['LAB','Sample LAB Engineer',2,9.5,41.0],['EHS','Sample EHS Engineer',2,6.0,39.0],
-    ['MED','Sample MED Engineer',3,12.0,40.0],['LAB','Sample LAB Engineer',3,11.0,42.0],['EHS','Sample EHS Engineer',3,7.5,40.0],
-    ['MED','Sample MED Engineer',4,16.5,43.0],['LAB','Sample LAB Engineer',4,7.0,39.0],['EHS','Sample EHS Engineer',4,9.0,41.0],
-    ['MED','Sample MED Engineer',5,10.0,40.0],['LAB','Sample LAB Engineer',5,12.0,43.0],['EHS','Sample EHS Engineer',5,8.0,40.0],
-    ['MED','Sample MED Engineer',6,15.0,42.0],['LAB','Sample LAB Engineer',6,9.0,40.0],['EHS','Sample EHS Engineer',6,6.5,38.0]
-  ];
-  return samples.map(function(item,index){
-    return { id:'OT-MOCK-'+(index+1), source:'MOCK', date:String(year)+'-'+String(item[2]).padStart(2,'0')+'-15', month:item[2], year:Number(year), team:item[0], name:item[1], userId:'MOCK-'+item[0], otHours:item[3], workHours:item[4], isMock:true };
-  });
 }
 
 function ensureOTYears_(records) {
@@ -200,12 +179,12 @@ function renderOTTable(filteredData) {
     map[key].totalOT += record.otHours; map[key].totalWork += record.workHours; map[key].entries++;
   });
   const rows = Object.values(map).sort((a,b) => b.totalOT-a.totalOT || a.name.localeCompare(b.name));
-  if (subtitle) subtitle.textContent = `${rows.length} staff · ${filteredData.length} OT records${otUsingMockData ? ' · MOCK PREVIEW' : ''}`;
+  if (subtitle) subtitle.textContent = `${rows.length} staff · ${filteredData.length} OT records`;
   if (!rows.length) { tbody.innerHTML = '<tr><td colspan="4" class="ces-ot-empty">ไม่พบข้อมูล OT ในช่วงเวลาที่เลือก</td></tr>'; return; }
   tbody.innerHTML = rows.map(staff => `<tr><td class="font-bold text-slate-700">${escapeOTHtml_(staff.name)}</td><td class="text-center"><span class="ces-team-label ${staff.team.toLowerCase()}">${staff.team}</span></td><td class="text-center font-bold text-slate-600">${staff.totalWork.toFixed(1)}</td><td class="text-center font-black text-[#003DA5]">${formatOTHours_(staff.totalOT)}</td></tr>`).join('');
 }
 
-function ensureApexChartsV18_() {
+function ensureApexCharts_() {
   if (typeof ApexCharts !== 'undefined') return Promise.resolve();
   if (window.CES_OT_APEX_PROMISE) return window.CES_OT_APEX_PROMISE;
   window.CES_OT_APEX_PROMISE = window.CES_loadLib
@@ -216,12 +195,12 @@ function ensureApexChartsV18_() {
 
 function renderCharts(filteredData) {
   if (otChartRetryTimer) clearTimeout(otChartRetryTimer);
-  ensureApexChartsV18_().then(function() { renderChartsReadyV18_(filteredData); }).catch(function(error) {
+  ensureApexCharts_().then(function() { renderChartsReady_(filteredData); }).catch(function(error) {
     console.error('[OT charts]',error);
   });
 }
 
-function renderChartsReadyV18_(filteredData) {
+function renderChartsReady_(filteredData) {
   const teamTotals = {MED:0,LAB:0,EHS:0};
   filteredData.forEach(r => { if (teamTotals[r.team] != null) teamTotals[r.team] += r.otHours; });
   const donutTarget = document.querySelector('#ot-team-chart');
@@ -270,7 +249,7 @@ function exportOTData() {
   let csv='\uFEFFStaff Name,Team,Working Hours,OT Hours\n';
   Object.values(summary).forEach(r => { csv += [r.name,r.team,r.work.toFixed(2),r.ot.toFixed(2)].map(v=>`"${String(v).replace(/"/g,'""')}"`).join(',')+'\n'; });
   const blob=new Blob([csv],{type:'text/csv;charset=utf-8'}),url=URL.createObjectURL(blob),link=document.createElement('a');
-  link.href=url;link.download=`OT_Report_${otUsingMockData ? 'MOCK_' : ''}${new Date().toISOString().slice(0,10)}.csv`;document.body.appendChild(link);link.click();link.remove();setTimeout(()=>URL.revokeObjectURL(url),500);
+  link.href=url;link.download=`OT_Report_${new Date().toISOString().slice(0,10)}.csv`;document.body.appendChild(link);link.click();link.remove();setTimeout(()=>URL.revokeObjectURL(url),500);
 }
 function setOTText_(id,value){const el=document.getElementById(id);if(el)el.textContent=value;}
 function formatOTHours_(value){const n=Number(value)||0;return n.toLocaleString(undefined,{minimumFractionDigits:n%1?1:0,maximumFractionDigits:1});}
