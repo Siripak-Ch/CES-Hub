@@ -9,10 +9,10 @@
     </div>
     <div class="ces-standard-actions">
       <span class="ces-health-updated" id="health-last-updated"><i class="far fa-clock"></i> Not checked</span>
-      <button class="ces-header-action-btn ces-action-neutral" data-ces-health-action onclick="loadSystemHealth(true)" title="Quick Check" aria-label="Quick Check"><i class="fas fa-rotate"></i></button>
-      <button class="ces-header-action-btn ces-action-neutral" data-ces-health-action onclick="runFrontendAssetAudit(true)" title="Check Frontend" aria-label="Check Frontend"><i class="fas fa-file-circle-check"></i></button>
-      <button class="ces-header-action-btn ces-action-primary ces-action-text" data-ces-health-action onclick="runFullApiAudit()"><i class="fas fa-vial-circle-check"></i><span>Run API E2E</span></button>
-      <button class="ces-header-action-btn ces-action-neutral" onclick="exportSystemHealthJson()" title="Export health report JSON" aria-label="Export health report JSON"><i class="fas fa-file-arrow-down"></i></button>
+      <button class="ces-header-action-btn ces-action-neutral" data-ces-health-action onclick="loadSystemHealthV18(true)" title="Quick Check" aria-label="Quick Check"><i class="fas fa-rotate"></i></button>
+      <button class="ces-header-action-btn ces-action-neutral" data-ces-health-action onclick="runFrontendAssetAuditV18(true)" title="Check Frontend" aria-label="Check Frontend"><i class="fas fa-file-circle-check"></i></button>
+      <button class="ces-header-action-btn ces-action-primary ces-action-text" data-ces-health-action onclick="runFullApiAuditV18()"><i class="fas fa-vial-circle-check"></i><span>Run API E2E</span></button>
+      <button class="ces-header-action-btn ces-action-neutral" onclick="exportSystemHealthJsonV18()" title="Export health report JSON" aria-label="Export health report JSON"><i class="fas fa-file-arrow-down"></i></button>
     </div>
   </div>
 
@@ -63,10 +63,10 @@
       <div class="ces-standard-card-head">
         <div><h3><i class="fas fa-diagram-project"></i> Function End-to-End Results</h3><p>Each safe module is invoked through the real API router</p></div>
         <div class="ces-health-filter-tabs" id="health-probe-filter">
-          <button class="active" data-status="ALL" onclick="filterHealthProbes('ALL')">All</button>
-          <button data-status="PASS" onclick="filterHealthProbes('PASS')">Pass</button>
-          <button data-status="WARN" onclick="filterHealthProbes('WARN')">Warn</button>
-          <button data-status="FAIL" onclick="filterHealthProbes('FAIL')">Fail</button>
+          <button class="active" data-status="ALL" onclick="filterHealthProbesV18('ALL')">All</button>
+          <button data-status="PASS" onclick="filterHealthProbesV18('PASS')">Pass</button>
+          <button data-status="WARN" onclick="filterHealthProbesV18('WARN')">Warn</button>
+          <button data-status="FAIL" onclick="filterHealthProbesV18('FAIL')">Fail</button>
         </div>
       </div>
       <div class="ces-health-table-wrap">
@@ -82,7 +82,7 @@
     <div class="ces-standard-card-head">
       <div><h3><i class="fas fa-browser"></i> Frontend Deployment & Runtime</h3><p>Detects missing GitHub Pages files, duplicate IDs, missing views and unavailable module functions</p></div>
       <div class="ces-health-api-tools">
-        <select id="health-frontend-filter" onchange="renderFrontendAudit()"><option value="ALL">All frontend checks</option><option value="PASS">Pass</option><option value="WARN">Warn</option><option value="FAIL">Fail</option></select>
+        <select id="health-frontend-filter" onchange="renderFrontendAuditV18()"><option value="ALL">All frontend checks</option><option value="PASS">Pass</option><option value="WARN">Warn</option><option value="FAIL">Fail</option></select>
         <span class="ces-health-count-badge" id="health-frontend-count">0 checks</span>
       </div>
     </div>
@@ -98,8 +98,8 @@
     <div class="ces-standard-card-head ces-health-api-head">
       <div><h3><i class="fas fa-network-wired"></i> Public API Function Inventory</h3><p>Every function exposed through the Apps Script allowlist</p></div>
       <div class="ces-health-api-tools">
-        <input id="health-api-search" type="search" placeholder="Search function…" oninput="renderHealthApiInventory()">
-        <select id="health-api-mode" onchange="renderHealthApiInventory()"><option value="ALL">All routes</option><option value="READ_ROUTE">Read routes</option><option value="WRITE_READINESS">Write readiness</option><option value="FAIL">Missing / failed</option></select>
+        <input id="health-api-search" type="search" placeholder="Search function…" oninput="renderHealthApiInventoryV18()">
+        <select id="health-api-mode" onchange="renderHealthApiInventoryV18()"><option value="ALL">All routes</option><option value="READ_ROUTE">Read routes</option><option value="WRITE_READINESS">Write readiness</option><option value="FAIL">Missing / failed</option></select>
         <span class="ces-health-count-badge" id="health-api-count">0 routes</span>
       </div>
     </div>

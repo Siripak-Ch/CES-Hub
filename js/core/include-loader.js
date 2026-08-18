@@ -147,29 +147,16 @@
           return { item: item, code: '', failed: true, error: error };
         });
     })).then(function (results) {
-      // Preserve script execution order, but yield between optional/deferred
-      // modules. Previously every fetched script was appended in one long
-      // synchronous task, which delayed clicks and local SweetAlert modals.
-      var chain = Promise.resolve();
       results.forEach(function (result) {
-        chain = chain.then(function () {
-          if (result.failed || !result.code) return null;
-          var script = document.createElement('script');
-          script.setAttribute('data-ces-source', baseUrl(result.item.url));
-          script.text = result.code + '\n//# sourceURL=' + baseUrl(result.item.url);
-          document.head.appendChild(script);
-          if (!result.item.optional) return null;
-          return new Promise(function (resolve) {
-            if (typeof requestAnimationFrame === 'function') requestAnimationFrame(function(){setTimeout(resolve,0);});
-            else setTimeout(resolve,0);
-          });
-        });
+        if (result.failed || !result.code) return;
+        var script = document.createElement('script');
+        script.setAttribute('data-ces-source', baseUrl(result.item.url));
+        script.text = result.code + '\n//# sourceURL=' + baseUrl(result.item.url);
+        document.head.appendChild(script);
       });
-      return chain.then(function () {
-        report.completedAt = new Date().toISOString();
-        try { window.dispatchEvent(new CustomEvent('ces:boot-complete', { detail: report })); } catch (ignore) {}
-        return results;
-      });
+      report.completedAt = new Date().toISOString();
+      try { window.dispatchEvent(new CustomEvent('ces:boot-complete', { detail: report })); } catch (ignore) {}
+      return results;
     }).catch(function (err) { showBootError(err); throw err; });
   }
 

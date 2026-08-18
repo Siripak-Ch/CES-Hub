@@ -300,8 +300,8 @@
       }
       return true;
     });
-    return typeof window.kpiSortRowsByDate === 'function'
-      ? window.kpiSortRowsByDate(filtered)
+    return typeof window.kpiSortRowsByDateV36 === 'function'
+      ? window.kpiSortRowsByDateV36(filtered)
       : filtered;
   }
 
@@ -410,10 +410,10 @@
 
     var filtered = labFilteredRows();
     labRenderPerformance(filtered);
-    var pageMeta = typeof window.kpiPaginateRows === 'function'
-      ? window.kpiPaginateRows(filtered)
+    var pageMeta = typeof window.kpiPaginateRowsV36 === 'function'
+      ? window.kpiPaginateRowsV36(filtered)
       : { rows:filtered.slice(0, 10), page:1, pages:Math.max(1, Math.ceil(filtered.length / 10)), total:filtered.length, start:0, end:Math.min(10, filtered.length) };
-    if (typeof window.kpiRenderPagination === 'function') window.kpiRenderPagination(pageMeta);
+    if (typeof window.kpiRenderPaginationV36 === 'function') window.kpiRenderPaginationV36(pageMeta);
 
     var counter = byId('kpi-filtered-count');
     if (counter) {
@@ -669,7 +669,7 @@
         btn.disabled = false;
         if (res && res.success) {
           window.Swal.fire({ icon:'success', title:'บันทึก LAB KPI แล้ว', timer:1000, showConfirmButton:false });
-          if (typeof window.cesKpiClearCache === 'function') window.cesKpiClearCache('LAB');
+          if (typeof window.cesKpiClearCacheV36 === 'function') window.cesKpiClearCacheV36('LAB');
           window.fetchKPIData(rowId, true);
         } else {
           window.Swal.fire('LAB KPI Error', ((res && res.errorCode) ? '[' + res.errorCode + '] ' : '') + ((res && res.message) || 'Save failed'), 'error');
@@ -678,7 +678,7 @@
       .updateKPIStatusByTeam('LAB', rowId, 'LAB Status', newStatus, note, actor);
   }
 
-  function labApplyDashboardResponse(res, keepOpenRowId, fromCache) {
+  function labApplyDashboardResponseV36(res, keepOpenRowId, fromCache) {
     if (!res || !res.success) return false;
     globalKpiData = Array.isArray(res.data) ? res.data : [];
     globalKpiSummary = res.summary || null;
@@ -705,9 +705,9 @@
     var tbody = byId('kpi-table-body');
     var bypassCache = !!forceRefresh || !!keepOpenRowId;
 
-    if (!bypassCache && typeof window.cesKpiReadCache === 'function') {
-      var cached = window.cesKpiReadCache('LAB');
-      if (cached && labApplyDashboardResponse(cached, null, true)) return;
+    if (!bypassCache && typeof window.cesKpiReadCacheV36 === 'function') {
+      var cached = window.cesKpiReadCacheV36('LAB');
+      if (cached && labApplyDashboardResponseV36(cached, null, true)) return;
     }
 
     if (!keepOpenRowId && tbody) {
@@ -725,8 +725,8 @@
           if (!keepOpenRowId && tbody) tbody.innerHTML = '<tr><td colspan="7" class="text-center py-10">' + esc((res && res.message) || 'Cannot load LAB data') + '</td></tr>';
           return;
         }
-        if (typeof window.cesKpiWriteCache === 'function') window.cesKpiWriteCache('LAB', res);
-        labApplyDashboardResponse(res, keepOpenRowId, false);
+        if (typeof window.cesKpiWriteCacheV36 === 'function') window.cesKpiWriteCacheV36('LAB', res);
+        labApplyDashboardResponseV36(res, keepOpenRowId, false);
       })
       .getKPIDashboardByTeam('LAB', { forceRefresh:!!forceRefresh || !!keepOpenRowId });
   }

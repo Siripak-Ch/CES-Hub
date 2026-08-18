@@ -303,7 +303,7 @@
     }
   }
 
-  window.refreshCesAiOnlineStatus = refreshOnlineStatus;
+  window.refreshCesAiOnlineStatusV225 = refreshOnlineStatus;
 
   function addOperationStatus(text) {
     if (!el.messages) return null;
@@ -527,7 +527,7 @@
   function clearPendingEvaluation() { try { sessionStorage.removeItem(EVAL_PENDING_KEY); } catch (e) {} if (state.evaluationTimer) clearTimeout(state.evaluationTimer); state.evaluationTimer=null; if(el.launcher)el.launcher.classList.remove('has-evaluation'); }
 
 
-  function splitAnswerSteps(text, maxParts) {
+  function splitAnswerStepsV208(text, maxParts) {
     var clean = String(text || '').replace(/\r/g,'').trim();
     if (!clean) return [];
     var parts = clean.split(/\n+/).map(function(x){return x.replace(/^\s*(?:[•\-*]|\d+[.)])\s*/,'').trim();}).filter(Boolean);
@@ -539,12 +539,12 @@
     if (parts.length > maxParts) parts = parts.slice(0,maxParts-1).concat([parts.slice(maxParts-1).join(' ')]);
     return parts;
   }
-  function friendlyTabName(tab) {
+  function friendlyTabNameV208(tab) {
     var names={portal:'หน้า Home',management_overview:'Management Overview',yearly:'Job Dashboard',revenue:'Revenue Dashboard',ot:'OT Dashboard',service:'แบบประเมินการใช้บริการ',report:'แบบประเมินรายงานผล',calendar:'Master Calendar',checkin:'Check-in',car_booking:'Car Booking',van_booking:'Van Booking',weekly:'Weekly Report',kpi:'KPI Tracking',report_manage:'Report Management',stock_dashboard:'Infusion Pump Dashboard',inventory:'Inventory',check_stock:'Check Stock',team_information:'Team Information',team_plan:'Team Plan',monthly_report:'Monthly Report',users:'User Management',ces_evaluation:'CES Hub Evaluation',ces_ai_knowledge:'CES AI Knowledge',health:'System Health',setting:'Setting'};
     return names[String(tab||'')] || String(tab||'ฟังก์ชันที่เกี่ยวข้อง').replace(/_/g,' ');
   }
-  function renderStructuredAnswer(bubble, text, result) {
-    var parts=splitAnswerSteps(text, result && result.targetTab ? 3 : 4);
+  function renderStructuredAnswerV208(bubble, text, result) {
+    var parts=splitAnswerStepsV208(text, result && result.targetTab ? 3 : 4);
     var ol=document.createElement('ol');ol.className='ces-ai-answer-steps-v208';
     parts.forEach(function(part){var li=document.createElement('li');var body=document.createElement('span');body.textContent=part;li.appendChild(body);ol.appendChild(li);});
     bubble.appendChild(ol);
@@ -556,7 +556,7 @@
     var bubble = document.createElement('div');
     bubble.className = 'ces-ai-local-bubble';
     if (roleName === 'user' || !result) bubble.textContent = String(text || '');
-    else renderStructuredAnswer(bubble, text, result);
+    else renderStructuredAnswerV208(bubble, text, result);
     row.appendChild(bubble);
 
     if (roleName !== 'user' && result) {
@@ -569,7 +569,7 @@
       var actions = document.createElement('div'); actions.className = 'ces-ai-local-actions';
       if (result.targetTab && typeof window.switchTab === 'function') {
         var openBtn = document.createElement('button'); openBtn.type = 'button'; openBtn.className = 'ces-ai-local-action';
-        openBtn.innerHTML = '<span class="ces-ai-action-step-no">4</span><span><b>เปิดฟังก์ชัน</b><small>' + escapeHtml(friendlyTabName(result.targetTab)) + '</small></span><i class="fas fa-arrow-up-right-from-square"></i>'; openBtn.classList.add('ces-ai-function-link-v208');
+        openBtn.innerHTML = '<span class="ces-ai-action-step-no">4</span><span><b>เปิดฟังก์ชัน</b><small>' + escapeHtml(friendlyTabNameV208(result.targetTab)) + '</small></span><i class="fas fa-arrow-up-right-from-square"></i>'; openBtn.classList.add('ces-ai-function-link-v208');
         openBtn.addEventListener('click', function () { window.switchTab(result.targetTab); }); actions.appendChild(openBtn);
       }
       var yes = document.createElement('button'); yes.type = 'button'; yes.className = 'ces-ai-local-feedback'; yes.textContent = '👍 มีประโยชน์';

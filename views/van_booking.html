@@ -8,14 +8,14 @@
       <a id="van-book-form-v55" href="https://forms.gle/Tra5UBHtbMWpXvhr7" target="_blank" rel="noopener" class="ces-vehicle-action ces-action-primary"><i class="fas fa-calendar-plus"></i><span>Book Van</span></a>
       <a id="van-open-calendar-v55" href="https://calendar.google.com/calendar/u/0/r?cid=4a66f8df81e68d752715957a3805219e951d91c7b1c375e8996424ca2c55fef6%40group.calendar.google.com" target="_blank" rel="noopener" class="ces-vehicle-action ces-action-neutral"><i class="fas fa-arrow-up-right-from-square"></i><span>Google Calendar</span></a>
       <button type="button" onclick="exportVanBookingExcel()" class="ces-vehicle-action ces-action-excel ces-action-icon-only" title="Download Van Booking Excel" aria-label="Download Van Booking Excel"><i class="fas fa-file-excel"></i></button>
-      <button id="van-refresh-v55" type="button" onclick="refreshVanBookingCalendar(this)" class="ces-vehicle-action ces-action-neutral ces-action-icon-only" title="Refresh calendar and details" aria-label="Refresh calendar and details"><i class="fas fa-rotate-right"></i></button>
+      <button id="van-refresh-v55" type="button" onclick="refreshVanBookingCalendarV55(this)" class="ces-vehicle-action ces-action-neutral ces-action-icon-only" title="Refresh calendar and details" aria-label="Refresh calendar and details"><i class="fas fa-rotate-right"></i></button>
     </div>
   </div>
 
   <div class="bg-white rounded-2xl border border-slate-100 shadow-sm p-3 flex flex-wrap items-end gap-3">
-    <div><label class="ces-form-label">Year</label><select id="van-year-filter-v55" class="ces-book-input min-w-[120px]" onchange="changeVanBookingFilter()"></select></div>
-    <div><label class="ces-form-label">Month</label><select id="van-month-filter-v55" class="ces-book-input min-w-[140px]" onchange="changeVanBookingFilter()"><option value="ALL">All Months</option><option value="01">Jan</option><option value="02">Feb</option><option value="03">Mar</option><option value="04">Apr</option><option value="05">May</option><option value="06">Jun</option><option value="07">Jul</option><option value="08">Aug</option><option value="09">Sep</option><option value="10">Oct</option><option value="11">Nov</option><option value="12">Dec</option></select></div>
-    <div><label class="ces-form-label">Team</label><select id="van-team-filter-v55" class="ces-book-input min-w-[130px]" onchange="changeVanBookingFilter()"><option value="ALL">All Teams</option><option value="MED">MED</option><option value="LAB">LAB</option><option value="EHS">EHS</option><option value="ENV">ENV</option></select></div>
+    <div><label class="ces-form-label">Year</label><select id="van-year-filter-v55" class="ces-book-input min-w-[120px]" onchange="changeVanBookingFilterV57()"></select></div>
+    <div><label class="ces-form-label">Month</label><select id="van-month-filter-v55" class="ces-book-input min-w-[140px]" onchange="changeVanBookingFilterV57()"><option value="ALL">All Months</option><option value="01">Jan</option><option value="02">Feb</option><option value="03">Mar</option><option value="04">Apr</option><option value="05">May</option><option value="06">Jun</option><option value="07">Jul</option><option value="08">Aug</option><option value="09">Sep</option><option value="10">Oct</option><option value="11">Nov</option><option value="12">Dec</option></select></div>
+    <div><label class="ces-form-label">Team</label><select id="van-team-filter-v55" class="ces-book-input min-w-[130px]" onchange="changeVanBookingFilterV57()"><option value="ALL">All Teams</option><option value="MED">MED</option><option value="LAB">LAB</option><option value="EHS">EHS</option><option value="ENV">ENV</option></select></div>
     <div id="van-filter-note-v55" class="pb-2 text-[10px] font-bold text-slate-400">Loading schedule…</div>
   </div>
 
@@ -39,9 +39,9 @@
       <div class="van-calendar-shell relative rounded-2xl overflow-hidden border border-slate-200 bg-slate-50">
         <div class="van-calendar-toolbar absolute inset-x-0 top-0 z-10 flex items-center justify-between gap-3 px-3 bg-white border-b border-slate-200">
           <div class="flex items-center gap-2">
-            <button type="button" onclick="goVanCalendarToday()" class="h-8 px-3 rounded-lg border border-slate-300 bg-white text-[10px] font-black text-slate-700 hover:bg-slate-50">Today</button>
-            <button type="button" onclick="changeVanCalendarMonth(-1)" class="vehicle-calendar-nav" title="Previous month"><i class="fas fa-chevron-left"></i></button>
-            <button type="button" onclick="changeVanCalendarMonth(1)" class="vehicle-calendar-nav" title="Next month"><i class="fas fa-chevron-right"></i></button>
+            <button type="button" onclick="goVanCalendarTodayV57()" class="h-8 px-3 rounded-lg border border-slate-300 bg-white text-[10px] font-black text-slate-700 hover:bg-slate-50">Today</button>
+            <button type="button" onclick="changeVanCalendarMonthV57(-1)" class="vehicle-calendar-nav" title="Previous month"><i class="fas fa-chevron-left"></i></button>
+            <button type="button" onclick="changeVanCalendarMonthV57(1)" class="vehicle-calendar-nav" title="Next month"><i class="fas fa-chevron-right"></i></button>
           </div>
           <div id="van-calendar-period-v57" class="text-sm font-black text-slate-700">Calendar</div>
           <div class="h-8 px-3 inline-flex items-center rounded-lg border border-slate-200 bg-slate-50 text-[10px] font-black text-slate-600">Month</div>

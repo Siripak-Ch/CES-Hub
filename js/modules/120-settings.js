@@ -10,9 +10,9 @@
      * ฟังก์ชันเริ่มต้นเมื่อเข้าหน้า Setting: ทำหน้าที่ดึงข้อมูลจาก Server มาแสดงผล[cite: 12]
      */
     function initSettings() {
-        loadPortalLinksSetting(false);
-        try { if (typeof window.refreshGeminiSetting === 'function') window.refreshGeminiSetting(); } catch(ignore) {}
-        try { if (typeof window.updatePermissionSummary === 'function') window.updatePermissionSummary(); } catch(ignore2) {}
+        loadPortalLinksSettingV20(false);
+        try { if (typeof window.refreshGeminiSettingV226 === 'function') window.refreshGeminiSettingV226(); } catch(ignore) {}
+        try { if (typeof window.updatePermissionSummaryV228 === 'function') window.updatePermissionSummaryV228(); } catch(ignore2) {}
         if(isSettingsLoaded) return;
         
         // แสดงสถานะกำลังโหลด (Disable ช่องกรอกข้อมูลชั่วคราว)[cite: 12]
@@ -54,10 +54,10 @@
         ['MED','LAB','EHS','ENV','TES','QM','MNG'].forEach(team => {
             const value = data['TEAM_COLOR_' + team] || colorDefaults[team];
             setVal('cfg-color-' + team.toLowerCase(), value);
-            syncTeamColorPreview(team, value, false);
+            syncTeamColorPreviewV41(team, value, false);
         });
         if (typeof window.cesApplyTeamColorConfig === 'function') window.cesApplyTeamColorConfig(data);
-        try { if (data.ROLE_PERMISSIONS && typeof window.updatePermissionSummary === 'function') window.updatePermissionSummary(JSON.parse(data.ROLE_PERMISSIONS)); } catch(ignorePermV228) {}
+        try { if (data.ROLE_PERMISSIONS && typeof window.updatePermissionSummaryV228 === 'function') window.updatePermissionSummaryV228(JSON.parse(data.ROLE_PERMISSIONS)); } catch(ignorePermV228) {}
 
         // 2. รหัสปฏิทิน (Calendar IDs)[cite: 12]
         setVal('cfg-cal-med', (!data.CAL_ID_MED || String(data.CAL_ID_MED).toLowerCase()==='bmecalibration@gmail.com') ? 'cescalmedteam@gmail.com' : data.CAL_ID_MED);
@@ -146,7 +146,7 @@
         };
     }
 
-    function syncTeamColorPreview(team, value, applyNow = true) {
+    function syncTeamColorPreviewV41(team, value, applyNow = true) {
         const code = String(team || '').toUpperCase();
         const hex = /^#[0-9a-f]{6}$/i.test(String(value || '')) ? String(value).toLowerCase() : ((window.CES_TEAM_COLOR_DEFAULTS || {})[code] || '#64748b');
         const input = document.getElementById('cfg-color-' + code.toLowerCase());
@@ -159,17 +159,17 @@
             window.cesApplyTeamColorConfig(current);
         }
     }
-    window.syncTeamColorPreview = syncTeamColorPreview;
+    window.syncTeamColorPreviewV41 = syncTeamColorPreviewV41;
 
-    function resetTeamColors() {
+    function resetTeamColorsV41() {
         const defaults = window.CES_TEAM_COLOR_DEFAULTS || {MED:'#004aad',LAB:'#19a7ce',EHS:'#0fc1a1',ENV:'#7ed957',TES:'#ffde59',QM:'#f97316',MNG:'#b4b4b4'};
-        ['MED','LAB','EHS','ENV','TES','QM','MNG'].forEach(team => syncTeamColorPreview(team, defaults[team], false));
+        ['MED','LAB','EHS','ENV','TES','QM','MNG'].forEach(team => syncTeamColorPreviewV41(team, defaults[team], false));
         if (typeof window.cesApplyTeamColorConfig === 'function') {
             const patch = {}; ['MED','LAB','EHS','ENV','TES','QM','MNG'].forEach(team => patch['TEAM_COLOR_' + team] = defaults[team]);
             window.cesApplyTeamColorConfig(Object.assign({}, (typeof globalConfig !== 'undefined' ? globalConfig : {}), patch));
         }
     }
-    window.resetTeamColors = resetTeamColors;
+    window.resetTeamColorsV41 = resetTeamColorsV41;
 
     async function saveSettingsViaJsonp_(configData) {
         if (!window.CES_API || typeof window.CES_API.callFunction !== 'function') {
@@ -217,7 +217,7 @@
         line:['LINE_TOKEN_MED','LINE_TOKEN_LAB','LINE_TOKEN_EHS','LINE_TOKEN']
     };
 
-    async function saveSettingSection(section, button) {
+    async function saveSettingSectionV264(section, button) {
         const keys = CES_SETTING_SECTION_KEYS_V264[String(section || '').toLowerCase()] || [];
         if (!keys.length) return;
         const all = collectFullSystemConfig_(), patch = {CONFIG_SCHEMA_VERSION:'26.4'};
@@ -239,7 +239,7 @@
             if (btn) { btn.disabled = false; btn.innerHTML = oldHtml; }
         }
     }
-    window.saveSettingSection = saveSettingSection;
+    window.saveSettingSectionV264 = saveSettingSectionV264;
 
     async function saveFullSystemConfig() {
         const configData = collectFullSystemConfig_();
@@ -267,14 +267,14 @@
 // CES Hub V20 — Configurable Portal Links / cleaner navigation
 // ============================================================
 let CES_PORTAL_LINKS_SETTING_V20=[];
-function cesScrollSetting(id){const el=document.getElementById(id);if(el)el.scrollIntoView({behavior:'smooth',block:'start'});}
-async function loadPortalLinksSetting(force){
+function cesScrollSettingV20(id){const el=document.getElementById(id);if(el)el.scrollIntoView({behavior:'smooth',block:'start'});}
+async function loadPortalLinksSettingV20(force){
   const root=document.getElementById('setting-portal-links-list');if(!root)return;
   if(force||!CES_PORTAL_LINKS_SETTING_V20.length)root.innerHTML='<div class="lg:col-span-2 py-8 text-center text-slate-400"><i class="fas fa-circle-notch fa-spin"></i> Loading links…</div>';
-  try{const res=await (async()=>{let last;for(const fn of ['getPortalLinks']){try{const r=await window.CES_API.callFunction(fn,[!!force],{transport:'jsonp',timeoutMs:30000});if(r&&r.success!==false)return r;last=new Error((r&&r.message)||fn+' failed');}catch(e){last=e;}}throw last||new Error('Cannot load portal links');})();if(!res||res.success===false)throw new Error((res&&res.message)||'Cannot load portal links');CES_PORTAL_LINKS_SETTING_V20=res.data||[];renderPortalLinksSetting();}
+  try{const res=await (async()=>{let last;for(const fn of ['getPortalLinks']){try{const r=await window.CES_API.callFunction(fn,[!!force],{transport:'jsonp',timeoutMs:30000});if(r&&r.success!==false)return r;last=new Error((r&&r.message)||fn+' failed');}catch(e){last=e;}}throw last||new Error('Cannot load portal links');})();if(!res||res.success===false)throw new Error((res&&res.message)||'Cannot load portal links');CES_PORTAL_LINKS_SETTING_V20=res.data||[];renderPortalLinksSettingV20();}
   catch(err){root.innerHTML='<div class="lg:col-span-2 py-8 text-center text-red-500 font-bold">'+String(err.message||err)+'</div>';}
 }
-function renderPortalLinksSetting(){
+function renderPortalLinksSettingV20(){
   const root=document.getElementById('setting-portal-links-list');if(!root)return;
   const sectionLabel=(code)=>({APPLICATION:'Applications & Services',NHEALTH_SERVICE:'N Health Services',INNOVATION:'Innovation'}[String(code||'').toUpperCase()]||code||'Other');
   const sectionIcon=(code)=>({APPLICATION:'fa-th-large',NHEALTH_SERVICE:'fa-hospital',INNOVATION:'fa-lightbulb'}[String(code||'').toUpperCase()]||'fa-link');
@@ -282,10 +282,10 @@ function renderPortalLinksSetting(){
   const sectionRank={APPLICATION:1,NHEALTH_SERVICE:2,INNOVATION:3};
   const rows=(CES_PORTAL_LINKS_SETTING_V20||[]).slice().sort((a,b)=>(sectionRank[String(a.section||'').toUpperCase()]||9)-(sectionRank[String(b.section||'').toUpperCase()]||9)||Number(a.sortOrder||999)-Number(b.sortOrder||999));
   const groups=['APPLICATION','NHEALTH_SERVICE','INNOVATION'].map(code=>({code,rows:rows.filter(x=>String(x.section||'').toUpperCase()===code)})).filter(g=>g.rows.length);
-  const card=(x)=>`<article class="ces-setting-link-card ${sectionClass(x.section)}"><div class="ces-setting-link-icon"><i class="fas ${x.icon||'fa-link'}"></i></div><div class="min-w-0"><div class="ces-setting-link-meta"><b>${x.titleEn||x.titleTh}</b><em>#${Number(x.sortOrder||999)}</em><small>${x.status}</small></div><p>${x.descriptionEn||x.descriptionTh||''}</p><code>${x.url||'#'}</code></div><div class="ces-setting-link-actions"><button onclick='openPortalLinkEditor(${JSON.stringify(x).replace(/'/g,"&#39;")})' title="Edit"><i class="fas fa-pen"></i></button><button class="danger" onclick="deletePortalLinkSetting('${x.id}')" title="Delete"><i class="fas fa-trash"></i></button></div></article>`;
+  const card=(x)=>`<article class="ces-setting-link-card ${sectionClass(x.section)}"><div class="ces-setting-link-icon"><i class="fas ${x.icon||'fa-link'}"></i></div><div class="min-w-0"><div class="ces-setting-link-meta"><b>${x.titleEn||x.titleTh}</b><em>#${Number(x.sortOrder||999)}</em><small>${x.status}</small></div><p>${x.descriptionEn||x.descriptionTh||''}</p><code>${x.url||'#'}</code></div><div class="ces-setting-link-actions"><button onclick='openPortalLinkEditorV20(${JSON.stringify(x).replace(/'/g,"&#39;")})' title="Edit"><i class="fas fa-pen"></i></button><button class="danger" onclick="deletePortalLinkSettingV20('${x.id}')" title="Delete"><i class="fas fa-trash"></i></button></div></article>`;
   root.innerHTML=groups.map(g=>`<section class="ces-setting-link-section-v223 ${sectionClass(g.code)}"><div class="ces-setting-link-section-head-v223"><div><i class="fas ${sectionIcon(g.code)}"></i><strong>${sectionLabel(g.code)}</strong></div><span>${g.rows.length} links</span></div><div class="ces-setting-link-section-grid-v223">${g.rows.map(card).join('')}</div></section>`).join('')||'<div class="py-8 text-center text-slate-400">No portal links configured.</div>';
 }
-async function openPortalLinkEditor(row){
+async function openPortalLinkEditorV20(row){
   row=row||{};const currentSection=String(row.section||'APPLICATION').toUpperCase();const currentSort=Math.max(1,Math.min(50,Number(row.sortOrder||1)));
   const sortOptions=Array.from({length:50},(_,i)=>i+1).map(n=>`<option value="${n}" ${n===currentSort?'selected':''}>${n}</option>`).join('');
   const result=await Swal.fire({title:row.id?'Edit Portal Link':'Add Portal Link',width:780,showCancelButton:true,confirmButtonText:'Save Link',customClass:{popup:'ces-portal-link-editor-popup'},html:`<div class="ces-portal-editor-grid">
@@ -299,7 +299,7 @@ async function openPortalLinkEditor(row){
     <label class="ces-portal-featured-toggle"><input id="pl-featured" type="checkbox" ${row.featured?'checked':''}><span>Featured / Big card</span></label>
   </div>`,preConfirm:()=>({id:row.id||'',actorId:(window.CES_CURRENT_USER||{}).id||'',section:document.getElementById('pl-section').value,sortOrder:Number(document.getElementById('pl-sort').value||1),titleTh:document.getElementById('pl-title-th').value.trim(),titleEn:document.getElementById('pl-title-en').value.trim(),descriptionTh:document.getElementById('pl-desc-th').value.trim(),descriptionEn:document.getElementById('pl-desc-en').value.trim(),url:document.getElementById('pl-url').value.trim(),icon:document.getElementById('pl-icon').value.trim(),theme:document.getElementById('pl-theme').value.trim(),status:document.getElementById('pl-status').value,featured:document.getElementById('pl-featured').checked})});
   if(!result.isConfirmed)return;
-  try{const res=await window.CES_API.callFunction('savePortalLink',[result.value],{transport:'iframe',timeoutMs:60000});if(!res||res.success===false)throw new Error((res&&res.message)||'Save failed');await loadPortalLinksSetting(true);try{localStorage.removeItem('CES_PORTAL_CACHE_V19_'+String((window.CES_CURRENT_USER||{}).id||'anonymous'));}catch(e){}Swal.fire({icon:'success',title:'Portal link saved',timer:1200,showConfirmButton:false});}catch(err){Swal.fire('Save Error',err.message||String(err),'error');}
+  try{const res=await window.CES_API.callFunction('savePortalLink',[result.value],{transport:'iframe',timeoutMs:60000});if(!res||res.success===false)throw new Error((res&&res.message)||'Save failed');await loadPortalLinksSettingV20(true);try{localStorage.removeItem('CES_PORTAL_CACHE_V19_'+String((window.CES_CURRENT_USER||{}).id||'anonymous'));}catch(e){}Swal.fire({icon:'success',title:'Portal link saved',timer:1200,showConfirmButton:false});}catch(err){Swal.fire('Save Error',err.message||String(err),'error');}
 }
-async function deletePortalLinkSetting(id){const ok=await Swal.fire({icon:'warning',title:'Delete portal link?',showCancelButton:true,confirmButtonText:'Delete',confirmButtonColor:'#dc2626'});if(!ok.isConfirmed)return;try{const res=await window.CES_API.callFunction('deletePortalLink',[{id:id,actorId:(window.CES_CURRENT_USER||{}).id||''}],{transport:'iframe',timeoutMs:50000});if(!res||res.success===false)throw new Error((res&&res.message)||'Delete failed');await loadPortalLinksSetting(true);}catch(err){Swal.fire('Delete Error',err.message||String(err),'error');}}
-window.cesScrollSetting=cesScrollSetting;window.loadPortalLinksSetting=loadPortalLinksSetting;window.openPortalLinkEditor=openPortalLinkEditor;window.deletePortalLinkSetting=deletePortalLinkSetting;
+async function deletePortalLinkSettingV20(id){const ok=await Swal.fire({icon:'warning',title:'Delete portal link?',showCancelButton:true,confirmButtonText:'Delete',confirmButtonColor:'#dc2626'});if(!ok.isConfirmed)return;try{const res=await window.CES_API.callFunction('deletePortalLink',[{id:id,actorId:(window.CES_CURRENT_USER||{}).id||''}],{transport:'iframe',timeoutMs:50000});if(!res||res.success===false)throw new Error((res&&res.message)||'Delete failed');await loadPortalLinksSettingV20(true);}catch(err){Swal.fire('Delete Error',err.message||String(err),'error');}}
+window.cesScrollSettingV20=cesScrollSettingV20;window.loadPortalLinksSettingV20=loadPortalLinksSettingV20;window.openPortalLinkEditorV20=openPortalLinkEditorV20;window.deletePortalLinkSettingV20=deletePortalLinkSettingV20;

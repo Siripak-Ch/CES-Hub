@@ -21,16 +21,16 @@ const thaiHolidays = [
     let lastRMFormData = null;
 
 
-    function rmErrorMessage(value) {
-        if (window.cesSwalMessage) return window.cesSwalMessage(value);
+    function rmErrorMessageV209(value) {
+        if (window.cesSwalMessageV209) return window.cesSwalMessageV209(value);
         if (value == null) return 'Unexpected report error.';
         if (typeof value === 'string') return value;
         if (value && (value.message || value.error || value.details)) return String(value.message || value.error || value.details);
         try { return JSON.stringify(value); } catch (ignore) { return 'Unexpected report error.'; }
     }
 
-    function rmValidateResult(res) {
-        if (!res || res.success === false) throw new Error(rmErrorMessage(res));
+    function rmValidateResultV209(res) {
+        if (!res || res.success === false) throw new Error(rmErrorMessageV209(res));
         if (!res.templatePDF || !res.timesheetPDF || !Array.isArray(res.tsData)) {
             throw new Error('Report backend returned incomplete output. Please deploy the latest Report Management backend and retry.');
         }
@@ -38,10 +38,10 @@ const thaiHolidays = [
     }
 
 
-    function rmEscapeHtml(value) {
+    function rmEscapeHtmlV22(value) {
         return String(value == null ? '' : value).replace(/[&<>"']/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
     }
-    function rmRenderSheetPreview(targetId, rows, options) {
+    function rmRenderSheetPreviewV22(targetId, rows, options) {
         const target = document.getElementById(targetId);
         if (!target) return;
         rows = Array.isArray(rows) ? rows : [];
@@ -58,14 +58,14 @@ const thaiHolidays = [
             for (let ci=0; ci<maxCols; ci++) {
                 const text = row[ci] == null ? '' : row[ci];
                 const tag = ri <= (options.headerRows || 0) ? 'th' : 'td';
-                html += '<'+tag+'>'+rmEscapeHtml(text)+'</'+tag+'>';
+                html += '<'+tag+'>'+rmEscapeHtmlV22(text)+'</'+tag+'>';
             }
             html += '</tr>';
         });
         html += '</tbody></table></div>';
         target.innerHTML = html;
     }
-    function rmSetArtifactLink(id, artifact, fallback) {
+    function rmSetArtifactLinkV22(id, artifact, fallback) {
         const el=document.getElementById(id); if(!el)return;
         const href=(artifact && (artifact.download||artifact.view||artifact.preview)) || fallback || '#';
         el.href=href; el.classList.toggle('pointer-events-none',href==='#'); el.setAttribute('aria-disabled',href==='#'?'true':'false');
@@ -211,7 +211,7 @@ function fillUserInfoRM() {
                     const mainTeam = document.getElementById('rm-mainTeam'); if (mainTeam) mainTeam.value = "";
                     initReportManage();
                     Swal.fire({ icon: 'success', title: 'Reset Successful', text: 'Data has been cleared.', timer: 2000, showConfirmButton: false, customClass: { popup: 'rounded-3xl' } });
-                }).catch(err => Swal.fire('Error', 'ไม่สามารถล้างข้อมูลใน Sheet ได้: ' + rmErrorMessage(err), 'error'));
+                }).catch(err => Swal.fire('Error', 'ไม่สามารถล้างข้อมูลใน Sheet ได้: ' + rmErrorMessageV209(err), 'error'));
             }
         });
     }
@@ -406,7 +406,7 @@ function fillUserInfoRM() {
             btnText.innerText = "GENERATE & EXPORT REPORT";
             let res;
             try {
-                res = rmValidateResult(resRaw);
+                res = rmValidateResultV209(resRaw);
             } catch (validationError) {
                 throw validationError;
             }
@@ -419,14 +419,14 @@ function fillUserInfoRM() {
             document.getElementById('rm-sendEmailSection').classList.remove('hidden');
 
             // Exact inline preview from backend sheet values; no private Sheet iframe dependency.
-            rmRenderSheetPreview('rm-tempPdfFrame', res.templatePreviewRows, {headerRows:4});
-            rmRenderSheetPreview('rm-tsPdfFrame', res.timesheetPreviewRows, {headerRows:2});
-            rmSetArtifactLink('rm-tempPdfView', {download:res.templatePDF.view || res.templatePDF.preview}, res.templatePDF.preview);
-            rmSetArtifactLink('rm-tempPdfDown', res.templatePDF, res.templatePDF.download);
-            rmSetArtifactLink('rm-tempExcelDown', res.templateExcel, res.excelTemplateUrl);
-            rmSetArtifactLink('rm-tsPdfView', {download:res.timesheetPDF.view || res.timesheetPDF.preview}, res.timesheetPDF.preview);
-            rmSetArtifactLink('rm-tsPdfDown', res.timesheetPDF, res.timesheetPDF.download);
-            rmSetArtifactLink('rm-tsExcelDown', res.timesheetExcel, res.excelTimesheetUrl);
+            rmRenderSheetPreviewV22('rm-tempPdfFrame', res.templatePreviewRows, {headerRows:4});
+            rmRenderSheetPreviewV22('rm-tsPdfFrame', res.timesheetPreviewRows, {headerRows:2});
+            rmSetArtifactLinkV22('rm-tempPdfView', {download:res.templatePDF.view || res.templatePDF.preview}, res.templatePDF.preview);
+            rmSetArtifactLinkV22('rm-tempPdfDown', res.templatePDF, res.templatePDF.download);
+            rmSetArtifactLinkV22('rm-tempExcelDown', res.templateExcel, res.excelTemplateUrl);
+            rmSetArtifactLinkV22('rm-tsPdfView', {download:res.timesheetPDF.view || res.timesheetPDF.preview}, res.timesheetPDF.preview);
+            rmSetArtifactLinkV22('rm-tsPdfDown', res.timesheetPDF, res.timesheetPDF.download);
+            rmSetArtifactLinkV22('rm-tsExcelDown', res.timesheetExcel, res.excelTimesheetUrl);
 
             document.getElementById('rm-tsPreviewBody').innerHTML = res.tsData.map(r => 
                 `<tr class="border-b hover:bg-gray-50">` + r.map(c => `<td class="p-3 border-r text-gray-700">${c}</td>`).join('') + `</tr>`
@@ -441,7 +441,7 @@ function fillUserInfoRM() {
             btnText.innerText = "GENERATE & EXPORT REPORT";
             console.error('Report Management:', err);
             if (typeof currentTab === 'undefined' || currentTab === 'report_manage' || currentTab === 'report') {
-                Swal.fire('Error', rmErrorMessage(err), 'error');
+                Swal.fire('Error', rmErrorMessageV209(err), 'error');
             }
         }
     }
@@ -466,7 +466,7 @@ function fillUserInfoRM() {
                     btn.disabled = false; spinner.classList.add('hidden');
                     Swal.fire({ icon: 'success', title: 'Sent!', text: 'Email has been sent to your manager successfully.', customClass: { popup: 'rounded-3xl' } });
                     document.getElementById('rm-sendEmailSection').classList.add('hidden');
-                }).catch(error => { btn.disabled=false; spinner.classList.add('hidden'); Swal.fire('Error', rmErrorMessage(error), 'error'); });
+                }).catch(error => { btn.disabled=false; spinner.classList.add('hidden'); Swal.fire('Error', rmErrorMessageV209(error), 'error'); });
             }
         });
     }

@@ -15,7 +15,7 @@
     window.saveFullSystemConfig=function(){var result=oldSave.apply(this,arguments);setTimeout(refreshKpiDriveButtons,800);return result;};
     window.saveFullSystemConfig.__cesV31=true;
   }
-  window.CES_OPERATIONS_PERMISSIONS_RECHECK=function(){
+  window.CES_OPERATIONS_PERMISSIONS_V31_RECHECK=function(){
     var required=['view-car_booking','view-van_booking','view-team_information','btn-car_booking','btn-van_booking','btn-team_information','kpi-drive-ehs-link','kpi-drive-env-link','cfg-line-token-med','cfg-line-token-lab','cfg-line-token-ehs'];
     var out={version:'V31',missing:required.filter(function(id){return!document.getElementById(id);}),bookingApi:typeof initVehicleBooking==='function',teamInfoApi:typeof initTeamInformation==='function',alertBadgeParent:(document.getElementById('sdAlertHeaderCount')||{}).parentElement&&document.getElementById('sdAlertHeaderCount').parentElement.getAttribute('onclick')};
     console.log('[CES V31 Recheck]',out);return out;

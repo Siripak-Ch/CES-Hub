@@ -8,9 +8,9 @@
     // ==========================================
     let currentDisplayDate = new Date();
     let currentService = 'ALL';
-    let calendarCapacityDetail = {};
-    let calendarCapacityMeta = {};
-    let calendarFullInstance = null;
+    let calendarCapacityDetailV38 = {};
+    let calendarCapacityMetaV38 = {};
+    let calendarFullInstanceV40 = null;
     
     const CAL_MAP = {
         'ALL': "https://calendar.google.com/calendar/embed?height=600&wkst=1&bgcolor=%23ffffff&ctz=Asia%2FBangkok&showTitle=0&showNav=0&showDate=1&showPrint=0&showTabs=0&showCalendars=0&showTz=1" +
@@ -28,12 +28,12 @@
         'MGT': "https://calendar.google.com/calendar/embed?src=cesmanagement2026%40gmail.com&ctz=Asia%2FBangkok"
     };
 
-    function calendarEmbedUrl_(service) {
+    function calendarEmbedUrlV41_(service) {
         const cfg=(typeof globalConfig!=='undefined'&&globalConfig)||{};
         const ids={MED:cfg.CAL_ID_MED||'cescalmedteam@gmail.com',LAB:cfg.CAL_ID_LAB||'nhealthcallab@gmail.com',EHS:cfg.CAL_ID_EHS||'natkanok.8942@gmail.com',ENV:cfg.CAL_ID_ENV||'chiraphat.env@gmail.com',TES:cfg.CAL_ID_TES||'technicalsupport.tes@gmail.com',MGT:cfg.CAL_ID_MNG||'cesmanagement2026@gmail.com'};
         const teams=service==='ALL'?['MED','LAB','EHS','ENV','TES','MGT']:[service];
         let url='https://calendar.google.com/calendar/embed?height=600&wkst=1&bgcolor=%23ffffff&ctz=Asia%2FBangkok&showTitle=0&showNav=0&showDate=1&showPrint=0&showTabs=0&showCalendars=0&showTz=1';
-        teams.forEach(team=>{ if(!ids[team])return; const color=calendarTeamStyle_(team).color; url+='&src='+encodeURIComponent(ids[team])+'&color='+encodeURIComponent(color); });
+        teams.forEach(team=>{ if(!ids[team])return; const color=calendarTeamStyleV41_(team).color; url+='&src='+encodeURIComponent(ids[team])+'&color='+encodeURIComponent(color); });
         return url;
     }
 
@@ -80,15 +80,15 @@
     }
 
 
-    function calendarTeamStyle_(team) {
-        const normalized = calendarNormalizeTeam(team);
+    function calendarTeamStyleV41_(team) {
+        const normalized = calendarNormalizeTeamV34(team);
         if (typeof window.cesGetTeamStyle === 'function') return window.cesGetTeamStyle(normalized === 'MGT' ? 'MNG' : normalized);
         const defaults = {MED:'#004aad',LAB:'#19a7ce',EHS:'#0fc1a1',ENV:'#7ed957',TES:'#ffde59',MGT:'#b4b4b4'};
         const color = defaults[normalized] || '#64748b';
         return {color,soft:'#f8fafc',border:color,text:(normalized==='MED'?'#ffffff':'#17324d')};
     }
 
-    function calendarGoogleEventUrl_(eventId, calendarId) {
+    function calendarGoogleEventUrlV41_(eventId, calendarId) {
         const id = String(eventId || '').trim(), cal = String(calendarId || '').trim();
         if (!id || !cal) return '';
         try {
@@ -98,58 +98,58 @@
     }
 
 
-    function calendarGoogleCreateUrl_(title,startDate,endDate,location) {
+    function calendarGoogleCreateUrlV42_(title,startDate,endDate,location) {
         const start=String(startDate||'').replace(/-/g,'');
-        const endExclusive=String(calendarAddDaysIso_(endDate||startDate,1)||'').replace(/-/g,'');
+        const endExclusive=String(calendarAddDaysIsoV40_(endDate||startDate,1)||'').replace(/-/g,'');
         if(!start||!endExclusive)return '';
         return 'https://calendar.google.com/calendar/render?action=TEMPLATE&text='+encodeURIComponent(title||'CES Hub Job')+'&dates='+start+'/'+endExclusive+'&location='+encodeURIComponent(location||'');
     }
 
-    function calendarShowEventPopup_(event) {
+    function calendarShowEventPopupV42_(event) {
         const p=event.extendedProps||{};
         const start=p.firstDate||event.startStr||'';
         const end=p.lastDate||start;
         const dateText=start===end?start:`${start} – ${end}`;
-        const style=calendarTeamStyle_(p.team||'');
-        const googleUrl=p.googleUrl||calendarGoogleEventUrl_(p.eventId,p.calendarId);
-        const copyUrl=calendarGoogleCreateUrl_(event.title,start,end,p.location||'');
+        const style=calendarTeamStyleV41_(p.team||'');
+        const googleUrl=p.googleUrl||calendarGoogleEventUrlV41_(p.eventId,p.calendarId);
+        const copyUrl=calendarGoogleCreateUrlV42_(event.title,start,end,p.location||'');
         const buttons=[
-          googleUrl?`<a href="${calendarEsc_(googleUrl)}" target="_blank" rel="noopener" class="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-black text-[#003DA5] hover:bg-blue-50"><i class="far fa-external-link"></i>More details</a>`:'',
-          copyUrl?`<a href="${calendarEsc_(copyUrl)}" target="_blank" rel="noopener" class="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-black text-[#003DA5] hover:bg-blue-50"><i class="fas fa-plus"></i>Copy to my calendar</a>`:''
+          googleUrl?`<a href="${calendarEscV37_(googleUrl)}" target="_blank" rel="noopener" class="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-black text-[#003DA5] hover:bg-blue-50"><i class="far fa-external-link"></i>More details</a>`:'',
+          copyUrl?`<a href="${calendarEscV37_(copyUrl)}" target="_blank" rel="noopener" class="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-black text-[#003DA5] hover:bg-blue-50"><i class="fas fa-plus"></i>Copy to my calendar</a>`:''
         ].filter(Boolean).join('');
         Swal.fire({
-          html:`<div class="text-left p-1"><div class="flex items-start gap-4"><span class="mt-1.5 w-4 h-4 rounded shrink-0" style="background:${style.color}"></span><div class="min-w-0"><div class="text-2xl font-medium text-slate-800 leading-snug">${calendarEsc_(event.title)}</div><div class="text-sm text-slate-600 mt-2">${calendarEsc_(dateText)}</div>${p.location?`<div class="text-sm text-slate-600 mt-4 flex gap-3"><i class="fas fa-location-dot mt-1 text-slate-400"></i><span>${calendarEsc_(p.location)}</span></div>`:''}<div class="text-xs font-black mt-3" style="color:${style.color}">${calendarEsc_(p.team||'')}</div></div></div><div class="mt-5 pt-4 border-t border-slate-100 flex flex-wrap gap-2">${buttons||'<span class="text-sm text-slate-400">Google Calendar link is unavailable for this event.</span>'}</div></div>`,
+          html:`<div class="text-left p-1"><div class="flex items-start gap-4"><span class="mt-1.5 w-4 h-4 rounded shrink-0" style="background:${style.color}"></span><div class="min-w-0"><div class="text-2xl font-medium text-slate-800 leading-snug">${calendarEscV37_(event.title)}</div><div class="text-sm text-slate-600 mt-2">${calendarEscV37_(dateText)}</div>${p.location?`<div class="text-sm text-slate-600 mt-4 flex gap-3"><i class="fas fa-location-dot mt-1 text-slate-400"></i><span>${calendarEscV37_(p.location)}</span></div>`:''}<div class="text-xs font-black mt-3" style="color:${style.color}">${calendarEscV37_(p.team||'')}</div></div></div><div class="mt-5 pt-4 border-t border-slate-100 flex flex-wrap gap-2">${buttons||'<span class="text-sm text-slate-400">Google Calendar link is unavailable for this event.</span>'}</div></div>`,
           width:560,showConfirmButton:false,showCloseButton:true,customClass:{popup:'rounded-[1.5rem]'}
         });
     }
 
-    function calendarDateIso_(value) {
+    function calendarDateIsoV40_(value) {
         const parts = String(value || '').trim().split('/');
         if (parts.length !== 3) return '';
         return `${parts[2]}-${String(parts[1]).padStart(2,'0')}-${String(parts[0]).padStart(2,'0')}`;
     }
 
-    function calendarAddDaysIso_(iso, days) {
+    function calendarAddDaysIsoV40_(iso, days) {
         const d = new Date(`${iso}T00:00:00`);
         if (Number.isNaN(d.getTime())) return iso;
         d.setDate(d.getDate() + Number(days || 0));
         return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
     }
 
-    function calendarEventBase_(uniqueKey) {
+    function calendarEventBaseV40_(uniqueKey) {
         return String(uniqueKey || '').replace(/_\d{8}_[A-Z]+_.+$/, '') || String(uniqueKey || '');
     }
 
-    function buildSolidCalendarEvents_(data) {
+    function buildSolidCalendarEventsV40_(data) {
         const groups = new Map();
         (Array.isArray(data) ? data : []).forEach(item => {
-            const team = calendarSourceTeam(item);
+            const team = calendarSourceTeamV39(item);
             if (currentService !== 'ALL' && team !== currentService) return;
-            const iso = calendarDateIso_(item.date);
+            const iso = calendarDateIsoV40_(item.date);
             if (!iso || !String(item.title || '').trim()) return;
-            const base = calendarEventBase_(item.uniqueKey) || `${team}|${item.title}|${item.location || ''}`;
+            const base = calendarEventBaseV40_(item.uniqueKey) || `${team}|${item.title}|${item.location || ''}`;
             const key = [team, base, item.title, item.location || ''].join('|');
-            if (!groups.has(key)) groups.set(key, { team, title:String(item.title || '').trim(), location:String(item.location || '').trim(), dates:[], uniqueKey:item.uniqueKey || key, calendarId:String(item.calendarId || ''), eventId:calendarEventBase_(item.uniqueKey) });
+            if (!groups.has(key)) groups.set(key, { team, title:String(item.title || '').trim(), location:String(item.location || '').trim(), dates:[], uniqueKey:item.uniqueKey || key, calendarId:String(item.calendarId || ''), eventId:calendarEventBaseV40_(item.uniqueKey) });
             groups.get(key).dates.push(iso);
         });
 
@@ -159,8 +159,8 @@
             if (!dates.length) return;
             let segmentStart = dates[0], previous = dates[0], segmentNo = 0;
             const pushSegment = endDate => {
-                const style = calendarTeamStyle_(group.team);
-                const endExclusive = calendarAddDaysIso_(endDate, 1);
+                const style = calendarTeamStyleV41_(group.team);
+                const endExclusive = calendarAddDaysIsoV40_(endDate, 1);
                 events.push({
                     id:`${group.uniqueKey}-${segmentNo++}`,
                     title:group.title,
@@ -171,11 +171,11 @@
                     backgroundColor:style.color,
                     borderColor:style.color,
                     textColor:style.text,
-                    extendedProps:{ team:group.team, location:group.location, firstDate:segmentStart, lastDate:endDate, calendarId:group.calendarId, eventId:group.eventId, googleUrl:calendarGoogleEventUrl_(group.eventId, group.calendarId) }
+                    extendedProps:{ team:group.team, location:group.location, firstDate:segmentStart, lastDate:endDate, calendarId:group.calendarId, eventId:group.eventId, googleUrl:calendarGoogleEventUrlV41_(group.eventId, group.calendarId) }
                 });
             };
             for (let i=1;i<dates.length;i++) {
-                if (dates[i] === calendarAddDaysIso_(previous, 1)) {
+                if (dates[i] === calendarAddDaysIsoV40_(previous, 1)) {
                     previous = dates[i];
                 } else {
                     pushSegment(previous);
@@ -187,12 +187,12 @@
         return events;
     }
 
-    function renderSolidCalendar_(year, month) {
+    function renderSolidCalendarV40_(year, month) {
         const host = document.getElementById('calendar-fullcalendar-v40');
         const iframe = document.getElementById('calendar-iframe');
-        if (calendarFullInstance) {
-            try { calendarFullInstance.destroy(); } catch (ignore) {}
-            calendarFullInstance = null;
+        if (calendarFullInstanceV40) {
+            try { calendarFullInstanceV40.destroy(); } catch (ignore) {}
+            calendarFullInstanceV40 = null;
         }
         if (host) host.classList.add('hidden');
         if (!iframe) return;
@@ -201,7 +201,7 @@
         const ym = `${year}${String(month).padStart(2,'0')}`;
         const startDate = `${ym}01`;
         const endDate = `${ym}${String(lastDay).padStart(2,'0')}`;
-        const nextUrl = calendarEmbedUrl_(currentService) + `&mode=MONTH&dates=${startDate}/${endDate}`;
+        const nextUrl = calendarEmbedUrlV41_(currentService) + `&mode=MONTH&dates=${startDate}/${endDate}`;
         if (iframe.dataset.cesCalendarUrl !== nextUrl) {
             iframe.dataset.cesCalendarUrl = nextUrl;
             iframe.src = nextUrl;
@@ -223,7 +223,7 @@
         if(mSel) mSel.value = monthIndex;
         if(ySel) ySel.value = year;
 
-        renderSolidCalendar_(year, month);
+        renderSolidCalendarV40_(year, month);
 
         if (window.globalCalData) {
             processCalendarData(window.globalCalData, month, year);
@@ -280,13 +280,13 @@
         return false;
     }
 
-    function calendarNormalizeTeam(team) {
+    function calendarNormalizeTeamV34(team) {
         const value = String(team || '').trim().toUpperCase();
         if (value === 'MNG' || value === 'MANAGEMENT') return 'MGT';
         return value;
     }
 
-    function calendarSourceTeam(item) {
+    function calendarSourceTeamV39(item) {
         const calendarId = String((item && item.calendarId) || '').trim().toLowerCase();
         if (calendarId === 'chiraphat.env@gmail.com') return 'ENV';
         if (calendarId === 'natkanok.8942@gmail.com') return 'EHS';
@@ -294,18 +294,19 @@
         if (calendarId === 'nhealthcallab@gmail.com') return 'LAB';
         if (calendarId === 'technicalsupport.tes@gmail.com') return 'TES';
         if (calendarId === 'cesmanagement2026@gmail.com') return 'MGT';
-        return calendarNormalizeTeam(item && item.team);
+        return calendarNormalizeTeamV34(item && item.team);
     }
 
-    function calendarServiceMatches(team) {
-        const normalized = calendarNormalizeTeam(team);
+    function calendarServiceMatchesV34(team) {
+        const normalized = calendarNormalizeTeamV34(team);
         return currentService === 'ALL' || normalized === currentService;
     }
 
-    function calendarCapacityTeam(item, sourceTeam) {
-        // Capacity follows the actual source calendar/team. Do not trust stale Capacity Team values
-        // left in Calendar_Summary by older sync versions.
-        return calendarNormalizeTeam(sourceTeam || calendarSourceTeam(item) || (item && item.capacityTeam));
+    function calendarCapacityTeamV39(item, sourceTeam) {
+        return calendarNormalizeTeamV34(sourceTeam || calendarSourceTeamV39(item));
+    }
+    function calendarCapacityTeamV37(item, sourceTeam) {
+        return calendarCapacityTeamV39(item, sourceTeam);
     }
 
     function processCalendarData(data, targetM, targetY) {
@@ -325,37 +326,39 @@
             if (itemM !== targetM || itemY !== targetY) return;
 
             const title = (item.title || '').trim();
-            const sourceTeam = calendarSourceTeam(item);
-            const capacityTeam = calendarCapacityTeam(item, sourceTeam);
+            const sourceTeam = calendarSourceTeamV39(item);
+            const capacityTeam = calendarCapacityTeamV39(item, sourceTeam);
+            const dParts = String(item.date || '').split('/');
+            const dObj = dParts.length === 3 ? new Date(dParts[2], dParts[1] - 1, dParts[0]) : new Date(0);
+            const dayOfWeek = dObj.getDay();
+            const isWeekend = dayOfWeek === 0 || dayOfWeek === 6;
             // Calendar/source data stays unchanged. displayTeam is only a UI label.
             const displayTeam = sourceTeam;
             const normalizedItem = Object.assign({}, item, { team: sourceTeam, capacityTeam, displayTeam });
 
             if (checkIsLeaveEvent(title)) {
-                if (calendarServiceMatches(sourceTeam)) leaveListForTable.push(normalizedItem);
+                if (calendarServiceMatchesV34(sourceTeam)) leaveListForTable.push(normalizedItem);
                 return;
             }
             if (!title) return;
 
-            // Every scheduled non-leave work day contributes one man-day. Weekend work is real
-            // workload too; excluding MED weekends caused plan counts to rise while utilization stayed low.
-            if (teamManDays[capacityTeam] !== undefined) {
+            if (!(sourceTeam === 'MED' && isWeekend) && teamManDays[capacityTeam] !== undefined) {
                 teamManDays[capacityTeam]++;
                 if (capacityDetails[capacityTeam]) capacityDetails[capacityTeam].push(normalizedItem);
             }
             if (item.uniqueKey && teamJobUniqueSet[sourceTeam]) teamJobUniqueSet[sourceTeam].add(item.uniqueKey);
-            if (calendarServiceMatches(sourceTeam)) jobListForTable.push(normalizedItem);
+            if (calendarServiceMatchesV34(sourceTeam)) jobListForTable.push(normalizedItem);
         });
 
-        calendarCapacityDetail = capacityDetails;
-        window.calendarCapacityDetail = capacityDetails;
-        calendarCapacityMeta = { month:targetM, year:targetY, weekdays:getWeekdaysInMonth(targetM,targetY), manDays:teamManDays };
+        calendarCapacityDetailV38 = capacityDetails;
+        window.calendarCapacityDetailV38 = capacityDetails;
+        calendarCapacityMetaV38 = { month:targetM, year:targetY, weekdays:getWeekdaysInMonth(targetM,targetY), manDays:teamManDays };
 
         const totalUnique = ['MED','LAB','EHS','ENV','TES'].reduce((total, team) => total + teamJobUniqueSet[team].size, 0);
         const values = { total:totalUnique, med:teamJobUniqueSet.MED.size, lab:teamJobUniqueSet.LAB.size, ehs:teamJobUniqueSet.EHS.size, env:teamJobUniqueSet.ENV.size, tes:teamJobUniqueSet.TES.size };
         Object.keys(values).forEach(key => { const el = document.getElementById('stat-' + key); if (el) el.innerText = values[key]; });
 
-        const weekdays = calendarCapacityMeta.weekdays;
+        const weekdays = calendarCapacityMetaV38.weekdays;
         const days = document.getElementById('capacity-days-display');
         if (days) days.innerText = `${weekdays} Weekdays`;
         renderCapacityBars(teamManDays, weekdays);
@@ -363,7 +366,7 @@
         renderLeaveList(leaveListForTable);
     }
 
-    function calendarCapacityConfig_(manDays, weekdays) {
+    function calendarCapacityConfigV38_(manDays, weekdays) {
         const cfg = (typeof globalConfig !== 'undefined' && globalConfig) ? globalConfig : {};
         const number = (value, fallback) => { const parsed = Number(value); return Number.isFinite(parsed) && parsed >= 0 ? parsed : fallback; };
         return [
@@ -383,13 +386,13 @@
     function renderCapacityBars(manDays, weekdays) {
         const container = document.getElementById('capacity-dashboard-grid');
         if (!container) return;
-        const teams = calendarCapacityConfig_(manDays, weekdays);
+        const teams = calendarCapacityConfigV38_(manDays, weekdays);
         container.innerHTML = teams.map(team => {
             const width = Math.min(100, Math.max(0, team.pct));
-            const teamStyle = calendarTeamStyle_(team.name);
-            const tone = team.over ? '#E4002B' : teamStyle.color;
-            const softTone = team.over ? '#FFF1F2' : (teamStyle.soft || '#f8fafc');
-            return `<button type="button" class="ces-capacity-card ces-capacity-card-v38 ces-capacity-team-${team.name.toLowerCase()}" style="--team-color:${tone};--team-soft:${softTone}" onclick="openCapacityDetail('${team.name}')" aria-label="Open ${team.name} capacity details">
+            const teamStyleV185 = calendarTeamStyleV41_(team.name);
+            const tone = team.over ? '#E4002B' : teamStyleV185.color;
+            const softTone = team.over ? '#FFF1F2' : (teamStyleV185.soft || '#f8fafc');
+            return `<button type="button" class="ces-capacity-card ces-capacity-card-v38 ces-capacity-team-${team.name.toLowerCase()}" style="--team-color:${tone};--team-soft:${softTone}" onclick="openCapacityDetailV38('${team.name}')" aria-label="Open ${team.name} capacity details">
                 <div class="flex justify-between items-center gap-2 mb-1.5">
                     <div class="min-w-0 text-left"><span class="ces-capacity-team">${team.name}</span><span class="ces-capacity-limit">${team.limit}/day</span></div>
                     <div class="flex items-center shrink-0"><span class="ces-capacity-pct" style="color:${tone}">${team.pct}%</span>${team.over ? '<i class="fas fa-triangle-exclamation text-[#E4002B] ml-1 text-[10px]"></i>' : ''}</div>
@@ -401,29 +404,29 @@
         }).join('');
     }
 
-    function openCapacityDetail(team) {
+    function openCapacityDetailV38(team) {
         team = String(team || '').toUpperCase();
-        const items = (calendarCapacityDetail[team] || []).slice().sort((a,b) => {
+        const items = (calendarCapacityDetailV38[team] || []).slice().sort((a,b) => {
             const da = new Date(String(a.date || '').split('/').reverse().join('-'));
             const db = new Date(String(b.date || '').split('/').reverse().join('-'));
             return da - db || String(a.title || '').localeCompare(String(b.title || ''));
         });
-        const meta = calendarCapacityMeta || {};
-        const cfg = calendarCapacityConfig_(meta.manDays || {}, meta.weekdays || 0).find(x => x.name === team) || {val:0,target:0,pct:0,limit:0,over:false};
+        const meta = calendarCapacityMetaV38 || {};
+        const cfg = calendarCapacityConfigV38_(meta.manDays || {}, meta.weekdays || 0).find(x => x.name === team) || {val:0,target:0,pct:0,limit:0,over:false};
         const tone = cfg.over ? '#E4002B' : '#003DA5';
         const rows = items.length ? items.map((item,index) => `<tr class="border-b border-slate-100 hover:bg-blue-50/50">
             <td class="p-2.5 text-slate-400 font-bold">${index+1}</td>
-            <td class="p-2.5 whitespace-nowrap font-bold text-slate-700">${calendarEsc_(item.date || '-')}</td>
-            <td class="p-2.5"><div class="font-bold text-slate-800">${calendarEsc_(item.title || '-')}</div><div class="text-[10px] text-slate-400 mt-0.5">${calendarEsc_(item.location || '-')}</div></td>
-            <td class="p-2.5"><span class="inline-flex px-2 py-1 rounded-lg bg-blue-50 text-[#003DA5] border border-blue-100 text-[10px] font-black">${calendarEsc_(item.capacityTeam || team)}</span></td>
+            <td class="p-2.5 whitespace-nowrap font-bold text-slate-700">${calendarEscV37_(item.date || '-')}</td>
+            <td class="p-2.5"><div class="font-bold text-slate-800">${calendarEscV37_(item.title || '-')}</div><div class="text-[10px] text-slate-400 mt-0.5">${calendarEscV37_(item.location || '-')}</div></td>
+            <td class="p-2.5"><span class="inline-flex px-2 py-1 rounded-lg bg-blue-50 text-[#003DA5] border border-blue-100 text-[10px] font-black">${calendarEscV37_(item.capacityTeam || team)}</span></td>
         </tr>`).join('') : '<tr><td colspan="4" class="p-10 text-center text-slate-400">No capacity jobs in this month.</td></tr>';
         Swal.fire({
-            title:`<div class="text-left"><div class="text-xl font-black text-[#003DA5]">${calendarEsc_(team)} Capacity Detail</div><div class="text-xs text-slate-400 mt-1">${calendarEsc_(String(meta.month || ''))}/${calendarEsc_(String(meta.year || ''))}</div></div>`,
+            title:`<div class="text-left"><div class="text-xl font-black text-[#003DA5]">${calendarEscV37_(team)} Capacity Detail</div><div class="text-xs text-slate-400 mt-1">${calendarEscV37_(String(meta.month || ''))}/${calendarEscV37_(String(meta.year || ''))}</div></div>`,
             html:`<div class="text-left"><div class="grid grid-cols-3 gap-2 mb-4"><div class="rounded-xl bg-blue-50 border border-blue-100 p-3"><div class="text-[10px] text-slate-400 font-black">ACTUAL</div><div class="text-xl font-black text-[#003DA5]">${cfg.val} MD</div></div><div class="rounded-xl bg-slate-50 border border-slate-200 p-3"><div class="text-[10px] text-slate-400 font-black">CAPACITY</div><div class="text-xl font-black text-slate-700">${cfg.target} MD</div></div><div class="rounded-xl border p-3" style="background:${cfg.over?'#FEF2F2':'#EFF6FF'};border-color:${cfg.over?'#FCA5A5':'#BFDBFE'}"><div class="text-[10px] text-slate-400 font-black">UTILIZATION</div><div class="text-xl font-black" style="color:${tone}">${cfg.pct}%</div></div></div><div class="max-h-[520px] overflow-auto rounded-xl border border-slate-200"><table class="w-full text-xs"><thead class="sticky top-0 bg-slate-50 text-slate-500 uppercase"><tr><th class="p-2.5">#</th><th class="p-2.5">Date</th><th class="p-2.5">Job / Location</th><th class="p-2.5">Label</th></tr></thead><tbody>${rows}</tbody></table></div></div>`,
             width:850, showConfirmButton:false, showCloseButton:true, customClass:{popup:'rounded-[1.75rem]'}
         });
     }
-    window.openCapacityDetail = openCapacityDetail;
+    window.openCapacityDetailV38 = openCapacityDetailV38;
 
     function getWeekdaysInMonth(month, year) {
         let count = 0;
@@ -451,7 +454,7 @@
         let html = '';
         list.forEach(item => {
             const jobTeam = item.displayTeam || item.capacityTeam || item.team;
-            const teamStyle = calendarTeamStyle_(jobTeam);
+            const teamStyle = calendarTeamStyleV41_(jobTeam);
             html += `
                 <tr class="bg-white border-b hover:bg-[#003DA5]/50 transition-colors group">
                     <td class="px-4 py-3 font-medium text-gray-500 whitespace-nowrap align-top text-xs w-24">
@@ -488,7 +491,7 @@
         let html = '';
         list.forEach(item => {
             const jobTeam = item.displayTeam || item.capacityTeam || item.team;
-            const teamStyle = calendarTeamStyle_(jobTeam);
+            const teamStyle = calendarTeamStyleV41_(jobTeam);
             html += `
                 <li class="bg-white p-3 rounded-xl border border-red-50 shadow-sm flex flex-col hover:shadow-md transition-all group cursor-default">
                     <div class="flex justify-between items-center w-full mb-1">
@@ -515,7 +518,7 @@
             const itemM = parseInt(item.month);
             const itemY = parseInt(item.year);
             if (itemM !== targetM || itemY !== targetY) return false;
-            if (currentService !== 'ALL' && calendarSourceTeam(item) !== currentService) return false;
+            if (currentService !== 'ALL' && calendarSourceTeamV39(item) !== currentService) return false;
             return true;
         });
 
@@ -536,7 +539,7 @@
             const type = isLeave ? "Leave/Off" : "Job";
             let safeTitle = `"${(item.title || "").replace(/"/g, '""')}"`;
             let safeLocation = `"${(item.location || "-").replace(/"/g, '""')}"`;
-            csvContent += `${item.date},${calendarSourceTeam(item)},${type},${safeTitle},${safeLocation}\n`;
+            csvContent += `${item.date},${calendarSourceTeamV39(item)},${type},${safeTitle},${safeLocation}\n`;
         });
 
         let blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
@@ -652,7 +655,7 @@
         return null;
     }
 
-    function tesExcelDateKey_(value, fallbackMonth) {
+    function tesExcelDateKeyV37_(value, fallbackMonth) {
         if (value instanceof Date && !isNaN(value.getTime())) {
             const y = value.getFullYear();
             return `${y}-${String(value.getMonth()+1).padStart(2,'0')}-${String(value.getDate()).padStart(2,'0')}`;
@@ -676,7 +679,7 @@
         return isNaN(d.getTime()) ? '' : `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
     }
 
-    function tesTimeRange_(value) {
+    function tesTimeRangeV37_(value) {
         const text = String(value || '').trim();
         const times = text.match(/\d{1,2}[.:]\d{2}/g) || [];
         const norm = t => { const p=t.split(/[.:]/); return `${String(Math.min(23,Number(p[0]))).padStart(2,'0')}:${String(Math.min(59,Number(p[1]))).padStart(2,'0')}`; };
@@ -684,7 +687,7 @@
     }
 
 
-    function parseTesWorkbook_(workbook) {
+    function parseTesWorkbookV40_(workbook) {
         const result = [];
         const dedupe = new Set();
         const monthMap = {JAN:1,FEB:2,MAR:3,APR:4,MAY:5,JUN:6,JUL:7,AUG:8,SEP:9,OCT:10,NOV:11,DEC:12};
@@ -739,14 +742,14 @@
                 if(primaryContact||alternateContact) carry.contact=[primaryContact,alternateContact].filter(Boolean).join(' / ');
                 const customer=rawCustomer||carry.customer;
                 if(!customer||/ชื่อลูกค้า|account name|grand total|sum of|รวม/i.test(customer)) continue;
-                const planDate=tesExcelDateKey_(valueAt(map.actualDate),month);
-                const confirmedDate=tesExcelDateKey_(valueAt(map.confirmedDate),month);
+                const planDate=tesExcelDateKeyV37_(valueAt(map.actualDate),month);
+                const confirmedDate=tesExcelDateKeyV37_(valueAt(map.confirmedDate),month);
                 if(!planDate&&!confirmedDate) continue;
                 const rawStatus=clean(valueAt(map.status));
                 const isConfirmed=/^confirm(?:ed)?$/i.test(rawStatus);
                 const date=isConfirmed?(confirmedDate||planDate):(planDate||confirmedDate);
                 if(!date||!date.startsWith('2026-')) continue;
-                const time=tesTimeRange_(valueAt(map.confirmedTime));
+                const time=tesTimeRangeV37_(valueAt(map.confirmedTime));
                 const equipment=rawEquipment||carry.equipment;
                 const engineer=rawEngineer||carry.engineer;
                 const contact=[primaryContact,alternateContact].filter(Boolean).join(' / ')||carry.contact;
@@ -767,12 +770,15 @@
         });
         return result.sort((a,b)=>String(a.date+a.customer+a.equipment).localeCompare(String(b.date+b.customer+b.equipment)));
     }
+    function parseTesWorkbookV48_(workbook) { return parseTesWorkbookV40_(workbook); }
+    function parseTesWorkbookV47_(workbook) { return parseTesWorkbookV40_(workbook); }
+    function parseTesWorkbookV37_(workbook) { return parseTesWorkbookV40_(workbook); }
 
-    function calendarEsc_(value) {
+    function calendarEscV37_(value) {
         return String(value == null ? '' : value).replace(/[&<>'"]/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[ch]));
     }
 
-    async function handleTesPlanFile(input) {
+    async function handleTesPlanFileV38(input) {
         const file = input && input.files ? input.files[0] : null;
         if (!file) return;
         try {
@@ -780,11 +786,11 @@
             Swal.fire({ title:'Reading Booking Service TES plan…', allowOutsideClick:false, showConfirmButton:false, didOpen:()=>Swal.showLoading() });
             const data = await file.arrayBuffer();
             const workbook = XLSX.read(data, { type:'array', cellDates:true });
-            const rows = parseTesWorkbook_(workbook);
+            const rows = parseTesWorkbookV48_(workbook);
             Swal.close();
             if (!rows.length) throw new Error('No dated TES rows were found in Booking Service TES workbook.');
             const confirmedCount = rows.filter(r => r.isConfirmed || /^confirm$/i.test(String(r.status||''))).length;
-            const sample = rows.slice(0,8).map(r => `<tr><td>${calendarEsc_(r.date)}</td><td>${r.isConfirmed?'<span class="font-black text-emerald-700">CF</span>':'<span class="text-slate-400">PLAN</span>'}</td><td>${calendarEsc_(r.customer)}</td><td>${calendarEsc_(r.equipment||'-')}</td></tr>`).join('');
+            const sample = rows.slice(0,8).map(r => `<tr><td>${calendarEscV37_(r.date)}</td><td>${r.isConfirmed?'<span class="font-black text-emerald-700">CF</span>':'<span class="text-slate-400">PLAN</span>'}</td><td>${calendarEscV37_(r.customer)}</td><td>${calendarEscV37_(r.equipment||'-')}</td></tr>`).join('');
             const answer = await Swal.fire({
                 title:'Import Booking Service TES plan?',
                 html:`<div class="text-left text-xs"><div class="mb-3"><b>${rows.length}</b> dated TES plans found in <b>${file.name}</b> · <b>${confirmedCount}</b> Confirm.</div><div class="max-h-64 overflow-auto border rounded-xl"><table class="w-full"><thead class="bg-slate-50"><tr><th class="p-2">Date</th><th class="p-2">Status</th><th class="p-2">Customer</th><th class="p-2">Equipment</th></tr></thead><tbody>${sample}</tbody></table></div><p class="mt-3 text-slate-500">All dated monthly-plan rows are imported. Confirm rows are titled <b>CF-Customer - Equipment</b>. Re-import updates the current TES plan and removes stale CES-imported rows.</p></div>`,
@@ -799,25 +805,25 @@
             if (typeof loadAllData === 'function') loadAllData(true);
         } catch (error) {
             Swal.close();
-            Swal.fire({title:'TES Import Error',html:'<div class="text-left text-sm">' + calendarEsc_(error.message || String(error)).replace(/\n/g,'<br>') + '<hr class="my-3"><b>Direct Calendar setup:</b><ol class="list-decimal pl-5 mt-1 space-y-1"><li>Share the TES calendar with the Apps Script deployment account.</li><li>Permission must be <b>Make changes to events</b>.</li><li>Set Config <code>CAL_ID_TES</code> to the TES calendar ID, then deploy a new version.</li></ol><p class="mt-3 text-slate-500">When cross-account sharing is not possible, configure TES_IMPORT_WEBAPP_URL and TES_IMPORT_SECRET using the optional receiver included in the patch.</p></div>',icon:'error',width:720,confirmButtonColor:'#003DA5'});
+            Swal.fire({title:'TES Import Error',html:'<div class="text-left text-sm">' + calendarEscV37_(error.message || String(error)).replace(/\n/g,'<br>') + '<hr class="my-3"><b>Direct Calendar setup:</b><ol class="list-decimal pl-5 mt-1 space-y-1"><li>Share the TES calendar with the Apps Script deployment account.</li><li>Permission must be <b>Make changes to events</b>.</li><li>Set Config <code>CAL_ID_TES</code> to the TES calendar ID, then deploy a new version.</li></ol><p class="mt-3 text-slate-500">When cross-account sharing is not possible, configure TES_IMPORT_WEBAPP_URL and TES_IMPORT_SECRET using the optional receiver included in the patch.</p></div>',icon:'error',width:720,confirmButtonColor:'#003DA5'});
         } finally {
             if (input) input.value = '';
         }
     }
-    window.handleTesPlanFile = handleTesPlanFile;
-    window.handleTesPlanFile = handleTesPlanFile;
-    window.handleTesPlanFile = handleTesPlanFile;
-    window.handleTesPlanFile = handleTesPlanFile;
-    window.handleTesPlanFile = handleTesPlanFile;
+    window.handleTesPlanFileV48 = handleTesPlanFileV38;
+    window.handleTesPlanFileV47 = handleTesPlanFileV38;
+    window.handleTesPlanFileV40 = handleTesPlanFileV38;
+    window.handleTesPlanFileV38 = handleTesPlanFileV38;
+    window.handleTesPlanFileV37 = handleTesPlanFileV38;
 
 
     // ============================================================
     // MED Monthly Work Plan import V53
     // ============================================================
-    function medMonthNumber_(value){const map={JAN:1,FEB:2,MAR:3,APR:4,MAY:5,JUN:6,JUL:7,AUG:8,SEP:9,OCT:10,NOV:11,DEC:12};return map[String(value||'').trim().slice(0,3).toUpperCase()]||0;}
-    function medIso_(date){return `${date.getFullYear()}-${String(date.getMonth()+1).padStart(2,'0')}-${String(date.getDate()).padStart(2,'0')}`;}
-    function medWeekRange_(month,week){const startDay=[1,1,8,15,22,29][week]||1;const last=new Date(2026,month,0).getDate();if(startDay>last)return null;const endDay=week<5?Math.min(last,startDay+7):last+1;return{start:new Date(2026,month-1,startDay),end:week<5?new Date(2026,month-1,endDay):new Date(2026,month,1)};}
-    function parseMedWorkbook_(workbook){
+    function medMonthNumberV53_(value){const map={JAN:1,FEB:2,MAR:3,APR:4,MAY:5,JUN:6,JUL:7,AUG:8,SEP:9,OCT:10,NOV:11,DEC:12};return map[String(value||'').trim().slice(0,3).toUpperCase()]||0;}
+    function medIsoV53_(date){return `${date.getFullYear()}-${String(date.getMonth()+1).padStart(2,'0')}-${String(date.getDate()).padStart(2,'0')}`;}
+    function medWeekRangeV53_(month,week){const startDay=[1,1,8,15,22,29][week]||1;const last=new Date(2026,month,0).getDate();if(startDay>last)return null;const endDay=week<5?Math.min(last,startDay+7):last+1;return{start:new Date(2026,month-1,startDay),end:week<5?new Date(2026,month-1,endDay):new Date(2026,month,1)};}
+    function parseMedWorkbookV53_(workbook){
       const preferredName=workbook.Sheets['MED Fast Import']?'MED Fast Import':(workbook.Sheets['Master Plan']?'Master Plan':(workbook.Sheets['Calendar Upload']?'Calendar Upload':workbook.SheetNames[0]));const sheet=workbook.Sheets[preferredName];if(!sheet)return[];
       const rows=XLSX.utils.sheet_to_json(sheet,{header:1,defval:'',raw:true});
       const clean=v=>String(v==null?'':v).replace(/\s+/g,' ').trim();
@@ -835,13 +841,13 @@
       const out=[];
       for(let i=headerRow+1;i<rows.length;i++){
         const r=rows[i]||[],at=k=>idx[k]>=0?r[idx[k]]:'';
-        const year=Number(at('year')||2026),month=Number(at('monthNo')||medMonthNumber_(at('month'))),week=Number(at('week'));
+        const year=Number(at('year')||2026),month=Number(at('monthNo')||medMonthNumberV53_(at('month'))),week=Number(at('week'));
         const title=clean(at('title'));
         if(year!==2026||month<1||month>12||week<1||week>5||!title||title==='-')continue;
-        let startKey=tesExcelDateKey_(at('start'),month),endKey=tesExcelDateKey_(at('end'),month);
-        if(!startKey){const range=medWeekRange_(month,week);if(!range)continue;startKey=medIso_(range.start);endKey=medIso_(range.end);}
-        else if(!endKey){const d=new Date(startKey+'T00:00:00');d.setDate(d.getDate()+1);endKey=medIso_(d);}
-        else {const d=new Date(endKey+'T00:00:00');if(!isNaN(d.getTime())){d.setDate(d.getDate()+1);endKey=medIso_(d);}}
+        let startKey=tesExcelDateKeyV37_(at('start'),month),endKey=tesExcelDateKeyV37_(at('end'),month);
+        if(!startKey){const range=medWeekRangeV53_(month,week);if(!range)continue;startKey=medIsoV53_(range.start);endKey=medIsoV53_(range.end);}
+        else if(!endKey){const d=new Date(startKey+'T00:00:00');d.setDate(d.getDate()+1);endKey=medIsoV53_(d);}
+        else {const d=new Date(endKey+'T00:00:00');if(!isNaN(d.getTime())){d.setDate(d.getDate()+1);endKey=medIsoV53_(d);}}
         const qty=Number(at('engineerQty')||0)||0,detail=clean(at('engineerDetail'));
         const engineer=detail||(qty?qty+' engineer'+(qty===1?'':'s'):'');
         const item={startDate:startKey,endDate:endKey,title,customer:title,location:title,teamGroup:clean(at('team')),engineer,month:clean(at('month'))||String(month),weekLabel:'Week '+week,sourceSheet:preferredName||'Master Plan',sourceRow:i+1,note:clean(at('note')),status:clean(at('status')),calendarSubject:clean(at('subject')),calendarDescription:clean(at('description'))};
@@ -851,15 +857,15 @@
       }
       return out;
     }
-    async function handleMedPlanFile(input){
+    async function handleMedPlanFileV53(input){
       const file=input&&input.files?input.files[0]:null;if(!file)return;
       try{
         if(!window.XLSX)throw new Error('XLSX library is not loaded.');
         Swal.fire({title:'Reading MED Monthly Work Plan…',allowOutsideClick:false,showConfirmButton:false,didOpen:()=>Swal.showLoading()});
-        const workbook=XLSX.read(await file.arrayBuffer(),{type:'array',cellDates:true}),rows=parseMedWorkbook_(workbook);Swal.close();
+        const workbook=XLSX.read(await file.arrayBuffer(),{type:'array',cellDates:true}),rows=parseMedWorkbookV53_(workbook);Swal.close();
         if(!rows.length)throw new Error('No MED weekly plan rows were found.');
-        const sample=rows.slice(0,10).map(r=>`<tr><td class="p-2">${calendarEsc_(r.startDate)} → ${calendarEsc_(r.endDate)}</td><td class="p-2">${calendarEsc_(r.teamGroup)}</td><td class="p-2">${calendarEsc_(r.title)}</td><td class="p-2">${calendarEsc_(r.engineer||'-')}</td></tr>`).join('');
-        const answer=await Swal.fire({title:'Import MED Monthly Work Plan Jul–Oct 2026?',html:`<div class="text-left text-xs"><div class="mb-3"><b>${rows.length}</b> MED work-plan blocks found in <b>${calendarEsc_(file.name)}</b>.</div><div class="max-h-72 overflow-auto border rounded-xl"><table class="w-full"><thead class="bg-slate-50"><tr><th class="p-2">Date range</th><th class="p-2">Team</th><th class="p-2">Work plan</th><th class="p-2">Engineer</th></tr></thead><tbody>${sample}</tbody></table></div><p class="mt-3 text-slate-500">Only Monday–Friday are added. V26.6 creates compact weekday date-ranges and updates only changed CES-imported MED events. Existing matching imports and manual MED Calendar events are kept.</p></div>`,icon:'question',showCancelButton:true,confirmButtonText:'Import to MED Calendar',confirmButtonColor:'#004aad',width:820});
+        const sample=rows.slice(0,10).map(r=>`<tr><td class="p-2">${calendarEscV37_(r.startDate)} → ${calendarEscV37_(r.endDate)}</td><td class="p-2">${calendarEscV37_(r.teamGroup)}</td><td class="p-2">${calendarEscV37_(r.title)}</td><td class="p-2">${calendarEscV37_(r.engineer||'-')}</td></tr>`).join('');
+        const answer=await Swal.fire({title:'Import MED Monthly Work Plan Jul–Oct 2026?',html:`<div class="text-left text-xs"><div class="mb-3"><b>${rows.length}</b> MED work-plan blocks found in <b>${calendarEscV37_(file.name)}</b>.</div><div class="max-h-72 overflow-auto border rounded-xl"><table class="w-full"><thead class="bg-slate-50"><tr><th class="p-2">Date range</th><th class="p-2">Team</th><th class="p-2">Work plan</th><th class="p-2">Engineer</th></tr></thead><tbody>${sample}</tbody></table></div><p class="mt-3 text-slate-500">Only Monday–Friday are added. V26.6 creates compact weekday date-ranges and updates only changed CES-imported MED events. Existing matching imports and manual MED Calendar events are kept.</p></div>`,icon:'question',showCancelButton:true,confirmButtonText:'Import to MED Calendar',confirmButtonColor:'#004aad',width:820});
         if(!answer.isConfirmed)return;
         Swal.fire({title:'Importing MED calendar…',html:'Syncing compact Monday–Friday work-plan blocks. Matching events are reused; only changed events are updated.',allowOutsideClick:false,showConfirmButton:false,didOpen:()=>Swal.showLoading()});
         const result=await window.CES_API.callFunction('importMedMonthlyWorkPlan',[{rows,sourceFile:file.name},{calendarId:'cescalmedteam@gmail.com',syncDashboard:false,hardReplace:false}],{transport:'iframe',timeoutMs:180000,priority:'user',userAction:true,loadingLabel:'Importing MED calendar…'});
@@ -870,20 +876,20 @@
         Swal.close();
         const warnings=Array.isArray(result.errors)?result.errors:[];
         if(result.partial||warnings.length){
-          const warningHtml=warnings.slice(0,8).map(x=>'<li>'+calendarEsc_(x)+'</li>').join('');
+          const warningHtml=warnings.slice(0,8).map(x=>'<li>'+calendarEscV37_(x)+'</li>').join('');
           await Swal.fire({title:'MED Import Complete with Warnings',html:`<div class="text-left text-sm"><p><b>${result.created||0}</b> compact events created · <b>${result.skippedExisting||0}</b> unchanged reused · <b>${result.deleted||0}</b> stale imports removed · <b>${result.validRows||rows.length}</b> source blocks.</p>${warningHtml?'<div class="mt-3 text-amber-700"><b>Warnings</b><ul class="list-disc pl-5 mt-1 space-y-1">'+warningHtml+'</ul></div>':''}</div>`,icon:'warning',confirmButtonColor:'#004aad',width:720});
         }else{
           await Swal.fire('MED Import Complete',`${result.created||0} compact weekday events created · ${result.skippedExisting||0} unchanged reused · ${result.deleted||0} stale imports removed · ${result.validRows||rows.length} source blocks`,'success');
         }
-        if(typeof cesRefreshCalendar_==='function')await cesRefreshCalendar_(); else if(typeof loadAllData==='function')loadAllData(false);
+        if(typeof cesRefreshCalendarV20_==='function')await cesRefreshCalendarV20_(); else if(typeof loadAllData==='function')loadAllData(false);
       }catch(error){
         Swal.close();
         const message=String(error&&error.message||error||'MED import failed.');
         const setup=/not accessible|permission|calendar/i.test(message)?'<hr class="my-3"><b>Calendar setup:</b><ol class="list-decimal pl-5 mt-1 space-y-1"><li>Share <code>cescalmedteam@gmail.com</code> calendar with the Apps Script deployment account.</li><li>Permission must be <b>Make changes to events</b>.</li><li>Set Config <code>CAL_ID_MED</code> when another Calendar ID is used.</li></ol>':'';
-        Swal.fire({title:'MED Import Error',html:'<div class="text-left text-sm">'+calendarEsc_(message).replace(/\n/g,'<br>')+setup+'</div>',icon:'error',width:720,confirmButtonColor:'#004aad'});
+        Swal.fire({title:'MED Import Error',html:'<div class="text-left text-sm">'+calendarEscV37_(message).replace(/\n/g,'<br>')+setup+'</div>',icon:'error',width:720,confirmButtonColor:'#004aad'});
       }finally{if(input)input.value='';}
     }
-    window.handleMedPlanFile=handleMedPlanFile;
+    window.handleMedPlanFileV53=handleMedPlanFileV53;
 
     async function openJobTracker2025() {
         if (!globalCalData || globalCalData.length === 0) {
@@ -983,7 +989,7 @@
         });
     }
 
-    function trackerPalette_(team) {
+    function trackerPaletteV37_(team) {
         const map = {
             MED:{ color:'#1D4ED8', soft:'#EFF6FF', border:'#BFDBFE' },
             LAB:{ color:'#0E7490', soft:'#ECFEFF', border:'#A5F3FC' },
@@ -1033,7 +1039,7 @@
         }
 
         tbody.innerHTML = filtered.map(r => {
-            const palette = trackerPalette_(r.team);
+            const palette = trackerPaletteV37_(r.team);
             let teamBadge = `<span class="px-2.5 py-1.5 rounded-md text-[10px] font-black shadow-sm" style="background:${palette.soft};color:${palette.color};border:1px solid ${palette.border}">${r.team}</span>`;
 
             const calLink25 = getCalLinkFromDate(r.firstDate25);
@@ -1127,5 +1133,10 @@
     }
 
 // CES Calendar V39 compatibility helpers
+window.CES_CALENDAR_UI_V42_RECHECK = function(){ return window.CES_CALENDAR_UI_V43_RECHECK(); };
+window.CES_CALENDAR_UI_V43_RECHECK = function(){ return {version:'V43', renderer:'google-calendar-embed', nativeEventPopup:true, tabs:['ALL','MED','LAB','EHS','ENV','TES','MGT'], jobRecordTeams:['MED','LAB','EHS','ENV','TES'], capacityTeams:['MED','LAB','EHS','ENV','TES'], ehsCalendar:'natkanok.8942@gmail.com', envCalendar:'chiraphat.env@gmail.com'}; };
 
-window.CES_CALENDAR_UI_RECHECK = function(){ return {version:'CURRENT', renderer:'google-calendar-embed', nativeEventPopup:true, tabs:['ALL','MED','LAB','EHS','ENV','TES','MGT'], jobRecordTeams:['MED','LAB','EHS','ENV','TES'], capacityTeams:['MED','LAB','EHS','ENV','TES'], ehsCalendar:'natkanok.8942@gmail.com', envCalendar:'chiraphat.env@gmail.com', planComparisonColumns:['TEAM','2025 PLAN','2026 STATUS'], memoKeywordMatchRemoved:true}; };
+window.CES_CALENDAR_UI_V41_RECHECK = window.CES_CALENDAR_UI_V42_RECHECK;
+window.CES_CALENDAR_UI_V40_RECHECK = window.CES_CALENDAR_UI_V42_RECHECK;
+window.CES_CALENDAR_UI_V39_RECHECK = window.CES_CALENDAR_UI_V42_RECHECK;
+window.CES_CALENDAR_UI_V49_RECHECK = function(){ const out=window.CES_CALENDAR_UI_V43_RECHECK(); out.version='V49'; out.planComparisonColumns=['TEAM','2025 PLAN','2026 STATUS']; out.memoKeywordMatchRemoved=true; return out; };

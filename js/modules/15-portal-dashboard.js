@@ -27,8 +27,8 @@ function api(name,args,opt){if(!window.CES_API||typeof window.CES_API.callFuncti
 async function apiFirst(names,args,opt){var last=null;for(var i=0;i<names.length;i++){try{var r=await api(names[i],args,opt);if(r&&r.success!==false)return r;last=new Error((r&&r.message)||('API '+names[i]+' failed'));}catch(e){last=e;}}throw last||new Error('Home API is unavailable.');}
 function user(){return window.CES_CURRENT_USER||window.currentUser||{};}
 function admin(){return String(user().role||'').toUpperCase()==='ADMIN';}
-function userDisplayName_(){var u=user();return String(u.name_eng||u.nameEng||u.Name_ENG||u.name_th||u.nameTh||u.Name_TH||u.name||u.displayName||u.id||'CES Team').trim()||'CES Team';}
-function primeHomeIdentity_(){setText('portal-user-name',userDisplayName_());clock();return true;}
+function userDisplayNameV206_(){var u=user();return String(u.name_eng||u.nameEng||u.Name_ENG||u.name_th||u.nameTh||u.Name_TH||u.name||u.displayName||u.id||'CES Team').trim()||'CES Team';}
+function primeHomeIdentityV206_(){setText('portal-user-name',userDisplayNameV206_());clock();return true;}
 function setText(id,v){var e=document.getElementById(id);if(e)e.textContent=v==null?'':v;}
 function color(t){if(typeof window.cesGetTeamColor==='function')return window.cesGetTeamColor(t);return({MED:'#004AAD',LAB:'#19A7CE',EHS:'#0FC1A1',ENV:'#7ED957',TES:'#F4C542',QM:'#F97316',MNG:'#64748B'})[String(t||'').toUpperCase()]||'#64748B';}
 function clock(){if(state.clock)clearInterval(state.clock);function tick(){var n=new Date(),h=n.getHours();setText('portal-daypart-v186',h<12?'morning':h<18?'afternoon':'evening');try{setText('portal-local-time',new Intl.DateTimeFormat('en-GB',{timeZone:'Asia/Bangkok',hour:'2-digit',minute:'2-digit',second:'2-digit',hour12:false}).format(n));setText('portal-local-date',new Intl.DateTimeFormat((window.CES_LANGUAGE&&window.CES_LANGUAGE.get&&window.CES_LANGUAGE.get()==='TH')?'th-TH':'en-GB',{timeZone:'Asia/Bangkok',weekday:'short',day:'2-digit',month:'short'}).format(n));}catch(e){setText('portal-local-time',n.toLocaleTimeString());setText('portal-local-date',n.toLocaleDateString());}}tick();state.clock=setInterval(tick,1000);}
@@ -42,7 +42,7 @@ function renderEvents(rows){var r=document.getElementById('portal-event-grid');i
 function charts(rows){rows=(Array.isArray(rows)?rows:[]).filter(function(x){return ['MED','LAB','EHS','TES'].indexOf(String(x&&x.team||'').toUpperCase())>=0;});var labs=rows.map(function(x){return x.team;}),vals=rows.map(function(x){return Number(x.serviceResponses||0)+Number(x.reportResponses||0);}),cols=labs.map(color);if(state.bar)state.bar.destroy();if(state.pie)state.pie.destroy();var b=document.getElementById('portal-csi-bar'),p=document.getElementById('portal-csi-pie');if(!window.Chart||!b||!p)return;state.bar=new Chart(b.getContext('2d'),{type:'bar',data:{labels:labs,datasets:[{data:vals,backgroundColor:cols,borderRadius:7,maxBarThickness:42}]},options:{responsive:true,maintainAspectRatio:false,animation:{duration:180},plugins:{legend:{display:false},datalabels:{display:function(c){return Number(c.dataset.data[c.dataIndex]||0)>0;},anchor:'end',align:'top',color:'#334155',font:{weight:'bold',size:10},formatter:function(v){return Number(v||0).toLocaleString();}}},scales:{y:{beginAtZero:true,grace:'15%',grid:{color:'#e7eef7'}},x:{grid:{display:false}}}},plugins:window.ChartDataLabels?[ChartDataLabels]:[]});state.pie=new Chart(p.getContext('2d'),{type:'doughnut',data:{labels:labs,datasets:[{data:vals,backgroundColor:cols,borderWidth:0}]},options:{responsive:true,maintainAspectRatio:false,cutout:'68%',animation:{duration:180},plugins:{legend:{position:'right',labels:{boxWidth:10,usePointStyle:true,font:{size:10}}},datalabels:{display:function(c){return Number(c.dataset.data[c.dataIndex]||0)>0;},color:'#fff',font:{weight:'bold',size:10},formatter:function(v,c){var total=c.dataset.data.reduce(function(a,b){return a+Number(b||0);},0);var pct=total?Math.round(Number(v||0)*100/total):0;return Number(v||0)+' ('+pct+'%)';}}}},plugins:window.ChartDataLabels?[ChartDataLabels]:[]});}
 
 
-function mergeCanonicalPortal_(incoming,defaults){
+function mergeCanonicalPortalV214_(incoming,defaults){
   incoming=Array.isArray(incoming)?incoming.filter(Boolean):[];defaults=Array.isArray(defaults)?defaults:[];
   var byId={};incoming.forEach(function(x){var id=String(x&&x.id||'').trim();if(id)byId[id]=x;});
   defaults.forEach(function(def){var id=String(def&&def.id||'').trim();if(!id)return;var current=byId[id]||{};byId[id]=Object.assign({},def,current,{id:id,status:'ACTIVE'});});
@@ -50,42 +50,42 @@ function mergeCanonicalPortal_(incoming,defaults){
   Object.keys(byId).forEach(function(id){var x=byId[id];if(String(x.status||'ACTIVE').toUpperCase()==='ACTIVE')out.push(x);});
   return out;
 }
-function normalizePortalLinks_(data){
+function normalizePortalLinksV205_(data){
   data=data||{};
   if(data.portalLinks&&typeof data.portalLinks==='object')data=data.portalLinks;
   var rows=Array.isArray(data.data)?data.data:[];
   var apps=Array.isArray(data.applications)?data.applications:rows.filter(function(x){return String(x&&x.section||'').toUpperCase()==='APPLICATION'&&String(x&&x.status||'ACTIVE').toUpperCase()==='ACTIVE';});
   var services=Array.isArray(data.nhealthServices)?data.nhealthServices:rows.filter(function(x){return String(x&&x.section||'').toUpperCase()==='NHEALTH_SERVICE'&&String(x&&x.status||'ACTIVE').toUpperCase()==='ACTIVE';});
   var innovations=Array.isArray(data.innovations)?data.innovations:rows.filter(function(x){return String(x&&x.section||'').toUpperCase()==='INNOVATION'&&String(x&&x.status||'ACTIVE').toUpperCase()==='ACTIVE';});
-  apps=mergeCanonicalPortal_(apps,PORTAL_LINKS_FALLBACK_V203.applications);
-  services=mergeCanonicalPortal_(services,PORTAL_LINKS_FALLBACK_V203.nhealthServices);
-  innovations=mergeCanonicalPortal_(innovations,PORTAL_LINKS_FALLBACK_V203.innovations);
+  apps=mergeCanonicalPortalV214_(apps,PORTAL_LINKS_FALLBACK_V203.applications);
+  services=mergeCanonicalPortalV214_(services,PORTAL_LINKS_FALLBACK_V203.nhealthServices);
+  innovations=mergeCanonicalPortalV214_(innovations,PORTAL_LINKS_FALLBACK_V203.innovations);
   return {success:data.success!==false,source:data.source||'',applications:apps,nhealthServices:services,innovations:innovations,generatedAt:data.generatedAt||''};
 }
-function ensurePortalFallback_(){
+function ensurePortalFallbackV205_(){
   var apps=document.getElementById('portal-app-grid'),services=document.getElementById('portal-services-grid'),innovations=document.getElementById('portal-innovation-grid');
   if(!apps||!services||!innovations)return false;
   var hasApps=!!apps.querySelector('.ces-portal-app-card');var hasServices=!!services.querySelector('.ces-portal-app-card');
   var hasInnovations=!!innovations.querySelector('.ces-portal-innovation');
   if(!hasApps||!hasServices||!hasInnovations){
-    var cached=readPortalLinksCache_();
+    var cached=readPortalLinksCacheV203_();
     var usable=cached&&((cached.applications||[]).length||(cached.innovations||[]).length)?cached:PORTAL_LINKS_FALLBACK_V203;
-    state.portalLinks=normalizePortalLinks_(usable);
-    renderPortalLinks(state.portalLinks);
+    state.portalLinks=normalizePortalLinksV205_(usable);
+    renderPortalLinksV20(state.portalLinks);
   }
   apps.dataset.portalFallback='true';services.dataset.portalFallback='true';innovations.dataset.portalFallback='true';
   return true;
 }
-function homeOverlay_(show,message){
+function homeOverlayV205_(show,message){
   var box=document.getElementById('ces-home-priority-overlay');if(!box)return;
   var msg=document.getElementById('ces-home-priority-message');if(msg&&message)msg.textContent=message;
   if(show){state.overlayStartedAt=Date.now();box.classList.remove('hidden');box.setAttribute('aria-busy','true');}
   else{var wait=Math.max(0,260-(Date.now()-Number(state.overlayStartedAt||0)));setTimeout(function(){box.classList.add('hidden');box.setAttribute('aria-busy','false');var root=document.getElementById('view-portal');if(root)root.classList.add('ces-home-ready-v205');},wait);}
 }
-function dispatchHomeReady_(detail){try{window.dispatchEvent(new CustomEvent('ces:home-ready',{detail:detail||{}}));}catch(ignore){}}
-function portalLanguage(){try{return window.CES_LANGUAGE&&window.CES_LANGUAGE.get?window.CES_LANGUAGE.get():'EN';}catch(e){return'EN';}}
-function renderPortalLinks(data){
-  data=normalizePortalLinks_(data);
+function dispatchHomeReadyV205_(detail){try{window.dispatchEvent(new CustomEvent('ces:home-ready',{detail:detail||{}}));}catch(ignore){}}
+function portalLanguageV20(){try{return window.CES_LANGUAGE&&window.CES_LANGUAGE.get?window.CES_LANGUAGE.get():'EN';}catch(e){return'EN';}}
+function renderPortalLinksV20(data){
+  data=normalizePortalLinksV205_(data);
   var apps=document.getElementById('portal-app-grid'),services=document.getElementById('portal-services-grid'),innovations=document.getElementById('portal-innovation-grid');
   var lang=(window.CES_LANGUAGE&&window.CES_LANGUAGE.get&&window.CES_LANGUAGE.get())||'EN';
   var canonical=['PL-N-SMART','PL-N-CERT','PL-IHB','PL-STEP','PL-FORMBRICKS','PL-EBOOK','PL-CES-CSI'];
@@ -96,89 +96,89 @@ function renderPortalLinks(data){
   if(services){var serviceRows=(data.nhealthServices.length?data.nhealthServices:PORTAL_LINKS_FALLBACK_V203.nhealthServices).slice().sort(function(a,b){return Number(a.sortOrder||999)-Number(b.sortOrder||999);});services.innerHTML=serviceRows.map(function(x){var isVpn=/VPN|IT Support|Intranet/i.test(String(x.titleEn||x.titleTh||''));return '<a class="ces-portal-app-card '+(x.featured?'featured ':'')+(isVpn?'vpn-card':'')+'" href="'+esc(x.url||'#')+'" target="_blank" rel="noopener"><div class="ces-portal-app-icon '+esc(x.theme||'blue')+'"><i class="fas '+esc(x.icon||'fa-link')+'"></i></div><div><h4>'+esc(title(x))+(isVpn?'<span class="ces-portal-vpn-badge">VPN</span>':'')+'</h4><p>'+esc(desc(x))+'</p></div><i class="fas fa-arrow-up-right-from-square open"></i></a>';}).join('');services.dataset.portalFallback=String(!data.nhealthServices.length);}
   if(innovations){var items=(data.innovations.length?data.innovations:PORTAL_LINKS_FALLBACK_V203.innovations).slice().sort(function(a,b){return Number(a.sortOrder||999)-Number(b.sortOrder||999);});innovations.innerHTML=items.map(function(x){var theme=String(x.theme||'').toLowerCase();if(theme==='teal')theme='smart';if(theme==='slate')theme='promed';return '<a class="ces-portal-innovation '+esc(theme||'smart')+'" href="'+esc(x.url||'#')+'" target="_blank" rel="noopener"><div class="ces-portal-tool-icon"><i class="fas '+esc(x.icon||'fa-screwdriver-wrench')+'"></i></div><div class="ces-portal-tool-copy"><span>'+esc(lang==='TH'?'เครื่องมือ CES':'CES Tool')+'</span><h4>'+esc(title(x))+'</h4><p>'+esc(desc(x))+'</p></div><i class="fas fa-arrow-right"></i></a>';}).join('');innovations.dataset.portalFallback=String(!data.innovations.length);}
 }
-function homeCardsReady_(){
+function homeCardsReadyV206_(){
   var apps=document.getElementById('portal-app-grid'),innov=document.getElementById('portal-innovation-grid');
   return !!(apps&&innov&&apps.querySelectorAll('.ces-portal-app-card').length>=1&&innov.querySelectorAll('.ces-portal-innovation').length>=1);
 }
-function renderHomeCritical_(res){
+function renderHomeCriticalV206_(res){
   res=res||{};
   if(Object.prototype.hasOwnProperty.call(res,'onlineUsers'))setText('portal-online-count-v186',Math.max(user().id?1:0,Number(res.onlineUsers||0)));
   if(Array.isArray(res.events))renderEvents(res.events);
   if(Array.isArray(res.topActiveUsers))renderUsers(res.topActiveUsers);
   if(Array.isArray(res.recentModules))renderRecent(res.recentModules);
-  var links=normalizePortalLinks_(res.portalLinks||(res.applications||res.innovations?res:{}));
-  if(links.applications.length||links.innovations.length){state.portalLinks=links;renderPortalLinks(links);writePortalLinksCache_(links);}
-  else renderPortalLinks(state.portalLinks||PORTAL_LINKS_FALLBACK_V203);
-  ensurePortalFallback_();
-  return homeCardsReady_();
+  var links=normalizePortalLinksV205_(res.portalLinks||(res.applications||res.innovations?res:{}));
+  if(links.applications.length||links.innovations.length){state.portalLinks=links;renderPortalLinksV20(links);writePortalLinksCacheV203_(links);}
+  else renderPortalLinksV20(state.portalLinks||PORTAL_LINKS_FALLBACK_V203);
+  ensurePortalFallbackV205_();
+  return homeCardsReadyV206_();
 }
-async function loadHomeCritical_(force){
-  primeHomeIdentity_();primePortalLinks_();ensurePortalFallback_();
+async function loadHomeCriticalV206_(force){
+  primeHomeIdentityV206_();primePortalLinksV203_();ensurePortalFallbackV205_();
   var opt={force:!!force,userId:user().id||''};
   try{
     var res=await apiFirst(['getHomeCritical'],[opt],{timeoutMs:14000});
-    if(res&&res.success!==false){renderHomeCritical_(res);return res;}
+    if(res&&res.success!==false){renderHomeCriticalV206_(res);return res;}
   }catch(error){console.warn('[Home critical]',error);}
-  try{await loadPortalLinks(!!force);}catch(ignore){}
-  ensurePortalFallback_();
+  try{await loadPortalLinksV20(!!force);}catch(ignore){}
+  ensurePortalFallbackV205_();
   return {success:false,fallback:true,applications:(state.portalLinks&&state.portalLinks.applications)||PORTAL_LINKS_FALLBACK_V203.applications,innovations:(state.portalLinks&&state.portalLinks.innovations)||PORTAL_LINKS_FALLBACK_V203.innovations};
 }
-function readPortalLinksCache_(){try{var x=JSON.parse(localStorage.getItem(PORTAL_LINKS_CACHE_KEY_V203)||'null');var d=x&&x.data?x.data:null;return d&&(Array.isArray(d.applications)||Array.isArray(d.innovations))?d:null;}catch(e){return null;}}
-function writePortalLinksCache_(data){try{localStorage.setItem(PORTAL_LINKS_CACHE_KEY_V203,JSON.stringify({at:Date.now(),data:data}));}catch(e){}}
-function primePortalLinks_(){var cached=readPortalLinksCache_();var usable=cached&&((cached.applications||[]).length||(cached.innovations||[]).length)?cached:PORTAL_LINKS_FALLBACK_V203;state.portalLinks=normalizePortalLinks_(usable);renderPortalLinks(state.portalLinks);ensurePortalFallback_();return state.portalLinks;}
-async function loadPortalLinks(force){
-  if(!state.portalLinks)primePortalLinks_();if(state.linkLoadingPromise&&!force)return state.linkLoadingPromise;
-  state.linkLoadingPromise=(async function(){try{var res=await apiFirst(['getPortalLinks'],[!!force],{timeoutMs:12000});var normalized=normalizePortalLinks_(res);if(normalized.success&&(normalized.applications.length||normalized.innovations.length)){state.portalLinks=normalized;renderPortalLinks(normalized);writePortalLinksCache_(normalized);return normalized;}}catch(e){console.warn('[Home links]',e);}finally{state.linkLoadingPromise=null;}renderPortalLinks(state.portalLinks||PORTAL_LINKS_FALLBACK_V203);ensurePortalFallback_();return state.portalLinks||normalizePortalLinks_(PORTAL_LINKS_FALLBACK_V203);})();return state.linkLoadingPromise;
+function readPortalLinksCacheV203_(){try{var x=JSON.parse(localStorage.getItem(PORTAL_LINKS_CACHE_KEY_V203)||'null');var d=x&&x.data?x.data:null;return d&&(Array.isArray(d.applications)||Array.isArray(d.innovations))?d:null;}catch(e){return null;}}
+function writePortalLinksCacheV203_(data){try{localStorage.setItem(PORTAL_LINKS_CACHE_KEY_V203,JSON.stringify({at:Date.now(),data:data}));}catch(e){}}
+function primePortalLinksV203_(){var cached=readPortalLinksCacheV203_();var usable=cached&&((cached.applications||[]).length||(cached.innovations||[]).length)?cached:PORTAL_LINKS_FALLBACK_V203;state.portalLinks=normalizePortalLinksV205_(usable);renderPortalLinksV20(state.portalLinks);ensurePortalFallbackV205_();return state.portalLinks;}
+async function loadPortalLinksV20(force){
+  if(!state.portalLinks)primePortalLinksV203_();if(state.linkLoadingPromise&&!force)return state.linkLoadingPromise;
+  state.linkLoadingPromise=(async function(){try{var res=await apiFirst(['getPortalLinks'],[!!force],{timeoutMs:12000});var normalized=normalizePortalLinksV205_(res);if(normalized.success&&(normalized.applications.length||normalized.innovations.length)){state.portalLinks=normalized;renderPortalLinksV20(normalized);writePortalLinksCacheV203_(normalized);return normalized;}}catch(e){console.warn('[Home links]',e);}finally{state.linkLoadingPromise=null;}renderPortalLinksV20(state.portalLinks||PORTAL_LINKS_FALLBACK_V203);ensurePortalFallbackV205_();return state.portalLinks||normalizePortalLinksV205_(PORTAL_LINKS_FALLBACK_V203);})();return state.linkLoadingPromise;
 }
 function innovation(d){d=d||{};var c=document.getElementById('portal-promedguide-card'),n=document.getElementById('portal-promedguide-note');if(!c)return;if(d.promedguideUrl){c.href=d.promedguideUrl;c.target='_blank';c.rel='noopener';c.classList.remove('disabled');c.removeAttribute('aria-disabled');if(n)n.textContent='Open Promedguide team solution.';var i=c.querySelector(':scope > i');if(i)i.className='fas fa-arrow-right';}else{c.href='#';c.classList.add('disabled');c.setAttribute('aria-disabled','true');if(n)n.textContent='Set PORTAL_PROMEDGUIDE_URL in Setting.';}}
 function filters(data){var y=document.getElementById('portal-csi-year-v186'),m=document.getElementById('portal-csi-month-v186');if(!y||!m)return;var now=new Date(),years=(data.availableYears||[now.getFullYear()]).map(Number).filter(Boolean).sort(function(a,b){return b-a;});var selectedYear=Number(data.selectedYear||now.getFullYear()),selectedMonth=String(data.selectedMonth||String(now.getMonth()+1).padStart(2,'0'));y.innerHTML=years.map(function(v){return '<option value="'+v+'"'+(v===selectedYear?' selected':'')+'>'+v+'</option>';}).join('');var names=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];m.innerHTML=names.map(function(n,i){var v=String(i+1).padStart(2,'0');return '<option value="'+v+'"'+(v===selectedMonth?' selected':'')+'>'+n+'</option>';}).join('');state.filterReady=true;}
-function portalCacheKey(){return PORTAL_CACHE_KEY_V19+String((user()&&user().id)||'anonymous');}
-function readPortalCache(){try{var x=JSON.parse(localStorage.getItem(portalCacheKey())||'null');return x&&x.data?x:null;}catch(e){return null;}}
-function writePortalCache(data){try{localStorage.setItem(portalCacheKey(),JSON.stringify({at:Date.now(),data:data}));}catch(e){}}
-function renderPortalData(res){
+function portalCacheKeyV19(){return PORTAL_CACHE_KEY_V19+String((user()&&user().id)||'anonymous');}
+function readPortalCacheV19(){try{var x=JSON.parse(localStorage.getItem(portalCacheKeyV19())||'null');return x&&x.data?x:null;}catch(e){return null;}}
+function writePortalCacheV19(data){try{localStorage.setItem(portalCacheKeyV19(),JSON.stringify({at:Date.now(),data:data}));}catch(e){}}
+function renderPortalDataV19(res){
   if(!res)return;state.data=res;state.loaded=true;state.loadedAt=Date.now();setText('portal-online-count-v186',Math.max(user().id?1:0,Number(res.onlineUsers||0)));renderEvents(res.events);renderUsers(res.topActiveUsers);renderRecent(res.recentModules);charts(res.csiSummary);innovation(res.innovation);
-  var links=normalizePortalLinks_(res.portalLinks||(res.applications||res.innovations?res:{}));if(links.applications.length||links.innovations.length){state.portalLinks=links;renderPortalLinks(links);writePortalLinksCache_(links);}else{renderPortalLinks(state.portalLinks||primePortalLinks_());}
-  ensurePortalFallback_();if(!state.filterReady)filters(res);var add=document.getElementById('portal-add-event-btn');if(add)add.classList.toggle('hidden',!admin());
+  var links=normalizePortalLinksV205_(res.portalLinks||(res.applications||res.innovations?res:{}));if(links.applications.length||links.innovations.length){state.portalLinks=links;renderPortalLinksV20(links);writePortalLinksCacheV203_(links);}else{renderPortalLinksV20(state.portalLinks||primePortalLinksV203_());}
+  ensurePortalFallbackV205_();if(!state.filterReady)filters(res);var add=document.getElementById('portal-add-event-btn');if(add)add.classList.toggle('hidden',!admin());
 }
 async function load(force){
-  var root=document.getElementById('view-portal');if(!root)return null;ensurePortalFallback_();
+  var root=document.getElementById('view-portal');if(!root)return null;ensurePortalFallbackV205_();
   var ttl=(window.CES_CONFIG&&window.CES_CONFIG.PERFORMANCE&&Number(window.CES_CONFIG.PERFORMANCE.PORTAL_CACHE_TTL_MS))||300000;
   if(!force&&state.loaded&&Date.now()-Number(state.loadedAt||0)<ttl)return state.data;if(state.loadingPromise&&!force)return state.loadingPromise;
-  var cached=readPortalCache();if(cached&&cached.data&&!state.loaded)renderPortalData(cached.data);
-  state.loadingPromise=(async function(){root.classList.add('ces-portal-is-loading');try{var y=document.getElementById('portal-csi-year-v186'),m=document.getElementById('portal-csi-month-v186');var opt={force:!!force,userId:user().id||'',year:y&&y.value?Number(y.value):0,month:m&&m.value?m.value:''};var res=await apiFirst(['getHomeDashboard'],[opt],{timeoutMs:28000});if(!res||res.success===false)throw new Error((res&&res.message)||'Home API returned no data.');renderPortalData(res);writePortalCache(res);return res;}catch(e){if(cached&&cached.data){renderPortalData(cached.data);var r1=document.getElementById('portal-event-grid');if(r1&&!r1.querySelector('.ces-portal-cache-note-v19'))r1.insertAdjacentHTML('afterbegin','<div class="ces-portal-cache-note-v19">กำลังใช้ข้อมูลล่าสุดที่บันทึกไว้ · Backend: '+esc(e.message||e)+'</div>');return cached.data;}var r=document.getElementById('portal-event-grid');if(r&&!r.querySelector('.ces-portal-post-v186'))r.innerHTML='<div class="ces-portal-empty-card"><i class="fas fa-cloud-arrow-down"></i><b>Home ใช้ข้อมูลสำรองชั่วคราว</b><span>Applications และ Team Innovation พร้อมใช้งาน กด Refresh เพื่อโหลด Events และ Dashboard อีกครั้ง</span><button onclick="loadPortalDashboard(true)">Refresh</button></div>';renderPortalLinks(state.portalLinks||PORTAL_LINKS_FALLBACK_V203);ensurePortalFallback_();return null;}finally{root.classList.remove('ces-portal-is-loading');state.loadingPromise=null;}})();return state.loadingPromise;
+  var cached=readPortalCacheV19();if(cached&&cached.data&&!state.loaded)renderPortalDataV19(cached.data);
+  state.loadingPromise=(async function(){root.classList.add('ces-portal-is-loading');try{var y=document.getElementById('portal-csi-year-v186'),m=document.getElementById('portal-csi-month-v186');var opt={force:!!force,userId:user().id||'',year:y&&y.value?Number(y.value):0,month:m&&m.value?m.value:''};var res=await apiFirst(['getHomeDashboard'],[opt],{timeoutMs:28000});if(!res||res.success===false)throw new Error((res&&res.message)||'Home API returned no data.');renderPortalDataV19(res);writePortalCacheV19(res);return res;}catch(e){if(cached&&cached.data){renderPortalDataV19(cached.data);var r1=document.getElementById('portal-event-grid');if(r1&&!r1.querySelector('.ces-portal-cache-note-v19'))r1.insertAdjacentHTML('afterbegin','<div class="ces-portal-cache-note-v19">กำลังใช้ข้อมูลล่าสุดที่บันทึกไว้ · Backend: '+esc(e.message||e)+'</div>');return cached.data;}var r=document.getElementById('portal-event-grid');if(r&&!r.querySelector('.ces-portal-post-v186'))r.innerHTML='<div class="ces-portal-empty-card"><i class="fas fa-cloud-arrow-down"></i><b>Home ใช้ข้อมูลสำรองชั่วคราว</b><span>Applications และ Team Innovation พร้อมใช้งาน กด Refresh เพื่อโหลด Events และ Dashboard อีกครั้ง</span><button onclick="loadPortalDashboard(true)">Refresh</button></div>';renderPortalLinksV20(state.portalLinks||PORTAL_LINKS_FALLBACK_V203);ensurePortalFallbackV205_();return null;}finally{root.classList.remove('ces-portal-is-loading');state.loadingPromise=null;}})();return state.loadingPromise;
 }
-async function priorityBootstrap_(force){
+async function priorityBootstrapV205_(force){
   if(state.priorityPromise&&!force)return state.priorityPromise;
-  primeHomeIdentity_();ensurePortalFallback_();primePortalLinks_();
-  var cached=readPortalCache();if(cached&&cached.data)renderPortalData(cached.data);
-  homeOverlay_(true,cached&&cached.data?'Checking the latest Home data…':'Loading Home details from CES Hub…');
+  primeHomeIdentityV206_();ensurePortalFallbackV205_();primePortalLinksV203_();
+  var cached=readPortalCacheV19();if(cached&&cached.data)renderPortalDataV19(cached.data);
+  homeOverlayV205_(true,cached&&cached.data?'Checking the latest Home data…':'Loading Home details from CES Hub…');
   state.priorityPromise=(async function(){
     var critical=null;
     try{
-      critical=await loadHomeCritical_(!!force);
-      ensurePortalFallback_();
+      critical=await loadHomeCriticalV206_(!!force);
+      ensurePortalFallbackV205_();
       state.firstReady=true;
-      homeOverlay_(false);
-      dispatchHomeReady_({success:!!(critical&&critical.success!==false),critical:true,fallback:!!(critical&&critical.fallback)});
+      homeOverlayV205_(false);
+      dispatchHomeReadyV205_({success:!!(critical&&critical.success!==false),critical:true,fallback:!!(critical&&critical.fallback)});
       // Full CSI/activity payload is deliberately non-blocking after the visible
       // Home header, links and events are ready.
       setTimeout(function(){load(!!force).catch(function(error){console.warn('[Home full background]',error);});},40);
       return critical;
     }catch(error){
-      ensurePortalFallback_();state.firstReady=true;homeOverlay_(false);
-      dispatchHomeReady_({success:false,error:String(error&&error.message||error),fallback:true});
+      ensurePortalFallbackV205_();state.firstReady=true;homeOverlayV205_(false);
+      dispatchHomeReadyV205_({success:false,error:String(error&&error.message||error),fallback:true});
       return state.data||(cached&&cached.data)||null;
     }finally{state.priorityPromise=null;}
   })();
   var safety=setTimeout(function(){
-    if(!state.firstReady){primeHomeIdentity_();ensurePortalFallback_();state.firstReady=true;homeOverlay_(false);dispatchHomeReady_({success:false,timeout:true,fallback:true});}
+    if(!state.firstReady){primeHomeIdentityV206_();ensurePortalFallbackV205_();state.firstReady=true;homeOverlayV205_(false);dispatchHomeReadyV205_({success:false,timeout:true,fallback:true});}
   },10000);
   state.priorityPromise.finally(function(){clearTimeout(safety);});
   return state.priorityPromise;
 }
 
 function bindPortalLinks(){var grid=document.getElementById('portal-app-grid');if(!grid||grid.dataset.boundV186==='1')return;grid.dataset.boundV186='1';grid.addEventListener('click',function(event){var link=event.target.closest('a');if(!link)return;var u=user();try{if(window.CES_API&&u.id&&Date.now()-Number(state.usageAt||0)>60000){state.usageAt=Date.now();window.CES_API.callFunction('recordPortalUsage',[{employeeId:u.id,name:u.name_eng||u.name_th||'',team:u.team||'',role:u.role||'',action:'OPEN_LINK',module:'portal',source:'web'}],{transport:'jsonp',timeoutMs:8000}).catch(function(){});}}catch(ignore){}});}
-function init(force){var u=user();primeHomeIdentity_();ensurePortalFallback_();primePortalLinks_();setTimeout(function(){primeHomeIdentity_();ensurePortalFallback_();},50);setTimeout(function(){ensurePortalFallback_();},700);bindPortalLinks();var add=document.getElementById('portal-add-event-btn');if(add)add.classList.toggle('hidden',!admin());try{if(window.CES_API&&u.id&&Date.now()-Number(state.usageAt||0)>60000){state.usageAt=Date.now();window.CES_API.callFunction('recordPortalUsage',[{employeeId:u.id,name:u.name_eng||u.name_th||'',team:u.team||'',role:u.role||'',action:'ACTIVE',module:'portal',sessionId:(typeof cesSessionId_==='function'?cesSessionId_():''),source:'web'}],{transport:'jsonp',timeoutMs:12000}).catch(function(){});}}catch(ignore){}if(force||!state.loaded||!state.firstReady)priorityBootstrap_(!!force);else load(false).catch(function(){});}
+function init(force){var u=user();primeHomeIdentityV206_();ensurePortalFallbackV205_();primePortalLinksV203_();setTimeout(function(){primeHomeIdentityV206_();ensurePortalFallbackV205_();},50);setTimeout(function(){ensurePortalFallbackV205_();},700);bindPortalLinks();var add=document.getElementById('portal-add-event-btn');if(add)add.classList.toggle('hidden',!admin());try{if(window.CES_API&&u.id&&Date.now()-Number(state.usageAt||0)>60000){state.usageAt=Date.now();window.CES_API.callFunction('recordPortalUsage',[{employeeId:u.id,name:u.name_eng||u.name_th||'',team:u.team||'',role:u.role||'',action:'ACTIVE',module:'portal',sessionId:(typeof cesSessionIdV50_==='function'?cesSessionIdV50_():''),source:'web'}],{transport:'jsonp',timeoutMs:12000}).catch(function(){});}}catch(ignore){}if(force||!state.loaded||!state.firstReady)priorityBootstrapV205_(!!force);else load(false).catch(function(){});}
 function byId(id){return((state.data&&state.data.events)||[]).find(function(x){return String(x.id)===String(id);})||{};}
 function readImage(file){return new Promise(function(resolve,reject){if(!file)return resolve(null);if(file.size>3*1024*1024)return reject(new Error('Image must be 3 MB or smaller.'));var fr=new FileReader();fr.onload=function(){resolve({name:file.name,mimeType:file.type||'image/jpeg',base64:String(fr.result||'').split(',').pop()});};fr.onerror=function(){reject(new Error('Cannot read image.'));};fr.readAsDataURL(file);});}
 async function editor(id){if(!admin()){if(window.Swal)Swal.fire({icon:'warning',title:'Admin only'});return;}var x=byId(id);var result=await Swal.fire({title:id?'Edit Portal Post':'Post Portal Event',width:720,showCancelButton:true,confirmButtonText:'Publish',confirmButtonColor:'#003DA5',html:'<div class="ces-portal-event-form"><label>Subject *</label><input id="portal-event-title" value="'+esc(x.title||'')+'"><label>Description</label><textarea id="portal-event-description" rows="5">'+esc(x.description||'')+'</textarea><label>Link</label><input id="portal-event-link" type="url" value="'+esc(x.link||'')+'" placeholder="https://"><label>Image</label><input id="portal-event-image" type="file" accept="image/jpeg,image/png,image/webp"><small>JPEG / PNG / WEBP, max 3 MB. Leave blank to keep the current image.</small></div>',preConfirm:async function(){var title=document.getElementById('portal-event-title').value.trim();if(!title){Swal.showValidationMessage('Subject is required.');return false;}try{return{id:id||'',title:title,description:document.getElementById('portal-event-description').value.trim(),link:document.getElementById('portal-event-link').value.trim(),image:await readImage(document.getElementById('portal-event-image').files[0]),actorId:user().id};}catch(e){Swal.showValidationMessage(e.message);return false;}}});if(!result.isConfirmed||!result.value)return;Swal.fire({title:'Publishing…',allowOutsideClick:false,didOpen:function(){Swal.showLoading();}});try{var r=await api('savePortalEvent',[result.value],{transport:'iframe',timeoutMs:90000});if(!r||r.success===false)throw new Error((r&&r.message)||'Save failed.');await load(true);Swal.fire({icon:'success',title:'Post published',timer:1100,showConfirmButton:false});}catch(e){Swal.fire({icon:'error',title:'Save failed',text:e.message||String(e)});}}
@@ -186,8 +186,8 @@ async function remove(id){if(!admin())return;var ok=await Swal.fire({icon:'warni
 async function view(id){try{var r=await api('recordPortalEventView',[{id:id,userId:user().id}],{timeoutMs:15000});if(r&&r.success)setText('portal-event-views-'+id,r.views);}catch(e){}}
 async function like(id){try{var r=await api('togglePortalEventLike',[{id:id,userId:user().id}],{transport:'iframe',timeoutMs:30000});if(r&&r.success){setText('portal-event-likes-'+id,r.likes);await load(false);}}catch(e){}}
 function csiFilter(){if(state.filterReady)load(true);}
-document.addEventListener('ces:language-changed',function(){if(state.portalLinks)renderPortalLinks(state.portalLinks);});
-window.initPortalDashboard=init;window.loadPortalDashboard=load;window.CES_HOME_BOOTSTRAP=priorityBootstrap_;window.openPortalEventEditor=editor;window.openPortalEventDetail=openPortalEventDetail;window.deletePortalEventFront=remove;window.portalViewEvent=view;window.portalLikeEvent=like;window.changePortalCsiFilter=csiFilter;window.CES_HOME_PRIME=primePortalLinks_;window.CES_PORTAL_FRONTEND_RECHECK=function(){return{success:true,stableApiNames:true,homeCombinedApi:true,frontendFallbackLinks:true,eventImages:true,usageLog:true,csiFilter:true};};
+document.addEventListener('ces:language-changed',function(){if(state.portalLinks)renderPortalLinksV20(state.portalLinks);});
+window.initPortalDashboard=init;window.loadPortalDashboard=load;window.CES_HOME_BOOTSTRAP=priorityBootstrapV205_;window.openPortalEventEditor=editor;window.openPortalEventDetail=openPortalEventDetail;window.deletePortalEventFront=remove;window.portalViewEvent=view;window.portalLikeEvent=like;window.changePortalCsiFilter=csiFilter;window.CES_HOME_PRIME=primePortalLinksV203_;window.CES_PORTAL_FRONTEND_RECHECK=function(){return{success:true,stableApiNames:true,homeCombinedApi:true,frontendFallbackLinks:true,eventImages:true,usageLog:true,csiFilter:true};};
 })();
 
 // Prime static/cache Home links as soon as the view exists; backend refresh continues in background.

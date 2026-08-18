@@ -28,32 +28,32 @@
   <section id="setting-gemini-online-v226" class="bg-white p-5 rounded-3xl shadow-sm border border-slate-100 space-y-4">
     <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
       <div><h3 class="ces-setting-title"><i class="fas fa-wand-magic-sparkles text-indigo-600"></i>Gemini Online Configuration</h3><p class="text-xs text-slate-400 mt-1">Configure AI CES Online reasoning. API key is stored securely in Apps Script Script Properties and is never saved in Config Sheet.</p></div>
-      <div class="flex items-center gap-2"><span id="setting-gemini-status-v226" class="px-3 py-2 rounded-xl bg-slate-100 text-slate-600 text-[11px] font-black">Checking…</span><button type="button" class="ces-training-btn" onclick="testCesAiGemini()"><i class="fas fa-plug-circle-check"></i> Test Gemini</button></div>
+      <div class="flex items-center gap-2"><span id="setting-gemini-status-v226" class="px-3 py-2 rounded-xl bg-slate-100 text-slate-600 text-[11px] font-black">Checking…</span><button type="button" class="ces-training-btn" onclick="testCesAiGeminiV225()"><i class="fas fa-plug-circle-check"></i> Test Gemini</button></div>
     </div>
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-3">
       <label class="ces-ai-k-field-v225">Gemini API Key<input id="setting-gemini-api-key-v226" type="password" autocomplete="new-password" placeholder="Paste API key to enable Gemini Online"></label>
       <label class="ces-ai-k-field-v225">Model<input id="setting-gemini-model-v226" value="gemini-2.5-flash"></label>
       <label class="ces-ai-k-field-v225">Mode<select id="setting-gemini-mode-v226"><option value="AUTO">AUTO</option><option value="DISABLED">DISABLED</option></select></label>
     </div>
-    <div class="flex flex-wrap items-center gap-2"><button type="button" class="ces-training-btn primary" onclick="saveCesAiGeminiConfig(false)"><i class="fas fa-floppy-disk"></i> Save & Enable</button><button type="button" class="ces-training-btn" onclick="saveCesAiGeminiConfig(true)"><i class="fas fa-key"></i> Clear API Key</button><small id="setting-gemini-model-status-v226" class="text-slate-400 font-bold">-</small></div>
+    <div class="flex flex-wrap items-center gap-2"><button type="button" class="ces-training-btn primary" onclick="saveCesAiGeminiConfigV225(false)"><i class="fas fa-floppy-disk"></i> Save & Enable</button><button type="button" class="ces-training-btn" onclick="saveCesAiGeminiConfigV225(true)"><i class="fas fa-key"></i> Clear API Key</button><small id="setting-gemini-model-status-v226" class="text-slate-400 font-bold">-</small></div>
   </section>
 
   <section id="setting-portal-links" class="bg-white p-5 rounded-3xl shadow-sm border border-slate-100 space-y-4">
-    <div class="flex flex-col md:flex-row md:items-center justify-between gap-3"><div><h3 class="ces-setting-title"><i class="fas fa-link text-[#003DA5]"></i><span data-i18n-th="ลิงก์หน้า Home Portal" data-i18n-en="Home Portal Links">Home Portal Links</span></h3><p class="text-xs text-slate-400 mt-1" data-i18n-th="เพิ่ม แก้ไข และจัดลำดับ Applications & Services / N Health Services / Innovation ได้โดยไม่ต้องแก้โค้ด" data-i18n-en="Add, edit and reorder Applications & Services / N Health Services / Innovation without changing code.">Add, edit and reorder Applications & Services / N Health Services / Innovation without changing code.</p></div><div class="flex gap-2"><button class="ces-training-btn" onclick="loadPortalLinksSetting(true)"><i class="fas fa-rotate"></i> Reload</button><button class="ces-training-btn primary" onclick="openPortalLinkEditor()"><i class="fas fa-plus"></i> Add Link</button></div></div>
+    <div class="flex flex-col md:flex-row md:items-center justify-between gap-3"><div><h3 class="ces-setting-title"><i class="fas fa-link text-[#003DA5]"></i><span data-i18n-th="ลิงก์หน้า Home Portal" data-i18n-en="Home Portal Links">Home Portal Links</span></h3><p class="text-xs text-slate-400 mt-1" data-i18n-th="เพิ่ม แก้ไข และจัดลำดับ Applications & Services / N Health Services / Innovation ได้โดยไม่ต้องแก้โค้ด" data-i18n-en="Add, edit and reorder Applications & Services / N Health Services / Innovation without changing code.">Add, edit and reorder Applications & Services / N Health Services / Innovation without changing code.</p></div><div class="flex gap-2"><button class="ces-training-btn" onclick="loadPortalLinksSettingV20(true)"><i class="fas fa-rotate"></i> Reload</button><button class="ces-training-btn primary" onclick="openPortalLinkEditorV20()"><i class="fas fa-plus"></i> Add Link</button></div></div>
     <div id="setting-portal-links-list" class="ces-setting-link-sections-v223"><div class="py-8 text-center text-slate-400">Open Setting to load configurable links.</div></div>
   </section>
 
   <div id="setting-general-grid" class="grid grid-cols-1 xl:grid-cols-12 gap-5">
     <div class="xl:col-span-12 ces-setting-save-banner"><div><i class="fas fa-database"></i><strong>Config persistence</strong><span>ค่าทั้งหมดใน General / External Links / System & Storage จะบันทึกในชีต <b>Config</b> ของ Final CES</span></div><span class="ces-setting-save-badge">Config Sheet</span></div>
     <div class="xl:col-span-5 bg-white p-5 rounded-3xl shadow-sm border border-slate-100 space-y-4">
-      <div class="flex items-center justify-between gap-3"><h3 class="ces-setting-title"><i class="fas fa-broadcast-tower text-[#003DA5]"></i>Announcement & Admin</h3><button type="button" class="ces-training-btn primary" onclick="saveSettingSection('announcement',this)"><i class="fas fa-floppy-disk"></i> Save</button></div>
+      <div class="flex items-center justify-between gap-3"><h3 class="ces-setting-title"><i class="fas fa-broadcast-tower text-[#003DA5]"></i>Announcement & Admin</h3><button type="button" class="ces-training-btn primary" onclick="saveSettingSectionV264('announcement',this)"><i class="fas fa-floppy-disk"></i> Save</button></div>
       <div class="flex items-center justify-between p-4 rounded-2xl bg-blue-50 border border-blue-100"><div><label class="font-black text-slate-700 text-sm">Announcement Bar</label><p class="text-xs text-slate-400">Toggle alert on Home Dashboard</p></div><label class="relative inline-flex items-center cursor-pointer"><input class="sr-only peer" id="cfg-announce-active" type="checkbox"><div class="w-11 h-6 bg-slate-200 rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#003DA5]"></div></label></div>
       <div><label class="ces-setting-label">Announcement Message</label><input class="ces-setting-input" id="cfg-announce-msg" type="text"></div>
       <div class="ces-setting-field ces-admin-email-field"><label class="ces-setting-label" for="cfg-admin-email">Admin Notification Email</label><input class="ces-setting-input" id="cfg-admin-email" type="email" autocomplete="email" placeholder="admin@nhealth-asia.com"></div>
     </div>
 
     <div class="xl:col-span-7 bg-white p-5 rounded-3xl shadow-sm border border-slate-100 space-y-4">
-      <div class="flex items-center justify-between gap-3"><h3 class="ces-setting-title"><i class="fas fa-users-gear text-[#003DA5]"></i>Team Capacity (Man-Days)</h3><button type="button" class="ces-training-btn primary" onclick="saveSettingSection('capacity',this)"><i class="fas fa-floppy-disk"></i> Save</button></div>
+      <div class="flex items-center justify-between gap-3"><h3 class="ces-setting-title"><i class="fas fa-users-gear text-[#003DA5]"></i>Team Capacity (Man-Days)</h3><button type="button" class="ces-training-btn primary" onclick="saveSettingSectionV264('capacity',this)"><i class="fas fa-floppy-disk"></i> Save</button></div>
       <p class="text-xs text-slate-400">Limit per person/day for Calendar calculation.</p>
       <div class="grid grid-cols-2 md:grid-cols-3 gap-3">
         <div><label class="ces-team-label med">MED</label><input class="ces-setting-input text-center font-black" id="cfg-cap-med" type="number"></div>
@@ -66,7 +66,7 @@
     </div>
 
     <div class="xl:col-span-12 bg-white p-5 rounded-3xl shadow-sm border border-slate-100 space-y-4">
-      <div class="flex items-center justify-between gap-3"><h3 class="ces-setting-title"><i class="fas fa-link text-[#003DA5]"></i>External Links</h3><button type="button" class="ces-training-btn primary" onclick="saveSettingSection('links',this)"><i class="fas fa-floppy-disk"></i> Save</button></div>
+      <div class="flex items-center justify-between gap-3"><h3 class="ces-setting-title"><i class="fas fa-link text-[#003DA5]"></i>External Links</h3><button type="button" class="ces-training-btn primary" onclick="saveSettingSectionV264('links',this)"><i class="fas fa-floppy-disk"></i> Save</button></div>
       <p class="text-xs text-slate-400">Central links used by Service CSI, Report CSI, Revenue, KPI, Memo & Work Order and Training Plan.</p>
       <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
         <div><label class="ces-setting-label">Service CSI — CES Summary</label><input class="ces-setting-input text-xs" id="cfg-link-service-csi-ces" type="url"></div>
@@ -83,21 +83,21 @@
     <div class="xl:col-span-12 bg-white p-5 rounded-3xl shadow-sm border border-slate-100 space-y-4">
       <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-2">
         <div><h3 class="ces-setting-title"><i class="fas fa-palette text-[#003DA5]"></i>Core Team Colors</h3><p class="text-xs text-slate-400 mt-1">Single source of truth for team cards, charts, badges, tables and calendar events.</p></div>
-        <div class="flex gap-2"><button type="button" class="px-3 py-2 rounded-xl bg-slate-100 text-slate-600 text-xs font-black" onclick="resetTeamColors()"><i class="fas fa-rotate-left mr-1"></i>Default Colors</button><button type="button" class="ces-training-btn primary" onclick="saveSettingSection('colors',this)"><i class="fas fa-floppy-disk"></i> Save</button></div>
+        <div class="flex gap-2"><button type="button" class="px-3 py-2 rounded-xl bg-slate-100 text-slate-600 text-xs font-black" onclick="resetTeamColorsV41()"><i class="fas fa-rotate-left mr-1"></i>Default Colors</button><button type="button" class="ces-training-btn primary" onclick="saveSettingSectionV264('colors',this)"><i class="fas fa-floppy-disk"></i> Save</button></div>
       </div>
       <div class="grid grid-cols-2 md:grid-cols-4 xl:grid-cols-7 gap-3">
-        <label class="ces-team-color-setting"><span>MED</span><input id="cfg-color-med" type="color" value="#004aad" oninput="syncTeamColorPreview('MED',this.value)"><code id="cfg-color-med-code">#004aad</code></label>
-        <label class="ces-team-color-setting"><span>LAB</span><input id="cfg-color-lab" type="color" value="#19a7ce" oninput="syncTeamColorPreview('LAB',this.value)"><code id="cfg-color-lab-code">#19a7ce</code></label>
-        <label class="ces-team-color-setting"><span>EHS</span><input id="cfg-color-ehs" type="color" value="#0fc1a1" oninput="syncTeamColorPreview('EHS',this.value)"><code id="cfg-color-ehs-code">#0fc1a1</code></label>
-        <label class="ces-team-color-setting"><span>ENV</span><input id="cfg-color-env" type="color" value="#7ed957" oninput="syncTeamColorPreview('ENV',this.value)"><code id="cfg-color-env-code">#7ed957</code></label>
-        <label class="ces-team-color-setting"><span>TES</span><input id="cfg-color-tes" type="color" value="#ffde59" oninput="syncTeamColorPreview('TES',this.value)"><code id="cfg-color-tes-code">#ffde59</code></label>
-        <label class="ces-team-color-setting"><span>QM</span><input id="cfg-color-qm" type="color" value="#f97316" oninput="syncTeamColorPreview('QM',this.value)"><code id="cfg-color-qm-code">#f97316</code></label>
-        <label class="ces-team-color-setting"><span>MNG</span><input id="cfg-color-mng" type="color" value="#b4b4b4" oninput="syncTeamColorPreview('MNG',this.value)"><code id="cfg-color-mng-code">#b4b4b4</code></label>
+        <label class="ces-team-color-setting"><span>MED</span><input id="cfg-color-med" type="color" value="#004aad" oninput="syncTeamColorPreviewV41('MED',this.value)"><code id="cfg-color-med-code">#004aad</code></label>
+        <label class="ces-team-color-setting"><span>LAB</span><input id="cfg-color-lab" type="color" value="#19a7ce" oninput="syncTeamColorPreviewV41('LAB',this.value)"><code id="cfg-color-lab-code">#19a7ce</code></label>
+        <label class="ces-team-color-setting"><span>EHS</span><input id="cfg-color-ehs" type="color" value="#0fc1a1" oninput="syncTeamColorPreviewV41('EHS',this.value)"><code id="cfg-color-ehs-code">#0fc1a1</code></label>
+        <label class="ces-team-color-setting"><span>ENV</span><input id="cfg-color-env" type="color" value="#7ed957" oninput="syncTeamColorPreviewV41('ENV',this.value)"><code id="cfg-color-env-code">#7ed957</code></label>
+        <label class="ces-team-color-setting"><span>TES</span><input id="cfg-color-tes" type="color" value="#ffde59" oninput="syncTeamColorPreviewV41('TES',this.value)"><code id="cfg-color-tes-code">#ffde59</code></label>
+        <label class="ces-team-color-setting"><span>QM</span><input id="cfg-color-qm" type="color" value="#f97316" oninput="syncTeamColorPreviewV41('QM',this.value)"><code id="cfg-color-qm-code">#f97316</code></label>
+        <label class="ces-team-color-setting"><span>MNG</span><input id="cfg-color-mng" type="color" value="#b4b4b4" oninput="syncTeamColorPreviewV41('MNG',this.value)"><code id="cfg-color-mng-code">#b4b4b4</code></label>
       </div>
     </div>
 
     <div class="xl:col-span-12 bg-white p-5 rounded-3xl shadow-sm border border-slate-100 space-y-4">
-      <div class="flex items-center justify-between gap-3"><h3 class="ces-setting-title"><i class="fas fa-calendar-days text-[#003DA5]"></i>Calendar Integration (Google Calendar IDs)</h3><button type="button" class="ces-training-btn primary" onclick="saveSettingSection('calendar',this)"><i class="fas fa-floppy-disk"></i> Save</button></div>
+      <div class="flex items-center justify-between gap-3"><h3 class="ces-setting-title"><i class="fas fa-calendar-days text-[#003DA5]"></i>Calendar Integration (Google Calendar IDs)</h3><button type="button" class="ces-training-btn primary" onclick="saveSettingSectionV264('calendar',this)"><i class="fas fa-floppy-disk"></i> Save</button></div>
       <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3">
         <div><label class="ces-setting-label">MED Calendar ID</label><input class="ces-setting-input font-mono text-xs" id="cfg-cal-med"></div>
         <div><label class="ces-setting-label">LAB Calendar ID</label><input class="ces-setting-input font-mono text-xs" id="cfg-cal-lab"></div>
@@ -109,7 +109,7 @@
     </div>
 
     <div class="xl:col-span-5 bg-white p-5 rounded-3xl shadow-sm border border-slate-100 space-y-4">
-      <div class="flex items-center justify-between gap-3"><h3 class="ces-setting-title"><i class="fas fa-bullseye text-[#003DA5]"></i>Targets & KPI</h3><button type="button" class="ces-training-btn primary" onclick="saveSettingSection('targets',this)"><i class="fas fa-floppy-disk"></i> Save</button></div>
+      <div class="flex items-center justify-between gap-3"><h3 class="ces-setting-title"><i class="fas fa-bullseye text-[#003DA5]"></i>Targets & KPI</h3><button type="button" class="ces-training-btn primary" onclick="saveSettingSectionV264('targets',this)"><i class="fas fa-floppy-disk"></i> Save</button></div>
       <div class="grid grid-cols-2 gap-3"><div><label class="ces-setting-label">Target CSI (Max 5)</label><input class="ces-setting-input font-black text-[#003DA5]" id="cfg-target-csi" step="0.1" type="number"></div><div><label class="ces-setting-label">Target SLA (Hours)</label><input class="ces-setting-input font-black text-[#003DA5]" id="cfg-target-sla" type="number"></div></div>
       <div class="border-t border-slate-100 pt-3"><h4 class="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-3">Revenue Targets (Yearly)</h4><div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
         <div class="ces-revenue-row"><span>MED</span><input id="cfg-rev-med" type="number"></div><div class="ces-revenue-row"><span>LAB</span><input id="cfg-rev-lab" type="number"></div><div class="ces-revenue-row"><span>EHS</span><input id="cfg-rev-ehs" type="number"></div><div class="ces-revenue-row"><span>ENV</span><input id="cfg-rev-env" type="number"></div><div class="ces-revenue-row"><span>MNG</span><input id="cfg-rev-mng" type="number"></div><div class="ces-revenue-row"><span>TES</span><input id="cfg-rev-tes" type="number"></div>
@@ -117,7 +117,7 @@
     </div>
 
     <div class="xl:col-span-7 bg-white p-5 rounded-3xl shadow-sm border border-slate-100 space-y-4">
-      <div class="flex items-center justify-between gap-3"><h3 class="ces-setting-title"><i class="fas fa-folder-open text-[#003DA5]"></i>KPI Drive Links</h3><button type="button" class="ces-training-btn primary" onclick="saveSettingSection('kpi',this)"><i class="fas fa-floppy-disk"></i> Save</button></div>
+      <div class="flex items-center justify-between gap-3"><h3 class="ces-setting-title"><i class="fas fa-folder-open text-[#003DA5]"></i>KPI Drive Links</h3><button type="button" class="ces-training-btn primary" onclick="saveSettingSectionV264('kpi',this)"><i class="fas fa-floppy-disk"></i> Save</button></div>
       <p class="text-xs text-slate-400">EHS and ENV use separate links and separate buttons in KPI Tracking.</p>
       <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
         <div><label class="ces-setting-label">MED Drive</label><input class="ces-setting-input text-xs" id="cfg-kpi-drive-med" type="url"></div>
@@ -130,7 +130,7 @@
     </div>
 
     <div class="xl:col-span-12 bg-white p-5 rounded-3xl shadow-sm border border-slate-100 space-y-4">
-      <div class="flex items-center justify-between gap-3"><h3 class="ces-setting-title"><i class="fab fa-line text-emerald-500"></i>LINE Notification Tokens</h3><button type="button" class="ces-training-btn primary" onclick="saveSettingSection('line',this)"><i class="fas fa-floppy-disk"></i> Save</button></div>
+      <div class="flex items-center justify-between gap-3"><h3 class="ces-setting-title"><i class="fab fa-line text-emerald-500"></i>LINE Notification Tokens</h3><button type="button" class="ces-training-btn primary" onclick="saveSettingSectionV264('line',this)"><i class="fas fa-floppy-disk"></i> Save</button></div>
       <p class="text-xs text-slate-400">Separate tokens for MED, LAB and EHS. Values are saved in Config sheet.</p>
       <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
         <div class="ces-token-card med"><label>MED LINE Token</label><input id="cfg-line-token-med" type="text" autocomplete="off" data-lpignore="true" data-1p-ignore="true" class="ces-secret-input" placeholder="MED token"></div>

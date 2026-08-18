@@ -49,7 +49,7 @@ function initWeekly(forceRefresh) {
         Swal.fire('Weekly Report Error', (err && err.message) || String(err), 'error');
     }).getWeeklyInitialData(!!forceRefresh);
 }
-window.refreshWeeklyInitial = function(){ wkInitialLoadedV38=false; return initWeekly(true); };
+window.refreshWeeklyInitialV38 = function(){ wkInitialLoadedV38=false; return initWeekly(true); };
 
 function submitWeeklyReport(e) { if (e) e.preventDefault(); addReportToQueue(); }
 

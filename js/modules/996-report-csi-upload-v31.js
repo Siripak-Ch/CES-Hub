@@ -135,7 +135,7 @@
     });
   }
 
-  function parseWorkbook(file) {
+  function parseWorkbookV31(file) {
     return ensureXlsx().then(function () {
       return new Promise(function (resolve, reject) {
         var reader = new FileReader();
@@ -278,14 +278,14 @@
     return summary;
   }
 
-  async function handleReportUpload(event) {
+  async function handleReportUploadV31(event) {
     var input = event && event.target ? event.target : byId('reportFileInput');
     var file = input && input.files ? input.files[0] : null;
     if (!file || active) return;
     active = true;
     show('Reading Report CSI Excel file...');
     try {
-      var parsed = await parseWorkbook(file);
+      var parsed = await parseWorkbookV31(file);
       var diff = selectChangedRows(parsed.rows);
       hide();
 
@@ -321,8 +321,8 @@
       // Do not block the user while reading the sheet again. The page already reflects the uploaded rows.
       setTimeout(function () {
         try {
-          if (typeof loadReportCSIOnly === 'function') {
-            Promise.resolve(loadReportCSIOnly(true, false)).catch(function (e) { console.warn('[Report CSI V31] background refresh failed', e); });
+          if (typeof loadReportCSIOnlyV31 === 'function') {
+            Promise.resolve(loadReportCSIOnlyV31(true, false)).catch(function (e) { console.warn('[Report CSI V31] background refresh failed', e); });
           }
         } catch (_) {}
       }, 100);
@@ -350,16 +350,16 @@
 
   function install() {
     var input = byId('reportFileInput');
-    if (input) input.setAttribute('onchange', 'handleReportUpload(event)');
-    window.handleReportUpload = handleReportUpload;
-    window.handleReportUpload = handleReportUpload;
+    if (input) input.setAttribute('onchange', 'handleReportUploadV31(event)');
+    window.handleReportUploadV31 = handleReportUploadV31;
+    window.handleReportUpload = handleReportUploadV31;
   }
 
-  window.CES_REPORT_RECHECK = function () {
+  window.CES_REPORT_V31_RECHECK = function () {
     var input = byId('reportFileInput');
     var ui = null;
     try {
-      if (typeof window.CES_REPORT_UI_RECHECK === 'function') ui = window.CES_REPORT_UI_RECHECK();
+      if (typeof window.CES_REPORT_UI_V31_RECHECK === 'function') ui = window.CES_REPORT_UI_V31_RECHECK();
     } catch (ignore) {}
     return {
       version:'V31', installed:!!window.__CES_REPORT_FAST_V31__,

@@ -15,13 +15,13 @@ let CES_LOGIN_REQUEST_SEQ_V62 = 0;
 let CES_REGISTER_REQUEST_SEQ_V62 = 0;
 
 
-function cesRememberLoginEnabled_() {
+function cesRememberLoginEnabledV60_() {
     const checkbox = document.getElementById('rememberLogin');
     if (checkbox) return !!checkbox.checked;
     return localStorage.getItem(CES_REMEMBER_LOGIN_KEY_V60) !== '0';
 }
 
-function cesReadRecentLogins_() {
+function cesReadRecentLoginsV60_() {
     try {
         const rows = JSON.parse(localStorage.getItem(CES_RECENT_LOGIN_USERS_KEY_V60) || '[]');
         return Array.isArray(rows) ? rows.filter(item => item && item.id).slice(0, 5) : [];
@@ -30,12 +30,12 @@ function cesReadRecentLogins_() {
     }
 }
 
-function cesRecordRecentLogin_(userOrId) {
+function cesRecordRecentLoginV60_(userOrId) {
     const user = (userOrId && typeof userOrId === 'object') ? userOrId : { id: userOrId };
     const id = String(user.id || '').trim();
     if (!id) return;
 
-    const remember = cesRememberLoginEnabled_();
+    const remember = cesRememberLoginEnabledV60_();
     try {
         sessionStorage.setItem(CES_LAST_EMPLOYEE_ID_KEY_V60, id);
         if (remember) {
@@ -46,20 +46,20 @@ function cesRecordRecentLogin_(userOrId) {
                 name: String(user.name_eng || user.name_th || '').trim(),
                 team: String(user.team || '').trim(),
                 lastLoginAt: new Date().toISOString()
-            }].concat(cesReadRecentLogins_().filter(item => String(item.id) !== id)).slice(0, 5);
+            }].concat(cesReadRecentLoginsV60_().filter(item => String(item.id) !== id)).slice(0, 5);
             localStorage.setItem(CES_RECENT_LOGIN_USERS_KEY_V60, JSON.stringify(next));
         }
     } catch (e) {}
-    cesRenderLoginMemory_();
+    cesRenderLoginMemoryV60_();
 }
 
-function cesRenderLoginMemory_() {
+function cesRenderLoginMemoryV60_() {
     const input = document.getElementById('loginId');
     const checkbox = document.getElementById('rememberLogin');
     const dataList = document.getElementById('recentEmployeeIds');
     const hint = document.getElementById('recentLoginHint');
     const remember = localStorage.getItem(CES_REMEMBER_LOGIN_KEY_V60) !== '0';
-    const recent = cesReadRecentLogins_();
+    const recent = cesReadRecentLoginsV60_();
     const lastId = String(
         localStorage.getItem(CES_LAST_EMPLOYEE_ID_KEY_V60) ||
         sessionStorage.getItem(CES_LAST_EMPLOYEE_ID_KEY_V60) ||
@@ -87,8 +87,8 @@ function cesRenderLoginMemory_() {
     }
 }
 
-function cesUseMostRecentLogin_() {
-    const recent = cesReadRecentLogins_();
+function cesUseMostRecentLoginV60_() {
+    const recent = cesReadRecentLoginsV60_();
     const input = document.getElementById('loginId');
     if (input && recent[0] && recent[0].id) {
         input.value = recent[0].id;
@@ -96,8 +96,8 @@ function cesUseMostRecentLogin_() {
     }
 }
 
-function cesHandleRememberLoginChange_() {
-    const enabled = cesRememberLoginEnabled_();
+function cesHandleRememberLoginChangeV60_() {
+    const enabled = cesRememberLoginEnabledV60_();
     try {
         localStorage.setItem(CES_REMEMBER_LOGIN_KEY_V60, enabled ? '1' : '0');
         if (!enabled) {
@@ -110,11 +110,11 @@ function cesHandleRememberLoginChange_() {
             if (input && input.value.trim()) localStorage.setItem(CES_LAST_EMPLOYEE_ID_KEY_V60, input.value.trim());
         }
     } catch (e) {}
-    cesRenderLoginMemory_();
+    cesRenderLoginMemoryV60_();
 }
 
-function cesHydrateLoginMemory_() {
-    cesRenderLoginMemory_();
+function cesHydrateLoginMemoryV60_() {
+    cesRenderLoginMemoryV60_();
     const input = document.getElementById('loginId');
     if (input && !input.dataset.cesLoginBound) {
         input.dataset.cesLoginBound = '1';
@@ -126,23 +126,23 @@ function cesHydrateLoginMemory_() {
         });
         input.addEventListener('change', function() {
             const id = input.value.trim();
-            if (id && cesRememberLoginEnabled_()) localStorage.setItem(CES_LAST_EMPLOYEE_ID_KEY_V60, id);
+            if (id && cesRememberLoginEnabledV60_()) localStorage.setItem(CES_LAST_EMPLOYEE_ID_KEY_V60, id);
         });
     }
 }
 
-window.cesRememberLoginEnabled_ = cesRememberLoginEnabled_;
-window.cesRecordRecentLogin_ = cesRecordRecentLogin_;
-window.cesRenderLoginMemory_ = cesRenderLoginMemory_;
-window.cesUseMostRecentLogin_ = cesUseMostRecentLogin_;
-window.cesHandleRememberLoginChange_ = cesHandleRememberLoginChange_;
-window.cesHydrateLoginMemory_ = cesHydrateLoginMemory_;
+window.cesRememberLoginEnabledV60_ = cesRememberLoginEnabledV60_;
+window.cesRecordRecentLoginV60_ = cesRecordRecentLoginV60_;
+window.cesRenderLoginMemoryV60_ = cesRenderLoginMemoryV60_;
+window.cesUseMostRecentLoginV60_ = cesUseMostRecentLoginV60_;
+window.cesHandleRememberLoginChangeV60_ = cesHandleRememberLoginChangeV60_;
+window.cesHydrateLoginMemoryV60_ = cesHydrateLoginMemoryV60_;
 
 // ──────────────────────────────────────────────────────────────────
     //  LOGIN  — Employee ID verification
     //  Key change: passes pendingLineProfile flag to onLoginSuccess()
     // ──────────────────────────────────────────────────────────────────
-    function cesLoginStatus_(message, state) {
+    function cesLoginStatusV249_(message, state) {
         const btn = document.getElementById('btnLogin');
         if (!btn) return;
         let el = document.getElementById('ces-login-status-v249');
@@ -178,7 +178,7 @@ window.cesHydrateLoginMemory_ = cesHydrateLoginMemory_;
         el.style.display = 'block';
     }
 
-    function cesLoginApi_(userId) {
+    function cesLoginApiV249_(userId) {
         // V24.9: hedge the normal JSONP login with a delayed POST/poll request.
         // This avoids a single transport hanging for 30+ seconds in mobile/LIFF while
         // keeping login read-only and idempotent. Whichever valid response arrives first wins.
@@ -221,7 +221,7 @@ window.cesHydrateLoginMemory_ = cesHydrateLoginMemory_;
                 launch('jsonp', 24000);
                 timers.push(setTimeout(() => {
                     if (!settled) {
-                        cesLoginStatus_('Connection is slower than usual — retrying securely…', 'warning');
+                        cesLoginStatusV249_('Connection is slower than usual — retrying securely…', 'warning');
                         launch('iframe', 42000);
                     }
                 }, 1800));
@@ -246,14 +246,14 @@ window.cesHydrateLoginMemory_ = cesHydrateLoginMemory_;
         const userId = String(idInput && idInput.value || '').trim();
 
         if (!userId) {
-            cesLoginStatus_('Please enter your Employee ID.', 'warning');
+            cesLoginStatusV249_('Please enter your Employee ID.', 'warning');
             if (idInput) idInput.focus();
             return;
         }
 
         try {
             sessionStorage.setItem(CES_LAST_EMPLOYEE_ID_KEY_V60, userId);
-            if (cesRememberLoginEnabled_()) {
+            if (cesRememberLoginEnabledV60_()) {
                 localStorage.setItem(CES_LAST_EMPLOYEE_ID_KEY_V60, userId);
                 localStorage.setItem(CES_REMEMBER_LOGIN_KEY_V60, '1');
             }
@@ -275,30 +275,30 @@ window.cesHydrateLoginMemory_ = cesHydrateLoginMemory_;
 
         btn.innerHTML = '<i class="fas fa-circle-notch fa-spin"></i> Checking ID…';
         btn.disabled = true;
-        cesLoginStatus_('Checking your CES Hub account…', 'loading');
+        cesLoginStatusV249_('Checking your CES Hub account…', 'loading');
 
-        cesLoginApi_(userId).then((res) => {
+        cesLoginApiV249_(userId).then((res) => {
             if (!finish()) return;
             if (res && res.success) {
-                cesLoginStatus_('Account verified. Opening CES Hub…', 'success');
+                cesLoginStatusV249_('Account verified. Opening CES Hub…', 'success');
                 try {
                     idInput.blur();
                     idInput.setAttribute('autocomplete', 'off');
                     idInput.setAttribute('name', 'ces_employee_id_verified_' + Date.now());
                     idInput.setAttribute('data-form-type', 'other');
                 } catch (ignorePasswordManager) {}
-                cesRecordRecentLogin_(res.user || { id:userId });
+                cesRecordRecentLoginV60_(res.user || { id:userId });
                 const skipLink = (typeof pendingLineProfile === 'undefined' || pendingLineProfile === null);
                 onLoginSuccess(res.user, skipLink, 'LOGIN');
-                setTimeout(() => cesLoginStatus_('', 'success'), 800);
+                setTimeout(() => cesLoginStatusV249_('', 'success'), 800);
                 return;
             }
-            cesLoginStatus_((res && res.message) || 'Employee ID could not be verified.', 'error');
+            cesLoginStatusV249_((res && res.message) || 'Employee ID could not be verified.', 'error');
             if (idInput) { idInput.focus(); idInput.select(); }
         }).catch((err) => {
             if (!finish()) return;
             const message = (err && err.message) || 'Unable to contact CES Hub.';
-            cesLoginStatus_('Login service connection failed: ' + message + ' Tap Login / Check ID to retry.', 'error');
+            cesLoginStatusV249_('Login service connection failed: ' + message + ' Tap Login / Check ID to retry.', 'error');
             console.error('[CES Login V24.9]', err);
         });
     }
@@ -319,7 +319,7 @@ window.cesHydrateLoginMemory_ = cesHydrateLoginMemory_;
 
 
     // V24.8 — explicit LINE OA / LIFF connection entry from Sign in.
-    function cesConnectLineOA_() {
+    function cesConnectLineOAV248_() {
         const cfg = (window.CES_CONFIG && window.CES_CONFIG.LINE_OA) || {};
         const liffId = String(cfg.LIFF_ID || '').trim();
         const addFriend = 'https://line.me/R/ti/p/@032jntyw';
@@ -329,12 +329,12 @@ window.cesHydrateLoginMemory_ = cesHydrateLoginMemory_;
         try { window.location.href = target; }
         catch (e) { window.open(target, '_blank', 'noopener'); }
     }
-    window.cesConnectLineOA_ = cesConnectLineOA_;
+    window.cesConnectLineOAV248_ = cesConnectLineOAV248_;
 
     // ──────────────────────────────────────────────────────────────────
     //  REGISTER MODAL
     // ──────────────────────────────────────────────────────────────────
-    function cesResetRegisterForm_() {
+    function cesResetRegisterFormV231_() {
         const ids = ['reg-id','reg-name-th','reg-name-eng','reg-email','reg-costCenter','reg-supervisor','reg-empType','reg-tel'];
         ids.forEach(id => { const el=document.getElementById(id); if(el) el.value=''; });
         const team=document.getElementById('reg-team'); if(team) team.value='';
@@ -343,14 +343,14 @@ window.cesHydrateLoginMemory_ = cesHydrateLoginMemory_;
 
     function openRegisterModal() {
         // V23.1: every registration field starts blank. Never inherit Employee ID from the login box.
-        cesResetRegisterForm_();
+        cesResetRegisterFormV231_();
         document.getElementById('registerModal').classList.remove('hidden');
         setTimeout(() => { const first=document.getElementById('reg-id'); if(first) first.focus(); }, 40);
     }
 
     function closeRegisterModal() {
         document.getElementById('registerModal').classList.add('hidden');
-        cesResetRegisterForm_();
+        cesResetRegisterFormV231_();
     }
 
     function registerUser() {
@@ -413,7 +413,7 @@ window.cesHydrateLoginMemory_ = cesHydrateLoginMemory_;
                 if (!finish()) return;
 
                 if (res && res.success) {
-                    cesRecordRecentLogin_({
+                    cesRecordRecentLoginV60_({
                         id:form.id,
                         name_eng:form.name_eng,
                         name_th:form.name_th,
@@ -424,7 +424,7 @@ window.cesHydrateLoginMemory_ = cesHydrateLoginMemory_;
                     // success popup. This fixes the old "Processing..." header bug.
                     const modal = document.getElementById('registerModal');
                     if (modal) modal.classList.add('hidden');
-                    cesResetRegisterForm_();
+                    cesResetRegisterFormV231_();
 
                     const adminMailOk = !!(
                         res.mail &&
@@ -484,7 +484,7 @@ window.cesHydrateLoginMemory_ = cesHydrateLoginMemory_;
 
 
 if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', cesHydrateLoginMemory_, { once:true });
+    document.addEventListener('DOMContentLoaded', cesHydrateLoginMemoryV60_, { once:true });
 } else {
-    setTimeout(cesHydrateLoginMemory_, 0);
+    setTimeout(cesHydrateLoginMemoryV60_, 0);
 }

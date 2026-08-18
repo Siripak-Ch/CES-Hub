@@ -51,13 +51,13 @@ function renderTeamSummary_(rows){
   const teams=['MED','LAB','EHS','ENV','TES','QM','MNG','SALES'],root=document.getElementById('team-info-summary');if(!root)return;
   root.innerHTML=teams.map(t=>{const n=rows.filter(r=>{const raw=(r.team||'').toUpperCase();const x=['MED','LAB','EHS','ENV','TES','QM','MNG','SALES'].includes(raw)?raw:'MNG';return x===t;}).length,c=cesTeamColor_(t);return `<div class="rounded-2xl border p-3 text-center" style="background:${c.bg};border-color:${c.border}"><div class="text-[10px] font-black" style="color:${c.text}">${t}</div><div class="text-xl font-black mt-1" style="color:${c.text}">${n}</div></div>`;}).join('');
 }
-function cesTeamApplyCurrentUserUpdate_(staff){
+function cesTeamApplyCurrentUserUpdateV51_(staff){
   if(!staff)return; const actor=cesTeamActorId_(); if(String(actor)!==String(staff.id)&&String(actor)!==String(staff.originalId||''))return;
   const patch={id:staff.id,empId:staff.id,nameTh:staff.nameTh,nameEng:staff.nameEng,name:staff.nameEng||staff.nameTh,email:staff.email,team:staff.team,position:staff.position,role:staff.role,costCenter:staff.costCenter,supervisor:staff.supervisor,empType:staff.empType,tel:staff.tel};
   try{if(typeof currentUser!=='undefined'&&currentUser)Object.assign(currentUser,patch);}catch(e){}
   try{window.CES_CURRENT_USER=Object.assign({},window.CES_CURRENT_USER||{},patch);}catch(e){}
   try{localStorage.setItem('ces_user',JSON.stringify(window.CES_CURRENT_USER||patch));}catch(e){}
-  try{if(typeof cesPersistSession_==='function')cesPersistSession_(window.CES_CURRENT_USER||patch,'team_information','STAFF_INFO_UPDATED');}catch(e){}
+  try{if(typeof cesPersistSessionV50_==='function')cesPersistSessionV50_(window.CES_CURRENT_USER||patch,'team_information','STAFF_INFO_UPDATED');}catch(e){}
   try{if(typeof updateProfileUI==='function')updateProfileUI();}catch(e){}
 }
 
@@ -67,7 +67,7 @@ function editTeamInformation(row){
   Swal.fire({title:'Edit Team Information',width:820,html:`<div class="grid grid-cols-1 md:grid-cols-2 gap-3 text-left"><div><label class="ces-form-label">Staff ID</label><input id="ti-id" class="swal2-input !m-0 !w-full" value="${cesTeamEsc_(row.id)}"></div><div><label class="ces-form-label">Email</label><input id="ti-email" class="swal2-input !m-0 !w-full" value="${cesTeamEsc_(row.email)}"></div><div><label class="ces-form-label">Thai Name</label><input id="ti-th" class="swal2-input !m-0 !w-full" value="${cesTeamEsc_(row.nameTh)}"></div><div><label class="ces-form-label">English Name</label><input id="ti-en" class="swal2-input !m-0 !w-full" value="${cesTeamEsc_(row.nameEng)}"></div><div><label class="ces-form-label">Team</label><select id="ti-team" class="swal2-select !m-0 !w-full">${teams.map(x=>`<option ${x===((['MED','LAB','EHS','ENV','TES','QM','MNG','SALES'].includes(String(row.team||'').toUpperCase()))?String(row.team||'').toUpperCase():'MNG')?'selected':''}>${x}</option>`).join('')}</select></div><div><label class="ces-form-label">Role</label><select id="ti-role" class="swal2-select !m-0 !w-full">${roles.map(x=>`<option ${x===row.role?'selected':''}>${x}</option>`).join('')}</select></div><div><label class="ces-form-label">Position</label><input id="ti-position" class="swal2-input !m-0 !w-full" value="${cesTeamEsc_(row.position)}"></div><div><label class="ces-form-label">Supervisor</label><input id="ti-supervisor" class="swal2-input !m-0 !w-full" value="${cesTeamEsc_(row.supervisor)}"></div><div><label class="ces-form-label">Cost Center</label><input id="ti-cost" class="swal2-input !m-0 !w-full" value="${cesTeamEsc_(row.costCenter)}"></div><div><label class="ces-form-label">Employee Type</label><input id="ti-type" class="swal2-input !m-0 !w-full" value="${cesTeamEsc_(row.empType)}"></div><div><label class="ces-form-label">Contact</label><input id="ti-tel" class="swal2-input !m-0 !w-full" value="${cesTeamEsc_(row.tel)}"></div></div>`,showCancelButton:true,confirmButtonText:'Save Staff Data',preConfirm:()=>({actorId:cesTeamActorId_(),originalId:row.id,id:document.getElementById('ti-id').value.trim(),nameTh:document.getElementById('ti-th').value.trim(),nameEng:document.getElementById('ti-en').value.trim(),email:document.getElementById('ti-email').value.trim(),team:document.getElementById('ti-team').value,position:document.getElementById('ti-position').value.trim(),role:document.getElementById('ti-role').value,costCenter:document.getElementById('ti-cost').value.trim(),supervisor:document.getElementById('ti-supervisor').value.trim(),empType:document.getElementById('ti-type').value.trim(),tel:document.getElementById('ti-tel').value.trim()})}).then(async result=>{
     if(!result.isConfirmed)return;
     Swal.fire({title:'Updating Staff_Data...',allowOutsideClick:false,didOpen:()=>Swal.showLoading()});
-    try{const res=await window.CES_API.callFunction('updateTeamInformation',[result.value],{transport:'jsonp',timeoutMs:60000});if(!res||!res.success)throw new Error((res&&res.message)||'Update failed');cesTeamApplyCurrentUserUpdate_(res.data);localStorage.removeItem(CES_TEAM_INFO_LOCAL_KEY);CES_TEAM_INFO.loaded=false;await Swal.fire('Updated',res.message||'Staff information updated','success');loadTeamInformation(true,false);}catch(err){Swal.fire('Update Error',err.message||String(err),'error');}
+    try{const res=await window.CES_API.callFunction('updateTeamInformation',[result.value],{transport:'jsonp',timeoutMs:60000});if(!res||!res.success)throw new Error((res&&res.message)||'Update failed');cesTeamApplyCurrentUserUpdateV51_(res.data);localStorage.removeItem(CES_TEAM_INFO_LOCAL_KEY);CES_TEAM_INFO.loaded=false;await Swal.fire('Updated',res.message||'Staff information updated','success');loadTeamInformation(true,false);}catch(err){Swal.fire('Update Error',err.message||String(err),'error');}
   });
 }
 
@@ -76,12 +76,12 @@ function editTeamInformation(row){
 // CES Hub V20 — Training Record (2026)
 // ============================================================
 const CES_TRAINING_V20={loaded:false,data:null,mode:'directory',planLoaded:false,planData:null,planDirty:{},planSheet:'STEP FORWARD 2026'};
-function refreshTeamInformation(){
-  if(CES_TRAINING_V20.mode==='training') loadTrainingDashboard(true);
+function refreshTeamInformationV20(){
+  if(CES_TRAINING_V20.mode==='training') loadTrainingDashboardV20(true);
   else if(CES_TRAINING_V20.mode==='plan') loadTrainingPlan(true);
   else loadTeamInformation(true,false);
 }
-function switchTeamInfoMode(mode){
+function switchTeamInfoModeV20(mode){
   CES_TRAINING_V20.mode=(mode==='training'||mode==='plan')?mode:'directory';
   const dir=document.getElementById('team-info-directory-panel'),training=document.getElementById('team-info-training-panel'),plan=document.getElementById('team-info-plan-panel');
   if(dir)dir.classList.toggle('hidden',CES_TRAINING_V20.mode!=='directory');
@@ -91,21 +91,21 @@ function switchTeamInfoMode(mode){
   if(d)d.classList.toggle('active',CES_TRAINING_V20.mode==='directory');
   if(tr)tr.classList.toggle('active',CES_TRAINING_V20.mode==='training');
   if(pl)pl.classList.toggle('active',CES_TRAINING_V20.mode==='plan');
-  if(CES_TRAINING_V20.mode==='training'&&!CES_TRAINING_V20.loaded)loadTrainingDashboard(false);
+  if(CES_TRAINING_V20.mode==='training'&&!CES_TRAINING_V20.loaded)loadTrainingDashboardV20(false);
   if(CES_TRAINING_V20.mode==='plan'&&!CES_TRAINING_V20.planLoaded)loadTrainingPlan(false);
   if(window.CES_LANGUAGE&&window.CES_LANGUAGE.apply)window.CES_LANGUAGE.apply();
 }
-async function loadTrainingDashboard(force){
+async function loadTrainingDashboardV20(force){
   const root=document.getElementById('training-people-list');
   if(root&&!CES_TRAINING_V20.loaded)root.innerHTML='<div class="lg:col-span-2 py-12 text-center text-slate-400"><i class="fas fa-circle-notch fa-spin text-2xl"></i><div class="mt-2 font-bold">Loading Training Records…</div></div>';
   try{
     if(!window.CES_API)throw new Error('CES API is not ready.');
     const res=await window.CES_API.callFunction('getTrainingDashboard',[{forceRefresh:!!force}],{transport:'jsonp',timeoutMs:45000});
     if(!res||res.success===false)throw new Error((res&&res.message)||'Cannot load training records.');
-    CES_TRAINING_V20.loaded=true;CES_TRAINING_V20.data=res;renderTrainingDashboard();
+    CES_TRAINING_V20.loaded=true;CES_TRAINING_V20.data=res;renderTrainingDashboardV20();
   }catch(err){if(root)root.innerHTML='<div class="lg:col-span-2 py-12 text-center text-red-500 font-bold">'+cesTeamEsc_(err.message||String(err))+'</div>';}
 }
-function renderTrainingDashboard(){
+function renderTrainingDashboardV20(){
   const data=CES_TRAINING_V20.data||{people:[],teams:[],overall:{}};
   const overall=data.overall||{},rate=Number(overall.completionRate||0);
   const donut=document.getElementById('training-overall-donut');if(donut)donut.style.setProperty('--progress',Math.max(0,Math.min(100,rate))+'%');
@@ -116,9 +116,9 @@ function renderTrainingDashboard(){
   const q=(document.getElementById('training-search')?.value||'').toLowerCase().trim();
   const people=(data.people||[]).filter(p=>(team==='ALL'||String(p.team).toUpperCase()===team)&&(!q||[p.id,p.nameTh,p.nameEng,p.position,p.team].join(' ').toLowerCase().includes(q)));
   const root=document.getElementById('training-people-list');if(!root)return;
-  root.innerHTML=people.map(p=>{const records=(data.records||[]).filter(r=>String(r.userId||'')===String(p.id||'')&&String(r.completedStatus||'').toLowerCase()==='completed').slice(0,5);const history=records.length?`<details class="ces-training-history"><summary>Learning History (${Number(p.recordCount||records.length||0)})</summary>${records.map(r=>`<div><b>${cesTeamEsc_(r.contentName||'Training')}</b><span>Completed · ${cesTeamEsc_(r.completedDate||'-')} · ${Number(r.totalHour||0).toFixed(1)} hr</span></div>`).join('')}</details>`:'';return `<article class="ces-training-person"><div class="ces-training-person-head"><div><b>${cesTeamEsc_(p.nameEng||p.nameTh||p.id)}</b><span>${cesTeamEsc_(p.nameTh||'')} · ${cesTeamEsc_(p.id)} · ${cesTeamEsc_(p.team)}</span><small>${cesTeamEsc_(p.position||'-')}</small></div><strong>${Number(p.hours||0).toFixed(1)}${p.eligible?' / 60':' hr'}</strong></div><div class="ces-training-progress ${p.eligible?'':'excluded'}"><i style="width:${p.eligible?Math.min(100,Number(p.progress||0)):100}%"></i></div><div class="ces-training-person-foot"><span>${p.eligible?(p.completed?'Completed':'Remaining '+Number(p.remainingHours||0).toFixed(1)+' hr'):'Excluded from target'}</span>${p.id?`<button onclick="openTrainingManual('${cesTeamEsc_(p.id)}')"><i class="fas fa-plus"></i> Add</button>`:'<span class="text-[9px] text-slate-400">No Employee ID</span>'}</div>${history}</article>`;}).join('')||'<div class="lg:col-span-2 py-12 text-center text-slate-400">No staff found.</div>';
+  root.innerHTML=people.map(p=>{const records=(data.records||[]).filter(r=>String(r.userId||'')===String(p.id||'')&&String(r.completedStatus||'').toLowerCase()==='completed').slice(0,5);const history=records.length?`<details class="ces-training-history"><summary>Learning History (${Number(p.recordCount||records.length||0)})</summary>${records.map(r=>`<div><b>${cesTeamEsc_(r.contentName||'Training')}</b><span>Completed · ${cesTeamEsc_(r.completedDate||'-')} · ${Number(r.totalHour||0).toFixed(1)} hr</span></div>`).join('')}</details>`:'';return `<article class="ces-training-person"><div class="ces-training-person-head"><div><b>${cesTeamEsc_(p.nameEng||p.nameTh||p.id)}</b><span>${cesTeamEsc_(p.nameTh||'')} · ${cesTeamEsc_(p.id)} · ${cesTeamEsc_(p.team)}</span><small>${cesTeamEsc_(p.position||'-')}</small></div><strong>${Number(p.hours||0).toFixed(1)}${p.eligible?' / 60':' hr'}</strong></div><div class="ces-training-progress ${p.eligible?'':'excluded'}"><i style="width:${p.eligible?Math.min(100,Number(p.progress||0)):100}%"></i></div><div class="ces-training-person-foot"><span>${p.eligible?(p.completed?'Completed':'Remaining '+Number(p.remainingHours||0).toFixed(1)+' hr'):'Excluded from target'}</span>${p.id?`<button onclick="openTrainingManualV20('${cesTeamEsc_(p.id)}')"><i class="fas fa-plus"></i> Add</button>`:'<span class="text-[9px] text-slate-400">No Employee ID</span>'}</div>${history}</article>`;}).join('')||'<div class="lg:col-span-2 py-12 text-center text-slate-400">No staff found.</div>';
 }
-function cesTrainingExcelDate_(value){
+function cesTrainingExcelDateV20_(value){
   if(value instanceof Date&&!isNaN(value.getTime()))return value.toISOString().slice(0,10);
   if(typeof value==='number'&&window.XLSX&&XLSX.SSF){try{return XLSX.SSF.format('yyyy-mm-dd',value);}catch(e){}}
   const s=String(value==null?'':value).trim();
@@ -126,13 +126,13 @@ function cesTrainingExcelDate_(value){
   if(m){const year=Number(m[3])<100?2000+Number(m[3]):Number(m[3]);return year+'-'+String(Number(m[2])).padStart(2,'0')+'-'+String(Number(m[1])).padStart(2,'0');}
   return s;
 }
-function cesTrainingHours_(value){
+function cesTrainingHoursV20_(value){
   if(typeof value==='number')return value>0&&value<1?value*24:value;
   const s=String(value==null?'':value).trim();
   if(/^\d{1,3}:\d{2}(?::\d{2})?$/.test(s)){const a=s.split(':').map(Number);return a[0]+a[1]/60+(a[2]||0)/3600;}
   return Number(s.replace(',','.'))||0;
 }
-async function importTrainingWorkbook(file){
+async function importTrainingWorkbookV20(file){
   if(!file)return;
   if(!window.XLSX){Swal.fire('Import Error','SheetJS library is not ready.','error');return;}
   Swal.fire({title:'Reading Learning Report…',allowOutsideClick:false,didOpen:()=>Swal.showLoading()});
@@ -147,21 +147,21 @@ async function importTrainingWorkbook(file){
     const records=rows.map((r,index)=>({
       recordId:String(r['Record ID']||('EXCEL-'+userId+'-'+index)).trim(),userId:userId,
       contentName:String(r['Content Name']||r['Content Program Name']||'Training').trim(),contentType:String(r['Content Type']||'').trim(),provider:String(r['Content Provider']||'').trim(),category:String(r['Category']||'').trim(),
-      startDate:cesTrainingExcelDate_(r['Start Date']),endDate:cesTrainingExcelDate_(r['End Date']),completedStatus:String(r['Completed Status']||'').trim(),completedDate:cesTrainingExcelDate_(r['Completed Date']),totalHour:cesTrainingHours_(r['Total Hour'])
+      startDate:cesTrainingExcelDateV20_(r['Start Date']),endDate:cesTrainingExcelDateV20_(r['End Date']),completedStatus:String(r['Completed Status']||'').trim(),completedDate:cesTrainingExcelDateV20_(r['Completed Date']),totalHour:cesTrainingHoursV20_(r['Total Hour'])
     })).filter(r=>{const d=String(r.completedDate||r.endDate||r.startDate);return r.completedStatus.toLowerCase()==='completed'&&/^2026(?:-|$)/.test(d)&&r.totalHour>0;});
     if(!records.length)throw new Error('No Completed learning records for 2026 were found.');
     const res=await window.CES_API.callFunction('saveTrainingRecords',[{actorId:cesTeamActorId_(),userId:userId,sourceFile:file.name,entryType:'IMPORT',records:records}],{transport:'iframe',timeoutMs:120000});
     if(!res||res.success===false)throw new Error((res&&res.message)||'Import failed.');
-    await loadTrainingDashboard(true);
+    await loadTrainingDashboardV20(true);
     Swal.fire({icon:'success',title:'Training records imported',text:`Added ${res.added||0} · Updated ${res.updated||0} · Skipped ${res.skipped||0} · Staff_Data P:AB`});
   }catch(err){Swal.fire('Import Error',err.message||String(err),'error');}
 }
-async function openTrainingManual(userId){
+async function openTrainingManualV20(userId){
   userId=String(userId||cesTeamActorId_()||'');
   var today=new Date(), defaultDate=today.getFullYear()===2026?today.toISOString().slice(0,10):'2026-12-31';
   const result=await Swal.fire({title:'Add Learning Hours',width:680,showCancelButton:true,confirmButtonText:'Save',html:`<div class="text-left grid grid-cols-1 md:grid-cols-2 gap-3"><label class="md:col-span-2 text-xs font-bold">Employee ID<input id="tr-user" class="swal2-input !m-0 !w-full" value="${cesTeamEsc_(userId)}"></label><label class="md:col-span-2 text-xs font-bold">Course / Content<input id="tr-name" class="swal2-input !m-0 !w-full"></label><label class="text-xs font-bold">Completed Date<input id="tr-date" type="date" class="swal2-input !m-0 !w-full" value="${defaultDate}"></label><label class="text-xs font-bold">Learning Hour<input id="tr-hour" type="number" min="0.1" step="0.1" class="swal2-input !m-0 !w-full"></label><label class="md:col-span-2 text-xs font-bold">Note<textarea id="tr-note" class="swal2-textarea !m-0 !w-full"></textarea></label></div>`,preConfirm:()=>({actorId:cesTeamActorId_(),userId:document.getElementById('tr-user').value.trim(),contentName:document.getElementById('tr-name').value.trim(),completedDate:document.getElementById('tr-date').value,totalHour:Number(document.getElementById('tr-hour').value||0),note:document.getElementById('tr-note').value.trim()})});
   if(!result.isConfirmed)return;
-  try{const res=await window.CES_API.callFunction('saveTrainingManualRecord',[result.value],{transport:'iframe',timeoutMs:60000});if(!res||res.success===false)throw new Error((res&&res.message)||'Save failed');await loadTrainingDashboard(true);Swal.fire({icon:'success',title:'Learning hour saved',timer:1300,showConfirmButton:false});}catch(err){Swal.fire('Save Error',err.message||String(err),'error');}
+  try{const res=await window.CES_API.callFunction('saveTrainingManualRecord',[result.value],{transport:'iframe',timeoutMs:60000});if(!res||res.success===false)throw new Error((res&&res.message)||'Save failed');await loadTrainingDashboardV20(true);Swal.fire({icon:'success',title:'Learning hour saved',timer:1300,showConfirmButton:false});}catch(err){Swal.fire('Save Error',err.message||String(err),'error');}
 }
 
 // ============================================================
@@ -247,12 +247,12 @@ async function saveTrainingPlan(){
 }
 function openTrainingPlanSource(){const url=(typeof window.cesExternalLink==='function'&&window.cesExternalLink('TRAINING_PLAN_2026'))||(CES_TRAINING_V20.planData&&CES_TRAINING_V20.planData.sourceUrl)||'';if(url)window.open(url,'_blank','noopener,noreferrer');}
 
-window.refreshTeamInformation=refreshTeamInformation;
-window.switchTeamInfoMode=switchTeamInfoMode;
-window.loadTrainingDashboard=loadTrainingDashboard;
-window.renderTrainingDashboard=renderTrainingDashboard;
-window.importTrainingWorkbook=importTrainingWorkbook;
-window.openTrainingManual=openTrainingManual;
+window.refreshTeamInformationV20=refreshTeamInformationV20;
+window.switchTeamInfoModeV20=switchTeamInfoModeV20;
+window.loadTrainingDashboardV20=loadTrainingDashboardV20;
+window.renderTrainingDashboardV20=renderTrainingDashboardV20;
+window.importTrainingWorkbookV20=importTrainingWorkbookV20;
+window.openTrainingManualV20=openTrainingManualV20;
 window.setTrainingPlanSheet=setTrainingPlanSheet;
 window.loadTrainingPlan=loadTrainingPlan;
 window.renderTrainingPlan=renderTrainingPlan;
@@ -261,4 +261,4 @@ window.saveTrainingPlan=saveTrainingPlan;
 window.openTrainingPlanSource=openTrainingPlanSource;
 
 // V22.5 standalone Information > Team Plan
-window.initTeamPlan=function(){try{if(typeof window.loadTrainingPlan==='function')return window.loadTrainingPlan(false);}catch(e){console.warn('[Team Plan V22.5]',e);}return null;};
+window.initTeamPlanV225=function(){try{if(typeof window.loadTrainingPlan==='function')return window.loadTrainingPlan(false);}catch(e){console.warn('[Team Plan V22.5]',e);}return null;};
