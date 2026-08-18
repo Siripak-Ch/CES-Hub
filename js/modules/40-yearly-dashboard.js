@@ -280,8 +280,8 @@
 
     async function syncCalendarToSheet() {
         Swal.fire({
-            title: 'Synchronizing full calendar…',
-            html: '<div style="font-size:12px;color:#64748b">Fetching all MED, LAB, EHS and Management events for 2025–2026.<br>Please keep this page open.</div>',
+            title: 'Synchronizing calendar…',
+            html: '<div style="font-size:12px;color:#64748b">First setup loads the full 2025–2026 range. After that, only the current month is synchronized.<br>Please keep this page open.</div>',
             allowOutsideClick: false,
             showConfirmButton: false,
             didOpen: () => Swal.showLoading()
@@ -293,7 +293,7 @@
             await Swal.fire({
                 icon: 'success',
                 title: 'Calendar synchronized',
-                text: typeof result === 'string' ? result : 'Calendar_Summary and Job_Stats were rebuilt successfully.',
+                text: typeof result === 'string' ? result : 'Calendar_Summary and Job_Stats were synchronized successfully.',
                 confirmButtonColor: '#003DA5'
             });
             if (typeof loadAllData === 'function') loadAllData();
@@ -508,12 +508,12 @@
   const TEAM_COLORS_V19 = { MED: '#004aad', LAB: '#19a7ce', EHS: '#0fc1a1' };
   const TARGET_COLOR_V19 = '#e2e8f0';
 
-  function yearlyNumV31_(v) {
+  function yearlyNum_(v) {
     const n = Number(String(v == null ? '' : v).replace(/[^0-9.-]/g, ''));
     return Number.isFinite(n) ? n : 0;
   }
 
-  function yearlyWeekdaysV31_(month, year) {
+  function yearlyWeekdays_(month, year) {
     if (typeof getYearlyWeekdays === 'function') return getYearlyWeekdays(month, year);
     let count = 0;
     const days = new Date(year, month, 0).getDate();
@@ -524,18 +524,18 @@
     return count;
   }
 
-  function yearlyCompleteRowsV31_(data, year) {
+  function yearlyCompleteRows_(data, year) {
     const map = {};
     (Array.isArray(data) ? data : []).forEach(r => {
-      const m = yearlyNumV31_(r.month);
+      const m = yearlyNum_(r.month);
       if (m >= 1 && m <= 12) {
         map[m] = {
-          year: yearlyNumV31_(r.year) || year,
+          year: yearlyNum_(r.year) || year,
           month: m,
           monthName: r.monthName || MONTH_FULL_V19[m],
-          med: yearlyNumV31_(r.med),
-          lab: yearlyNumV31_(r.lab),
-          ehs: yearlyNumV31_(r.ehs)
+          med: yearlyNum_(r.med),
+          lab: yearlyNum_(r.lab),
+          ehs: yearlyNum_(r.ehs)
         };
       }
     });
@@ -566,7 +566,7 @@
         if (!meta || !meta.data) return;
 
         meta.data.forEach((bar, index) => {
-          const targetValue = yearlyNumV31_(targets[index]);
+          const targetValue = yearlyNum_(targets[index]);
           if (targetValue <= 0 || !bar) return;
           const props = bar.getProps(['x', 'width'], true);
           const baseY = yScale.getPixelForValue(0);
@@ -597,19 +597,19 @@
   };
 
   window.renderYearlyCharts = function (data, teamConfig, year) {
-    const selectedYear = yearlyNumV31_(year) || new Date().getFullYear();
-    const rows = yearlyCompleteRowsV31_(data || [], selectedYear);
+    const selectedYear = yearlyNum_(year) || new Date().getFullYear();
+    const rows = yearlyCompleteRows_(data || [], selectedYear);
     const labels = rows.map(d => String(d.monthName || MONTH_FULL_V19[d.month]).substring(0, 3));
     const cfg = teamConfig || {};
     const cap = {
-      med: yearlyNumV31_(cfg.med || 12) || 12,
-      lab: yearlyNumV31_(cfg.lab || 3) || 3,
-      ehs: yearlyNumV31_(cfg.ehs || 3) || 3
+      med: yearlyNum_(cfg.med || 12) || 12,
+      lab: yearlyNum_(cfg.lab || 3) || 3,
+      ehs: yearlyNum_(cfg.ehs || 3) || 3
     };
     const targets = {
-      med: rows.map(d => yearlyWeekdaysV31_(d.month, selectedYear) * cap.med),
-      lab: rows.map(d => yearlyWeekdaysV31_(d.month, selectedYear) * cap.lab),
-      ehs: rows.map(d => yearlyWeekdaysV31_(d.month, selectedYear) * cap.ehs)
+      med: rows.map(d => yearlyWeekdays_(d.month, selectedYear) * cap.med),
+      lab: rows.map(d => yearlyWeekdays_(d.month, selectedYear) * cap.lab),
+      ehs: rows.map(d => yearlyWeekdays_(d.month, selectedYear) * cap.ehs)
     };
 
     const canvasT = document.getElementById('yearlyTrendChart');
@@ -621,9 +621,9 @@
         data: {
           labels,
           datasets: [
-            { label: 'MED', data: rows.map(d => yearlyNumV31_(d.med)), backgroundColor: TEAM_COLORS_V19.MED, borderRadius: 5, barPercentage: 0.48, categoryPercentage: 0.72 },
-            { label: 'LAB', data: rows.map(d => yearlyNumV31_(d.lab)), backgroundColor: TEAM_COLORS_V19.LAB, borderRadius: 5, barPercentage: 0.48, categoryPercentage: 0.72 },
-            { label: 'EHS', data: rows.map(d => yearlyNumV31_(d.ehs)), backgroundColor: TEAM_COLORS_V19.EHS, borderRadius: 5, barPercentage: 0.48, categoryPercentage: 0.72 }
+            { label: 'MED', data: rows.map(d => yearlyNum_(d.med)), backgroundColor: TEAM_COLORS_V19.MED, borderRadius: 5, barPercentage: 0.48, categoryPercentage: 0.72 },
+            { label: 'LAB', data: rows.map(d => yearlyNum_(d.lab)), backgroundColor: TEAM_COLORS_V19.LAB, borderRadius: 5, barPercentage: 0.48, categoryPercentage: 0.72 },
+            { label: 'EHS', data: rows.map(d => yearlyNum_(d.ehs)), backgroundColor: TEAM_COLORS_V19.EHS, borderRadius: 5, barPercentage: 0.48, categoryPercentage: 0.72 }
           ]
         },
         options: {
@@ -655,8 +655,8 @@
               callbacks: {
                 label: function (ctx) {
                   const team = String(ctx.dataset.label || '').toLowerCase();
-                  const actual = yearlyNumV31_(ctx.parsed && ctx.parsed.y);
-                  const target = yearlyNumV31_(targets[team] && targets[team][ctx.dataIndex]);
+                  const actual = yearlyNum_(ctx.parsed && ctx.parsed.y);
+                  const target = yearlyNum_(targets[team] && targets[team][ctx.dataIndex]);
                   return `${String(ctx.dataset.label || '').toUpperCase()}: ${actual.toLocaleString()} / Target ${target.toLocaleString()}`;
                 }
               }
@@ -671,9 +671,9 @@
     if (canvasP && window.Chart) {
       const ctxP = canvasP.getContext('2d');
       if (yearlyPieChartInstance) yearlyPieChartInstance.destroy();
-      const med = rows.reduce((a, d) => a + yearlyNumV31_(d.med), 0);
-      const lab = rows.reduce((a, d) => a + yearlyNumV31_(d.lab), 0);
-      const ehs = rows.reduce((a, d) => a + yearlyNumV31_(d.ehs), 0);
+      const med = rows.reduce((a, d) => a + yearlyNum_(d.med), 0);
+      const lab = rows.reduce((a, d) => a + yearlyNum_(d.lab), 0);
+      const ehs = rows.reduce((a, d) => a + yearlyNum_(d.ehs), 0);
       yearlyPieChartInstance = new Chart(ctxP, {
         type: 'doughnut',
         data: {
@@ -736,7 +736,7 @@
     if(typeof updateProgressBar==='function') updateProgressBar('y-bar-'+id,'y-cap-'+id,Math.min(100,pct));
     const pctEl=document.getElementById('y-cap-'+id); if(pctEl) pctEl.textContent=pct+'%';
   }
-  function openYearlyMonthV40_(year,month){
+  function openYearlyMonth_(year,month){
     const y = Number(year), m = Number(month);
     if (!Number.isFinite(y) || !Number.isFinite(m) || m < 1 || m > 12) return;
     if (typeof switchTab === 'function') switchTab('calendar');
@@ -752,7 +752,7 @@
     };
     requestAnimationFrame(function(){ requestAnimationFrame(applyCalendarPeriod); });
   }
-  window.openYearlyMonthV40_=openYearlyMonthV40_;
+  window.openYearlyMonth_=openYearlyMonth_;
 
   const targetOverlayV40={
     id:'yearlyTargetOverlayV40',
@@ -824,9 +824,9 @@
   };
   renderYearlyTable=function(rows){
     const body=document.getElementById('yearly-table-body'); if(!body) return;
-    body.innerHTML=rows.map(r=>`<tr class="ces-yearly-month-row cursor-pointer" role="button" tabindex="0" title="Open ${r.monthName} ${r.year} in Master Calendar" onclick="openYearlyMonthV40_(${Number(r.year)},${Number(r.month)})" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();openYearlyMonthV40_(${Number(r.year)},${Number(r.month)})}"><td class="text-center font-bold">${r.year}</td><td class="text-center font-bold text-[#003DA5]">${r.monthName}</td><td class="text-right">${n40(r.med).toLocaleString()}</td><td class="text-right">${n40(r.lab).toLocaleString()}</td><td class="text-right">${n40(r.ehs).toLocaleString()}</td><td class="text-right">${n40(r.env).toLocaleString()}</td><td class="text-right">${n40(r.tes).toLocaleString()}</td><td class="text-right font-black">${n40(r.total).toLocaleString()}</td><td class="text-center"><button type="button" class="w-8 h-8 rounded-lg bg-blue-50 text-[#003DA5] hover:bg-[#003DA5] hover:text-white" onclick="event.stopPropagation();openYearlyMonthV40_(${Number(r.year)},${Number(r.month)})" aria-label="Open ${r.monthName} ${r.year} in Master Calendar"><i class="fas fa-calendar-alt"></i></button></td></tr>`).join('');
+    body.innerHTML=rows.map(r=>`<tr class="ces-yearly-month-row cursor-pointer" role="button" tabindex="0" title="Open ${r.monthName} ${r.year} in Master Calendar" onclick="openYearlyMonth_(${Number(r.year)},${Number(r.month)})" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();openYearlyMonth_(${Number(r.year)},${Number(r.month)})}"><td class="text-center font-bold">${r.year}</td><td class="text-center font-bold text-[#003DA5]">${r.monthName}</td><td class="text-right">${n40(r.med).toLocaleString()}</td><td class="text-right">${n40(r.lab).toLocaleString()}</td><td class="text-right">${n40(r.ehs).toLocaleString()}</td><td class="text-right">${n40(r.env).toLocaleString()}</td><td class="text-right">${n40(r.tes).toLocaleString()}</td><td class="text-right font-black">${n40(r.total).toLocaleString()}</td><td class="text-center"><button type="button" class="w-8 h-8 rounded-lg bg-blue-50 text-[#003DA5] hover:bg-[#003DA5] hover:text-white" onclick="event.stopPropagation();openYearlyMonth_(${Number(r.year)},${Number(r.month)})" aria-label="Open ${r.monthName} ${r.year} in Master Calendar"><i class="fas fa-calendar-alt"></i></button></td></tr>`).join('');
   };
-  window.CES_YEARLY_UI_V41_RECHECK=function(){return{version:'V41',teams:TEAM_ORDER_V40.slice(),mgtVisible:false};};
+  window.CES_YEARLY_UI_RECHECK=function(){return{version:'V41',teams:TEAM_ORDER_V40.slice(),mgtVisible:false};};
 })();
 
-window.CES_YEARLY_UI_V41_RECHECK = window.CES_YEARLY_UI_V41_RECHECK || function(){return{version:'V41',teams:['MED','LAB','EHS','ENV','TES'],colors:['MED','LAB','EHS','ENV','TES'].reduce((o,t)=>(o[t]=cesGetTeamColor(t),o),{})};};
+window.CES_YEARLY_UI_RECHECK = window.CES_YEARLY_UI_RECHECK || function(){return{version:'V41',teams:['MED','LAB','EHS','ENV','TES'],colors:['MED','LAB','EHS','ENV','TES'].reduce((o,t)=>(o[t]=cesGetTeamColor(t),o),{})};};

@@ -395,28 +395,12 @@
     loadSystemHealth(false).catch(function () {});
   }
 
-  window.initSystemHealthV18 = init;
-  window.initSystemHealthV17 = init;
-  window.loadSystemHealthV18 = loadSystemHealth;
-  window.loadSystemHealthV17 = loadSystemHealth;
-  window.runFullApiAuditV18 = runFullAudit;
-  window.runFullApiAuditV17 = runFullAudit;
-  window.runFrontendAssetAuditV18 = runFrontendAssetAudit;
-  window.runFrontendAssetAuditV17 = runFrontendAssetAudit;
-  window.filterHealthProbesV18 = filterProbes;
-  window.filterHealthProbesV17 = filterProbes;
-  window.renderHealthApiInventoryV18 = renderApiInventory;
-  window.renderHealthApiInventoryV17 = renderApiInventory;
-  window.renderFrontendAuditV18 = renderFrontendAudit;
-  window.renderFrontendAuditV17 = renderFrontendAudit;
-  window.exportSystemHealthJsonV18 = exportJson;
-  window.exportSystemHealthJsonV17 = exportJson;
-
-  // Backward-compatible names used by cached V14/V16 HTML/controller.
-  window.initSystemHealthV14 = init;
-  window.loadSystemHealthV14 = loadSystemHealth;
-  window.runFullApiAuditV14 = runFullAudit;
-  window.filterHealthProbesV14 = filterProbes;
-  window.renderHealthApiInventoryV14 = renderApiInventory;
-  window.exportSystemHealthJsonV14 = exportJson;
+  window.initSystemHealth = init;
+  window.loadSystemHealth = loadSystemHealth;
+  window.runFullApiAudit = runFullAudit;
+  window.runFrontendAssetAudit = runFrontendAssetAudit;
+  window.filterHealthProbes = filterProbes;
+  window.renderHealthApiInventory = renderApiInventory;
+  window.renderFrontendAudit = renderFrontendAudit;
+  window.exportSystemHealthJson = exportJson;
 })();

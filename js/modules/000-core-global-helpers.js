@@ -69,20 +69,20 @@
     TES:'#ffde59', QM:'#f97316', MNG:'#b4b4b4', MGT:'#b4b4b4', OTHER:'#b4b4b4', ALL:'#475569'
   };
 
-  function normalizeTeamV41(team) {
+  function normalizeTeam(team) {
     var value = text(team).trim().toUpperCase();
     if (value === 'MANAGEMENT' || value === 'MGT' || value === 'OTHER' || !value) return 'MNG';
     return value;
   }
 
-  function validHexV41(value) {
+  function validHex(value) {
     var v = text(value).trim();
     if (/^#[0-9a-f]{6}$/i.test(v)) return v.toLowerCase();
     if (/^[0-9a-f]{6}$/i.test(v)) return ('#' + v).toLowerCase();
     return '';
   }
 
-  function readConfigV41() {
+  function readConfig() {
     try {
       if (typeof globalConfig !== 'undefined' && globalConfig && typeof globalConfig === 'object') return globalConfig;
     } catch (ignoreGlobal) {}
@@ -94,28 +94,28 @@
     return {};
   }
 
-  function teamColorV41(team, config) {
-    var code = normalizeTeamV41(team);
-    var cfg = config || readConfigV41();
+  function teamColor(team, config) {
+    var code = normalizeTeam(team);
+    var cfg = config || readConfig();
     var key = 'TEAM_COLOR_' + code;
-    var value = validHexV41(cfg[key]);
-    if (!value && code === 'MNG') value = validHexV41(cfg.TEAM_COLOR_MGT);
+    var value = validHex(cfg[key]);
+    if (!value && code === 'MNG') value = validHex(cfg.TEAM_COLOR_MGT);
     return value || TEAM_COLOR_DEFAULTS_V41[code] || TEAM_COLOR_DEFAULTS_V41.MNG;
   }
 
-  function hexRgbV41(hex) {
-    var value = validHexV41(hex) || '#64748b';
+  function hexRgb(hex) {
+    var value = validHex(hex) || '#64748b';
     return {r:parseInt(value.slice(1,3),16), g:parseInt(value.slice(3,5),16), b:parseInt(value.slice(5,7),16)};
   }
 
-  function mixV41(hex, whiteRatio) {
-    var rgb = hexRgbV41(hex), p = Math.max(0, Math.min(1, Number(whiteRatio == null ? .88 : whiteRatio)));
+  function mix(hex, whiteRatio) {
+    var rgb = hexRgb(hex), p = Math.max(0, Math.min(1, Number(whiteRatio == null ? .88 : whiteRatio)));
     var c = function(v){ return Math.round(v * (1-p) + 255 * p).toString(16).padStart(2,'0'); };
     return '#' + c(rgb.r) + c(rgb.g) + c(rgb.b);
   }
 
-  function readableTextV41(hex) {
-    var c = hexRgbV41(hex);
+  function readableText(hex) {
+    var c = hexRgb(hex);
     var channel = function(v){ v=v/255; return v<=0.03928 ? v/12.92 : Math.pow((v+0.055)/1.055,2.4); };
     var lum = 0.2126*channel(c.r) + 0.7152*channel(c.g) + 0.0722*channel(c.b);
     var whiteContrast = 1.05 / (lum + 0.05);
@@ -124,27 +124,27 @@
     return darkContrast >= whiteContrast ? '#0f172a' : '#ffffff';
   }
 
-  function teamStyleV41(team, config) {
-    var color = teamColorV41(team, config);
-    return { color:color, text:readableTextV41(color), soft:mixV41(color,.88), border:mixV41(color,.62) };
+  function teamStyle(team, config) {
+    var color = teamColor(team, config);
+    return { color:color, text:readableText(color), soft:mix(color,.88), border:mix(color,.62) };
   }
 
-  function applyTeamColorConfigV41(config) {
-    var cfg = config || readConfigV41();
+  function applyTeamColorConfig(config) {
+    var cfg = config || readConfig();
     var root = document.documentElement;
     ['MED','LAB','EHS','ENV','TES','QM','MNG'].forEach(function(team){
-      var color = teamColorV41(team, cfg);
+      var color = teamColor(team, cfg);
       root.style.setProperty('--ces-team-' + team.toLowerCase(), color);
-      root.style.setProperty('--ces-team-' + team.toLowerCase() + '-soft', mixV41(color,.88));
-      root.style.setProperty('--ces-team-' + team.toLowerCase() + '-border', mixV41(color,.62));
-      root.style.setProperty('--ces-team-' + team.toLowerCase() + '-text', readableTextV41(color));
+      root.style.setProperty('--ces-team-' + team.toLowerCase() + '-soft', mix(color,.88));
+      root.style.setProperty('--ces-team-' + team.toLowerCase() + '-border', mix(color,.62));
+      root.style.setProperty('--ces-team-' + team.toLowerCase() + '-text', readableText(color));
     });
     // MGT is a UI alias of MNG.
-    root.style.setProperty('--ces-team-mgt', teamColorV41('MNG', cfg));
-    root.style.setProperty('--ces-team-mgt-soft', mixV41(teamColorV41('MNG', cfg),.88));
+    root.style.setProperty('--ces-team-mgt', teamColor('MNG', cfg));
+    root.style.setProperty('--ces-team-mgt-soft', mix(teamColor('MNG', cfg),.88));
 
     document.querySelectorAll('[data-ces-team]').forEach(function(el){
-      var style = teamStyleV41(el.getAttribute('data-ces-team'), cfg);
+      var style = teamStyle(el.getAttribute('data-ces-team'), cfg);
       el.style.setProperty('--ces-team-color', style.color);
       el.style.setProperty('--ces-team-soft', style.soft);
       el.style.setProperty('--ces-team-border', style.border);
@@ -172,7 +172,7 @@
   };
   function cesExternalLink(key) {
     key = text(key).trim().toUpperCase();
-    var cfg = readConfigV41();
+    var cfg = readConfig();
     var configKey = CES_LINK_CONFIG_KEYS[key] || ('LINK_' + key);
     var configured = text(cfg[configKey]).trim();
     if (configured) return configured;
@@ -192,15 +192,15 @@
   window.cesOpenExternalLink = cesOpenExternalLink;
 
   window.CES_TEAM_COLOR_DEFAULTS = TEAM_COLOR_DEFAULTS_V41;
-  window.cesNormalizeTeamCode = normalizeTeamV41;
-  window.cesGetTeamColor = teamColorV41;
-  window.cesGetTeamStyle = teamStyleV41;
-  window.cesReadableTextColor = readableTextV41;
-  window.cesMixTeamColor = mixV41;
-  window.cesApplyTeamColorConfig = applyTeamColorConfigV41;
+  window.cesNormalizeTeamCode = normalizeTeam;
+  window.cesGetTeamColor = teamColor;
+  window.cesGetTeamStyle = teamStyle;
+  window.cesReadableTextColor = readableText;
+  window.cesMixTeamColor = mix;
+  window.cesApplyTeamColorConfig = applyTeamColorConfig;
 
-  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', function(){ applyTeamColorConfigV41(); });
-  else applyTeamColorConfigV41();
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', function(){ applyTeamColorConfig(); });
+  else applyTeamColorConfig();
 
   window.CES_CORE_HELPERS_RECHECK = function () {
     return {
@@ -209,7 +209,7 @@
       hasSpNum: typeof window.spNum === 'function',
       hasGasApi: !!(window.CES_API && typeof window.CES_API.callFunction === 'function'),
       gasUrl: window.CES_CONFIG && window.CES_CONFIG.GAS_API_URL || '',
-      teamColors: ['MED','LAB','EHS','ENV','TES','QM','MNG'].reduce(function(out,t){out[t]=teamColorV41(t);return out;},{})
+      teamColors: ['MED','LAB','EHS','ENV','TES','QM','MNG'].reduce(function(out,t){out[t]=teamColor(t);return out;},{})
     };
   };
 })(window, document);

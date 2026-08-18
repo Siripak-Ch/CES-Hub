@@ -24,11 +24,11 @@ const KPI_TABLE_PAGE_SIZE_V36 = 10;
 let KPI_TABLE_PAGE_V36 = 1;
 let KPI_FILTER_SIGNATURE_V36 = '';
 
-function cesKpiCacheKeyV36(team) {
+function cesKpiCacheKey(team) {
     return 'ces_kpi_dashboard_v16_sheet_aligned_' + String(team || 'EHS').toUpperCase();
 }
-function cesKpiReadCacheV36(team) {
-    const key = cesKpiCacheKeyV36(team);
+function cesKpiReadCache(team) {
+    const key = cesKpiCacheKey(team);
     const memory = CES_KPI_MEMORY_CACHE_V36[key];
     if (memory && Date.now() - Number(memory.ts || 0) <= CES_KPI_CACHE_TTL_MS_V36) return memory.payload || null;
     if (memory) delete CES_KPI_MEMORY_CACHE_V36[key];
@@ -46,44 +46,44 @@ function cesKpiReadCacheV36(team) {
         return null;
     }
 }
-function cesKpiWriteCacheV36(team, payload) {
-    const key = cesKpiCacheKeyV36(team);
+function cesKpiWriteCache(team, payload) {
+    const key = cesKpiCacheKey(team);
     const saved = { ts:Date.now(), payload:payload };
     CES_KPI_MEMORY_CACHE_V36[key] = saved;
     try { localStorage.setItem(key, JSON.stringify(saved)); } catch (ignore) {}
 }
-function cesKpiClearCacheV36(team) {
-    const key = cesKpiCacheKeyV36(team);
+function cesKpiClearCache(team) {
+    const key = cesKpiCacheKey(team);
     delete CES_KPI_MEMORY_CACHE_V36[key];
     try { localStorage.removeItem(key); } catch (ignore) {}
 }
-window.cesKpiReadCacheV36 = cesKpiReadCacheV36;
-window.cesKpiWriteCacheV36 = cesKpiWriteCacheV36;
-window.cesKpiClearCacheV36 = cesKpiClearCacheV36;
+window.cesKpiReadCache = cesKpiReadCache;
+window.cesKpiWriteCache = cesKpiWriteCache;
+window.cesKpiClearCache = cesKpiClearCache;
 
-function kpiDateValueV36(value) {
+function kpiDateValue(value) {
     const d = typeof kpiParseDateObj === 'function' ? kpiParseDateObj(value) : null;
     return d && !isNaN(d.getTime()) ? d.getTime() : 0;
 }
-function kpiSortRowsByDateV36(rows) {
+function kpiSortRowsByDate(rows) {
     const mode = document.getElementById('kpi-filter-date-sort')?.value || 'date_desc';
     const list = Array.isArray(rows) ? rows.slice() : [];
     list.sort((a, b) => {
         const aDate = mode.indexOf('target_') === 0
-            ? kpiDateValueV36(a.targetDate || a.deadline)
-            : kpiDateValueV36(a.receivedDate || a.calDate);
+            ? kpiDateValue(a.targetDate || a.deadline)
+            : kpiDateValue(a.receivedDate || a.calDate);
         const bDate = mode.indexOf('target_') === 0
-            ? kpiDateValueV36(b.targetDate || b.deadline)
-            : kpiDateValueV36(b.receivedDate || b.calDate);
+            ? kpiDateValue(b.targetDate || b.deadline)
+            : kpiDateValue(b.receivedDate || b.calDate);
         const diff = aDate - bDate;
         if (diff !== 0) return mode.endsWith('_asc') ? diff : -diff;
         return String(a.customerId || a.jobNo || '').localeCompare(String(b.customerId || b.jobNo || ''));
     });
     return list;
 }
-window.kpiSortRowsByDateV36 = kpiSortRowsByDateV36;
+window.kpiSortRowsByDate = kpiSortRowsByDate;
 
-function kpiCurrentFilterSignatureV36() {
+function kpiCurrentFilterSignature() {
     const ids = [
         'kpi-filter-search','kpi-filter-year','kpi-filter-month','kpi-filter-date-sort',
         'kpi-filter-worktype','kpi-filter-status','kpi-filter-team'
@@ -92,8 +92,8 @@ function kpiCurrentFilterSignatureV36() {
         .concat(ids.map(id => document.getElementById(id)?.value || ''))
         .join('|');
 }
-function kpiPaginateRowsV36(rows) {
-    const signature = kpiCurrentFilterSignatureV36();
+function kpiPaginateRows(rows) {
+    const signature = kpiCurrentFilterSignature();
     if (signature !== KPI_FILTER_SIGNATURE_V36) {
         KPI_FILTER_SIGNATURE_V36 = signature;
         KPI_TABLE_PAGE_V36 = 1;
@@ -111,9 +111,9 @@ function kpiPaginateRowsV36(rows) {
         end:Math.min(start + KPI_TABLE_PAGE_SIZE_V36, total)
     };
 }
-window.kpiPaginateRowsV36 = kpiPaginateRowsV36;
+window.kpiPaginateRows = kpiPaginateRows;
 
-function kpiRenderPaginationV36(meta) {
+function kpiRenderPagination(meta) {
     const wrap = document.getElementById('kpi-table-pagination');
     if (!wrap) return;
     if (!meta || !meta.total) {
@@ -125,19 +125,19 @@ function kpiRenderPaginationV36(meta) {
     wrap.innerHTML = `
         <span class="text-[10px] font-black text-slate-500">Showing ${meta.start}-${meta.end} of ${meta.total} · 10 rows per page</span>
         <div class="flex items-center gap-2">
-            <button ${prevDisabled} onclick="kpiChangePageV36(${meta.page - 1})" class="h-9 px-3 rounded-xl border border-slate-200 bg-slate-50 text-slate-600 text-xs font-black"><i class="fas fa-chevron-left mr-1"></i>Prev</button>
+            <button ${prevDisabled} onclick="kpiChangePage(${meta.page - 1})" class="h-9 px-3 rounded-xl border border-slate-200 bg-slate-50 text-slate-600 text-xs font-black"><i class="fas fa-chevron-left mr-1"></i>Prev</button>
             <span class="min-w-[92px] text-center text-xs font-black text-slate-600">Page ${meta.page} / ${meta.pages}</span>
-            <button ${nextDisabled} onclick="kpiChangePageV36(${meta.page + 1})" class="h-9 px-3 rounded-xl border border-slate-200 bg-slate-50 text-slate-600 text-xs font-black">Next<i class="fas fa-chevron-right ml-1"></i></button>
+            <button ${nextDisabled} onclick="kpiChangePage(${meta.page + 1})" class="h-9 px-3 rounded-xl border border-slate-200 bg-slate-50 text-slate-600 text-xs font-black">Next<i class="fas fa-chevron-right ml-1"></i></button>
         </div>`;
 }
-window.kpiRenderPaginationV36 = kpiRenderPaginationV36;
-function kpiChangePageV36(page) {
+window.kpiRenderPagination = kpiRenderPagination;
+function kpiChangePage(page) {
     KPI_TABLE_PAGE_V36 = Math.max(1, Number(page || 1));
     renderKPITable();
     const scroll = document.getElementById('kpi-table-scroll');
     if (scroll) scroll.scrollTop = 0;
 }
-window.kpiChangePageV36 = kpiChangePageV36;
+window.kpiChangePage = kpiChangePage;
 
 const KPI_DRIVE_LINKS = {
     'LAB': 'https://bdmsgroup-my.sharepoint.com/shared?listurl=https%3A%2F%2Fbdmsgroup%2Dmy%2Esharepoint%2Ecom%2Fpersonal%2Fnhbmecallab%5Fbdms%5Fco%5Fth%2FDocuments&id=%2Fpersonal%2Fnhbmecallab%5Fbdms%5Fco%5Fth%2FDocuments%2F42%2E%20%E0%B9%83%E0%B8%9A%E0%B8%A3%E0%B8%B2%E0%B8%A2%E0%B8%87%E0%B8%B2%E0%B8%99%E0%B8%9C%E0%B8%A5%E0%B8%AA%E0%B8%AD%E0%B8%9A%E0%B9%80%E0%B8%97%E0%B8%B5%E0%B8%A2%E0%B8%9A%202026&ct=1784621792322&or=Teams%2DHL&shareLink=1&ga=1&LOF=1',
@@ -214,7 +214,7 @@ function switchKpiTab(team) {
     fetchKPIData();
 }
 
-function kpiApplyDashboardResponseV36(res, keepOpenRowId, fromCache) {
+function kpiApplyDashboardResponse(res, keepOpenRowId, fromCache) {
     if (!res || !res.success) return false;
     globalKpiData = kpiApplyStrictWorkflowStatus(res.data || []);
     globalKpiSummary = res.summary || null;
@@ -245,10 +245,10 @@ function fetchKPIData(keepOpenRowId = null, forceRefresh = false) {
     const bypassCache = !!forceRefresh || !!keepOpenRowId;
 
     if (!bypassCache) {
-        const cached = cesKpiReadCacheV36(requestedTeam);
-        if (cached && kpiApplyDashboardResponseV36(cached, null, true)) return;
+        const cached = cesKpiReadCache(requestedTeam);
+        if (cached && kpiApplyDashboardResponse(cached, null, true)) return;
     } else {
-        cesKpiClearCacheV36(requestedTeam);
+        cesKpiClearCache(requestedTeam);
     }
 
     if (!keepOpenRowId && tbody) {
@@ -267,9 +267,9 @@ function fetchKPIData(keepOpenRowId = null, forceRefresh = false) {
         })
         .withSuccessHandler(res => {
             if (res && res.success) {
-                cesKpiWriteCacheV36(requestedTeam, res);
+                cesKpiWriteCache(requestedTeam, res);
                 if (String(currentKpiTeam || '').toUpperCase() === requestedTeam) {
-                    kpiApplyDashboardResponseV36(res, keepOpenRowId, false);
+                    kpiApplyDashboardResponse(res, keepOpenRowId, false);
                 }
             } else {
                 Swal.fire('Error', (res && res.message) || 'Cannot load KPI data', 'error');
@@ -916,7 +916,7 @@ function getKpiFilteredRows() {
 
         return true;
     });
-    return kpiSortRowsByDateV36(filtered);
+    return kpiSortRowsByDate(filtered);
 }
 
 
@@ -1119,8 +1119,8 @@ function renderKPITable() {
 
     const filtered = getKpiFilteredRows();
     renderKpiPerformanceSummary(filtered);
-    const pageMeta = kpiPaginateRowsV36(filtered);
-    kpiRenderPaginationV36(pageMeta);
+    const pageMeta = kpiPaginateRows(filtered);
+    kpiRenderPagination(pageMeta);
 
     const counter = document.getElementById('kpi-filtered-count');
     if (counter) {

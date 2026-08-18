@@ -82,13 +82,13 @@
     window.dispatchEvent(new CustomEvent('ces:language-applied',{detail:{language:lang}}));document.dispatchEvent(new CustomEvent('ces:language-applied',{detail:{language:lang}}));
     // Home contains dynamic bilingual cards. Re-prime them after applying the
     // language so an initial page load and a language switch behave the same.
-    if(document.getElementById('portal-app-grid')&&typeof window.CES_HOME_PRIME_V204==='function'){
-      setTimeout(function(){try{window.CES_HOME_PRIME_V204();}catch(ignore){}},0);
+    if(document.getElementById('portal-app-grid')&&typeof window.CES_HOME_PRIME==='function'){
+      setTimeout(function(){try{window.CES_HOME_PRIME();}catch(ignore){}},0);
     }
   }
   function toggle(){lang=lang==='TH'?'EN':'TH';localStorage.setItem(KEY,lang);apply();document.dispatchEvent(new CustomEvent('ces:language-changed',{detail:{language:lang}}));}
   window.CES_LANGUAGE={get:function(){return lang;},set:function(v){lang=String(v||'').toUpperCase()==='TH'?'TH':'EN';localStorage.setItem(KEY,lang);apply();},apply:apply,toggle:toggle};
-  window.toggleCesLanguageV4=toggle;
+  window.toggleCesLanguage=toggle;
   window.addEventListener('ces:app-ready',function(){setTimeout(apply,0);});
   document.addEventListener('DOMContentLoaded',function(){setTimeout(apply,0);});
   window.addEventListener('ces:tab-changed',function(e){var t=e&&e.detail&&e.detail.tab;if(t==='service'||t==='report')setTimeout(apply,30);});

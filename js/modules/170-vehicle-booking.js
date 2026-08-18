@@ -47,9 +47,9 @@ function cesBookGet_(id) {
   var el = document.getElementById(id);
   return el ? el.value : '';
 }
-function cesBookDateRangeV37_(startValue, endValue) {
-  var startKey = cesBookingDateKeyV31_(startValue);
-  var endKey = cesBookingDateKeyV31_(endValue || startValue) || startKey;
+function cesBookDateRange_(startValue, endValue) {
+  var startKey = cesBookingDateKey_(startValue);
+  var endKey = cesBookingDateKey_(endValue || startValue) || startKey;
   if (!startKey || !endKey) return [];
   var start = new Date(startKey + 'T00:00:00');
   var end = new Date(endKey + 'T00:00:00');
@@ -60,15 +60,15 @@ function cesBookDateRangeV37_(startValue, endValue) {
   }
   return out;
 }
-function cesBookClearInvalidV37_(type) {
+function cesBookClearInvalid_(type) {
   var root = document.getElementById('view-' + cesBookPrefix_(type) + '_booking');
   if (!root) return;
   root.querySelectorAll('.ces-book-invalid').forEach(function(el) {
     el.classList.remove('ces-book-invalid'); el.removeAttribute('aria-invalid');
   });
 }
-function cesBookMarkMissingV37_(type, items, title) {
-  cesBookClearInvalidV37_(type);
+function cesBookMarkMissing_(type, items, title) {
+  cesBookClearInvalid_(type);
   var missing = [];
   (items || []).forEach(function(item) {
     if (!item || !item.missing) return;
@@ -85,7 +85,7 @@ function cesBookMarkMissingV37_(type, items, title) {
   }).then(function(){ if(first && first.el){ first.el.scrollIntoView({behavior:'smooth',block:'center'}); setTimeout(function(){ first.el.focus(); },250); } });
   return true;
 }
-function cesBookAttachInvalidClearV37_(type) {
+function cesBookAttachInvalidClear_(type) {
   var root = document.getElementById('view-' + cesBookPrefix_(type) + '_booking');
   if (!root || root.dataset.invalidClearV37 === '1') return;
   root.dataset.invalidClearV37 = '1';
@@ -114,7 +114,7 @@ function cesBookStatusClass_(status) {
   return 'bg-slate-100 text-slate-600';
 }
 
-function cesBookTeamClassV31_(team) {
+function cesBookTeamClass_(team) {
   var value = String(team || '').toUpperCase();
   if (value === 'MED') return 'ces-team-code ces-team-med';
   if (value === 'LAB') return 'ces-team-code ces-team-lab';
@@ -124,7 +124,7 @@ function cesBookTeamClassV31_(team) {
   return 'ces-team-code ces-team-default';
 }
 
-function cesBookingCurrentUserV31_() {
+function cesBookingCurrentUser_() {
   var live = null;
   try {
     if (typeof currentUser !== 'undefined' && currentUser && (currentUser.id || currentUser.userId)) live = currentUser;
@@ -146,14 +146,13 @@ function cesBookingCurrentUserV31_() {
     role: String(user.role || '').trim().toUpperCase()
   };
 }
-function cesBookUserV31_() { return cesBookingCurrentUserV31_(); }
-function cesBookUser_() { return cesBookingCurrentUserV31_(); }
-function cesBookingUserKeyV31_() {
-  var u = cesBookingCurrentUserV31_();
+function cesBookUser_() { return cesBookingCurrentUser_(); }
+function cesBookingUserKey_() {
+  var u = cesBookingCurrentUser_();
   return [u.id, u.email, u.team].join('|');
 }
 
-function cesBookingInjectStylesV31_() {
+function cesBookingInjectStyles_() {
   if (document.getElementById('ces-booking-v31-style')) return;
   var style = document.createElement('style');
   style.id = 'ces-booking-v31-style';
@@ -217,11 +216,11 @@ function cesBookingInjectStylesV31_() {
   document.head.appendChild(style);
 }
 
-function cesBookingStateV31_(type) {
+function cesBookingState_(type) {
   return CES_BOOKING_V31.state[cesBookType_(type)];
 }
-function cesBookingResetUserStateV31_(type, userKey) {
-  var state = cesBookingStateV31_(type);
+function cesBookingResetUserState_(type, userKey) {
+  var state = cesBookingState_(type);
   if (state.userKey === userKey) return;
   state.loaded = false;
   state.loadingPromise = null;
@@ -236,24 +235,24 @@ function cesBookingResetUserStateV31_(type, userKey) {
   state.team = '';
   state.month = new Date();
 }
-function cesBookingWorkspaceCacheKeyV31_(type, userId, team) {
+function cesBookingWorkspaceCacheKey_(type, userId, team) {
   return ['ces_vehicle_workspace_v56', cesBookType_(type), userId || 'unknown', team || 'none'].join('_');
 }
-function cesBookingPlanCacheKeyV31_(team) {
+function cesBookingPlanCacheKey_(team) {
   return 'ces_vehicle_plans_v38_' + String(team || '').toUpperCase();
 }
-function cesBookingReadCacheV31_(key, maxAge) {
+function cesBookingReadCache_(key, maxAge) {
   try {
     var payload = JSON.parse(localStorage.getItem(key) || 'null');
     if (payload && payload.ts && Date.now() - Number(payload.ts) < maxAge) return payload.data;
   } catch (ignore) {}
   return null;
 }
-function cesBookingWriteCacheV31_(key, data) {
+function cesBookingWriteCache_(key, data) {
   try { localStorage.setItem(key, JSON.stringify({ ts:Date.now(), data:data })); } catch (ignore) {}
 }
 
-async function cesBookingApiCallV31_(names, args, options) {
+async function cesBookingApiCall_(names, args, options) {
   var list = Array.isArray(names) ? names : [names];
   var lastError = null;
   for (var i = 0; i < list.length; i++) {
@@ -268,7 +267,7 @@ async function cesBookingApiCallV31_(names, args, options) {
   throw lastError || new Error('Vehicle Booking API is not available.');
 }
 
-function cesBookingApiNamesV55_(type, genericName) {
+function cesBookingApiNames_(type, genericName) {
   const map={
     getVehicleBookingWorkspace:'getVehicleBookingWorkspace', getVehicleOnsitePlans:'getVehicleOnsitePlans',
     uploadCarBookingMemo:'uploadCarBookingMemo', createVehicleBookingRequest:'createVehicleBookingRequest',
@@ -279,27 +278,27 @@ function cesBookingApiNamesV55_(type, genericName) {
   };
   return [map[genericName]||genericName];
 }
-async function resyncVehicleBookingV55(type, button) {
+async function resyncVehicleBooking(type, button) {
   const btn=button || (typeof event!=='undefined' ? event.currentTarget : null);
   if(btn){btn.classList.add('is-loading');btn.disabled=true;btn.setAttribute('aria-busy','true');}
-  try { await loadVehicleBookingWorkspaceV31(type,true); if(typeof showToast==='function')showToast(cesBookType_(type)+' booking resynced','success'); }
+  try { await loadVehicleBookingWorkspace(type,true); if(typeof showToast==='function')showToast(cesBookType_(type)+' booking resynced','success'); }
   catch(err){Swal.fire('Resync Error',err.message||String(err),'error');}
   finally{if(btn){btn.classList.remove('is-loading');btn.disabled=false;btn.removeAttribute('aria-busy');}}
 }
-window.resyncVehicleBookingV55=resyncVehicleBookingV55;
+window.resyncVehicleBooking=resyncVehicleBooking;
 
-function cesVehicleSyncCompactPageV57_(){
+function cesVehicleSyncCompactPage_(){
   // V58 uses one global desktop scale for every CES Hub function.  Remove the
   // former vehicle-only shell class so Car/Van Booking cannot change sidebar,
   // header or content dimensions independently from KPI and other modules.
   if(document.body)document.body.classList.remove('ces-vehicle-compact');
 }
-function cesVehicleEnableCompactObserverV57_(){
-  cesVehicleSyncCompactPageV57_();
+function cesVehicleEnableCompactObserver_(){
+  cesVehicleSyncCompactPage_();
   window.CES_VEHICLE_COMPACT_OBSERVER_V57=true;
 }
 
-function switchCarBookingWorkspaceV204(mode){
+function switchCarBookingWorkspace(mode){
   mode=String(mode||'DASHBOARD').toUpperCase();
   if(['DASHBOARD','BOOKING','EVALUATION'].indexOf(mode)<0)mode='DASHBOARD';
   var dash=document.getElementById('car-workspace-dashboard-panel'),book=document.getElementById('car-workspace-booking-panel'),evaluation=document.getElementById('car-workspace-evaluation-panel');
@@ -311,28 +310,28 @@ function switchCarBookingWorkspaceV204(mode){
   if(bookBtn)bookBtn.classList.toggle('active',mode==='BOOKING');
   if(evaluationBtn)evaluationBtn.classList.toggle('active',mode==='EVALUATION');
   try{sessionStorage.setItem('CES_CAR_WORKSPACE_V204',mode);}catch(e){}
-  if(mode==='DASHBOARD'){setTimeout(function(){renderVehicleCalendarV31_('CAR');renderVehicleSummaryV36('CAR');renderVehicleBookingsV31('CAR');},20);}
-  if(mode==='EVALUATION'){setTimeout(function(){renderCarEvaluationWorkspaceV222();},20);}
+  if(mode==='DASHBOARD'){setTimeout(function(){renderVehicleCalendar_('CAR');renderVehicleSummary('CAR');renderVehicleBookings('CAR');},20);}
+  if(mode==='EVALUATION'){setTimeout(function(){renderCarEvaluationWorkspace();},20);}
   if(window.CES_LANGUAGE&&window.CES_LANGUAGE.apply)window.CES_LANGUAGE.apply();
 }
-window.switchCarBookingWorkspaceV204=switchCarBookingWorkspaceV204;
+window.switchCarBookingWorkspace=switchCarBookingWorkspace;
 
 function initVehicleBooking(type, forceRefresh) {
   type = cesBookType_(type);
-  cesBookingInjectStylesV31_();
-  cesVehicleEnableCompactObserverV57_();
-  if (type === 'VAN') { initVanBookingCalendarV55(); return; }
-  cesBookAttachInvalidClearV37_(type);
+  cesBookingInjectStyles_();
+  cesVehicleEnableCompactObserver_();
+  if (type === 'VAN') { initVanBookingCalendar(); return; }
+  cesBookAttachInvalidClear_(type);
   var prefix = cesBookPrefix_(type);
   var root = document.getElementById('view-' + prefix + '_booking');
   if (!root) return;
 
-  var state = cesBookingStateV31_(type);
-  var user = cesBookingCurrentUserV31_();
-  cesBookingResetUserStateV31_(type, cesBookingUserKeyV31_());
+  var state = cesBookingState_(type);
+  var user = cesBookingCurrentUser_();
+  cesBookingResetUserState_(type, cesBookingUserKey_());
 
   // Immediate UI: profile + default values + an available calendar.
-  autoFillVehicleProfileV31(type, false);
+  autoFillVehicleProfile(type, false);
   if (!cesBookGet_(prefix + '-book-start')) cesBookSet_(prefix + '-book-start', '08:00');
   if (!cesBookGet_(prefix + '-book-end')) cesBookSet_(prefix + '-book-end', '17:00');
   if (!cesBookGet_(prefix + '-book-return-date')) cesBookSet_(prefix + '-book-return-date', cesBookGet_(prefix + '-book-date') || cesBookToday_());
@@ -340,18 +339,18 @@ function initVehicleBooking(type, forceRefresh) {
   if (!cesBookGet_(prefix + '-return-date')) cesBookSet_(prefix + '-return-date', cesBookToday_());
   if (!cesBookGet_(prefix + '-return-time')) cesBookSet_(prefix + '-return-time', cesBookNowTime_());
   if (!state.month || isNaN(state.month.getTime())) state.month = new Date();
-  renderVehicleCalendarV31_(type);
-  switchVehicleBookingModeV31(type, state.mode || 'REQUEST', true);
-  if(type==='CAR'){var saved='DASHBOARD';try{saved=sessionStorage.getItem('CES_CAR_WORKSPACE_V204')||'DASHBOARD';}catch(e){}switchCarBookingWorkspaceV204(saved);}
+  renderVehicleCalendar_(type);
+  switchVehicleBookingMode(type, state.mode || 'REQUEST', true);
+  if(type==='CAR'){var saved='DASHBOARD';try{saved=sessionStorage.getItem('CES_CAR_WORKSPACE_V204')||'DASHBOARD';}catch(e){}switchCarBookingWorkspace(saved);}
 
-  loadVehicleBookingWorkspaceV31(type, !!forceRefresh);
+  loadVehicleBookingWorkspace(type, !!forceRefresh);
 }
 
-function autoFillVehicleProfileV31(type, forceProfile) {
+function autoFillVehicleProfile(type, forceProfile) {
   type = cesBookType_(type);
   var prefix = cesBookPrefix_(type);
-  var state = cesBookingStateV31_(type);
-  var login = cesBookingCurrentUserV31_();
+  var state = cesBookingState_(type);
+  var login = cesBookingCurrentUser_();
   var profile = state.profile || {};
   var sameUser = profile && String(profile.id || profile.userId || '') === String(login.id || '');
 
@@ -379,37 +378,37 @@ function autoFillVehicleProfileV31(type, forceProfile) {
   state.team = currentTeam || data.team || '';
 }
 
-function clearVehicleProfileV31(type) {
+function clearVehicleProfile(type) {
   type = cesBookType_(type);
   var prefix = cesBookPrefix_(type);
   ['requester-name','requester-id','requester-position','requester-email','book-contact'].forEach(function(key) {
     cesBookSet_(prefix + '-' + key, '');
   });
   cesBookSet_(prefix + '-requester-team', '');
-  cesBookingStateV31_(type).plans = [];
-  cesBookingStateV31_(type).team = '';
-  renderVehiclePlanOptionsV31_(type);
+  cesBookingState_(type).plans = [];
+  cesBookingState_(type).team = '';
+  renderVehiclePlanOptions_(type);
 }
 
-async function loadVehicleBookingWorkspaceV31(type, forceRefresh, silent) {
+async function loadVehicleBookingWorkspace(type, forceRefresh, silent) {
   type = cesBookType_(type);
   var prefix = cesBookPrefix_(type);
-  var state = cesBookingStateV31_(type);
-  var user = cesBookingCurrentUserV31_();
+  var state = cesBookingState_(type);
+  var user = cesBookingCurrentUser_();
   var selectedTeam = cesBookGet_(prefix + '-requester-team');
   if (!CES_BOOKING_V31.allowedTeams.includes(selectedTeam)) selectedTeam = user.team;
   if (!CES_BOOKING_V31.allowedTeams.includes(selectedTeam)) selectedTeam = '';
-  var cacheKey = cesBookingWorkspaceCacheKeyV31_(type, user.id || user.email, selectedTeam);
+  var cacheKey = cesBookingWorkspaceCacheKey_(type, user.id || user.email, selectedTeam);
   if (!forceRefresh && state.loaded && Date.now() - Number(state.lastLoadedAt || 0) < CES_BOOKING_V31.workspaceCacheMs) {
-    renderVehicleWorkspaceV31_(type);
+    renderVehicleWorkspace_(type);
     return state.summary;
   }
   if (state.loadingPromise && !forceRefresh) return state.loadingPromise;
 
   if (!forceRefresh) {
-    var cached = cesBookingReadCacheV31_(cacheKey, CES_BOOKING_V31.workspaceCacheMs);
+    var cached = cesBookingReadCache_(cacheKey, CES_BOOKING_V31.workspaceCacheMs);
     if (cached && (!cached.profile || !user.id || String(cached.profile.id || '') === String(user.id))) {
-      applyVehicleWorkspaceV31_(type, cached, true, !!silent);
+      applyVehicleWorkspace_(type, cached, true, !!silent);
     }
   }
 
@@ -419,26 +418,26 @@ async function loadVehicleBookingWorkspaceV31(type, forceRefresh, silent) {
   }
 
   try {
-    var workspaceNames=cesBookingApiNamesV55_(type,'getVehicleBookingWorkspace');
+    var workspaceNames=cesBookingApiNames_(type,'getVehicleBookingWorkspace');
     var workspaceArgs=type==='VAN' ? [selectedTeam,user.id,!!forceRefresh] : [type,selectedTeam,user.id,!!forceRefresh];
-    state.loadingPromise = cesBookingApiCallV31_(workspaceNames,workspaceArgs,{ transport:'jsonp', timeoutMs:90000 });
+    state.loadingPromise = cesBookingApiCall_(workspaceNames,workspaceArgs,{ transport:'jsonp', timeoutMs:90000 });
     var result = await state.loadingPromise;
     if (!result || !result.success) throw new Error((result && result.message) || 'Cannot load booking workspace.');
-    applyVehicleWorkspaceV31_(type, result, false, !!silent);
-    cesBookingWriteCacheV31_(cacheKey, result);
+    applyVehicleWorkspace_(type, result, false, !!silent);
+    cesBookingWriteCache_(cacheKey, result);
   } catch (err) {
     if (!state.loaded && list) {
       list.innerHTML = '<div class="py-12 px-4 text-center text-red-500 font-bold">' + cesBookEsc_(err.message || String(err)) +
-        '<div class="mt-3"><button class="px-3 py-2 rounded-lg bg-red-50" onclick="loadVehicleBookingWorkspaceV31(\'' + type + '\',true)">Retry</button></div></div>';
+        '<div class="mt-3"><button class="px-3 py-2 rounded-lg bg-red-50" onclick="loadVehicleBookingWorkspace(\'' + type + '\',true)">Retry</button></div></div>';
     }
-    renderVehicleCalendarV31_(type);
+    renderVehicleCalendar_(type);
   } finally { state.loadingPromise = null; }
 }
 
-function applyVehicleWorkspaceV31_(type, result, fromCache, silent) {
+function applyVehicleWorkspace_(type, result, fromCache, silent) {
   type = cesBookType_(type);
-  var state = cesBookingStateV31_(type);
-  var login = cesBookingCurrentUserV31_();
+  var state = cesBookingState_(type);
+  var login = cesBookingCurrentUser_();
   state.loaded = true;
   state.lastLoadedAt = Date.now();
   state.rows = result.bookings || result.data || [];
@@ -449,79 +448,79 @@ function applyVehicleWorkspaceV31_(type, result, fromCache, silent) {
   state.team = String(result.plansTeam || result.team || state.team || login.team || '').toUpperCase();
   if (result.profile && (!login.id || String(result.profile.id || '') === String(login.id))) state.profile = result.profile;
 
-  autoFillVehicleProfileV31(type, true);
-  renderVehicleWorkspaceV31_(type);
+  autoFillVehicleProfile(type, true);
+  renderVehicleWorkspace_(type);
   if (!fromCache && !silent && typeof showToast === 'function') showToast('Booking data updated', 'success');
 }
 
-function renderVehicleWorkspaceV31_(type) {
-  renderVehiclePlanOptionsV31_(type);
-  renderVehicleReturnOptionsV31_(type);
-  populateVehicleSummaryFiltersV36_(type);
-  if(type==='CAR'&&document.getElementById('car-workspace-evaluation-panel'))renderCarEvaluationWorkspaceV222();
-  renderVehicleSummaryV36(type);
-  renderVehicleCalendarV31_(type);
-  renderVehicleBookingsV31(type);
-  switchVehicleBookingModeV31(type, cesBookingStateV31_(type).mode || 'REQUEST', true);
+function renderVehicleWorkspace_(type) {
+  renderVehiclePlanOptions_(type);
+  renderVehicleReturnOptions_(type);
+  populateVehicleSummaryFilters_(type);
+  if(type==='CAR'&&document.getElementById('car-workspace-evaluation-panel'))renderCarEvaluationWorkspace();
+  renderVehicleSummary(type);
+  renderVehicleCalendar_(type);
+  renderVehicleBookings(type);
+  switchVehicleBookingMode(type, cesBookingState_(type).mode || 'REQUEST', true);
 }
 
-async function changeVehicleBookingTeamV31(type) {
+async function changeVehicleBookingTeam(type) {
   type = cesBookType_(type);
   var prefix = cesBookPrefix_(type);
   var team = cesBookGet_(prefix + '-requester-team');
-  cesBookingStateV31_(type).team = team;
+  cesBookingState_(type).team = team;
   ['onsite-plan','calendar-key','calendar-team','job-title','book-date','book-return-date','book-destination','book-purpose'].forEach(function(key) {
     cesBookSet_(prefix + '-' + key, '');
   });
   if (!CES_BOOKING_V31.allowedTeams.includes(team)) {
-    cesBookingStateV31_(type).plans = [];
-    renderVehiclePlanOptionsV31_(type);
+    cesBookingState_(type).plans = [];
+    renderVehiclePlanOptions_(type);
     return;
   }
-  await loadVehiclePlansV31(type, team, false);
+  await loadVehiclePlans(type, team, false);
 }
 
-async function loadVehiclePlansV31(type, team, forceRefresh) {
+async function loadVehiclePlans(type, team, forceRefresh) {
   type = cesBookType_(type);
   team = String(team || '').toUpperCase();
   if (!CES_BOOKING_V31.allowedTeams.includes(team)) return;
-  var state = cesBookingStateV31_(type);
+  var state = cesBookingState_(type);
   var prefix = cesBookPrefix_(type);
   var select = document.getElementById(prefix + '-onsite-plan');
-  var key = cesBookingPlanCacheKeyV31_(team);
+  var key = cesBookingPlanCacheKey_(team);
 
   if (!forceRefresh) {
-    var cached = cesBookingReadCacheV31_(key, CES_BOOKING_V31.planCacheMs);
+    var cached = cesBookingReadCache_(key, CES_BOOKING_V31.planCacheMs);
     if (cached && Array.isArray(cached.plans)) {
       state.plans = cached.plans;
       state.team = team;
-      renderVehiclePlanOptionsV31_(type);
+      renderVehiclePlanOptions_(type);
     }
   }
 
   if (select && !state.plans.length) select.innerHTML = '<option value="">Loading onsite plans...</option>';
   try {
-    var result = await cesBookingApiCallV31_(
-      cesBookingApiNamesV55_(type,'getVehicleOnsitePlans'),
+    var result = await cesBookingApiCall_(
+      cesBookingApiNames_(type,'getVehicleOnsitePlans'),
       [team, !!forceRefresh],
       { transport:'jsonp', timeoutMs:90000 }
     );
     if (!result || !result.success) throw new Error((result && result.message) || 'Cannot load Master Calendar plans.');
     state.plans = result.plans || [];
     state.team = team;
-    cesBookingWriteCacheV31_(key, result);
-    renderVehiclePlanOptionsV31_(type);
+    cesBookingWriteCache_(key, result);
+    renderVehiclePlanOptions_(type);
   } catch (err) {
     if (select && !state.plans.length) select.innerHTML = '<option value="">Cannot load calendar: ' + cesBookEsc_(err.message || String(err)) + '</option>';
   }
 }
 
-function renderVehiclePlanOptionsV31_(type) {
+function renderVehiclePlanOptions_(type) {
   type = cesBookType_(type);
   var prefix = cesBookPrefix_(type);
   var select = document.getElementById(prefix + '-onsite-plan');
   if (!select) return;
-  var state = cesBookingStateV31_(type);
+  var state = cesBookingState_(type);
   var current = select.value;
   var plans = state.plans || [];
   var html = '<option value="">— Select onsite work from team calendar —</option>';
@@ -545,16 +544,16 @@ function renderVehiclePlanOptionsV31_(type) {
         return '<option value="' + index + '" ' + (a.email ? '' : 'disabled') + '>' + cesBookEsc_((a.nameEng || a.nameTh || a.id) + email) + '</option>';
       }).join('');
       if (selected && Number(selected) < approvers.length) approverSelect.value = selected;
-      updateVehicleApproverNoteV55();
+      updateVehicleApproverNote();
     }
   }
 }
 
-function updateVehicleApproverNoteV55() {
+function updateVehicleApproverNote() {
   var select = document.getElementById('car-approver');
   var note = document.getElementById('car-approver-signature-note');
   if (!select || !note) return;
-  var approver = select.value === '' ? null : (cesBookingStateV31_('CAR').approvers || [])[Number(select.value)];
+  var approver = select.value === '' ? null : (cesBookingState_('CAR').approvers || [])[Number(select.value)];
   note.className = 'text-[10px] text-slate-500 mt-1';
   note.innerHTML = approver
     ? '<i class="fas fa-envelope-circle-check mr-1"></i>Approval alert will be sent to ' + cesBookEsc_(approver.email || '-') + '. No signature document is generated.'
@@ -562,7 +561,7 @@ function updateVehicleApproverNoteV55() {
 }
 
 
-function applyVehicleOnsitePlanV31(type) {
+function applyVehicleOnsitePlan(type) {
   type = cesBookType_(type);
   var prefix = cesBookPrefix_(type);
   var value = cesBookGet_(prefix + '-onsite-plan');
@@ -573,7 +572,7 @@ function applyVehicleOnsitePlanV31(type) {
     if (jobInput) { jobInput.readOnly = false; jobInput.classList.remove('bg-slate-50'); jobInput.focus(); }
     return;
   }
-  var plan = value === '' ? null : cesBookingStateV31_(type).plans[Number(value)];
+  var plan = value === '' ? null : cesBookingState_(type).plans[Number(value)];
   if (!plan) return;
   if (jobInput) jobInput.readOnly = false; // V24.3: calendar values are editable after selection.
   cesBookSet_(prefix + '-calendar-key', plan.eventKey || plan.uniqueKey || '');
@@ -587,46 +586,46 @@ function applyVehicleOnsitePlanV31(type) {
   cesBookSet_(prefix + '-book-purpose', plan.title || '');
 }
 
-function enableManualVehicleWorkV243(type) {
+function enableManualVehicleWork(type) {
   type = cesBookType_(type || 'CAR');
   var prefix = cesBookPrefix_(type);
   var select = document.getElementById(prefix + '-onsite-plan');
   if (select) select.value = '__MANUAL__';
-  applyVehicleOnsitePlanV31(type);
+  applyVehicleOnsitePlan(type);
   var job = document.getElementById(prefix + '-job-title');
   if (job) job.scrollIntoView({behavior:'smooth',block:'center'});
 }
-window.enableManualVehicleWorkV243 = enableManualVehicleWorkV243;
+window.enableManualVehicleWork = enableManualVehicleWork;
 
-function setVehicleCustomTimeV243(startTime,endTime) {
+function setVehicleCustomTime(startTime,endTime) {
   cesBookSet_('car-book-start',startTime);
   cesBookSet_('car-book-end',endTime);
   if (typeof showToast === 'function') showToast('Time selected: '+startTime+'–'+endTime,'success');
 }
-window.setVehicleCustomTimeV243 = setVehicleCustomTimeV243;
+window.setVehicleCustomTime = setVehicleCustomTime;
 
-function cesOpenNativePickerV262(id,event){
+function cesOpenNativePicker(id,event){
   var el=document.getElementById(id);if(!el)return;
   // Clicking anywhere on the field card opens the native picker. Keep the
   // fallback non-recursive so the wrapper onclick cannot loop.
   try{if(typeof el.showPicker==='function'){el.showPicker();return;}}catch(ignore){}
   try{el.focus({preventScroll:true});}catch(ignore2){try{el.focus();}catch(ignore3){}}
 }
-window.cesOpenNativePickerV262=cesOpenNativePickerV262;
+window.cesOpenNativePicker=cesOpenNativePicker;
 
-function cesBookingSummaryDatePartsV36_(value) {
-  var key = cesBookingDateKeyV31_(value);
+function cesBookingSummaryDateParts_(value) {
+  var key = cesBookingDateKey_(value);
   var m = key.match(/^(\d{4})-(\d{2})-/);
   return m ? { year:m[1], month:m[2], key:key } : { year:'', month:'', key:'' };
 }
 
-function populateVehicleSummaryFiltersV36_(type) {
+function populateVehicleSummaryFilters_(type) {
   type = cesBookType_(type);
   var prefix = cesBookPrefix_(type);
-  var rows = cesBookingStateV31_(type).rows || [];
+  var rows = cesBookingState_(type).rows || [];
   var years = {};
   rows.forEach(function(row) {
-    var p = cesBookingSummaryDatePartsV36_(row.bookingDate || row.onsiteDate || row.createdAt);
+    var p = cesBookingSummaryDateParts_(row.bookingDate || row.onsiteDate || row.createdAt);
     if (p.year) years[p.year] = true;
   });
   var options = Object.keys(years).sort().reverse();
@@ -650,12 +649,12 @@ function populateVehicleSummaryFiltersV36_(type) {
   if(monthEl&&!monthEl.dataset.cesV263DefaultApplied){monthEl.value=String(new Date().getMonth()+1).padStart(2,'0');monthEl.dataset.cesV263DefaultApplied='1';}
 }
 
-function cesBookingWorkingPeriodV56_(year, month, rows) {
+function cesBookingWorkingPeriod_(year, month, rows) {
   var currentYear = String(new Date().getFullYear());
   if (year !== 'All') return { years:[String(year)], month:month };
   var years = {};
   (rows || []).forEach(function(row) {
-    var p = cesBookingSummaryDatePartsV36_(row.bookingDate || row.onsiteDate || row.createdAt);
+    var p = cesBookingSummaryDateParts_(row.bookingDate || row.onsiteDate || row.createdAt);
     if (p.year) years[p.year] = true;
   });
   var list = Object.keys(years).sort();
@@ -668,8 +667,8 @@ function cesBookingWorkingPeriodV56_(year, month, rows) {
   }
   return { years:list, month:month };
 }
-function cesBookingWorkingDaysV55_(year, month, rows) {
-  var period = cesBookingWorkingPeriodV56_(year, month, rows);
+function cesBookingWorkingDays_(year, month, rows) {
+  var period = cesBookingWorkingPeriod_(year, month, rows);
   var total = 0;
   period.years.forEach(function(yearValue) {
     var y = Number(yearValue);
@@ -685,8 +684,8 @@ function cesBookingWorkingDaysV55_(year, month, rows) {
   });
   return total;
 }
-function cesBookingUsedWorkingDaysV56_(dateKeys, year, month, rows) {
-  var period = cesBookingWorkingPeriodV56_(year, month, rows);
+function cesBookingUsedWorkingDays_(dateKeys, year, month, rows) {
+  var period = cesBookingWorkingPeriod_(year, month, rows);
   var allowedYears = {};
   period.years.forEach(function(value) { allowedYears[String(value)] = true; });
   return Object.keys(dateKeys || {}).filter(function(key) {
@@ -697,16 +696,16 @@ function cesBookingUsedWorkingDaysV56_(dateKeys, year, month, rows) {
     return day !== 0 && day !== 6;
   }).length;
 }
-function renderVehicleSummaryV36(type) {
+function renderVehicleSummary(type) {
   type = cesBookType_(type);
   var prefix = cesBookPrefix_(type);
-  var rows = cesBookingStateV31_(type).rows || [];
+  var rows = cesBookingState_(type).rows || [];
   var year = cesBookGet_(prefix + '-summary-year-filter') || 'All';
   var month = cesBookGet_(prefix + '-summary-month-filter') || 'All';
   var team = cesBookGet_(prefix + '-summary-team-filter') || 'All';
   var dates = {}, totalBill = 0, totalKm = 0, completedKm = 0, totalJobs = 0;
   var filtered = rows.filter(function(row) {
-    var p = cesBookingSummaryDatePartsV36_(row.bookingDate || row.onsiteDate || row.createdAt);
+    var p = cesBookingSummaryDateParts_(row.bookingDate || row.onsiteDate || row.createdAt);
     var rowTeam = String(row.team || row.calendarTeam || '').toUpperCase();
     if (year !== 'All' && p.year !== year) return false;
     if (month !== 'All' && p.month !== month) return false;
@@ -716,8 +715,8 @@ function renderVehicleSummaryV36(type) {
   filtered.forEach(function(row) {
     var status = String(row.status || '').toUpperCase();
     if (status === 'CANCELLED' || status === 'REJECTED') return;
-    var p = cesBookingSummaryDatePartsV36_(row.bookingDate || row.onsiteDate || row.createdAt);
-    var usageDates = cesBookDateRangeV37_(row.bookingDate || row.onsiteDate || p.key, row.plannedReturnDate || row.bookingEndDate || row.bookingDate || p.key);
+    var p = cesBookingSummaryDateParts_(row.bookingDate || row.onsiteDate || row.createdAt);
+    var usageDates = cesBookDateRange_(row.bookingDate || row.onsiteDate || p.key, row.plannedReturnDate || row.bookingEndDate || row.bookingDate || p.key);
     (usageDates.length ? usageDates : (p.key ? [p.key] : [])).forEach(function(key){ dates[key] = true; });
     totalJobs++;
     var rowKm = Number(row.actualTotalKm || row.totalKm || row.roundTripKm || 0);
@@ -728,8 +727,8 @@ function renderVehicleSummaryV36(type) {
   var feeSaved = Math.max(0, regularCost - totalBill);
   var feeSavedPercent = regularCost > 0 ? Math.round(feeSaved * 1000 / regularCost) / 10 : 0;
   var usedDays = Object.keys(dates).length;
-  var workingDays = cesBookingWorkingDaysV55_(year, month, filtered);
-  var usedWorkingDays = cesBookingUsedWorkingDaysV56_(dates, year, month, filtered);
+  var workingDays = cesBookingWorkingDays_(year, month, filtered);
+  var usedWorkingDays = cesBookingUsedWorkingDays_(dates, year, month, filtered);
   var usagePercent = workingDays ? Math.min(100, Math.round(usedWorkingDays * 1000 / workingDays) / 10) : 0;
   var values = { bill:cesBookMoney_(totalBill), km:cesBookNumber_(totalKm), regular:cesBookMoney_(regularCost), saved:cesBookMoney_(feeSaved), days:cesBookNumber_(usedDays), jobs:cesBookNumber_(totalJobs), working:cesBookNumber_(workingDays) };
   var regularNote = document.getElementById(prefix + '-summary-regular-note');
@@ -761,11 +760,11 @@ function cesRenderCarEvaluationSummary_(rows) {
   var count=document.getElementById('car-evaluation-response-count-v22');if(count)count.textContent=rated.length+' evaluation'+(rated.length===1?'':'s');
 }
 window.cesRenderCarEvaluationSummary_=cesRenderCarEvaluationSummary_;
-function renderCarEvaluationWorkspaceV222(){
-  var rows=cesBookingStateV31_('CAR').rows||[];
+function renderCarEvaluationWorkspace(){
+  var rows=cesBookingState_('CAR').rows||[];
   var year=cesBookGet_('car-evaluation-year-filter')||'All',month=cesBookGet_('car-evaluation-month-filter')||'All',team=cesBookGet_('car-evaluation-team-filter')||'All';
   var filtered=rows.filter(function(row){
-    var p=cesBookingSummaryDatePartsV36_(row.vehicleRatingAt||row.returnDate||row.bookingDate||row.onsiteDate||row.createdAt);
+    var p=cesBookingSummaryDateParts_(row.vehicleRatingAt||row.returnDate||row.bookingDate||row.onsiteDate||row.createdAt);
     var rowTeam=String(row.team||row.calendarTeam||'').toUpperCase();
     if(year!=='All'&&p.year!==year)return false;
     if(month!=='All'&&p.month!==month)return false;
@@ -778,17 +777,17 @@ function renderCarEvaluationWorkspaceV222(){
   if(!filtered.length){root.innerHTML='<div class="py-12 text-center text-slate-400"><i class="fas fa-inbox text-3xl mb-3"></i><div class="font-bold">No post-use evaluation in this filter</div></div>';return;}
   root.innerHTML='<div class="overflow-auto rounded-2xl border border-slate-200 max-h-[560px]"><table class="w-full min-w-[980px] text-xs text-left"><thead class="sticky top-0 bg-slate-50 text-[9px] uppercase tracking-wider text-slate-500"><tr><th class="p-3">Date / Booking</th><th class="p-3">Requester / Team</th><th class="p-3">Performance</th><th class="p-3">Comfort</th><th class="p-3">Value</th><th class="p-3">Comment</th></tr></thead><tbody class="divide-y divide-slate-100">'+filtered.slice().reverse().map(function(r){return '<tr class="align-top hover:bg-slate-50"><td class="p-3"><b>'+cesBookEsc_(r.vehicleRatingAt||r.returnDate||r.bookingDate||'-')+'</b><div class="text-[10px] text-slate-400 mt-1">'+cesBookEsc_(r.bookingId||'-')+'</div></td><td class="p-3"><b>'+cesBookEsc_(r.requesterName||r.vehicleRatingBy||'-')+'</b><div class="text-[10px] text-slate-400 mt-1">'+cesBookEsc_(r.team||r.calendarTeam||'-')+'</div></td><td class="p-3 font-black">'+cesBookEsc_(r.vehicleRatingPerformance||'-')+' / 5</td><td class="p-3 font-black">'+cesBookEsc_(r.vehicleRatingComfort||'-')+' / 5</td><td class="p-3 font-black">'+cesBookEsc_(r.vehicleRatingValue||'-')+' / 5</td><td class="p-3 min-w-[280px] whitespace-normal">'+cesBookEsc_(r.vehicleRatingComment||'-')+'</td></tr>';}).join('')+'</tbody></table></div>';
 }
-window.renderCarEvaluationWorkspaceV222=renderCarEvaluationWorkspaceV222;
-window.renderVehicleSummaryV36 = renderVehicleSummaryV36;
+window.renderCarEvaluationWorkspace=renderCarEvaluationWorkspace;
+window.renderVehicleSummary = renderVehicleSummary;
 
-function cesBookingFilteredRowsV56_(type) {
+function cesBookingFilteredRows_(type) {
   type = cesBookType_(type);
   var prefix = cesBookPrefix_(type);
   var year = cesBookGet_(prefix + '-summary-year-filter') || 'All';
   var month = cesBookGet_(prefix + '-summary-month-filter') || 'All';
   var team = cesBookGet_(prefix + '-summary-team-filter') || 'All';
-  return (cesBookingStateV31_(type).rows || []).filter(function(row) {
-    var p = cesBookingSummaryDatePartsV36_(row.bookingDate || row.onsiteDate || row.createdAt);
+  return (cesBookingState_(type).rows || []).filter(function(row) {
+    var p = cesBookingSummaryDateParts_(row.bookingDate || row.onsiteDate || row.createdAt);
     var rowTeam = String(row.team || row.calendarTeam || '').toUpperCase();
     if (year !== 'All' && p.year !== year) return false;
     if (month !== 'All' && p.month !== month) return false;
@@ -796,18 +795,18 @@ function cesBookingFilteredRowsV56_(type) {
     return true;
   });
 }
-function cesBookingXmlEscV56_(value) {
+function cesBookingXmlEsc_(value) {
   return String(value == null ? '' : value).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&apos;');
 }
-function cesBookingExcelCellV56_(value, type) {
+function cesBookingExcelCell_(value, type) {
   var dataType = type || (typeof value === 'number' && isFinite(value) ? 'Number' : 'String');
   var content = value == null ? '' : value;
-  return '<Cell><Data ss:Type="' + dataType + '">' + cesBookingXmlEscV56_(content) + '</Data></Cell>';
+  return '<Cell><Data ss:Type="' + dataType + '">' + cesBookingXmlEsc_(content) + '</Data></Cell>';
 }
-function exportVehicleUsageExcelV56(type) {
+function exportVehicleUsageExcel(type) {
   type = cesBookType_(type);
   var prefix = cesBookPrefix_(type);
-  var rows = cesBookingFilteredRowsV56_(type);
+  var rows = cesBookingFilteredRows_(type);
   var year = cesBookGet_(prefix + '-summary-year-filter') || 'All';
   var month = cesBookGet_(prefix + '-summary-month-filter') || 'All';
   var team = cesBookGet_(prefix + '-summary-team-filter') || 'All';
@@ -818,7 +817,7 @@ function exportVehicleUsageExcelV56(type) {
     var actualKm = Number(row.actualTotalKm || 0);
     var estimatedKm = Number(row.totalKm || row.roundTripKm || 0);
     var feeKm = status === 'COMPLETED' ? actualKm : 0;
-    var daysUsed = cesBookDateRangeV37_(row.bookingDate || row.onsiteDate, row.plannedReturnDate || row.bookingDate).length;
+    var daysUsed = cesBookDateRange_(row.bookingDate || row.onsiteDate, row.plannedReturnDate || row.bookingDate).length;
     return [
       row.bookingId || '', row.bookingDate || row.onsiteDate || '', row.plannedReturnDate || '', row.startTime || '', row.endTime || '',
       row.requesterId || '', row.requesterName || '', row.team || row.calendarTeam || '', row.jobTitle || '', row.destination || '',
@@ -837,19 +836,19 @@ function exportVehicleUsageExcelV56(type) {
     '<Styles><Style ss:ID="Header"><Font ss:Bold="1" ss:Color="#FFFFFF"/><Interior ss:Color="#004AAD" ss:Pattern="Solid"/></Style><Style ss:ID="Title"><Font ss:Bold="1" ss:Size="14"/></Style></Styles>' +
     '<Worksheet ss:Name="Summary"><Table>' +
       '<Row><Cell ss:StyleID="Title"><Data ss:Type="String">CES Hub Car Booking Usage</Data></Cell></Row>' +
-      '<Row>' + cesBookingExcelCellV56_('Filter') + cesBookingExcelCellV56_('Year: '+year+' | Month: '+month+' | Team: '+team) + '</Row>' +
-      '<Row>' + cesBookingExcelCellV56_('Exported At') + cesBookingExcelCellV56_(new Date().toLocaleString('th-TH')) + '</Row>' +
-      '<Row>' + cesBookingExcelCellV56_('Matched Records') + cesBookingExcelCellV56_(rows.length,'Number') + '</Row>' +
-      '<Row>' + cesBookingExcelCellV56_('Counted Jobs') + cesBookingExcelCellV56_(valid.length,'Number') + '</Row>' +
-      '<Row>' + cesBookingExcelCellV56_('Total KM') + cesBookingExcelCellV56_(totalKm,'Number') + '</Row>' +
-      '<Row>' + cesBookingExcelCellV56_('Electric Bill (THB)') + cesBookingExcelCellV56_(totalBill,'Number') + '</Row>' +
-      '<Row>' + cesBookingExcelCellV56_('Regular Car Fee (THB)') + cesBookingExcelCellV56_(regularFee,'Number') + '</Row>' +
-      '<Row>' + cesBookingExcelCellV56_('Total Fee Saved (THB)') + cesBookingExcelCellV56_(totalFeeSaved,'Number') + '</Row>' +
-      '<Row>' + cesBookingExcelCellV56_('Rate Reference') + cesBookingExcelCellV56_('Car 5 Baht/km | Van Booking 2,200 Baht/day') + '</Row>' +
+      '<Row>' + cesBookingExcelCell_('Filter') + cesBookingExcelCell_('Year: '+year+' | Month: '+month+' | Team: '+team) + '</Row>' +
+      '<Row>' + cesBookingExcelCell_('Exported At') + cesBookingExcelCell_(new Date().toLocaleString('th-TH')) + '</Row>' +
+      '<Row>' + cesBookingExcelCell_('Matched Records') + cesBookingExcelCell_(rows.length,'Number') + '</Row>' +
+      '<Row>' + cesBookingExcelCell_('Counted Jobs') + cesBookingExcelCell_(valid.length,'Number') + '</Row>' +
+      '<Row>' + cesBookingExcelCell_('Total KM') + cesBookingExcelCell_(totalKm,'Number') + '</Row>' +
+      '<Row>' + cesBookingExcelCell_('Electric Bill (THB)') + cesBookingExcelCell_(totalBill,'Number') + '</Row>' +
+      '<Row>' + cesBookingExcelCell_('Regular Car Fee (THB)') + cesBookingExcelCell_(regularFee,'Number') + '</Row>' +
+      '<Row>' + cesBookingExcelCell_('Total Fee Saved (THB)') + cesBookingExcelCell_(totalFeeSaved,'Number') + '</Row>' +
+      '<Row>' + cesBookingExcelCell_('Rate Reference') + cesBookingExcelCell_('Car 5 Baht/km | Van Booking 2,200 Baht/day') + '</Row>' +
     '</Table></Worksheet>' +
     '<Worksheet ss:Name="Usage Data"><Table>' +
-      '<Row>' + headers.map(function(value){ return '<Cell ss:StyleID="Header"><Data ss:Type="String">'+cesBookingXmlEscV56_(value)+'</Data></Cell>'; }).join('') + '</Row>' +
-      tableRows.map(function(row){ return '<Row>'+row.map(function(value,index){ return cesBookingExcelCellV56_(value,[10,11,12,13,14].indexOf(index)>=0?'Number':'String'); }).join('')+'</Row>'; }).join('') +
+      '<Row>' + headers.map(function(value){ return '<Cell ss:StyleID="Header"><Data ss:Type="String">'+cesBookingXmlEsc_(value)+'</Data></Cell>'; }).join('') + '</Row>' +
+      tableRows.map(function(row){ return '<Row>'+row.map(function(value,index){ return cesBookingExcelCell_(value,[10,11,12,13,14].indexOf(index)>=0?'Number':'String'); }).join('')+'</Row>'; }).join('') +
     '</Table><WorksheetOptions xmlns="urn:schemas-microsoft-com:office:excel"><FreezePanes/><FrozenNoSplit/><SplitHorizontal>1</SplitHorizontal><TopRowBottomPane>1</TopRowBottomPane></WorksheetOptions></Worksheet></Workbook>';
   var blob = new Blob(['\ufeff', xml], { type:'application/vnd.ms-excel;charset=utf-8' });
   var url = URL.createObjectURL(blob);
@@ -863,13 +862,13 @@ function exportVehicleUsageExcelV56(type) {
   setTimeout(function(){ URL.revokeObjectURL(url); }, 1500);
   if (typeof showToast === 'function') showToast('Exported ' + rows.length + ' Car Booking records', 'success');
 }
-window.exportVehicleUsageExcelV56 = exportVehicleUsageExcelV56;
+window.exportVehicleUsageExcel = exportVehicleUsageExcel;
 
-function renderVehicleSummaryV31_(type) {
-  return renderVehicleSummaryV36(type);
+function renderVehicleSummary_(type) {
+  return renderVehicleSummary(type);
 }
 
-function cesBookingDateKeyV31_(value) {
+function cesBookingDateKey_(value) {
   var text = String(value || '').trim();
   var match = text.match(/^(\d{4})-(\d{1,2})-(\d{1,2})$/);
   if (match) return match[1] + '-' + ('0' + match[2]).slice(-2) + '-' + ('0' + match[3]).slice(-2);
@@ -877,38 +876,38 @@ function cesBookingDateKeyV31_(value) {
   if (match) return match[3] + '-' + ('0' + match[2]).slice(-2) + '-' + ('0' + match[1]).slice(-2);
   return '';
 }
-function cesBookingTimeMinutesV55_(value, fallback) {
+function cesBookingTimeMinutes_(value, fallback) {
   var match=String(value||'').match(/^(\d{1,2}):(\d{2})/);return match?Number(match[1])*60+Number(match[2]):fallback;
 }
-function cesBookingDayIntervalsV55_(rows, key) {
+function cesBookingDayIntervals_(rows, key) {
   var intervals=[];
   (rows||[]).forEach(function(row){
     var status=String(row.status||'').toUpperCase();if(['PENDING_APPROVAL','CONFIRMED','IN_PROGRESS'].indexOf(status)<0)return;
-    var startKey=cesBookingDateKeyV31_(row.bookingDate||row.onsiteDate),endKey=cesBookingDateKeyV31_(row.plannedReturnDate||row.bookingEndDate||row.bookingDate||row.onsiteDate)||startKey;
+    var startKey=cesBookingDateKey_(row.bookingDate||row.onsiteDate),endKey=cesBookingDateKey_(row.plannedReturnDate||row.bookingEndDate||row.bookingDate||row.onsiteDate)||startKey;
     if(!startKey||key<startKey||key>endKey)return;
-    var start=key===startKey?cesBookingTimeMinutesV55_(row.startTime,480):480;
-    var end=key===endKey?cesBookingTimeMinutesV55_(row.endTime,1020):1020;
+    var start=key===startKey?cesBookingTimeMinutes_(row.startTime,480):480;
+    var end=key===endKey?cesBookingTimeMinutes_(row.endTime,1020):1020;
     start=Math.max(480,Math.min(1020,start));end=Math.max(480,Math.min(1020,end));
     if(end>start)intervals.push({start:start,end:end,row:row});
   });
   intervals.sort(function(a,b){return a.start-b.start;});
   return intervals;
 }
-function cesBookingDayAvailabilityV55_(rows,key) {
-  var intervals=cesBookingDayIntervalsV55_(rows,key),merged=[];
+function cesBookingDayAvailability_(rows,key) {
+  var intervals=cesBookingDayIntervals_(rows,key),merged=[];
   intervals.forEach(function(item){var last=merged[merged.length-1];if(last&&item.start<=last.end)last.end=Math.max(last.end,item.end);else merged.push({start:item.start,end:item.end});});
   var occupied=merged.reduce(function(sum,item){return sum+(item.end-item.start);},0),free=Math.max(0,540-occupied);
   if(!intervals.length)return{css:'available',label:'Available 9h',freeMinutes:540,intervals:intervals};
   if(free>0)return{css:'partial',label:'Available '+(free/60).toFixed(free%60?1:0)+'h',freeMinutes:free,intervals:intervals};
   return{css:'unavailable',label:'Fully booked',freeMinutes:0,intervals:intervals};
 }
-function cesBookingMinuteTextV55_(minutes){return String(Math.floor(minutes/60)).padStart(2,'0')+':'+String(minutes%60).padStart(2,'0');}
-function selectVehicleDaySlotV240_(key,startTime,endTime){
+function cesBookingMinuteText_(minutes){return String(Math.floor(minutes/60)).padStart(2,'0')+':'+String(minutes%60).padStart(2,'0');}
+function selectVehicleDaySlot_(key,startTime,endTime){
   key=String(key||'').trim();startTime=String(startTime||'').trim();endTime=String(endTime||'').trim();
   if(!key||!startTime||!endTime)return;
   try{sessionStorage.setItem('CES_CAR_WORKSPACE_V204','BOOKING');}catch(e){}
-  switchCarBookingWorkspaceV204('BOOKING');
-  switchVehicleBookingModeV31('CAR','REQUEST',true);
+  switchCarBookingWorkspace('BOOKING');
+  switchVehicleBookingMode('CAR','REQUEST',true);
   var apply=function(){
     cesBookSet_('car-book-date',key);
     cesBookSet_('car-book-return-date',key);
@@ -924,10 +923,10 @@ function selectVehicleDaySlotV240_(key,startTime,endTime){
   setTimeout(apply,220);
   try{if(typeof Swal!=='undefined'&&Swal.isVisible())Swal.close();}catch(e){}
 }
-window.selectVehicleDaySlotV240_=selectVehicleDaySlotV240_;
+window.selectVehicleDaySlot_=selectVehicleDaySlot_;
 
-function showVehicleDaySlotsV55(type,key){
-  type=cesBookType_(type);var rows=cesBookingStateV31_(type).rows||[],availability=cesBookingDayAvailabilityV55_(rows,key);
+function showVehicleDaySlots(type,key){
+  type=cesBookType_(type);var rows=cesBookingState_(type).rows||[],availability=cesBookingDayAvailability_(rows,key);
   var slots=[
     {start:480,end:1020,label:'08:00–17:00',kind:'Full day'},
     {start:480,end:720,label:'08:00–12:00',kind:'Morning'},
@@ -939,40 +938,40 @@ function showVehicleDaySlotsV55(type,key){
     {start:900,end:1020,label:'15:00–17:00',kind:'2 hours'}
   ].map(function(slot){slot.busy=availability.intervals.some(function(item){return slot.start<item.end&&slot.end>item.start;});return slot;});
   var safeKey=String(key||'').replace(/'/g,'&#39;');
-  var html='<div class="text-left"><div class="mb-3 text-sm font-bold text-slate-500">Choose an available full-day, half-day or 2-hour slot. Selecting a time opens Booking / Return → Booking automatically.</div><div class="grid grid-cols-2 md:grid-cols-3 gap-2">'+slots.map(function(slot){var startText=cesBookingMinuteTextV55_(slot.start),endText=cesBookingMinuteTextV55_(slot.end);return '<button type="button" '+(slot.busy?'disabled':'onclick="selectVehicleDaySlotV240_(\''+safeKey+'\',\''+startText+'\',\''+endText+'\')"')+' class="px-3 py-3 rounded-xl border text-xs font-black '+(slot.busy?'bg-red-50 text-red-400 border-red-100 cursor-not-allowed':'bg-blue-50 text-[#003DA5] border-blue-100 hover:bg-[#003DA5] hover:text-white')+'">'+slot.label+'<div class="text-[9px] mt-1">'+(slot.busy?'Booked':slot.kind+' · Available')+'</div></button>';}).join('')+'</div></div>';
+  var html='<div class="text-left"><div class="mb-3 text-sm font-bold text-slate-500">Choose an available full-day, half-day or 2-hour slot. Selecting a time opens Booking / Return → Booking automatically.</div><div class="grid grid-cols-2 md:grid-cols-3 gap-2">'+slots.map(function(slot){var startText=cesBookingMinuteText_(slot.start),endText=cesBookingMinuteText_(slot.end);return '<button type="button" '+(slot.busy?'disabled':'onclick="selectVehicleDaySlot_(\''+safeKey+'\',\''+startText+'\',\''+endText+'\')"')+' class="px-3 py-3 rounded-xl border text-xs font-black '+(slot.busy?'bg-red-50 text-red-400 border-red-100 cursor-not-allowed':'bg-blue-50 text-[#003DA5] border-blue-100 hover:bg-[#003DA5] hover:text-white')+'">'+slot.label+'<div class="text-[9px] mt-1">'+(slot.busy?'Booked':slot.kind+' · Available')+'</div></button>';}).join('')+'</div></div>';
   Swal.fire({title:'Car time slots · '+key,html:html,width:680,showConfirmButton:false,showCloseButton:true});
 }
 
-function renderVehicleCalendarV31_(type) {
-  type = cesBookType_(type);var prefix=cesBookPrefix_(type),state=cesBookingStateV31_(type),root=document.getElementById(prefix+'-availability-calendar'),title=document.getElementById(prefix+'-calendar-title');if(!root)return;
+function renderVehicleCalendar_(type) {
+  type = cesBookType_(type);var prefix=cesBookPrefix_(type),state=cesBookingState_(type),root=document.getElementById(prefix+'-availability-calendar'),title=document.getElementById(prefix+'-calendar-title');if(!root)return;
   var month=state.month instanceof Date&&!isNaN(state.month.getTime())?state.month:new Date();month=new Date(month.getFullYear(),month.getMonth(),1);state.month=month;if(title)title.textContent=month.toLocaleDateString('en-US',{month:'long',year:'numeric'});
-  var byDate={};(state.rows||[]).forEach(function(row){var keys=cesBookDateRangeV37_(row.bookingDate||row.onsiteDate,row.plannedReturnDate||row.bookingEndDate||row.bookingDate||row.onsiteDate);keys.forEach(function(key){if(!byDate[key])byDate[key]=[];byDate[key].push(row);});});
+  var byDate={};(state.rows||[]).forEach(function(row){var keys=cesBookDateRange_(row.bookingDate||row.onsiteDate,row.plannedReturnDate||row.bookingEndDate||row.bookingDate||row.onsiteDate);keys.forEach(function(key){if(!byDate[key])byDate[key]=[];byDate[key].push(row);});});
   var today=typeof cesBookToday_==='function'?cesBookToday_():(new Date().toISOString().slice(0,10));
   var weekdays=['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];var html=weekdays.map(function(day){return '<div class="vehicle-calendar-weekday">'+day+'</div>';}).join('');var first=new Date(month.getFullYear(),month.getMonth(),1),start=new Date(month.getFullYear(),month.getMonth(),1-first.getDay());
   for(var i=0;i<42;i++){
-    var date=new Date(start.getFullYear(),start.getMonth(),start.getDate()+i),key=date.getFullYear()+'-'+('0'+(date.getMonth()+1)).slice(-2)+'-'+('0'+date.getDate()).slice(-2),rows=byDate[key]||[],status=cesBookingDayAvailabilityV55_(rows,key),muted=date.getMonth()!==month.getMonth()?' muted':'',isPast=key<today;
-    var tooltip=isPast?'Past date — booking is disabled':status.intervals.map(function(item){return cesBookingMinuteTextV55_(item.start)+'–'+cesBookingMinuteTextV55_(item.end)+' '+(item.row.jobTitle||item.row.destination||item.row.bookingId||'');}).join('\n');
+    var date=new Date(start.getFullYear(),start.getMonth(),start.getDate()+i),key=date.getFullYear()+'-'+('0'+(date.getMonth()+1)).slice(-2)+'-'+('0'+date.getDate()).slice(-2),rows=byDate[key]||[],status=cesBookingDayAvailability_(rows,key),muted=date.getMonth()!==month.getMonth()?' muted':'',isPast=key<today;
+    var tooltip=isPast?'Past date — booking is disabled':status.intervals.map(function(item){return cesBookingMinuteText_(item.start)+'–'+cesBookingMinuteText_(item.end)+' '+(item.row.jobTitle||item.row.destination||item.row.bookingId||'');}).join('\n');
     var clickable=type==='CAR'&&date.getMonth()===month.getMonth()&&!isPast;
-    html+='<div class="vehicle-calendar-day '+status.css+muted+(isPast?' ces-booking-past-v212':'')+'" data-date="'+key+'" aria-disabled="'+(isPast?'true':'false')+'" title="'+cesBookEsc_(tooltip)+'" '+(clickable?'onclick="showVehicleDaySlotsV55(\'CAR\',\''+key+'\')"':'')+'><div class="vehicle-calendar-number">'+date.getDate()+'</div>'+(status.intervals.length?'<span class="vehicle-calendar-count">'+status.intervals.length+'</span>':'')+'<div class="vehicle-calendar-state">'+(isPast?'Past date':status.label)+'</div></div>';
+    html+='<div class="vehicle-calendar-day '+status.css+muted+(isPast?' ces-booking-past-v212':'')+'" data-date="'+key+'" aria-disabled="'+(isPast?'true':'false')+'" title="'+cesBookEsc_(tooltip)+'" '+(clickable?'onclick="showVehicleDaySlots(\'CAR\',\''+key+'\')"':'')+'><div class="vehicle-calendar-number">'+date.getDate()+'</div>'+(status.intervals.length?'<span class="vehicle-calendar-count">'+status.intervals.length+'</span>':'')+'<div class="vehicle-calendar-state">'+(isPast?'Past date':status.label)+'</div></div>';
   }
   root.innerHTML=html;
 }
-window.showVehicleDaySlotsV55=showVehicleDaySlotsV55;
-function changeVehicleCalendarMonthV31(type, delta) {
+window.showVehicleDaySlots=showVehicleDaySlots;
+function changeVehicleCalendarMonth(type, delta) {
   type = cesBookType_(type);
-  var state = cesBookingStateV31_(type);
+  var state = cesBookingState_(type);
   var month = state.month || new Date();
   state.month = new Date(month.getFullYear(), month.getMonth() + Number(delta || 0), 1);
-  renderVehicleCalendarV31_(type);
+  renderVehicleCalendar_(type);
 }
 
-function renderVehicleReturnOptionsV31_(type) {
+function renderVehicleReturnOptions_(type) {
   type = cesBookType_(type);
   var prefix = cesBookPrefix_(type);
   var select = document.getElementById(prefix + '-return-booking');
   if (!select) return;
   var current = select.value;
-  var active = (cesBookingStateV31_(type).rows || []).filter(function(row) {
+  var active = (cesBookingState_(type).rows || []).filter(function(row) {
     var status = String(row.status || '').toUpperCase();
     return status === 'CONFIRMED' || status === 'IN_PROGRESS';
   });
@@ -981,11 +980,11 @@ function renderVehicleReturnOptionsV31_(type) {
   }).join('');
   if (current && active.some(function(row) { return String(row.bookingId) === String(current); })) select.value = current;
 }
-function applyVehicleReturnJobV31(type) {
+function applyVehicleReturnJob(type) {
   type = cesBookType_(type);
   var prefix = cesBookPrefix_(type);
   var bookingId = cesBookGet_(prefix + '-return-booking');
-  var item = (cesBookingStateV31_(type).rows || []).find(function(row) { return String(row.bookingId) === String(bookingId); });
+  var item = (cesBookingState_(type).rows || []).find(function(row) { return String(row.bookingId) === String(bookingId); });
   var detail = document.getElementById(prefix + '-return-detail');
   if (!item) {
     if (detail) detail.textContent = 'Select a booking to view details.';
@@ -999,20 +998,20 @@ function applyVehicleReturnJobV31(type) {
     cesBookSet_('car-returned-by', item.requesterName || item.requesterId || '');
   }
 }
-function openVehicleReturnV31(type, bookingId) {
+function openVehicleReturn(type, bookingId) {
   type = cesBookType_(type);
-  switchVehicleBookingModeV31(type, 'RETURN');
+  switchVehicleBookingMode(type, 'RETURN');
   cesBookSet_(cesBookPrefix_(type) + '-return-booking', bookingId);
-  applyVehicleReturnJobV31(type);
+  applyVehicleReturnJob(type);
   var panel = document.getElementById(cesBookPrefix_(type) + '-return-panel');
   if (panel) panel.scrollIntoView({ behavior:'smooth', block:'start' });
 }
 
-function switchVehicleBookingModeV31(type, mode, quiet) {
+function switchVehicleBookingMode(type, mode, quiet) {
   type = cesBookType_(type);
   mode = String(mode || 'REQUEST').toUpperCase() === 'RETURN' ? 'RETURN' : 'REQUEST';
   var prefix = cesBookPrefix_(type);
-  cesBookingStateV31_(type).mode = mode;
+  cesBookingState_(type).mode = mode;
   var requestPanel = document.getElementById(prefix + '-request-panel');
   var returnPanel = document.getElementById(prefix + '-return-panel');
   var requestBtn = document.getElementById(prefix + '-mode-request');
@@ -1021,17 +1020,17 @@ function switchVehicleBookingModeV31(type, mode, quiet) {
   if (returnPanel) returnPanel.classList.toggle('hidden', mode !== 'RETURN');
   if (requestBtn) requestBtn.classList.toggle('active', mode === 'REQUEST');
   if (returnBtn) returnBtn.classList.toggle('active', mode === 'RETURN');
-  if (mode === 'RETURN' && !quiet) renderVehicleReturnOptionsV31_(type);
+  if (mode === 'RETURN' && !quiet) renderVehicleReturnOptions_(type);
 }
 
-function renderVehicleBookingsV31(type) {
+function renderVehicleBookings(type) {
   type = cesBookType_(type);
   var prefix = cesBookPrefix_(type);
   var root = document.getElementById(prefix + '-book-list');
   if (!root) return;
   var query = cesBookGet_(prefix + '-book-search').toLowerCase().trim();
   var selectedStatus = cesBookGet_(prefix + '-book-status') || 'all';
-  var rows = (cesBookingStateV31_(type).rows || []).filter(function(row) {
+  var rows = (cesBookingState_(type).rows || []).filter(function(row) {
     var text = [row.bookingId,row.requesterName,row.team,row.destination,row.purpose,row.jobTitle,row.approverName,row.bookingDate].join(' ').toLowerCase();
     return (!query || text.indexOf(query) >= 0) && (selectedStatus === 'all' || String(row.status || '').toUpperCase() === selectedStatus);
   });
@@ -1044,34 +1043,34 @@ function renderVehicleBookingsV31(type) {
     var docs = '';
     if (row.memoFileUrl) docs += '<a href="' + cesBookEsc_(row.memoFileUrl) + '" target="_blank" onclick="event.stopPropagation()" class="w-8 h-8 grid place-items-center rounded-lg bg-blue-50 text-blue-600" title="MEMO / Work Order"><i class="fas fa-paperclip"></i></a>';
     if (row.returnBillFileUrl) docs += '<a href="' + cesBookEsc_(row.returnBillFileUrl) + '" target="_blank" onclick="event.stopPropagation()" class="w-8 h-8 grid place-items-center rounded-lg bg-amber-50 text-amber-600" title="Bill / Receipt"><i class="fas fa-receipt"></i></a>';
-    if (row.returnCarPhotoFileUrls && row.returnCarPhotoFileUrls.length) docs += '<button type="button" onclick="event.stopPropagation();openVehicleBookingDetailV243(\''+type+'\',\''+cesBookEsc_(row.bookingId)+'\')" class="min-w-8 h-8 px-2 grid place-items-center rounded-lg bg-emerald-50 text-emerald-700" title="Car photos"><span><i class="fas fa-images"></i> '+row.returnCarPhotoFileUrls.length+'</span></button>';
+    if (row.returnCarPhotoFileUrls && row.returnCarPhotoFileUrls.length) docs += '<button type="button" onclick="event.stopPropagation();openVehicleBookingDetail(\''+type+'\',\''+cesBookEsc_(row.bookingId)+'\')" class="min-w-8 h-8 px-2 grid place-items-center rounded-lg bg-emerald-50 text-emerald-700" title="Car photos"><span><i class="fas fa-images"></i> '+row.returnCarPhotoFileUrls.length+'</span></button>';
     if (row.pdfUrl) docs += '<a href="' + cesBookEsc_(row.pdfUrl) + '" target="_blank" onclick="event.stopPropagation()" class="w-8 h-8 grid place-items-center rounded-lg bg-red-50 text-red-500" title="PDF"><i class="fas fa-file-pdf"></i></a>';
-    var actions = '<button class="w-8 h-8 rounded-lg bg-slate-100 text-slate-600 border border-slate-200" title="View / Edit details" onclick="event.stopPropagation();openVehicleBookingDetailV243(\''+type+'\',\'' + cesBookEsc_(row.bookingId) + '\')"><i class="fas fa-eye"></i></button>';
-    var loginUserV185 = cesBookingCurrentUserV31_();
+    var actions = '<button class="w-8 h-8 rounded-lg bg-slate-100 text-slate-600 border border-slate-200" title="View / Edit details" onclick="event.stopPropagation();openVehicleBookingDetail(\''+type+'\',\'' + cesBookEsc_(row.bookingId) + '\')"><i class="fas fa-eye"></i></button>';
+    var loginUserV185 = cesBookingCurrentUser_();
     var isAdminV185 = String((loginUserV185 && loginUserV185.role) || '').toUpperCase() === 'ADMIN';
     if (type === 'CAR' && status === 'PENDING_APPROVAL' && isAdminV185) {
-      actions += '<button class="w-8 h-8 rounded-lg bg-emerald-50 text-emerald-700 border border-emerald-200" title="Approve on website" onclick="event.stopPropagation();approveCarBookingWebsiteV185Front(\'' + cesBookEsc_(row.bookingId) + '\',\'APPROVE\')"><i class="fas fa-check"></i></button>';
-      actions += '<button class="w-8 h-8 rounded-lg bg-red-50 text-red-600 border border-red-200" title="Reject on website" onclick="event.stopPropagation();approveCarBookingWebsiteV185Front(\'' + cesBookEsc_(row.bookingId) + '\',\'REJECT\')"><i class="fas fa-xmark"></i></button>';
+      actions += '<button class="w-8 h-8 rounded-lg bg-emerald-50 text-emerald-700 border border-emerald-200" title="Approve on website" onclick="event.stopPropagation();approveCarBookingWebsiteFront(\'' + cesBookEsc_(row.bookingId) + '\',\'APPROVE\')"><i class="fas fa-check"></i></button>';
+      actions += '<button class="w-8 h-8 rounded-lg bg-red-50 text-red-600 border border-red-200" title="Reject on website" onclick="event.stopPropagation();approveCarBookingWebsiteFront(\'' + cesBookEsc_(row.bookingId) + '\',\'REJECT\')"><i class="fas fa-xmark"></i></button>';
     }
-    if (status === 'CONFIRMED' || status === 'IN_PROGRESS') actions += '<button class="w-8 h-8 rounded-lg bg-blue-50 text-[#003DA5] border border-blue-100" title="Return" onclick="event.stopPropagation();openVehicleReturnV31(\'' + type + '\',\'' + cesBookEsc_(row.bookingId) + '\')"><i class="fas fa-rotate-left"></i></button>';
-    if (['COMPLETED','CANCELLED','REJECTED'].indexOf(status) < 0) actions += '<button class="w-8 h-8 rounded-lg bg-red-50 text-red-500 border border-red-100" title="Cancel" onclick="event.stopPropagation();cancelVehicleBookingV31(\'' + type + '\',\'' + cesBookEsc_(row.bookingId) + '\')"><i class="fas fa-ban"></i></button>';
-    return '<tr class="hover:bg-blue-50/40 cursor-pointer transition-colors" onclick="openVehicleBookingDetailV243(\''+type+'\',\''+cesBookEsc_(row.bookingId)+'\')"><td class="p-3 font-bold text-slate-700 ces-booking-date-cell-v38"><div class="whitespace-nowrap">' + cesBookEsc_(row.bookingDate || '-') + ((row.plannedReturnDate && row.plannedReturnDate !== row.bookingDate) ? ' <span class="text-blue-600">→ ' + cesBookEsc_(row.plannedReturnDate) + '</span>' : '') + '</div><div class="text-[10px] text-slate-400 mt-1 whitespace-nowrap">' + cesBookEsc_(row.startTime || '') + ' – ' + cesBookEsc_(row.endTime || '') + '</div></td><td class="p-3"><b>' + cesBookEsc_(row.requesterName || '-') + '</b><div class="text-[10px] text-slate-400 flex items-center gap-1.5 mt-1"><span class="' + cesBookTeamClassV31_(row.team) + '">' + cesBookEsc_(row.team || '-') + '</span><span>· ' + cesBookEsc_(row.contact || '-') + '</span></div></td><td class="p-3"><b>' + cesBookEsc_(row.jobTitle || '-') + '</b><div class="text-[10px] text-slate-400 max-w-[240px] whitespace-normal">' + cesBookEsc_(row.destination || '-') + '</div></td><td class="p-3"><b>' + (Number(row.actualTotalKm||0)>0 ? cesBookEsc_(row.actualTotalKm)+' km' : 'KM at return') + '</b><div class="text-[10px] text-slate-400">' + (row.electricBill !== '' && row.electricBill != null ? cesBookMoney_(row.electricBill) : 'No bill') + '</div></td><td class="p-3"><span class="inline-flex px-2.5 py-1 rounded-full text-[10px] font-black ' + cesBookStatusClass_(status) + '">' + cesBookEsc_(status) + '</span></td><td class="p-3"><div class="flex gap-2">' + (docs || '<span class="text-slate-300">—</span>') + '</div></td><td class="p-3 text-center"><div class="flex justify-center gap-2">' + actions + '</div></td></tr>';
+    if (status === 'CONFIRMED' || status === 'IN_PROGRESS') actions += '<button class="w-8 h-8 rounded-lg bg-blue-50 text-[#003DA5] border border-blue-100" title="Return" onclick="event.stopPropagation();openVehicleReturn(\'' + type + '\',\'' + cesBookEsc_(row.bookingId) + '\')"><i class="fas fa-rotate-left"></i></button>';
+    if (['COMPLETED','CANCELLED','REJECTED'].indexOf(status) < 0) actions += '<button class="w-8 h-8 rounded-lg bg-red-50 text-red-500 border border-red-100" title="Cancel" onclick="event.stopPropagation();cancelVehicleBooking(\'' + type + '\',\'' + cesBookEsc_(row.bookingId) + '\')"><i class="fas fa-ban"></i></button>';
+    return '<tr class="hover:bg-blue-50/40 cursor-pointer transition-colors" onclick="openVehicleBookingDetail(\''+type+'\',\''+cesBookEsc_(row.bookingId)+'\')"><td class="p-3 font-bold text-slate-700 ces-booking-date-cell-v38"><div class="whitespace-nowrap">' + cesBookEsc_(row.bookingDate || '-') + ((row.plannedReturnDate && row.plannedReturnDate !== row.bookingDate) ? ' <span class="text-blue-600">→ ' + cesBookEsc_(row.plannedReturnDate) + '</span>' : '') + '</div><div class="text-[10px] text-slate-400 mt-1 whitespace-nowrap">' + cesBookEsc_(row.startTime || '') + ' – ' + cesBookEsc_(row.endTime || '') + '</div></td><td class="p-3"><b>' + cesBookEsc_(row.requesterName || '-') + '</b><div class="text-[10px] text-slate-400 flex items-center gap-1.5 mt-1"><span class="' + cesBookTeamClass_(row.team) + '">' + cesBookEsc_(row.team || '-') + '</span><span>· ' + cesBookEsc_(row.contact || '-') + '</span></div></td><td class="p-3"><b>' + cesBookEsc_(row.jobTitle || '-') + '</b><div class="text-[10px] text-slate-400 max-w-[240px] whitespace-normal">' + cesBookEsc_(row.destination || '-') + '</div></td><td class="p-3"><b>' + (Number(row.actualTotalKm||0)>0 ? cesBookEsc_(row.actualTotalKm)+' km' : 'KM at return') + '</b><div class="text-[10px] text-slate-400">' + (row.electricBill !== '' && row.electricBill != null ? cesBookMoney_(row.electricBill) : 'No bill') + '</div></td><td class="p-3"><span class="inline-flex px-2.5 py-1 rounded-full text-[10px] font-black ' + cesBookStatusClass_(status) + '">' + cesBookEsc_(status) + '</span></td><td class="p-3"><div class="flex gap-2">' + (docs || '<span class="text-slate-300">—</span>') + '</div></td><td class="p-3 text-center"><div class="flex justify-center gap-2">' + actions + '</div></td></tr>';
   }).join('') + '</tbody></table></div><div class="mt-2 text-[10px] text-slate-400"><i class="fas fa-circle-info mr-1"></i>Click any row to open full details and edit attachments.</div>';
 }
 
-function cesBookingDetailInputV243_(id,label,value,type,disabled) {
+function cesBookingDetailInput_(id,label,value,type,disabled) {
   type = type || 'text';
   var safeValue=(value==null?'':value); return '<div><label class="ces-detail-label-v243">'+cesBookEsc_(label)+'</label><input id="'+id+'" type="'+type+'" value="'+cesBookEsc_(safeValue)+'" '+(disabled?'disabled':'')+' class="ces-detail-input-v243"></div>';
 }
-function cesBookingDetailTextAreaV243_(id,label,value,disabled) {
+function cesBookingDetailTextArea_(id,label,value,disabled) {
   var safeValue=(value==null?'':value); return '<div><label class="ces-detail-label-v243">'+cesBookEsc_(label)+'</label><textarea id="'+id+'" rows="2" '+(disabled?'disabled':'')+' class="ces-detail-input-v243">'+cesBookEsc_(safeValue)+'</textarea></div>';
 }
 
-async function openVehicleBookingDetailV243(type, bookingId) {
+async function openVehicleBookingDetail(type, bookingId) {
   type=cesBookType_(type); bookingId=String(bookingId||'');
-  var row=(cesBookingStateV31_(type).rows||[]).find(function(x){return String(x.bookingId)===bookingId;});
+  var row=(cesBookingState_(type).rows||[]).find(function(x){return String(x.bookingId)===bookingId;});
   if(!row)return Swal.fire('Booking details','Booking record not found. Please Refresh Data.','warning');
-  var user=cesBookingCurrentUserV31_(),status=String(row.status||'').toUpperCase();
+  var user=cesBookingCurrentUser_(),status=String(row.status||'').toUpperCase();
   var active=['PENDING_APPROVAL','CONFIRMED','IN_PROGRESS'].indexOf(status)>=0,completed=status==='COMPLETED';
   var canEdit=(String(user.role||'').toUpperCase()==='ADMIN'||String(user.id||'')===String(row.requesterId||''))&&(active||completed);
   var billUrls=(row.returnBillFileUrls&&row.returnBillFileUrls.length)?row.returnBillFileUrls:(row.returnBillFileUrl?[row.returnBillFileUrl]:[]);
@@ -1079,19 +1078,19 @@ async function openVehicleBookingDetailV243(type, bookingId) {
   var photoLinks=(row.returnCarPhotoFileUrls||[]).map(function(url,i){return '<a target="_blank" href="'+cesBookEsc_(url)+'" class="ces-detail-doc-v243"><i class="fas fa-image"></i> Car photo '+(i+1)+'</a>';}).join('');
   var docLinks=(row.memoFileUrl?'<a target="_blank" href="'+cesBookEsc_(row.memoFileUrl)+'" class="ces-detail-doc-v243"><i class="fas fa-paperclip"></i> MEMO / Work Order</a>':'')+billLinks+photoLinks;
   var html='<div class="ces-booking-detail-v243 text-left"><div class="ces-detail-head-v243"><div><small>BOOKING ID</small><b>'+cesBookEsc_(row.bookingId)+'</b></div><span class="'+cesBookStatusClass_(status)+'">'+cesBookEsc_(status)+'</span></div><div class="ces-detail-requester-v243"><b>'+cesBookEsc_(row.requesterName||'-')+'</b><span>'+cesBookEsc_(row.team||'-')+' · '+cesBookEsc_(row.requesterId||'-')+'</span></div>';
-  if(active){html+='<div class="ces-detail-grid-v243">'+cesBookingDetailInputV243_('ces-edit-job-v243','Job / Customer',row.jobTitle,'text',!canEdit)+cesBookingDetailInputV243_('ces-edit-destination-v243','Destination',row.destination,'text',!canEdit)+cesBookingDetailInputV243_('ces-edit-date-v243','Start Date',row.bookingDate,'date',!canEdit)+cesBookingDetailInputV243_('ces-edit-return-date-v243','Planned Return',row.plannedReturnDate||row.bookingDate,'date',!canEdit)+cesBookingDetailInputV243_('ces-edit-start-v243','Start Time',row.startTime,'time',!canEdit)+cesBookingDetailInputV243_('ces-edit-end-v243','End Time',row.endTime,'time',!canEdit)+cesBookingDetailInputV243_('ces-edit-passengers-v243','Passengers',row.passengers||1,'number',!canEdit)+cesBookingDetailInputV243_('ces-edit-contact-v243','Contact',row.contact,'text',!canEdit)+'</div>'+cesBookingDetailTextAreaV243_('ces-edit-purpose-v243','Purpose / Onsite Detail',row.purpose,!canEdit);}
-  if(completed){html+='<div class="ces-detail-grid-v243">'+cesBookingDetailInputV243_('ces-edit-km-v243','Actual Total KM',row.actualTotalKm,'number',!canEdit)+cesBookingDetailInputV243_('ces-edit-bill-v243','Electric Bill (THB)',row.electricBill,'number',!canEdit)+'</div>'+cesBookingDetailTextAreaV243_('ces-edit-return-note-v243','Return Note',row.returnNote,!canEdit);}
+  if(active){html+='<div class="ces-detail-grid-v243">'+cesBookingDetailInput_('ces-edit-job-v243','Job / Customer',row.jobTitle,'text',!canEdit)+cesBookingDetailInput_('ces-edit-destination-v243','Destination',row.destination,'text',!canEdit)+cesBookingDetailInput_('ces-edit-date-v243','Start Date',row.bookingDate,'date',!canEdit)+cesBookingDetailInput_('ces-edit-return-date-v243','Planned Return',row.plannedReturnDate||row.bookingDate,'date',!canEdit)+cesBookingDetailInput_('ces-edit-start-v243','Start Time',row.startTime,'time',!canEdit)+cesBookingDetailInput_('ces-edit-end-v243','End Time',row.endTime,'time',!canEdit)+cesBookingDetailInput_('ces-edit-passengers-v243','Passengers',row.passengers||1,'number',!canEdit)+cesBookingDetailInput_('ces-edit-contact-v243','Contact',row.contact,'text',!canEdit)+'</div>'+cesBookingDetailTextArea_('ces-edit-purpose-v243','Purpose / Onsite Detail',row.purpose,!canEdit);}
+  if(completed){html+='<div class="ces-detail-grid-v243">'+cesBookingDetailInput_('ces-edit-km-v243','Actual Total KM',row.actualTotalKm,'number',!canEdit)+cesBookingDetailInput_('ces-edit-bill-v243','Electric Bill (THB)',row.electricBill,'number',!canEdit)+'</div>'+cesBookingDetailTextArea_('ces-edit-return-note-v243','Return Note',row.returnNote,!canEdit);}
   html+='<div class="ces-detail-docs-v243">'+(docLinks||'<span class="text-slate-400">No document attached.</span>')+'</div>';
   if(canEdit){html+='<div class="ces-detail-upload-grid-v243"><div><label class="ces-detail-label-v243">Replace MEMO / Work Order</label><input id="ces-edit-memo-file-v243" type="file" accept=".pdf,.doc,.docx,.jpg,.jpeg,.png" class="ces-detail-file-v243"></div>'+(completed?'<div><label class="ces-detail-label-v243">Replace Bill / Receipt</label><input id="ces-edit-bill-file-v243" type="file" accept=".pdf,.jpg,.jpeg,.png,.heic" class="ces-detail-file-v243"></div><div class="ces-detail-upload-full-v243"><label class="ces-detail-label-v243">Add Car Pictures</label><input id="ces-edit-car-photos-v243" type="file" multiple accept=".jpg,.jpeg,.png,.heic,.webp" class="ces-detail-file-v243"></div>':'')+'</div>';}
   if(!canEdit)html+='<div class="mt-3 rounded-xl bg-slate-50 border p-3 text-xs text-slate-500">Read only: only the requester or ADMIN can edit this record.</div>';
   html+='</div>';
-  var result=await Swal.fire({title:'Car Booking Details',html:html,width:900,showCancelButton:canEdit,showConfirmButton:true,confirmButtonText:canEdit?'Save Changes':'Close',cancelButtonText:'Cancel',confirmButtonColor:'#003DA5',focusConfirm:false,showLoaderOnConfirm:canEdit,allowOutsideClick:function(){return !Swal.isLoading();},preConfirm:canEdit?async function(){try{return await saveVehicleBookingDetailV243(type,row);}catch(error){Swal.showValidationMessage(error&&error.message?error.message:String(error));return false;}}:undefined});
-  if(canEdit&&result.isConfirmed&&result.value){if(typeof showToast==='function')showToast('Booking updated','success');loadVehicleBookingWorkspaceV31(type,true,true).catch(function(){});}
+  var result=await Swal.fire({title:'Car Booking Details',html:html,width:900,showCancelButton:canEdit,showConfirmButton:true,confirmButtonText:canEdit?'Save Changes':'Close',cancelButtonText:'Cancel',confirmButtonColor:'#003DA5',focusConfirm:false,showLoaderOnConfirm:canEdit,allowOutsideClick:function(){return !Swal.isLoading();},preConfirm:canEdit?async function(){try{return await saveVehicleBookingDetail(type,row);}catch(error){Swal.showValidationMessage(error&&error.message?error.message:String(error));return false;}}:undefined});
+  if(canEdit&&result.isConfirmed&&result.value){if(typeof showToast==='function')showToast('Booking updated','success');loadVehicleBookingWorkspace(type,true,true).catch(function(){});}
 }
-window.openVehicleBookingDetailV243=openVehicleBookingDetailV243;
+window.openVehicleBookingDetail=openVehicleBookingDetail;
 
-async function saveVehicleBookingDetailV243(type,row){
-  var user=cesBookingCurrentUserV31_(),status=String(row.status||'').toUpperCase(),active=['PENDING_APPROVAL','CONFIRMED','IN_PROGRESS'].indexOf(status)>=0,completed=status==='COMPLETED';
+async function saveVehicleBookingDetail(type,row){
+  var user=cesBookingCurrentUser_(),status=String(row.status||'').toUpperCase(),active=['PENDING_APPROVAL','CONFIRMED','IN_PROGRESS'].indexOf(status)>=0,completed=status==='COMPLETED';
   var payload={bookingType:type,bookingId:row.bookingId,actorId:user.id};
   function val(id){var el=document.getElementById(id);return el?el.value:'';}
   if(active){payload.jobTitle=val('ces-edit-job-v243').trim();payload.destination=val('ces-edit-destination-v243').trim();payload.bookingDate=val('ces-edit-date-v243');payload.plannedReturnDate=val('ces-edit-return-date-v243');payload.startTime=val('ces-edit-start-v243');payload.endTime=val('ces-edit-end-v243');payload.passengers=Number(val('ces-edit-passengers-v243')||1);payload.contact=val('ces-edit-contact-v243').trim();payload.purpose=val('ces-edit-purpose-v243').trim();if(!payload.jobTitle||!payload.destination)throw new Error('Job / Customer and Destination are required.');}
@@ -1099,14 +1098,14 @@ async function saveVehicleBookingDetailV243(type,row){
   var memoEl=document.getElementById('ces-edit-memo-file-v243'),memoFile=memoEl&&memoEl.files?memoEl.files[0]:null;
   var billEl=document.getElementById('ces-edit-bill-file-v243'),billFile=billEl&&billEl.files?billEl.files[0]:null;
   var photosEl=document.getElementById('ces-edit-car-photos-v243'),photos=photosEl&&photosEl.files?Array.from(photosEl.files):[];
-  if(memoFile){var memo=await cesReadBookingFileV31_(memoFile,10);memo.requesterId=user.id;memo.uploadToken=row.bookingId+'-EDIT-MEMO-'+Date.now();var mr=await cesBookingApiCallV31_(['uploadCarBookingMemo'],[memo],{transport:'iframe',timeoutMs:180000,loadingLabel:'Uploading MEMO / Work Order…'});if(!mr||!mr.success)throw new Error((mr&&mr.message)||'MEMO upload failed.');payload.memoFileId=mr.fileId;payload.memoFileUrl=mr.fileUrl;}
-  if(billFile){var bill=await cesReadBookingFileV31_(billFile,8);bill.bookingType=type;bill.bookingId=row.bookingId;bill.requesterId=user.id;bill.uploadToken=row.bookingId+'-EDIT-BILL-'+Date.now();var br=await cesBookingApiCallV31_(['uploadVehicleReturnBill'],[bill],{transport:'iframe',timeoutMs:180000,loadingLabel:'Uploading Bill / Receipt…'});if(!br||!br.success)throw new Error((br&&br.message)||'Bill upload failed.');payload.billFileId=br.fileId;payload.billFileUrl=br.fileUrl;}
-  if(photos.length){var photoResults=await Promise.all(photos.map(async function(file,i){var photo=await cesReadBookingFileV31_(file,10);photo.bookingType=type;photo.bookingId=row.bookingId;photo.requesterId=user.id;photo.uploadToken=row.bookingId+'-EDIT-PHOTO-'+Date.now()+'-'+i;return cesBookingApiCallV31_(['uploadVehicleReturnPhoto'],[photo],{transport:'iframe',timeoutMs:180000,loadingLabel:'Uploading car pictures…'});}));payload.addCarPhotoFileIds=[];payload.addCarPhotoFileUrls=[];payload.addCarPhotoFileNames=[];photoResults.forEach(function(r){if(!r||!r.success)throw new Error((r&&r.message)||'Car photo upload failed.');payload.addCarPhotoFileIds.push(r.fileId);payload.addCarPhotoFileUrls.push(r.fileUrl);payload.addCarPhotoFileNames.push(r.fileName);});}
-  var saved=await cesBookingApiCallV31_(['updateVehicleBookingRecord'],[payload],{timeoutMs:60000,loadingLabel:'Saving booking changes…'});if(!saved||!saved.success)throw new Error((saved&&saved.message)||'Cannot update booking.');return saved;
+  if(memoFile){var memo=await cesReadBookingFile_(memoFile,10);memo.requesterId=user.id;memo.uploadToken=row.bookingId+'-EDIT-MEMO-'+Date.now();var mr=await cesBookingApiCall_(['uploadCarBookingMemo'],[memo],{transport:'iframe',timeoutMs:180000,loadingLabel:'Uploading MEMO / Work Order…'});if(!mr||!mr.success)throw new Error((mr&&mr.message)||'MEMO upload failed.');payload.memoFileId=mr.fileId;payload.memoFileUrl=mr.fileUrl;}
+  if(billFile){var bill=await cesReadBookingFile_(billFile,8);bill.bookingType=type;bill.bookingId=row.bookingId;bill.requesterId=user.id;bill.uploadToken=row.bookingId+'-EDIT-BILL-'+Date.now();var br=await cesBookingApiCall_(['uploadVehicleReturnBill'],[bill],{transport:'iframe',timeoutMs:180000,loadingLabel:'Uploading Bill / Receipt…'});if(!br||!br.success)throw new Error((br&&br.message)||'Bill upload failed.');payload.billFileId=br.fileId;payload.billFileUrl=br.fileUrl;}
+  if(photos.length){var photoResults=await Promise.all(photos.map(async function(file,i){var photo=await cesReadBookingFile_(file,10);photo.bookingType=type;photo.bookingId=row.bookingId;photo.requesterId=user.id;photo.uploadToken=row.bookingId+'-EDIT-PHOTO-'+Date.now()+'-'+i;return cesBookingApiCall_(['uploadVehicleReturnPhoto'],[photo],{transport:'iframe',timeoutMs:180000,loadingLabel:'Uploading car pictures…'});}));payload.addCarPhotoFileIds=[];payload.addCarPhotoFileUrls=[];payload.addCarPhotoFileNames=[];photoResults.forEach(function(r){if(!r||!r.success)throw new Error((r&&r.message)||'Car photo upload failed.');payload.addCarPhotoFileIds.push(r.fileId);payload.addCarPhotoFileUrls.push(r.fileUrl);payload.addCarPhotoFileNames.push(r.fileName);});}
+  var saved=await cesBookingApiCall_(['updateVehicleBookingRecord'],[payload],{timeoutMs:60000,loadingLabel:'Saving booking changes…'});if(!saved||!saved.success)throw new Error((saved&&saved.message)||'Cannot update booking.');return saved;
 }
-window.saveVehicleBookingDetailV243=saveVehicleBookingDetailV243;
+window.saveVehicleBookingDetail=saveVehicleBookingDetail;
 
-function cesBookingReadBlobV31_(blob, fileName, mimeType) {
+function cesBookingReadBlob_(blob, fileName, mimeType) {
   return new Promise(function(resolve, reject) {
     var reader = new FileReader();
     reader.onload = function() {
@@ -1118,7 +1117,7 @@ function cesBookingReadBlobV31_(blob, fileName, mimeType) {
   });
 }
 
-function cesBookingCompressImageV31_(file) {
+function cesBookingCompressImage_(file) {
   return new Promise(function(resolve) {
     var type = String(file.type || '').toLowerCase();
     if (!/^image\/(jpeg|jpg|png|webp)$/.test(type) || file.size < 700 * 1024) {
@@ -1156,17 +1155,17 @@ function cesBookingCompressImageV31_(file) {
   });
 }
 
-async function cesReadBookingFileV31_(file, maxMb) {
+async function cesReadBookingFile_(file, maxMb) {
   if (!file) throw new Error('File is required.');
   if (file.size > maxMb * 1024 * 1024) throw new Error('File is too large. Maximum ' + maxMb + ' MB.');
-  var compressed = await cesBookingCompressImageV31_(file);
+  var compressed = await cesBookingCompressImage_(file);
   if (compressed) {
-    var result = await cesBookingReadBlobV31_(compressed.blob, compressed.fileName, compressed.mimeType);
+    var result = await cesBookingReadBlob_(compressed.blob, compressed.fileName, compressed.mimeType);
     result.originalFileName = file.name;
     result.compressed = true;
     return result;
   }
-  var raw = await cesBookingReadBlobV31_(file, file.name, file.type || 'application/octet-stream');
+  var raw = await cesBookingReadBlob_(file, file.name, file.type || 'application/octet-stream');
   raw.originalFileName = file.name;
   raw.compressed = false;
   return raw;
@@ -1180,15 +1179,15 @@ var CES_BOOKING_AUTH_V31_CACHE = { checkedAt:0, result:null };
  * Each backend operation validates only the service it actually uses. This
  * prevents an optional Calendar/Docs scope from freezing a valid Sheet save.
  */
-async function cesBookingAuthorizationPreflightV31_() {
+async function cesBookingAuthorizationPreflight_() {
   return { authorized:true, mode:'service-specific-v31', nonBlocking:true };
 }
 
-function cesBookingRequestIdV31_(type, requesterId) {
+function cesBookingRequestId_(type, requesterId) {
   return [String(type || 'VEHICLE').toUpperCase(), String(requesterId || 'USER'), Date.now(), Math.random().toString(36).slice(2, 10)].join('-');
 }
 
-function cesBookingPromiseTimeoutV31_(promise, timeoutMs, label) {
+function cesBookingPromiseTimeout_(promise, timeoutMs, label) {
   return Promise.race([
     promise,
     new Promise(function(_, reject) {
@@ -1197,7 +1196,7 @@ function cesBookingPromiseTimeoutV31_(promise, timeoutMs, label) {
   ]);
 }
 
-function cesBookingProgressV31_(title, detail) {
+function cesBookingProgress_(title, detail) {
   if (typeof Swal === 'undefined' || !Swal.isVisible()) return;
   Swal.update({
     title:title,
@@ -1208,9 +1207,9 @@ function cesBookingProgressV31_(title, detail) {
   Swal.showLoading();
 }
 
-async function submitVehicleRequestV31(type) {
+async function submitVehicleRequest(type) {
   type = cesBookType_(type);
-  var prefix = cesBookPrefix_(type), state = cesBookingStateV31_(type);
+  var prefix = cesBookPrefix_(type), state = cesBookingState_(type);
   var planValue = cesBookGet_(prefix + '-onsite-plan');
   var manualWork = planValue === '__MANUAL__';
   var plan = (!manualWork && planValue !== '') ? state.plans[Number(planValue)] : null;
@@ -1238,9 +1237,9 @@ async function submitVehicleRequestV31(type) {
       payload.approverEmail=String(selectedApproverV260.email||'');
     }
   }
-  payload.clientRequestId = cesBookingRequestIdV31_(type, payload.requesterId);
+  payload.clientRequestId = cesBookingRequestId_(type, payload.requesterId);
   var todayIsoV21=(function(){var d=new Date(),o=d.getTimezoneOffset()*60000;return new Date(d.getTime()-o).toISOString().slice(0,10);})();
-  if(payload.bookingDate && payload.bookingDate<todayIsoV21){cesBookMarkMissingV37_(type,[{id:prefix+'-book-date',label:'Start Date must be today or later',missing:true}],'ไม่สามารถจองย้อนหลังได้');return;}
+  if(payload.bookingDate && payload.bookingDate<todayIsoV21){cesBookMarkMissing_(type,[{id:prefix+'-book-date',label:'Start Date must be today or later',missing:true}],'ไม่สามารถจองย้อนหลังได้');return;}
   var requestMissing=[
     {id:prefix+'-requester-id',label:'Employee ID',missing:!payload.requesterId},{id:prefix+'-requester-name',label:'Requester Name',missing:!payload.requesterName},
     {id:prefix+'-requester-team',label:'Team',missing:!CES_BOOKING_V31.allowedTeams.includes(payload.team)},
@@ -1250,9 +1249,9 @@ async function submitVehicleRequestV31(type) {
     {id:'car-approver',label:'Approver',missing:type==='CAR'&&(!selectedApproverV260||!payload.approverEmail)},
     {id:prefix+'-memo-file',label:'MEMO / Work Order',missing:type==='CAR'&&!file}
   ];
-  if(cesBookMarkMissingV37_(type,requestMissing,'กรอกข้อมูลคำขอไม่ครบ'))return;
-  var dateRange=cesBookDateRangeV37_(payload.bookingDate,payload.plannedReturnDate);if(!dateRange.length){cesBookMarkMissingV37_(type,[{id:prefix+'-book-return-date',label:'Planned Return Date ต้องไม่น้อยกว่า Start Date',missing:true}],'ช่วงวันที่ไม่ถูกต้อง');return;}
-  if(payload.bookingDate===payload.plannedReturnDate&&payload.endTime<=payload.startTime){cesBookMarkMissingV37_(type,[{id:prefix+'-book-end',label:'End Time ต้องมากกว่า Start Time',missing:true}],'เวลาไม่ถูกต้อง');return;}
+  if(cesBookMarkMissing_(type,requestMissing,'กรอกข้อมูลคำขอไม่ครบ'))return;
+  var dateRange=cesBookDateRange_(payload.bookingDate,payload.plannedReturnDate);if(!dateRange.length){cesBookMarkMissing_(type,[{id:prefix+'-book-return-date',label:'Planned Return Date ต้องไม่น้อยกว่า Start Date',missing:true}],'ช่วงวันที่ไม่ถูกต้อง');return;}
+  if(payload.bookingDate===payload.plannedReturnDate&&payload.endTime<=payload.startTime){cesBookMarkMissing_(type,[{id:prefix+'-book-end',label:'End Time ต้องมากกว่า Start Time',missing:true}],'เวลาไม่ถูกต้อง');return;}
   var approvalSummaryV260=type==='CAR'
     ? '<br><b>Approver:</b> '+cesBookEsc_(payload.approverName||'-')+' · '+cesBookEsc_(payload.approverEmail||'-')+'<br><b>Always CC:</b> Siripak.Ch@nhealth-asia.com · Thippayawaree.Kh@nhealth-asia.com'
     : '';
@@ -1262,79 +1261,79 @@ async function submitVehicleRequestV31(type) {
   var submitStartedV243=Date.now();
   try{
     Swal.fire({title:'Submitting booking…',html:'<div style="font-size:12px;color:#64748b">Uploading MEMO / Work Order and saving request in one operation.</div>',allowOutsideClick:false,allowEscapeKey:false,showConfirmButton:false,didOpen:function(){Swal.showLoading();}});
-    await cesBookingAuthorizationPreflightV31_();
+    await cesBookingAuthorizationPreflight_();
     var savedResult;
     if(type==='CAR'){
-      cesBookingProgressV31_('Preparing MEMO / Work Order…',file.name);
-      var memo=await cesReadBookingFileV31_(file,10);memo.requesterId=payload.requesterId;memo.clientRequestId=payload.clientRequestId;memo.uploadToken=payload.clientRequestId;
-      cesBookingProgressV31_('Saving booking…','Upload + booking save are processed together for faster submission.');
-      savedResult=await cesBookingPromiseTimeoutV31_(cesBookingApiCallV31_(cesBookingApiNamesV55_(type,'createVehicleBookingRequestFast'),[payload,memo],{transport:'iframe',timeoutMs:210000,loadingLabel:'Submitting Car Booking…'}),220000,'Booking submit');
+      cesBookingProgress_('Preparing MEMO / Work Order…',file.name);
+      var memo=await cesReadBookingFile_(file,10);memo.requesterId=payload.requesterId;memo.clientRequestId=payload.clientRequestId;memo.uploadToken=payload.clientRequestId;
+      cesBookingProgress_('Saving booking…','Upload + booking save are processed together for faster submission.');
+      savedResult=await cesBookingPromiseTimeout_(cesBookingApiCall_(cesBookingApiNames_(type,'createVehicleBookingRequestFast'),[payload,memo],{transport:'iframe',timeoutMs:210000,loadingLabel:'Submitting Car Booking…'}),220000,'Booking submit');
     }else{
-      savedResult=await cesBookingPromiseTimeoutV31_(cesBookingApiCallV31_(cesBookingApiNamesV55_(type,'createVehicleBookingRequest'),[payload],{timeoutMs:60000,loadingLabel:'Submitting Booking…'}),70000,'Request save');
+      savedResult=await cesBookingPromiseTimeout_(cesBookingApiCall_(cesBookingApiNames_(type,'createVehicleBookingRequest'),[payload],{timeoutMs:60000,loadingLabel:'Submitting Booking…'}),70000,'Request save');
     }
     if(!savedResult||!savedResult.success)throw new Error((savedResult&&savedResult.message)||'Cannot save request.');
-    state.loaded=false;resetVehicleRequestV31_(type);Swal.close();
+    state.loaded=false;resetVehicleRequest_(type);Swal.close();
     var elapsedV243=Math.max(0,Math.round((Date.now()-submitStartedV243)/100)/10);
     await Swal.fire({title:'Booking Complete',html:'<div style="text-align:center"><b>Upload done · Submit done</b><br>Booking <b>'+cesBookEsc_(savedResult.bookingId)+'</b> was saved successfully.<br><span style="font-size:12px;color:#64748b">Completed in '+elapsedV243+' sec · Approval notification is queued in the background.</span></div>',icon:'success',confirmButtonText:'Done',confirmButtonColor:'#059669'});
-    loadVehicleBookingWorkspaceV31(type,true,true).catch(function(){});
+    loadVehicleBookingWorkspace(type,true,true).catch(function(){});
   }catch(err){Swal.close();await Swal.fire({title:type+' Booking Error',text:err.message||String(err),icon:'error',confirmButtonColor:'#003DA5'});}finally{CES_BOOKING_V31.inFlight[type]=false;if(submitBtn){submitBtn.disabled=false;submitBtn.removeAttribute('aria-busy');}}
 }
 
 
 // V26.3: return completes immediately; TE generation UI is removed.
-function cesVehicleReturnRatingRowV209_(key,title,detail){
+function cesVehicleReturnRatingRow_(key,title,detail){
   return '<div class="ces-return-rating-row-v209"><div><b>'+cesBookEsc_(title)+'</b><small>'+cesBookEsc_(detail)+'</small></div><div class="ces-vehicle-stars-v209" data-rating-key="'+key+'">'+[1,2,3,4,5].map(function(n){return '<button type="button" data-rating="'+n+'" aria-label="'+n+' stars"><i class="fas fa-star"></i></button>';}).join('')+'</div></div>';
 }
-async function cesVehicleSaveReturnEvaluationV209_(type,bookingId,ratings,comment){
+async function cesVehicleSaveReturnEvaluation_(type,bookingId,ratings,comment){
   ratings=ratings||{};comment=String(comment||'').trim();
   if(!Number(ratings.performance||0)&&!Number(ratings.comfort||0)&&!Number(ratings.value||0)&&!comment)return {success:true,skipped:true};
-  var u=cesBookingCurrentUserV31_();
-  try{return await cesBookingApiCallV31_(['saveVehicleReturnEvaluation'],[{bookingType:type,bookingId:bookingId,performance:Number(ratings.performance||0),comfort:Number(ratings.comfort||0),value:Number(ratings.value||0),comment:comment,ratedBy:u.name||u.id||''}],{transport:'iframe',timeoutMs:60000});}
+  var u=cesBookingCurrentUser_();
+  try{return await cesBookingApiCall_(['saveVehicleReturnEvaluation'],[{bookingType:type,bookingId:bookingId,performance:Number(ratings.performance||0),comfort:Number(ratings.comfort||0),value:Number(ratings.value||0),comment:comment,ratedBy:u.name||u.id||''}],{transport:'iframe',timeoutMs:60000});}
   catch(error){console.warn('[Vehicle evaluation]',error);return {success:false,message:error&&error.message?error.message:String(error)};}
 }
-async function showVehicleReturnSuccessV209_(type,result,payload){
+async function showVehicleReturnSuccess_(type,result,payload){
   result=result||{};payload=payload||{};
   var km=Number(result.actualTotalKm||payload.actualTotalKm||0),bill=Number(result.electricBill||payload.electricBill||0),normal=Number(result.normalCost||km*5),saving=Number(result.saving!=null?result.saving:normal-bill),isSaving=saving>=0,pct=normal?Math.round(Math.abs(saving)*10000/normal)/100:0;
   var values={performance:0,comfort:0,value:0,comment:''};
   var html='<div class="text-left"><div class="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-4"><div class="rounded-xl border bg-slate-50 p-3"><div class="text-[10px] font-black text-slate-400">REGULAR CAR FEE</div><div class="text-xl font-black text-slate-700">'+cesBookMoney_(normal)+'</div><div class="text-[10px] text-slate-400">'+km+' km × 5 THB/km</div></div><div class="rounded-xl border border-emerald-100 bg-emerald-50 p-3"><div class="text-[10px] font-black text-emerald-600">ELECTRIC BILL</div><div class="text-xl font-black text-emerald-700">'+cesBookMoney_(bill)+'</div><div class="text-[10px] text-emerald-600">Actual charging cost</div></div><div class="rounded-xl '+(isSaving?'bg-green-600':'bg-red-600')+' p-3 text-white"><div class="text-[10px] font-black opacity-80">'+(isSaving?'TOTAL SAVING':'ADDITIONAL COST')+'</div><div class="text-xl font-black">'+cesBookMoney_(Math.abs(saving))+'</div><div class="text-[10px] opacity-80">'+pct+'% '+(isSaving?'lower':'higher')+' than regular fee</div></div></div>'+
     '<div class="text-xs font-black text-slate-700 mb-2">ประเมินการใช้งานรถ 1–5 ดาว</div><div class="ces-return-rating-grid-v209">'+
-    cesVehicleReturnRatingRowV209_('performance','1. สมรรถนะและการขับขี่','อัตราเร่ง การเบรก และการทรงตัว')+
-    cesVehicleReturnRatingRowV209_('comfort','2. ความสะดวกสบายและฟังก์ชัน','เบาะนั่ง แอร์ หน้าจอ และพื้นที่โดยสาร')+
-    cesVehicleReturnRatingRowV209_('value','3. ความคุ้มค่าและอัตราสิ้นเปลือง','การประหยัดน้ำมัน/ไฟฟ้า และความคุ้มค่า')+
+    cesVehicleReturnRatingRow_('performance','1. สมรรถนะและการขับขี่','อัตราเร่ง การเบรก และการทรงตัว')+
+    cesVehicleReturnRatingRow_('comfort','2. ความสะดวกสบายและฟังก์ชัน','เบาะนั่ง แอร์ หน้าจอ และพื้นที่โดยสาร')+
+    cesVehicleReturnRatingRow_('value','3. ความคุ้มค่าและอัตราสิ้นเปลือง','การประหยัดน้ำมัน/ไฟฟ้า และความคุ้มค่า')+
     '</div><textarea id="ces-vehicle-rating-comment-v209" class="w-full mt-3 rounded-xl border border-slate-200 p-3 text-xs" rows="2" placeholder="4. ความคิดเห็นเพิ่มเติม (ไม่บังคับ)"></textarea></div>';
   var answer=await Swal.fire({title:'Return Complete',html:'<div class="mb-3 rounded-xl bg-emerald-50 border border-emerald-100 p-3 text-emerald-700 text-sm font-black text-center"><i class="fas fa-circle-check mr-1"></i> Upload done · Return submitted successfully</div>'+html,icon:'success',width:760,confirmButtonText:'Save Evaluation & Close',confirmButtonColor:'#059669',allowOutsideClick:false,didOpen:function(){document.querySelectorAll('.ces-vehicle-stars-v209').forEach(function(group){group.querySelectorAll('button').forEach(function(btn){btn.addEventListener('click',function(){var n=Number(btn.dataset.rating||0),key=group.dataset.ratingKey;values[key]=n;group.querySelectorAll('button').forEach(function(b){b.classList.toggle('active',Number(b.dataset.rating||0)<=n);});});});});},willClose:function(){var c=document.getElementById('ces-vehicle-rating-comment-v209');values.comment=c?c.value:'';}});
-  var evalResult=await cesVehicleSaveReturnEvaluationV209_(type,result.bookingId||payload.bookingId,values,values.comment);
+  var evalResult=await cesVehicleSaveReturnEvaluation_(type,result.bookingId||payload.bookingId,values,values.comment);
   if(evalResult&&evalResult.success===false&&typeof showToast==='function')showToast('คืนรถสำเร็จ แต่บันทึกแบบประเมินไม่สำเร็จ','warning');
   return answer;
 }
 async function generateVehicleMonthlyTeFront(type,options){
   type=cesBookType_(type);options=options||{};if(type!=='CAR')return;
-  var u=cesBookingCurrentUserV31_(),year=String(options.year||cesBookGet_('car-summary-year-filter')||'').trim(),month=String(options.month||cesBookGet_('car-summary-month-filter')||'').trim();
+  var u=cesBookingCurrentUser_(),year=String(options.year||cesBookGet_('car-summary-year-filter')||'').trim(),month=String(options.month||cesBookGet_('car-summary-month-filter')||'').trim();
   var now=new Date();if(!/^\d{4}$/.test(year))year=String(now.getFullYear());if(!/^\d{2}$/.test(month)||month==='All')month=String(now.getMonth()+1).padStart(2,'0');
   var requesterId=String(options.requesterId||u.id||cesBookGet_('car-requester-id')||'').trim(),team=String(options.team||u.team||cesBookGet_('car-requester-team')||'').trim();
   if(!requesterId){return Swal.fire('Generate TE','ไม่พบรหัสพนักงานสำหรับสร้าง TE','warning');}
   if(!options.skipConfirm){var confirm=await Swal.fire({title:'Generate Monthly TE?',html:'รวมรายการคืนรถที่เสร็จสมบูรณ์ของ <b>'+cesBookEsc_(requesterId)+'</b><br>เดือน <b>'+cesBookEsc_(year+'-'+month)+'</b>',icon:'question',showCancelButton:true,confirmButtonText:'Generate',confirmButtonColor:'#003DA5'});if(!confirm.isConfirmed)return;}
-  try{Swal.fire({title:'Generating Monthly TE…',html:'กำลังรวมรายการใช้งานรถในเดือน '+cesBookEsc_(year+'-'+month),allowOutsideClick:false,showConfirmButton:false,didOpen:function(){Swal.showLoading();}});var result=await cesBookingPromiseTimeoutV31_(cesBookingApiCallV31_(['generateVehicleMonthlyTe'],[{bookingType:'CAR',requesterId:requesterId,team:team,year:Number(year),month:month}],{transport:'iframe',timeoutMs:240000}),250000,'Monthly TE generation');if(!result||!result.success)throw new Error((result&&result.message)||'Monthly TE generation failed.');var links='<div class="text-left"><div class="grid grid-cols-2 gap-3 mb-3"><div class="rounded-xl bg-slate-50 border p-3"><small class="text-slate-400">USAGE RECORDS</small><b class="block text-lg">'+Number(result.recordCount||0)+'</b></div><div class="rounded-xl bg-green-50 border border-green-100 p-3"><small class="text-green-600">TOTAL SAVING</small><b class="block text-lg text-green-700">'+cesBookMoney_(result.saving||0)+'</b></div></div><div class="flex flex-wrap gap-2"><a class="px-4 py-2 rounded-xl bg-[#003DA5] text-white text-xs font-black" href="'+cesBookEsc_(result.pdfUrl||'#')+'" target="_blank"><i class="fas fa-file-pdf mr-1"></i>Open PDF</a><a class="px-4 py-2 rounded-xl bg-emerald-600 text-white text-xs font-black" href="'+cesBookEsc_(result.xlsxUrl||'#')+'" target="_blank"><i class="fas fa-file-excel mr-1"></i>Open Excel</a></div></div>';return Swal.fire({title:'Monthly TE ready',html:links,icon:'success',confirmButtonColor:'#003DA5'});}catch(error){return Swal.fire('Monthly TE Error',error&&error.message?error.message:String(error),'error');}
+  try{Swal.fire({title:'Generating Monthly TE…',html:'กำลังรวมรายการใช้งานรถในเดือน '+cesBookEsc_(year+'-'+month),allowOutsideClick:false,showConfirmButton:false,didOpen:function(){Swal.showLoading();}});var result=await cesBookingPromiseTimeout_(cesBookingApiCall_(['generateVehicleMonthlyTe'],[{bookingType:'CAR',requesterId:requesterId,team:team,year:Number(year),month:month}],{transport:'iframe',timeoutMs:240000}),250000,'Monthly TE generation');if(!result||!result.success)throw new Error((result&&result.message)||'Monthly TE generation failed.');var links='<div class="text-left"><div class="grid grid-cols-2 gap-3 mb-3"><div class="rounded-xl bg-slate-50 border p-3"><small class="text-slate-400">USAGE RECORDS</small><b class="block text-lg">'+Number(result.recordCount||0)+'</b></div><div class="rounded-xl bg-green-50 border border-green-100 p-3"><small class="text-green-600">TOTAL SAVING</small><b class="block text-lg text-green-700">'+cesBookMoney_(result.saving||0)+'</b></div></div><div class="flex flex-wrap gap-2"><a class="px-4 py-2 rounded-xl bg-[#003DA5] text-white text-xs font-black" href="'+cesBookEsc_(result.pdfUrl||'#')+'" target="_blank"><i class="fas fa-file-pdf mr-1"></i>Open PDF</a><a class="px-4 py-2 rounded-xl bg-emerald-600 text-white text-xs font-black" href="'+cesBookEsc_(result.xlsxUrl||'#')+'" target="_blank"><i class="fas fa-file-excel mr-1"></i>Open Excel</a></div></div>';return Swal.fire({title:'Monthly TE ready',html:links,icon:'success',confirmButtonColor:'#003DA5'});}catch(error){return Swal.fire('Monthly TE Error',error&&error.message?error.message:String(error),'error');}
 }
 window.generateVehicleMonthlyTeFront=generateVehicleMonthlyTeFront;
 
-async function submitVehicleReturnV31(type) {
-  type=cesBookType_(type);var prefix=cesBookPrefix_(type),billInput=document.getElementById(prefix+'-return-bill-file'),billFiles=billInput&&billInput.files?Array.from(billInput.files):[],photoInput=document.getElementById(prefix+'-return-car-photos'),carPhotos=type==='CAR'&&photoInput&&photoInput.files?Array.from(photoInput.files):[],bookingId=cesBookGet_(prefix+'-return-booking'),item=(cesBookingStateV31_(type).rows||[]).find(function(row){return String(row.bookingId)===String(bookingId);});
+async function submitVehicleReturn(type) {
+  type=cesBookType_(type);var prefix=cesBookPrefix_(type),billInput=document.getElementById(prefix+'-return-bill-file'),billFiles=billInput&&billInput.files?Array.from(billInput.files):[],photoInput=document.getElementById(prefix+'-return-car-photos'),carPhotos=type==='CAR'&&photoInput&&photoInput.files?Array.from(photoInput.files):[],bookingId=cesBookGet_(prefix+'-return-booking'),item=(cesBookingState_(type).rows||[]).find(function(row){return String(row.bookingId)===String(bookingId);});
   var payload={bookingType:type,bookingId:bookingId,returnDate:cesBookGet_(prefix+'-return-date'),returnTime:cesBookGet_(prefix+'-return-time'),actualTotalKm:Number(cesBookGet_(prefix+'-return-km')||0),electricBill:Number(cesBookGet_(prefix+'-electric-bill')||0),note:cesBookGet_(prefix+'-return-note').trim(),returnedById:item?item.requesterId:'',returnedByName:item?item.requesterName:''};
   var returnMissing=[{id:prefix+'-return-booking',label:'Select Job',missing:!payload.bookingId},{id:prefix+'-return-date',label:'Return Date',missing:!payload.returnDate},{id:prefix+'-return-time',label:'Return Time',missing:!payload.returnTime},{id:prefix+'-return-km',label:'Actual Total KM',missing:!(payload.actualTotalKm>0)},{id:prefix+'-electric-bill',label:'Electric Bill',missing:payload.electricBill<0||cesBookGet_(prefix+'-electric-bill')===''},{id:prefix+'-return-bill-file',label:'Bill / Receipt',missing:!billFiles.length},{id:prefix+'-return-car-photos',label:'Car Return Pictures',missing:type==='CAR'&&!carPhotos.length}];
-  if(cesBookMarkMissingV37_(type,returnMissing,'กรอกข้อมูลคืนรถไม่ครบ'))return;
+  if(cesBookMarkMissing_(type,returnMissing,'กรอกข้อมูลคืนรถไม่ครบ'))return;
   var confirm=await Swal.fire({title:'Confirm vehicle return?',html:'<div style="text-align:left;font-size:13px"><b>Booking:</b> '+cesBookEsc_(payload.bookingId)+'<br><b>Returned By:</b> '+cesBookEsc_(payload.returnedByName)+'<br><b>Actual distance:</b> '+payload.actualTotalKm+' km<br><b>Electric bill:</b> '+cesBookMoney_(payload.electricBill)+'<br><b>Bill / Receipt files:</b> '+billFiles.length+'<br><b>Car pictures:</b> '+carPhotos.length+'</div>',icon:'question',showCancelButton:true,confirmButtonText:'Confirm Return',confirmButtonColor:'#003DA5'});if(!confirm.isConfirmed)return;
   var returnFlightKey=type+'_RETURN';if(CES_BOOKING_V31.inFlight[returnFlightKey]){Swal.fire('Please wait','This vehicle return is already being submitted.','info');return;}CES_BOOKING_V31.inFlight[returnFlightKey]=true;
   try{
-    Swal.fire({title:'Saving return…',html:'กำลังอัปโหลดไฟล์แนบและบันทึกข้อมูลคืนรถ',allowOutsideClick:false,showConfirmButton:false,didOpen:function(){Swal.showLoading();}});await cesBookingAuthorizationPreflightV31_();
-    var billsPromise=Promise.all(billFiles.map(async function(file,i){var attachment=await cesReadBookingFileV31_(file,8);attachment.bookingType=type;attachment.bookingId=payload.bookingId;attachment.requesterId=payload.returnedById;attachment.uploadToken=payload.bookingId+'-RETURN-BILL-'+payload.returnDate+'-'+(i+1);return cesBookingPromiseTimeoutV31_(cesBookingApiCallV31_(cesBookingApiNamesV55_(type,'uploadVehicleReturnBill'),[attachment],{transport:'iframe',timeoutMs:240000,priority:'user'}),250000,'Receipt '+(i+1)+' upload');}));
-    var photosPromise=Promise.all(carPhotos.map(async function(file,i){var photo=await cesReadBookingFileV31_(file,10);photo.bookingType=type;photo.bookingId=payload.bookingId;photo.requesterId=payload.returnedById;photo.uploadToken=payload.bookingId+'-CAR-'+payload.returnDate+'-'+(i+1);return cesBookingPromiseTimeoutV31_(cesBookingApiCallV31_(['uploadVehicleReturnPhoto'],[photo],{transport:'iframe',timeoutMs:240000,priority:'user'}),250000,'Car photo upload');}));
+    Swal.fire({title:'Saving return…',html:'กำลังอัปโหลดไฟล์แนบและบันทึกข้อมูลคืนรถ',allowOutsideClick:false,showConfirmButton:false,didOpen:function(){Swal.showLoading();}});await cesBookingAuthorizationPreflight_();
+    var billsPromise=Promise.all(billFiles.map(async function(file,i){var attachment=await cesReadBookingFile_(file,8);attachment.bookingType=type;attachment.bookingId=payload.bookingId;attachment.requesterId=payload.returnedById;attachment.uploadToken=payload.bookingId+'-RETURN-BILL-'+payload.returnDate+'-'+(i+1);return cesBookingPromiseTimeout_(cesBookingApiCall_(cesBookingApiNames_(type,'uploadVehicleReturnBill'),[attachment],{transport:'iframe',timeoutMs:240000,priority:'user'}),250000,'Receipt '+(i+1)+' upload');}));
+    var photosPromise=Promise.all(carPhotos.map(async function(file,i){var photo=await cesReadBookingFile_(file,10);photo.bookingType=type;photo.bookingId=payload.bookingId;photo.requesterId=payload.returnedById;photo.uploadToken=payload.bookingId+'-CAR-'+payload.returnDate+'-'+(i+1);return cesBookingPromiseTimeout_(cesBookingApiCall_(['uploadVehicleReturnPhoto'],[photo],{transport:'iframe',timeoutMs:240000,priority:'user'}),250000,'Car photo upload');}));
     var uploadedAll=await Promise.all([billsPromise,photosPromise]),billResults=uploadedAll[0],photoResults=uploadedAll[1];payload.billFileIds=[];payload.billFileUrls=[];payload.billFileNames=[];billResults.forEach(function(uploaded,i){if(!uploaded||!uploaded.success)throw new Error((uploaded&&uploaded.message)||('Return bill '+(i+1)+' upload failed.'));payload.billFileIds.push(uploaded.fileId);payload.billFileUrls.push(uploaded.fileUrl);payload.billFileNames.push(uploaded.fileName);});payload.billFileId=payload.billFileIds[0]||'';payload.billFileUrl=payload.billFileUrls[0]||'';payload.carPhotoFileIds=[];payload.carPhotoFileUrls=[];payload.carPhotoFileNames=[];photoResults.forEach(function(photoResult,i){if(!photoResult||!photoResult.success)throw new Error((photoResult&&photoResult.message)||('Car photo '+(i+1)+' upload failed.'));payload.carPhotoFileIds.push(photoResult.fileId);payload.carPhotoFileUrls.push(photoResult.fileUrl);payload.carPhotoFileNames.push(photoResult.fileName);});
-    var result=await cesBookingPromiseTimeoutV31_(cesBookingApiCallV31_(cesBookingApiNamesV55_(type,'completeVehicleReturn'),[payload],{timeoutMs:60000,loadingLabel:'Saving return…'}),70000,'Return save');if(!result||!result.success)throw new Error((result&&result.message)||'Cannot save return.');cesBookingStateV31_(type).loaded=false;resetVehicleReturnV31_(type);Swal.close();await showVehicleReturnSuccessV209_(type,result,payload);loadVehicleBookingWorkspaceV31(type,true).catch(function(){});
+    var result=await cesBookingPromiseTimeout_(cesBookingApiCall_(cesBookingApiNames_(type,'completeVehicleReturn'),[payload],{timeoutMs:60000,loadingLabel:'Saving return…'}),70000,'Return save');if(!result||!result.success)throw new Error((result&&result.message)||'Cannot save return.');cesBookingState_(type).loaded=false;resetVehicleReturn_(type);Swal.close();await showVehicleReturnSuccess_(type,result,payload);loadVehicleBookingWorkspace(type,true).catch(function(){});
   }catch(err){Swal.close();Swal.fire('Return Error',err&&err.message?err.message:String(err),'error');}finally{CES_BOOKING_V31.inFlight[returnFlightKey]=false;}
 }
 
-function resetVehicleRequestV31_(type) {
+function resetVehicleRequest_(type) {
   type = cesBookType_(type);
   var prefix = cesBookPrefix_(type);
   ['onsite-plan','calendar-key','calendar-team','job-title','book-date','book-return-date','book-destination','book-purpose','total-km','approver'].forEach(function(key) {
@@ -1347,9 +1346,9 @@ function resetVehicleRequestV31_(type) {
   if (memo) memo.value = '';
   var jobInputV243 = document.getElementById(prefix + '-job-title');
   if (jobInputV243) jobInputV243.readOnly = false;
-  autoFillVehicleProfileV31(type, true);
+  autoFillVehicleProfile(type, true);
 }
-function resetVehicleReturnV31_(type) {
+function resetVehicleReturn_(type) {
   type = cesBookType_(type);
   var prefix = cesBookPrefix_(type);
   ['return-booking','return-km','electric-bill','return-note'].forEach(function(key) { cesBookSet_(prefix + '-' + key, ''); });
@@ -1364,21 +1363,21 @@ function resetVehicleReturnV31_(type) {
   if (detail) detail.textContent = 'Select a booking to view details.';
 }
 
-function cancelVehicleBookingV31(type, bookingId) {
+function cancelVehicleBooking(type, bookingId) {
   type = cesBookType_(type);
   Swal.fire({ title:'Cancel this booking?', text:bookingId, icon:'warning', showCancelButton:true, confirmButtonColor:'#dc2626', confirmButtonText:'Cancel Booking' }).then(async function(answer) {
     if (!answer.isConfirmed) return;
-    var user = cesBookingCurrentUserV31_();
+    var user = cesBookingCurrentUser_();
     try {
       Swal.fire({ title:'Cancelling booking…', allowOutsideClick:false, showConfirmButton:false, didOpen:function(){ Swal.showLoading(); } });
-      var result = await cesBookingPromiseTimeoutV31_(
-        cesBookingApiCallV31_(cesBookingApiNamesV55_(type,'cancelVehicleBooking'), [{ bookingType:type, bookingId:bookingId, updatedBy:user.name || user.id }], { transport:'iframe', timeoutMs:60000 }),
+      var result = await cesBookingPromiseTimeout_(
+        cesBookingApiCall_(cesBookingApiNames_(type,'cancelVehicleBooking'), [{ bookingType:type, bookingId:bookingId, updatedBy:user.name || user.id }], { transport:'iframe', timeoutMs:60000 }),
         65000,
         'Booking cancellation'
       );
       if (!result || !result.success) throw new Error((result && result.message) || 'Cannot cancel booking.');
-      cesBookingStateV31_(type).loaded = false;
-      try { await loadVehicleBookingWorkspaceV31(type, true); } catch (ignore) {}
+      cesBookingState_(type).loaded = false;
+      try { await loadVehicleBookingWorkspace(type, true); } catch (ignore) {}
       Swal.close();
       await Swal.fire('Cancelled', 'Booking cancelled. The status email is queued.', 'success');
     } catch (err) {
@@ -1390,13 +1389,11 @@ function cancelVehicleBookingV31(type, bookingId) {
 
 
 // Stable unversioned wrappers used by the app controller.
-function loadCarBookingFormData(force) { return loadVehicleBookingWorkspaceV31('CAR', force); }
-function applyCarOnsitePlan() { return applyVehicleOnsitePlanV31('CAR'); }
-function loadVehicleBookings(type, force) { return loadVehicleBookingWorkspaceV31(type, force); }
-function renderVehicleBookings(type) { return renderVehicleBookingsV31(type); }
-function submitCarBookingRequest() { return submitVehicleRequestV31('CAR'); }
-function submitVehicleBooking(type) { return submitVehicleRequestV31(type); }
-function cancelVehicleBooking(type, bookingId) { return cancelVehicleBookingV31(type, bookingId); }
+function loadCarBookingFormData(force) { return loadVehicleBookingWorkspace('CAR', force); }
+function applyCarOnsitePlan() { return applyVehicleOnsitePlan('CAR'); }
+function loadVehicleBookings(type, force) { return loadVehicleBookingWorkspace(type, force); }
+function submitCarBookingRequest() { return submitVehicleRequest('CAR'); }
+function submitVehicleBooking(type) { return submitVehicleRequest(type); }
 
 window.CES_BOOKING_RECHECK=function(){return{success:true,version:'V20.9',requestDocument:false,requestApproval:true,requestEmailQueued:true,returnApproval:false,returnEmailQueued:true,returnOutput:'MONTHLY_TE_ON_DEMAND',multiPhotoReturn:true,regularRatePerKm:5,approvers:7,hourlyAvailability:true,workingDayUtilization:true,compactVehicleLayout:true,vanFilterResync:true,vanCalendarFilterSync:true,vanEndpointBilling:true,vanCalendar:'4a66f8df81e68d752715957a3805219e951d91c7b1c375e8996424ca2c55fef6@group.calendar.google.com'};};
 
@@ -1412,11 +1409,11 @@ const CES_VAN_V55={
   calendarCursor:null,
   calendarId:'4a66f8df81e68d752715957a3805219e951d91c7b1c375e8996424ca2c55fef6@group.calendar.google.com'
 };
-function cesVanMoneyV55_(value){return '฿'+Number(value||0).toLocaleString('th-TH',{maximumFractionDigits:0});}
-function cesVanTeamBadgeV55_(team){const map={MED:'bg-blue-50 text-[#004aad] border-blue-100',LAB:'bg-cyan-50 text-[#1587a7] border-cyan-100',EHS:'bg-emerald-50 text-[#0b8f78] border-emerald-100',ENV:'bg-lime-50 text-[#4c9c2e] border-lime-100',OTHER:'bg-slate-100 text-slate-600 border-slate-200'};return map[String(team||'OTHER').toUpperCase()]||map.OTHER;}
-function cesVanSetTextV55_(id,value){const el=document.getElementById(id);if(el)el.textContent=value;}
-function cesVanMonthNameV57_(month){return['January','February','March','April','May','June','July','August','September','October','November','December'][Math.max(0,Math.min(11,Number(month||1)-1))];}
-function cesVanEnsureYearOptionV57_(year){
+function cesVanMoney_(value){return '฿'+Number(value||0).toLocaleString('th-TH',{maximumFractionDigits:0});}
+function cesVanTeamBadge_(team){const map={MED:'bg-blue-50 text-[#004aad] border-blue-100',LAB:'bg-cyan-50 text-[#1587a7] border-cyan-100',EHS:'bg-emerald-50 text-[#0b8f78] border-emerald-100',ENV:'bg-lime-50 text-[#4c9c2e] border-lime-100',OTHER:'bg-slate-100 text-slate-600 border-slate-200'};return map[String(team||'OTHER').toUpperCase()]||map.OTHER;}
+function cesVanSetText_(id,value){const el=document.getElementById(id);if(el)el.textContent=value;}
+function cesVanMonthName_(month){return['January','February','March','April','May','June','July','August','September','October','November','December'][Math.max(0,Math.min(11,Number(month||1)-1))];}
+function cesVanEnsureYearOption_(year){
   const yearEl=document.getElementById('van-year-filter-v55');if(!yearEl)return;
   const value=String(year);
   if(!Array.from(yearEl.options).some(option=>option.value===value)){
@@ -1424,13 +1421,13 @@ function cesVanEnsureYearOptionV57_(year){
     Array.from(yearEl.options).sort((a,b)=>Number(a.value)-Number(b.value)).forEach(option=>yearEl.appendChild(option));
   }
 }
-function cesVanInitFiltersV55_(){
+function cesVanInitFilters_(){
   const yearEl=document.getElementById('van-year-filter-v55'),monthEl=document.getElementById('van-month-filter-v55');
   if(yearEl&&!yearEl.options.length){const year=new Date().getFullYear();for(let y=year-1;y<=year+2;y++){const option=document.createElement('option');option.value=String(y);option.textContent=String(y);if(y===year)option.selected=true;yearEl.appendChild(option);}}
   if(monthEl&&!monthEl.dataset.initialized){monthEl.dataset.initialized='1';monthEl.value=String(new Date().getMonth()+1).padStart(2,'0');}
 }
-function cesVanSelectedPeriodV57_(){
-  cesVanInitFiltersV55_();
+function cesVanSelectedPeriod_(){
+  cesVanInitFilters_();
   const now=new Date();
   const year=Number(document.getElementById('van-year-filter-v55')?.value||now.getFullYear());
   let month=String(document.getElementById('van-month-filter-v55')?.value||String(now.getMonth()+1).padStart(2,'0')).toUpperCase();
@@ -1440,15 +1437,15 @@ function cesVanSelectedPeriodV57_(){
   }
   return{year:year,month:month};
 }
-function cesVanCalendarRangeV57_(year,month){
+function cesVanCalendarRange_(year,month){
   const start=new Date(Number(year),Number(month)-1,1);
   const end=new Date(Number(year),Number(month),1);
   const key=date=>String(date.getFullYear())+String(date.getMonth()+1).padStart(2,'0')+String(date.getDate()).padStart(2,'0');
   return{start:key(start),end:key(end)};
 }
-function cesVanBuildEmbedUrlV57_(baseUrl,year,month){
+function cesVanBuildEmbedUrl_(baseUrl,year,month){
   const fallback='https://calendar.google.com/calendar/u/0/embed?src='+encodeURIComponent(CES_VAN_V55.calendarId)+'&ctz=Asia%2FBangkok&mode=MONTH&showTitle=0&showPrint=0&showTabs=0&showCalendars=0&showTz=0';
-  const range=cesVanCalendarRangeV57_(year,month);
+  const range=cesVanCalendarRange_(year,month);
   try{
     const url=new URL(baseUrl||fallback,window.location.href);
     url.searchParams.set('mode','MONTH');
@@ -1465,72 +1462,72 @@ function cesVanBuildEmbedUrlV57_(baseUrl,year,month){
     return fallback+'&showNav=0&showDate=0&dates='+range.start+'%2F'+range.end;
   }
 }
-function cesVanSetCalendarPeriodV57_(year,month){
+function cesVanSetCalendarPeriod_(year,month){
   CES_VAN_V55.calendarCursor={year:Number(year),month:Number(month)};
-  cesVanSetTextV55_('van-calendar-period-v57',cesVanMonthNameV57_(month)+' '+year);
+  cesVanSetText_('van-calendar-period-v57',cesVanMonthName_(month)+' '+year);
 }
-function cesVanSyncCalendarFrameV57_(baseUrl,year,month,force){
+function cesVanSyncCalendarFrame_(baseUrl,year,month,force){
   const frame=document.getElementById('van-google-calendar-v55');if(!frame)return;
-  const src=cesVanBuildEmbedUrlV57_(baseUrl||CES_VAN_V55.baseEmbedUrl||frame.dataset.baseSrc||frame.dataset.src,year,month);
+  const src=cesVanBuildEmbedUrl_(baseUrl||CES_VAN_V55.baseEmbedUrl||frame.dataset.baseSrc||frame.dataset.src,year,month);
   frame.dataset.src=src;
-  cesVanSetCalendarPeriodV57_(year,month);
+  cesVanSetCalendarPeriod_(year,month);
   if(force||frame.src!==src){
     frame.src='about:blank';
     window.setTimeout(()=>{frame.src=src;},60);
   }
 }
-function changeVanCalendarMonthV57(delta){
-  const current=cesVanSelectedPeriodV57_();
+function changeVanCalendarMonth(delta){
+  const current=cesVanSelectedPeriod_();
   const date=new Date(current.year,Number(current.month)-1+Number(delta||0),1);
   const year=date.getFullYear(),month=String(date.getMonth()+1).padStart(2,'0');
-  cesVanEnsureYearOptionV57_(year);
+  cesVanEnsureYearOption_(year);
   const yearEl=document.getElementById('van-year-filter-v55'),monthEl=document.getElementById('van-month-filter-v55');
   if(yearEl)yearEl.value=String(year);
   if(monthEl)monthEl.value=month;
   CES_VAN_V55.forceFrameRefresh=true;
-  return loadVanBookingDashboardV55(true);
+  return loadVanBookingDashboard(true);
 }
-function goVanCalendarTodayV57(){
+function goVanCalendarToday(){
   const now=new Date(),year=now.getFullYear(),month=String(now.getMonth()+1).padStart(2,'0');
-  cesVanEnsureYearOptionV57_(year);
+  cesVanEnsureYearOption_(year);
   const yearEl=document.getElementById('van-year-filter-v55'),monthEl=document.getElementById('van-month-filter-v55');
   if(yearEl)yearEl.value=String(year);
   if(monthEl)monthEl.value=month;
   CES_VAN_V55.forceFrameRefresh=true;
-  return loadVanBookingDashboardV55(true);
+  return loadVanBookingDashboard(true);
 }
-function changeVanBookingFilterV57(){
+function changeVanBookingFilter(){
   CES_VAN_V55.forceFrameRefresh=true;
-  return loadVanBookingDashboardV55(true);
+  return loadVanBookingDashboard(true);
 }
-function cesVanRenderSourceWarningV56_(result){
+function cesVanRenderSourceWarning_(result){
   const warning=document.getElementById('van-source-warning-v56');if(!warning)return;
   const message=String(result.sourceWarning||'').trim();
   if(!message){warning.classList.add('hidden');warning.textContent='';return;}
   warning.classList.remove('hidden');
   warning.innerHTML='<i class="fas fa-circle-info mr-2"></i>'+cesBookEsc_(message);
 }
-function cesVanRenderAvailableDatesV56_(dates){
+function cesVanRenderAvailableDates_(dates){
   const root=document.getElementById('van-available-list-v56');
   const list=Array.isArray(dates)?dates:[];
-  cesVanSetTextV55_('van-available-count-v56',`${list.length} dates`);
+  cesVanSetText_('van-available-count-v56',`${list.length} dates`);
   if(!root)return;
   if(!list.length){root.innerHTML='<div class="py-12 text-center text-slate-400"><i class="fas fa-calendar-check text-3xl text-slate-300 mb-3"></i><div class="font-bold">No available weekdays in this period</div></div>';return;}
   root.innerHTML='<div class="overflow-auto rounded-xl border border-slate-200 max-h-[560px]"><table class="w-full min-w-[340px] text-xs text-left"><thead class="sticky top-0 z-10 bg-slate-50 text-[9px] uppercase tracking-wider text-slate-500"><tr><th class="p-3">Date</th><th class="p-3">Day</th><th class="p-3">Status</th></tr></thead><tbody class="divide-y divide-slate-100">'+list.map(item=>`<tr class="hover:bg-emerald-50/40"><td class="p-3 font-black text-slate-700 whitespace-nowrap">${cesBookEsc_(item.dateLabel||item.date||'-')}</td><td class="p-3 text-slate-500">${cesBookEsc_(item.dayLabel||'')}</td><td class="p-3"><span class="inline-flex px-2 py-1 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-100 text-[9px] font-black">Available</span></td></tr>`).join('')+'</tbody></table></div>';
 }
-function renderVanBookingDashboardV55_(result){
+function renderVanBookingDashboard_(result){
   CES_VAN_V55.loaded=true;CES_VAN_V55.events=result.events||[];CES_VAN_V55.availableDates=result.availableDates||[];CES_VAN_V55.summary=result.summary||{};
   const summary=CES_VAN_V55.summary,counts=summary.teamCounts||{};
-  cesVanSetTextV55_('van-kpi-jobs-v55',Number(summary.totalJobs||0).toLocaleString('th-TH'));
-  cesVanSetTextV55_('van-kpi-days-v55',Number(summary.totalDays||0).toLocaleString('th-TH'));
-  cesVanSetTextV55_('van-kpi-cost-v55',cesVanMoneyV55_(summary.totalCost));
-  cesVanSetTextV55_('van-kpi-billing-days-v57',Number(summary.totalBillingDays||0).toLocaleString('th-TH')+' billed date(s)');
-  ['med','lab','ehs','env'].forEach(key=>cesVanSetTextV55_('van-kpi-'+key+'-v55',Number(counts[key.toUpperCase()]||0).toLocaleString('th-TH')));
+  cesVanSetText_('van-kpi-jobs-v55',Number(summary.totalJobs||0).toLocaleString('th-TH'));
+  cesVanSetText_('van-kpi-days-v55',Number(summary.totalDays||0).toLocaleString('th-TH'));
+  cesVanSetText_('van-kpi-cost-v55',cesVanMoney_(summary.totalCost));
+  cesVanSetText_('van-kpi-billing-days-v57',Number(summary.totalBillingDays||0).toLocaleString('th-TH')+' billed date(s)');
+  ['med','lab','ehs','env'].forEach(key=>cesVanSetText_('van-kpi-'+key+'-v55',Number(counts[key.toUpperCase()]||0).toLocaleString('th-TH')));
   const sourceLabel=result.dataSource==='PUBLIC_ICS'?'Public calendar feed':'Apps Script calendar access';
-  cesVanSetTextV55_('van-filter-note-v55',`${result.events.length} events · ${result.month==='ALL'?'All months':result.month+'/'+result.year} · ${result.selectedTeam||'ALL'} · ${sourceLabel} · synced ${result.generatedAt||''}`);
-  cesVanSetTextV55_('van-list-count-v55',`${result.events.length} events`);
-  cesVanRenderSourceWarningV56_(result);
-  cesVanRenderAvailableDatesV56_(result.availableDates||[]);
+  cesVanSetText_('van-filter-note-v55',`${result.events.length} events · ${result.month==='ALL'?'All months':result.month+'/'+result.year} · ${result.selectedTeam||'ALL'} · ${sourceLabel} · synced ${result.generatedAt||''}`);
+  cesVanSetText_('van-list-count-v55',`${result.events.length} events`);
+  cesVanRenderSourceWarning_(result);
+  cesVanRenderAvailableDates_(result.availableDates||[]);
   const root=document.getElementById('van-job-list-v55');if(!root)return;
   if(!result.events.length){root.innerHTML='<div class="py-14 text-center text-slate-400"><i class="fas fa-calendar-xmark text-3xl text-slate-300 mb-3"></i><div class="font-bold">No van bookings in this filter</div></div>';return;}
   root.innerHTML='<div class="overflow-auto rounded-xl border border-slate-200 max-h-[560px]"><table class="w-full min-w-[900px] text-xs text-left"><thead class="sticky top-0 z-10 bg-slate-50 text-[9px] uppercase tracking-wider text-slate-500"><tr><th class="p-3">Date / Time</th><th class="p-3">Team</th><th class="p-3">Booking / Route</th><th class="p-3">Usage / Cost</th><th class="p-3">Details</th></tr></thead><tbody class="divide-y divide-slate-100">'+result.events.map(item=>{
@@ -1539,18 +1536,18 @@ function renderVanBookingDashboardV55_(result){
     const title=cesBookEsc_(item.title||'-');
     const link=item.calendarUrl?`<a href="${cesBookEsc_(item.calendarUrl)}" target="_blank" rel="noopener" class="inline-flex items-center gap-1 text-[#003DA5] font-black mt-2"><i class="fas fa-arrow-up-right-from-square"></i>Open event</a>`:'';
     const billingDays=Number(item.billingDays||item.chargeDays||item.days||0);
-    return `<tr class="hover:bg-slate-50 align-top"><td class="p-3"><b class="whitespace-nowrap text-slate-700">${cesBookEsc_(item.dateLabel||'-')}</b><div class="text-[9px] text-slate-400 mt-1 whitespace-nowrap">${cesBookEsc_(item.timeLabel||'')}</div></td><td class="p-3"><span class="inline-flex px-2 py-1 rounded-full border text-[9px] font-black ${cesVanTeamBadgeV55_(item.team)}">${cesBookEsc_(item.team||'MNG')}</span></td><td class="p-3 min-w-[290px]"><b class="text-slate-800">${title}</b><div class="mt-1 text-slate-500 whitespace-normal leading-relaxed">${cesBookEsc_(route)}</div>${link}</td><td class="p-3"><b>${Number(item.days||0)} calendar day(s)</b><div class="text-[9px] text-slate-400 mt-1">${billingDays} billed date(s): departure / return</div><div class="text-amber-700 font-black mt-1">${cesVanMoneyV55_(item.cost)}</div></td><td class="p-3 min-w-[220px] text-slate-500 leading-relaxed">${details||'-'}</td></tr>`;
+    return `<tr class="hover:bg-slate-50 align-top"><td class="p-3"><b class="whitespace-nowrap text-slate-700">${cesBookEsc_(item.dateLabel||'-')}</b><div class="text-[9px] text-slate-400 mt-1 whitespace-nowrap">${cesBookEsc_(item.timeLabel||'')}</div></td><td class="p-3"><span class="inline-flex px-2 py-1 rounded-full border text-[9px] font-black ${cesVanTeamBadge_(item.team)}">${cesBookEsc_(item.team||'MNG')}</span></td><td class="p-3 min-w-[290px]"><b class="text-slate-800">${title}</b><div class="mt-1 text-slate-500 whitespace-normal leading-relaxed">${cesBookEsc_(route)}</div>${link}</td><td class="p-3"><b>${Number(item.days||0)} calendar day(s)</b><div class="text-[9px] text-slate-400 mt-1">${billingDays} billed date(s): departure / return</div><div class="text-amber-700 font-black mt-1">${cesVanMoney_(item.cost)}</div></td><td class="p-3 min-w-[220px] text-slate-500 leading-relaxed">${details||'-'}</td></tr>`;
   }).join('')+'</tbody></table></div>';
 }
-async function loadVanBookingDashboardV55(force){
-  cesVanInitFiltersV55_();
+async function loadVanBookingDashboard(force){
+  cesVanInitFilters_();
   const requestId=++CES_VAN_V55.requestSeq;
   const year=document.getElementById('van-year-filter-v55')?.value||new Date().getFullYear();
   const month=document.getElementById('van-month-filter-v55')?.value||String(new Date().getMonth()+1).padStart(2,'0');
   const team=document.getElementById('van-team-filter-v55')?.value||'ALL';
   const root=document.getElementById('van-job-list-v55');
   const availableRoot=document.getElementById('van-available-list-v56');
-  cesVanSetTextV55_('van-filter-note-v55','Resyncing calendar data…');
+  cesVanSetText_('van-filter-note-v55','Resyncing calendar data…');
   if(root&&!CES_VAN_V55.loaded)root.innerHTML='<div class="py-14 text-center text-slate-400"><i class="fas fa-circle-notch fa-spin text-xl mb-3"></i><div class="text-xs font-bold">Loading van bookings…</div></div>';
   if(availableRoot&&!CES_VAN_V55.loaded)availableRoot.innerHTML='<div class="py-14 text-center text-slate-400"><i class="fas fa-circle-notch fa-spin text-xl mb-3"></i><div class="text-xs font-bold">Loading available dates…</div></div>';
   const task=(async()=>{
@@ -1558,10 +1555,10 @@ async function loadVanBookingDashboardV55(force){
       const result=await window.CES_API.callFunction('getVanBookingDashboard',[year,month,team,!!force],{transport:'iframe',timeoutMs:120000});
       if(!result||!result.success)throw new Error((result&&result.message)||'Unable to load Van Booking calendar.');
       if(requestId!==CES_VAN_V55.requestSeq)return result;
-      renderVanBookingDashboardV55_(result);
+      renderVanBookingDashboard_(result);
       CES_VAN_V55.baseEmbedUrl=result.embedUrl||CES_VAN_V55.baseEmbedUrl;
-      const period=cesVanSelectedPeriodV57_();
-      cesVanSyncCalendarFrameV57_(CES_VAN_V55.baseEmbedUrl,period.year,period.month,CES_VAN_V55.forceFrameRefresh);
+      const period=cesVanSelectedPeriod_();
+      cesVanSyncCalendarFrame_(CES_VAN_V55.baseEmbedUrl,period.year,period.month,CES_VAN_V55.forceFrameRefresh);
       CES_VAN_V55.forceFrameRefresh=false;
       const open=document.getElementById('van-open-calendar-v55');if(open&&result.openUrl)open.href=result.openUrl;
       const book=document.getElementById('van-book-form-v55');if(book&&result.bookUrl)book.href=result.bookUrl;
@@ -1570,10 +1567,10 @@ async function loadVanBookingDashboardV55(force){
       if(requestId!==CES_VAN_V55.requestSeq)return null;
       CES_VAN_V55.forceFrameRefresh=false;
       const explanation='The embedded Google Calendar uses the signed-in browser account, but Van Job List Details is loaded by the Apps Script deployment account. The patch also tries the public ICS feed; if both sources are unavailable, share the calendar with the deployment account using “See all event details”.';
-      if(root)root.innerHTML=`<div class="py-12 px-5 text-center text-red-500"><i class="fas fa-triangle-exclamation text-3xl mb-3"></i><div class="font-black">Van job details unavailable</div><div class="text-xs mt-2 text-slate-500">${cesBookEsc_(error.message||String(error))}</div><div class="text-[10px] mt-3 text-slate-400">${cesBookEsc_(explanation)}</div><button class="mt-4 px-3 py-2 rounded-xl bg-red-50 text-red-600 font-black text-xs" onclick="loadVanBookingDashboardV55(true)">Retry</button></div>`;
+      if(root)root.innerHTML=`<div class="py-12 px-5 text-center text-red-500"><i class="fas fa-triangle-exclamation text-3xl mb-3"></i><div class="font-black">Van job details unavailable</div><div class="text-xs mt-2 text-slate-500">${cesBookEsc_(error.message||String(error))}</div><div class="text-[10px] mt-3 text-slate-400">${cesBookEsc_(explanation)}</div><button class="mt-4 px-3 py-2 rounded-xl bg-red-50 text-red-600 font-black text-xs" onclick="loadVanBookingDashboard(true)">Retry</button></div>`;
       if(availableRoot)availableRoot.innerHTML='<div class="py-12 text-center text-slate-400"><i class="fas fa-calendar-xmark text-3xl text-slate-300 mb-3"></i><div class="font-bold">Availability cannot be calculated</div></div>';
-      cesVanSetTextV55_('van-list-count-v55','0 events');cesVanSetTextV55_('van-available-count-v56','0 dates');
-      cesVanSetTextV55_('van-filter-note-v55','Resync failed · '+(error.message||String(error)));
+      cesVanSetText_('van-list-count-v55','0 events');cesVanSetText_('van-available-count-v56','0 dates');
+      cesVanSetText_('van-filter-note-v55','Resync failed · '+(error.message||String(error)));
       throw error;
     }finally{
       if(requestId===CES_VAN_V55.requestSeq)CES_VAN_V55.loading=false;
@@ -1601,33 +1598,33 @@ function exportVanBookingExcel(){
 }
 window.exportVanBookingExcel=exportVanBookingExcel;
 
-function initVanBookingCalendarV55(){
-  cesVanInitFiltersV55_();
+function initVanBookingCalendar(){
+  cesVanInitFilters_();
   const frame=document.getElementById('van-google-calendar-v55');
   if(frame){
     frame.dataset.baseSrc=frame.dataset.baseSrc||frame.dataset.src||frame.getAttribute('src')||'';
     CES_VAN_V55.baseEmbedUrl=CES_VAN_V55.baseEmbedUrl||frame.dataset.baseSrc;
   }
-  const period=cesVanSelectedPeriodV57_();
-  cesVanSetCalendarPeriodV57_(period.year,period.month);
-  loadVanBookingDashboardV55(true).catch(function(){});
+  const period=cesVanSelectedPeriod_();
+  cesVanSetCalendarPeriod_(period.year,period.month);
+  loadVanBookingDashboard(true).catch(function(){});
 }
-function refreshVanBookingCalendarV55(button){
+function refreshVanBookingCalendar(button){
   const btn=button||document.getElementById('van-refresh-v55');if(btn){btn.disabled=true;btn.classList.add('animate-spin');}
   CES_VAN_V55.forceFrameRefresh=true;
-  return loadVanBookingDashboardV55(true).catch(function(){return null;}).finally(()=>{if(btn){btn.disabled=false;btn.classList.remove('animate-spin');}});
+  return loadVanBookingDashboard(true).catch(function(){return null;}).finally(()=>{if(btn){btn.disabled=false;btn.classList.remove('animate-spin');}});
 }
-window.initVanBookingCalendarV55=initVanBookingCalendarV55;
-window.refreshVanBookingCalendarV55=refreshVanBookingCalendarV55;
-window.loadVanBookingDashboardV55=loadVanBookingDashboardV55;
-window.changeVanBookingFilterV57=changeVanBookingFilterV57;
-window.changeVanCalendarMonthV57=changeVanCalendarMonthV57;
-window.goVanCalendarTodayV57=goVanCalendarTodayV57;
+window.initVanBookingCalendar=initVanBookingCalendar;
+window.refreshVanBookingCalendar=refreshVanBookingCalendar;
+window.loadVanBookingDashboard=loadVanBookingDashboard;
+window.changeVanBookingFilter=changeVanBookingFilter;
+window.changeVanCalendarMonth=changeVanCalendarMonth;
+window.goVanCalendarToday=goVanCalendarToday;
 
 
 
-async function approveCarBookingWebsiteV185Front(bookingId, decision) {
-  var login = cesBookingCurrentUserV31_();
+async function approveCarBookingWebsiteFront(bookingId, decision) {
+  var login = cesBookingCurrentUser_();
   if (!login || String(login.role || '').toUpperCase() !== 'ADMIN') {
     if (window.Swal) Swal.fire('Permission Denied','Admin permission is required.','error');
     return;
@@ -1650,13 +1647,13 @@ async function approveCarBookingWebsiteV185Front(bookingId, decision) {
   try {
     var result = await window.CES_API.callFunction('approveCarBookingFromWebsite', [{bookingId:bookingId,decision:decision,note:note,actorId:login.id}], {transport:'iframe',timeoutMs:70000,dedupe:false});
     if (!result || result.success === false) throw new Error((result && result.message) || 'Approval failed.');
-    await loadVehicleBookingWorkspaceV31('CAR', true);
+    await loadVehicleBookingWorkspace('CAR', true);
     if (window.Swal) Swal.fire({icon:'success',title:approve?'Booking approved':'Booking rejected',timer:1400,showConfirmButton:false});
   } catch (error) {
     if (window.Swal) Swal.fire({icon:'error',title:'Update failed',text:error.message || String(error)});
   }
 }
-window.approveCarBookingWebsiteV185Front = approveCarBookingWebsiteV185Front;
+window.approveCarBookingWebsiteFront = approveCarBookingWebsiteFront;
 
 
 /* CES Hub V21 — prevent past booking dates */
@@ -1685,14 +1682,14 @@ const CES_CAR_RESUME_SYNC_V63 = {
   minIntervalMs:30000
 };
 
-function cesCarBookingViewVisibleV63_(){
+function cesCarBookingViewVisible_(){
   var view=document.getElementById('view-car_booking');
   if(!view || document.hidden)return false;
   return !view.classList.contains('hidden') && view.offsetParent!==null;
 }
 
-async function cesCarBookingRefreshOnResumeV63_(force){
-  if(!cesCarBookingViewVisibleV63_())return;
+async function cesCarBookingRefreshOnResume_(force){
+  if(!cesCarBookingViewVisible_())return;
   if(CES_CAR_RESUME_SYNC_V63.running)return;
 
   var now=Date.now();
@@ -1700,7 +1697,7 @@ async function cesCarBookingRefreshOnResumeV63_(force){
 
   CES_CAR_RESUME_SYNC_V63.running=true;
   try{
-    await loadVehicleBookingWorkspaceV31('CAR',true,true);
+    await loadVehicleBookingWorkspace('CAR',true,true);
     CES_CAR_RESUME_SYNC_V63.lastSyncAt=Date.now();
   }catch(ignoreRefresh){}
   finally{
@@ -1710,14 +1707,14 @@ async function cesCarBookingRefreshOnResumeV63_(force){
 
 window.addEventListener('focus',function(){
   setTimeout(function(){
-    cesCarBookingRefreshOnResumeV63_(false);
+    cesCarBookingRefreshOnResume_(false);
   },150);
 });
 
 document.addEventListener('visibilitychange',function(){
   if(!document.hidden){
     setTimeout(function(){
-      cesCarBookingRefreshOnResumeV63_(false);
+      cesCarBookingRefreshOnResume_(false);
     },150);
   }
 });
@@ -1726,9 +1723,9 @@ window.addEventListener('ces:tab-changed',function(event){
   var tab=event && event.detail && event.detail.tab;
   if(tab==='car_booking'){
     setTimeout(function(){
-      cesCarBookingRefreshOnResumeV63_(false);
+      cesCarBookingRefreshOnResume_(false);
     },150);
   }
 });
 
-window.cesCarBookingRefreshOnResumeV63_=cesCarBookingRefreshOnResumeV63_;
+window.cesCarBookingRefreshOnResume_=cesCarBookingRefreshOnResume_;

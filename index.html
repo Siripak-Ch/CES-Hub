@@ -291,8 +291,8 @@
 
 
 
-      window.CES_BUILD_HASH = 'CES-HUB-V26.8-PRIORITY-CONCURRENCY-20260818-1413';
-      window.CES_BUILD_VERSION = 'V26.8-PRIORITY-CONCURRENCY';
+      window.CES_BUILD_HASH = 'CES-HUB-V26.9-STABLE-FUNCTIONS-CALENDAR-SYNC-20260818-1448';
+      window.CES_BUILD_VERSION = 'V26.9-STABLE-FUNCTIONS-CALENDAR-SYNC';
 
       // CES_V221_CACHE_MIGRATION: force fresh shell/config/permissions after a release.
       try {
@@ -524,7 +524,7 @@
         ]
       };
 
-      function cesPrepareBootItemV19(item) {
+      function cesPrepareBootItem(item) {
         var copy={};Object.keys(item||{}).forEach(function(key){copy[key]=item[key];});
         copy.optional=copy.optional===true||copy.required===false;copy.url=window.CES_asset(copy.url);return copy;
       }
@@ -532,14 +532,14 @@
       var deferredPromiseV19=null;
       window.CES_loadDeferredModules=function(){
         if(deferredPromiseV19)return deferredPromiseV19;
-        deferredPromiseV19=CESBoot.loadHtml(window.CES_BOOT_MANIFEST.deferredHtml.map(cesPrepareBootItemV19))
-          .then(function(){return CESBoot.loadScripts(window.CES_BOOT_MANIFEST.deferredScripts.map(cesPrepareBootItemV19));})
+        deferredPromiseV19=CESBoot.loadHtml(window.CES_BOOT_MANIFEST.deferredHtml.map(cesPrepareBootItem))
+          .then(function(){return CESBoot.loadScripts(window.CES_BOOT_MANIFEST.deferredScripts.map(cesPrepareBootItem));})
           .then(function(result){try{window.dispatchEvent(new CustomEvent('ces:deferred-ready',{detail:CESBoot.getReport()}));}catch(ignore){}return result;});
         return deferredPromiseV19;
       };
 
-      CESBoot.loadHtml(window.CES_BOOT_MANIFEST.coreHtml.map(cesPrepareBootItemV19))
-        .then(function(){return CESBoot.loadScripts(window.CES_BOOT_MANIFEST.coreScripts.map(cesPrepareBootItemV19));})
+      CESBoot.loadHtml(window.CES_BOOT_MANIFEST.coreHtml.map(cesPrepareBootItem))
+        .then(function(){return CESBoot.loadScripts(window.CES_BOOT_MANIFEST.coreScripts.map(cesPrepareBootItem));})
         .then(function(){
           if(window.CES_BOOT_WATCHDOG)clearTimeout(window.CES_BOOT_WATCHDOG);CES_hideSplash();
           try{window.dispatchEvent(new CustomEvent('ces:app-ready',{detail:CESBoot.getReport()}));}catch(ignore){}

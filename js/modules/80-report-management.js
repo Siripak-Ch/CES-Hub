@@ -21,16 +21,16 @@ const thaiHolidays = [
     let lastRMFormData = null;
 
 
-    function rmErrorMessageV209(value) {
-        if (window.cesSwalMessageV209) return window.cesSwalMessageV209(value);
+    function rmErrorMessage(value) {
+        if (window.cesSwalMessage) return window.cesSwalMessage(value);
         if (value == null) return 'Unexpected report error.';
         if (typeof value === 'string') return value;
         if (value && (value.message || value.error || value.details)) return String(value.message || value.error || value.details);
         try { return JSON.stringify(value); } catch (ignore) { return 'Unexpected report error.'; }
     }
 
-    function rmValidateResultV209(res) {
-        if (!res || res.success === false) throw new Error(rmErrorMessageV209(res));
+    function rmValidateResult(res) {
+        if (!res || res.success === false) throw new Error(rmErrorMessage(res));
         if (!res.templatePDF || !res.timesheetPDF || !Array.isArray(res.tsData)) {
             throw new Error('Report backend returned incomplete output. Please deploy the latest Report Management backend and retry.');
         }
@@ -211,7 +211,7 @@ function fillUserInfoRM() {
                     const mainTeam = document.getElementById('rm-mainTeam'); if (mainTeam) mainTeam.value = "";
                     initReportManage();
                     Swal.fire({ icon: 'success', title: 'Reset Successful', text: 'Data has been cleared.', timer: 2000, showConfirmButton: false, customClass: { popup: 'rounded-3xl' } });
-                }).catch(err => Swal.fire('Error', 'ไม่สามารถล้างข้อมูลใน Sheet ได้: ' + rmErrorMessageV209(err), 'error'));
+                }).catch(err => Swal.fire('Error', 'ไม่สามารถล้างข้อมูลใน Sheet ได้: ' + rmErrorMessage(err), 'error'));
             }
         });
     }
@@ -406,7 +406,7 @@ function fillUserInfoRM() {
             btnText.innerText = "GENERATE & EXPORT REPORT";
             let res;
             try {
-                res = rmValidateResultV209(resRaw);
+                res = rmValidateResult(resRaw);
             } catch (validationError) {
                 throw validationError;
             }
@@ -441,7 +441,7 @@ function fillUserInfoRM() {
             btnText.innerText = "GENERATE & EXPORT REPORT";
             console.error('Report Management:', err);
             if (typeof currentTab === 'undefined' || currentTab === 'report_manage' || currentTab === 'report') {
-                Swal.fire('Error', rmErrorMessageV209(err), 'error');
+                Swal.fire('Error', rmErrorMessage(err), 'error');
             }
         }
     }
@@ -466,7 +466,7 @@ function fillUserInfoRM() {
                     btn.disabled = false; spinner.classList.add('hidden');
                     Swal.fire({ icon: 'success', title: 'Sent!', text: 'Email has been sent to your manager successfully.', customClass: { popup: 'rounded-3xl' } });
                     document.getElementById('rm-sendEmailSection').classList.add('hidden');
-                }).catch(error => { btn.disabled=false; spinner.classList.add('hidden'); Swal.fire('Error', rmErrorMessageV209(error), 'error'); });
+                }).catch(error => { btn.disabled=false; spinner.classList.add('hidden'); Swal.fire('Error', rmErrorMessage(error), 'error'); });
             }
         });
     }

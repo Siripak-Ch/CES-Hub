@@ -205,7 +205,7 @@ function renderOTTable(filteredData) {
   tbody.innerHTML = rows.map(staff => `<tr><td class="font-bold text-slate-700">${escapeOTHtml_(staff.name)}</td><td class="text-center"><span class="ces-team-label ${staff.team.toLowerCase()}">${staff.team}</span></td><td class="text-center font-bold text-slate-600">${staff.totalWork.toFixed(1)}</td><td class="text-center font-black text-[#003DA5]">${formatOTHours_(staff.totalOT)}</td></tr>`).join('');
 }
 
-function ensureApexChartsV18_() {
+function ensureApexCharts_() {
   if (typeof ApexCharts !== 'undefined') return Promise.resolve();
   if (window.CES_OT_APEX_PROMISE) return window.CES_OT_APEX_PROMISE;
   window.CES_OT_APEX_PROMISE = window.CES_loadLib
@@ -216,12 +216,12 @@ function ensureApexChartsV18_() {
 
 function renderCharts(filteredData) {
   if (otChartRetryTimer) clearTimeout(otChartRetryTimer);
-  ensureApexChartsV18_().then(function() { renderChartsReadyV18_(filteredData); }).catch(function(error) {
+  ensureApexCharts_().then(function() { renderChartsReady_(filteredData); }).catch(function(error) {
     console.error('[OT charts]',error);
   });
 }
 
-function renderChartsReadyV18_(filteredData) {
+function renderChartsReady_(filteredData) {
   const teamTotals = {MED:0,LAB:0,EHS:0};
   filteredData.forEach(r => { if (teamTotals[r.team] != null) teamTotals[r.team] += r.otHours; });
   const donutTarget = document.querySelector('#ot-team-chart');

@@ -4,13 +4,13 @@
       <div class="p-3 rounded-2xl shadow-sm bg-white text-[#003DA5] border border-slate-200"><i class="fas fa-address-book text-2xl"></i></div>
       <div><h2 class="text-xl font-extrabold text-slate-800" data-i18n-th="ข้อมูลทีม" data-i18n-en="Team Information">Team Information</h2><p class="text-sm text-slate-400 font-medium" data-i18n-th="รายชื่อทีมและบันทึกชั่วโมงการเรียนรู้ปี 2026" data-i18n-en="Staff directory and 2026 learning-hour records">Staff directory and 2026 learning-hour records</p></div>
     </div>
-    <div class="flex items-center gap-3"><span id="team-info-cache-status" class="text-[10px] font-bold text-slate-400">Cached data</span><button class="ces-header-action-btn ces-action-neutral" onclick="refreshTeamInformationV20()" title="Refresh"><i class="fas fa-rotate-right"></i></button></div>
+    <div class="flex items-center gap-3"><span id="team-info-cache-status" class="text-[10px] font-bold text-slate-400">Cached data</span><button class="ces-header-action-btn ces-action-neutral" onclick="refreshTeamInformation()" title="Refresh"><i class="fas fa-rotate-right"></i></button></div>
   </div>
 
   <div class="bg-white rounded-3xl border border-slate-100 shadow-sm p-3">
     <div class="inline-flex bg-slate-100 rounded-2xl p-1 gap-1">
-      <button id="team-info-directory-tab" class="ces-team-mode active" onclick="switchTeamInfoModeV20('directory')"><i class="fas fa-users"></i><span data-i18n-th="รายชื่อทีม" data-i18n-en="Staff Directory">Staff Directory</span></button>
-      <button id="team-info-training-tab" class="ces-team-mode" onclick="switchTeamInfoModeV20('training')"><i class="fas fa-graduation-cap"></i><span data-i18n-th="บันทึกการอบรม" data-i18n-en="Training Record">Training Record</span></button>
+      <button id="team-info-directory-tab" class="ces-team-mode active" onclick="switchTeamInfoMode('directory')"><i class="fas fa-users"></i><span data-i18n-th="รายชื่อทีม" data-i18n-en="Staff Directory">Staff Directory</span></button>
+      <button id="team-info-training-tab" class="ces-team-mode" onclick="switchTeamInfoMode('training')"><i class="fas fa-graduation-cap"></i><span data-i18n-th="บันทึกการอบรม" data-i18n-en="Training Record">Training Record</span></button>
     </div>
   </div>
 
@@ -32,10 +32,10 @@
         <div class="flex flex-col md:flex-row justify-between gap-3 mb-4">
           <div><h3 class="font-black text-slate-800" data-i18n-th="ภาพรวมชั่วโมงการเรียนรู้ 2026" data-i18n-en="2026 Learning Hours Overview">2026 Learning Hours Overview</h3><p class="text-xs text-slate-400">Target 60 hours · Stored in Staff_Data columns P:AB</p></div>
           <div class="flex flex-wrap gap-2">
-            <button class="ces-training-btn" onclick="openTrainingManualV20()"><i class="fas fa-plus"></i> Manual</button>
+            <button class="ces-training-btn" onclick="openTrainingManual()"><i class="fas fa-plus"></i> Manual</button>
             <button class="ces-training-btn primary" onclick="document.getElementById('training-import-file').click()"><i class="fas fa-file-excel"></i> Import Excel</button>
-            <input id="training-import-file" class="hidden" type="file" accept=".xlsx,.xls" onchange="importTrainingWorkbookV20(this.files[0]);this.value=''">
-            <button class="ces-training-btn" onclick="loadTrainingDashboardV20(true)"><i class="fas fa-rotate"></i> Refresh</button>
+            <input id="training-import-file" class="hidden" type="file" accept=".xlsx,.xls" onchange="importTrainingWorkbook(this.files[0]);this.value=''">
+            <button class="ces-training-btn" onclick="loadTrainingDashboard(true)"><i class="fas fa-rotate"></i> Refresh</button>
           </div>
         </div>
         <div id="training-team-summary" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-3"></div>
@@ -45,7 +45,7 @@
     <div class="bg-white rounded-3xl border border-slate-100 shadow-sm p-5">
       <div class="flex flex-col md:flex-row justify-between gap-3 mb-4">
         <div><h3 class="font-black text-slate-800" data-i18n-th="ความก้าวหน้ารายบุคคล" data-i18n-en="Individual Progress">Individual Progress</h3><p class="text-xs text-slate-400">Senior Manager / Assistant Manager / Manager are shown but excluded from the 60-hour requirement.</p></div>
-        <div class="flex gap-2"><select id="training-team-filter" onchange="renderTrainingDashboardV20()" class="ces-training-select"><option value="ALL">All Teams</option><option>MED</option><option>LAB</option><option>EHS</option><option>ENV</option><option>TES</option><option>QM</option><option>MNG</option><option>SALES</option></select><input id="training-search" oninput="renderTrainingDashboardV20()" class="ces-training-search" placeholder="Search staff"></div>
+        <div class="flex gap-2"><select id="training-team-filter" onchange="renderTrainingDashboard()" class="ces-training-select"><option value="ALL">All Teams</option><option>MED</option><option>LAB</option><option>EHS</option><option>ENV</option><option>TES</option><option>QM</option><option>MNG</option><option>SALES</option></select><input id="training-search" oninput="renderTrainingDashboard()" class="ces-training-search" placeholder="Search staff"></div>
       </div>
       <div id="training-people-list" class="grid grid-cols-1 lg:grid-cols-2 gap-3"><div class="py-12 text-center text-slate-400">Open Training Record to load data.</div></div>
     </div>

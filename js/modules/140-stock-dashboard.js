@@ -75,8 +75,8 @@ function spDownloadJsonAsExcel(rows, name){
 
 function initStockDashboardModule(force=false){
   spEnsureStyle();
-  try{sd_primeRentalWorkflowV263_();}catch(ignorePrimeV263){}
-  setTimeout(function(){try{sd_switchStockTabV260(sessionStorage.getItem('CES_STOCK_TAB_V260')||'dashboard');}catch(e){}},0);
+  try{sd_primeRentalWorkflow_();}catch(ignorePrimeV263){}
+  setTimeout(function(){try{sd_switchStockTab(sessionStorage.getItem('CES_STOCK_TAB_V260')||'dashboard');}catch(e){}},0);
   if (typeof sd_v17Style === 'function') sd_v17Style();
 
   const cacheKey = 'CES_STOCK_DASHBOARD_CACHE_V17';
@@ -92,8 +92,8 @@ function initStockDashboardModule(force=false){
     try { sessionStorage.setItem(cacheKey, JSON.stringify({ts:Date.now(), data:res})); } catch(e) {}
     sd_fillFilters();
     sd_renderAll();
-    try{sd_updateReadyStockBenchmarkV263();}catch(ignoreBenchmarkV263){}
-    setTimeout(()=>{try{sd_loadRentalWorkflowV248(false);}catch(e){}},160);
+    try{sd_updateReadyStockBenchmark();}catch(ignoreBenchmarkV263){}
+    setTimeout(()=>{try{sd_loadRentalWorkflow(false);}catch(e){}},160);
   }
 
   if(!force){
@@ -175,7 +175,7 @@ function sd_exportSummary(){
    CES Stock Pro V8 — ADDITIVE FRONTEND PATCH FROM V6 BASE
    Keeps all V6 functions, overrides dashboard render/action functions only.
 ============================================================ */
-function spEnsureStyleV31(){
+function spEnsureStyle(){
   if(document.getElementById('stockpro-style-v8'))return;
   const style=document.createElement('style');
   style.id='stockpro-style-v8';
@@ -291,7 +291,7 @@ function sd_v11ContractRows(){
   rows.sort((a,b)=>{if(sort==='location')return String(a.location).localeCompare(String(b.location));if(sort==='due_asc')return new Date(a.expectedReturn||'2999-12-31')-new Date(b.expectedReturn||'2999-12-31');if(sort==='due_desc')return new Date(b.expectedReturn||'1900-01-01')-new Date(a.expectedReturn||'1900-01-01');return (b.overdue-a.overdue)||(b.inUse-a.inUse)||(b.total-a.total);});
   return rows;
 }
-function sd_showLocationDetailV11_(location){
+function sd_showLocationDetail_(location){
   const rows=sd_v11FilteredDevices().filter(d=>(d.location||'Unknown')===location);
   const html=`<div class="sp-detail-list-v11">${rows.map(d=>`<div class="sp-detail-item-v11"><div class="sp-detail-icon-v11"><i class="fas fa-microchip"></i></div><div><div class="sp-detail-title">${spEsc(d.idCode||'-')} ${spBadge(d.status)}</div><div class="sp-detail-sub">${spEsc(d.brand||'-')} ${spEsc(d.model||d.itemName||'-')} • SN:${spEsc(d.sn||'-')}</div><div class="sp-detail-sub">Borrower: ${spEsc(d.borrower||'-')} • Due: ${spFmtDate(d.expectedReturn||d.expectedReturnDate)}</div></div><div class="sp-action-group"><button class="sp-icon-btn orange" onclick='sd_bulkExtend([${JSON.stringify(d.idCode)}],"${spEsc(d.expectedReturn||'')}","")'><i class="fas fa-calendar-plus"></i></button><button class="sp-icon-btn green" onclick='sd_bulkReturn([${JSON.stringify(d.idCode)}])'><i class="fas fa-undo"></i></button></div></div>`).join('')}</div>`;
   Swal.fire({title:'รายละเอียด: '+location,width:900,html,confirmButtonText:'Close'});
@@ -538,10 +538,10 @@ function sd_v245ContractRows_(){
   devices.forEach(d=>{const loc=String(d.location||'Unknown'),borrower=String(d.borrower||'-'),due=String(d.expectedReturn||d.expectedReturnDate||''),key=[loc,borrower,due].join('||');if(!map[key])map[key]={key,location:loc,borrower,borrowerEmail:d.borrowerEmail||d.borrower_email||'Siripak.Ch@nhealth-asia.com',dueDate:due,total:0,overdue:0,ids:[]};const x=map[key];x.total++;x.ids.push(d.idCode);if(d.status==='Overdue'||Number(d.overdueDays||0)>0)x.overdue++;});
   return Object.values(map).sort((a,b)=>String(a.dueDate).localeCompare(String(b.dueDate)));
 }
-async function sd_openRentalAlertsSheetV245(){
+async function sd_openRentalAlertsSheet(){
   try{const r=await window.CES_API.callFunction('sd_getRentalAlertsInfo',[],{loadingLabel:'Opening Rental Alerts…'});if(!r||!r.success)throw new Error((r&&r.message)||'Rental Alerts unavailable');window.open(r.sheetUrl,'_blank','noopener');}catch(e){Swal.fire({icon:'error',title:'Rental Alerts',text:e.message||String(e)});}
 }
-async function sd_saveRentalEmailV245(location){
+async function sd_saveRentalEmail(location){
   const el=document.getElementById('sd-v245-borrower-email');const email=String(el&&el.value||'').trim();
   try{const r=await window.CES_API.callFunction('sd_saveRentalBorrowerEmail',[{location,email}],{loadingLabel:'Saving borrower email…'});if(!r||!r.success)throw new Error((r&&r.message)||'Save failed');Swal.fire({icon:'success',title:'Email saved',text:r.email+' · '+r.updated+' active rental row(s)',timer:1600,showConfirmButton:false});if(SD_DASH.raw&&SD_DASH.raw.devices)SD_DASH.raw.devices.filter(d=>String(d.location||'')===String(location)).forEach(d=>{d.borrowerEmail=r.email;d.borrower_email=r.email;});}catch(e){Swal.fire({icon:'error',title:'Save failed',text:e.message||String(e)});}
 }
@@ -581,26 +581,26 @@ function sd_showLocationDetail(location){
     </div>
     <div class="ces-v255-rental-contact-grid">
       <div><span>Borrower</span><b>${spEsc(borrowers.join(', ')||'-')}</b></div>
-      <div><span>Borrower Email / Contract Contact</span><div class="ces-v255-rental-email-edit"><input id="sd-v245-borrower-email" type="email" value="${spEsc(borrowerEmail)}"><button class="sp-btn" onclick='sd_saveRentalEmailV245(${JSON.stringify(location)})'>Save Email</button></div></div>
+      <div><span>Borrower Email / Contract Contact</span><div class="ces-v255-rental-email-edit"><input id="sd-v245-borrower-email" type="email" value="${spEsc(borrowerEmail)}"><button class="sp-btn" onclick='sd_saveRentalEmail(${JSON.stringify(location)})'>Save Email</button></div></div>
     </div>
     <div class="ces-v255-rental-detail-table-wrap">
       <table class="ces-v255-rental-detail-table"><thead><tr><th>#</th><th>ID Code</th><th>SN</th><th>AC Plug SN</th><th>Clamp SN</th><th>Brand / Model</th><th>Borrower</th><th>Borrower Email</th><th>Borrow Date</th><th>Due Date</th><th>Status</th><th>Action Required</th></tr></thead><tbody>${tableRows}</tbody></table>
     </div>`;
   Swal.fire({title:'Rental Contract Detail',width:'min(1460px,98vw)',html,confirmButtonText:'Close',customClass:{popup:'ces-v255-rental-detail-popup'}});
 }
-function sd_openRentalContractAlertPopupV245(){
+function sd_openRentalContractAlertPopup(){
   const rows=sd_v245ContractRows_().filter(r=>{if(!r.dueDate)return false;const due=new Date(r.dueDate+'T00:00:00'),today=new Date();today.setHours(0,0,0,0);if(isNaN(due))return r.overdue>0;const days=Math.round((due-today)/86400000);r.daysToDue=days;return days<=7;});
-  const html=`<div style="text-align:left"><div style="display:flex;justify-content:flex-end;margin-bottom:10px"><button class="sp-btn soft" onclick="sd_openRentalAlertsSheetV245()"><i class="fas fa-table-list"></i> Rental Alerts Sheet</button></div><div class="sp-table-wrap"><table class="sp-table"><thead><tr><th>Contract / Location</th><th>Borrower</th><th>Email</th><th>Due</th><th>Items</th><th>Status</th></tr></thead><tbody>${rows.map(r=>`<tr><td><b>${spEsc(r.location)}</b></td><td>${spEsc(r.borrower)}</td><td>${spEsc(r.borrowerEmail)}</td><td>${spFmtDate(r.dueDate)}</td><td>${spNum(r.total)}</td><td>${r.daysToDue<0?`<span class="sp-chip low">Overdue ${Math.abs(r.daysToDue)}d</span>`:`<span class="sp-chip ok">Due in ${r.daysToDue}d</span>`}</td></tr>`).join('')||'<tr><td colspan="6" class="sp-muted">No contract alert in the next 7 days</td></tr>'}</tbody></table></div></div>`;
+  const html=`<div style="text-align:left"><div style="display:flex;justify-content:flex-end;margin-bottom:10px"><button class="sp-btn soft" onclick="sd_openRentalAlertsSheet()"><i class="fas fa-table-list"></i> Rental Alerts Sheet</button></div><div class="sp-table-wrap"><table class="sp-table"><thead><tr><th>Contract / Location</th><th>Borrower</th><th>Email</th><th>Due</th><th>Items</th><th>Status</th></tr></thead><tbody>${rows.map(r=>`<tr><td><b>${spEsc(r.location)}</b></td><td>${spEsc(r.borrower)}</td><td>${spEsc(r.borrowerEmail)}</td><td>${spFmtDate(r.dueDate)}</td><td>${spNum(r.total)}</td><td>${r.daysToDue<0?`<span class="sp-chip low">Overdue ${Math.abs(r.daysToDue)}d</span>`:`<span class="sp-chip ok">Due in ${r.daysToDue}d</span>`}</td></tr>`).join('')||'<tr><td colspan="6" class="sp-muted">No contract alert in the next 7 days</td></tr>'}</tbody></table></div></div>`;
   Swal.fire({title:'Rental Contract Alerts',width:950,html,confirmButtonText:'Close'});
 }
-window.sd_openRentalAlertsSheetV245=sd_openRentalAlertsSheetV245;window.sd_saveRentalEmailV245=sd_saveRentalEmailV245;window.sd_openRentalContractAlertPopupV245=sd_openRentalContractAlertPopupV245;
+window.sd_openRentalAlertsSheet=sd_openRentalAlertsSheet;window.sd_saveRentalEmail=sd_saveRentalEmail;window.sd_openRentalContractAlertPopup=sd_openRentalContractAlertPopup;
 
 
 /* ============================================================
    CES Stock Pro V24.8 — Rental workflow cards
 ============================================================ */
 const SD_RENTAL_SOURCE_V248='https://docs.google.com/spreadsheets/d/1X7f6BatQ-y5ZW6VYTv2oT34rbsCLeNgac0APt7njFrk/edit?gid=554643121#gid=554643121';
-function sd_rentalStatusClassV248_(s){
+function sd_rentalStatusClass_(s){
   s=String(s||'OPEN').toUpperCase();
   if(s==='COMPLETED')return 'complete';
   if(s==='WAITING_RETURN')return 'return';
@@ -609,7 +609,7 @@ function sd_rentalStatusClassV248_(s){
   if(s==='FOLLOW_UP_SENT')return 'follow';
   return 'open';
 }
-function sd_rentalActionLabelV248_(a){
+function sd_rentalActionLabel_(a){
   a=String(a||'NONE').toUpperCase();
   if(a==='RETURN_REQUESTED')return 'Return requested';
   if(a==='RENEWAL_REQUESTED')return 'Renewal requested';
@@ -620,12 +620,12 @@ const SD_RENTAL_CACHE_KEY_V262='CES_RENTAL_WORKFLOW_CACHE_V262';
 const SD_RENTAL_CACHE_TTL_V262=6*60*60*1000;
 function sd_v262ReadRentalCache_(){try{let raw=localStorage.getItem(SD_RENTAL_CACHE_KEY_V262);if(!raw){raw=sessionStorage.getItem(SD_RENTAL_CACHE_KEY_V262);if(raw)localStorage.setItem(SD_RENTAL_CACHE_KEY_V262,raw);}const x=JSON.parse(raw||'null');return x&&x.data&&(Date.now()-Number(x.ts||0)<SD_RENTAL_CACHE_TTL_V262)?x.data:null;}catch(e){return null;}}
 function sd_v262SaveRentalCache_(data){try{localStorage.setItem(SD_RENTAL_CACHE_KEY_V262,JSON.stringify({ts:Date.now(),data:data}));}catch(e){}}
-function sd_primeRentalWorkflowV263_(){
+function sd_primeRentalWorkflow_(){
   const cached=sd_v262ReadRentalCache_();
-  if(cached&&document.getElementById('sdRentalWorkflowCardsV248')){sd_renderRentalWorkflowV248(cached);return true;}
+  if(cached&&document.getElementById('sdRentalWorkflowCardsV248')){sd_renderRentalWorkflow(cached);return true;}
   return false;
 }
-function sd_readyStockBenchmarkDataV263_(){
+function sd_readyStockBenchmarkData_(){
   // V26.6: read the exact counts attached to the visible Model Cards first.
   // This guarantees Ready Stock Benchmark = the "พร้อมส่ง" number users see.
   const visible=[...document.querySelectorAll('#sdModelCards .sp-model-card[data-ready-stock]')].map(el=>({
@@ -639,36 +639,36 @@ function sd_readyStockBenchmarkDataV263_(){
   const cards=typeof sd_filteredModelCards_==='function'?sd_filteredModelCards_(rows):[];
   return cards.map(x=>{const ready=Number(x.stock||0),minimum=10;return{brand:x.brand||'',model:x.label||'',readyStock:ready,minimum,gap:Math.max(0,minimum-ready),low:ready<minimum};});
 }
-function sd_updateReadyStockBenchmarkV263(){
-  const rows=sd_readyStockBenchmarkDataV263_(),low=rows.filter(x=>x.low).length,badge=document.getElementById('sdReadyStockAlertCountV263'),btn=document.getElementById('sdReadyStockAlertBtnV263');
+function sd_updateReadyStockBenchmark(){
+  const rows=sd_readyStockBenchmarkData_(),low=rows.filter(x=>x.low).length,badge=document.getElementById('sdReadyStockAlertCountV263'),btn=document.getElementById('sdReadyStockAlertBtnV263');
   if(badge)badge.textContent=String(low);if(btn){btn.classList.toggle('has-alert',low>0);btn.title=low?`${low} model(s) below minimum ready stock 10`:'All models meet minimum ready stock 10';}
   return rows;
 }
-function sd_openReadyStockBenchmarkV263(){
-  const rows=sd_updateReadyStockBenchmarkV263();
+function sd_openReadyStockBenchmark(){
+  const rows=sd_updateReadyStockBenchmark();
   if(!rows.length){Swal.fire('Ready Stock Benchmark','No model data available.','info');return;}
   const html=`<div class="ces-ready-stock-popup-v263"><div class="ces-ready-stock-note-v263"><b>Benchmark:</b> minimum <b>10 ready-to-deliver units per model</b><br><span>Email summary is scheduled to ADMIN every 2 weeks.</span></div><div class="sp-table-wrap"><table class="sp-table"><thead><tr><th>Model</th><th>Ready Stock</th><th>Minimum</th><th>Gap</th><th>Status</th></tr></thead><tbody>${rows.map(r=>`<tr><td><b>${spEsc(r.brand)}</b><span class="sp-sub">${spEsc(r.model)}</span></td><td><b>${spNum(r.readyStock)}</b></td><td>${r.minimum}</td><td>${r.gap?`<b style="color:#dc2626">-${r.gap}</b>`:'0'}</td><td>${r.low?'<span class="sp-chip low">LOW STOCK</span>':'<span class="sp-chip ok">OK</span>'}</td></tr>`).join('')}</tbody></table></div></div>`;
   Swal.fire({title:'Ready Stock Benchmark',html,width:'min(760px,96vw)',confirmButtonText:'Close',confirmButtonColor:'#003DA5',animation:false});
 }
-window.sd_openReadyStockBenchmarkV263=sd_openReadyStockBenchmarkV263;
-window.sd_updateReadyStockBenchmarkV263=sd_updateReadyStockBenchmarkV263;
+window.sd_openReadyStockBenchmark=sd_openReadyStockBenchmark;
+window.sd_updateReadyStockBenchmark=sd_updateReadyStockBenchmark;
 
-async function sd_testRentalNotificationV266(){
+async function sd_testRentalNotification(){
   try{
-    const r=await window.CES_API.callFunction('sd_sendRentalNotificationTestV266',[],{transport:'iframe',timeoutMs:90000,priority:'user',userAction:true,loadingLabel:'Sending rental test mail…'});
+    const r=await window.CES_API.callFunction('sd_sendRentalNotificationTest',[],{transport:'iframe',timeoutMs:90000,priority:'user',userAction:true,loadingLabel:'Sending rental test mail…'});
     if(!r||r.success===false)throw new Error((r&&r.message)||'Rental test mail failed.');
     const sent=Number(r.sent||r.emailsSent||((r.test&&r.to)?1:0));const recipient=r.recipient||r.to||'';
     Swal.fire({icon:'success',title:'Rental Test Mail',html:`Test complete.<br><b>${sent}</b> email(s) sent.${recipient?`<br>${spEsc(recipient)}`:''}`});
   }catch(e){Swal.fire({icon:'error',title:'Rental Test Mail',text:e.message||String(e)});}
 }
-window.sd_testRentalNotificationV266=sd_testRentalNotificationV266;
+window.sd_testRentalNotification=sd_testRentalNotification;
 function sd_v262Summary_(cards){cards=cards||[];const open=cards.filter(x=>String(x.workflowStatus||'').toUpperCase()!=='COMPLETED').length;return{total:cards.length,open:open,completed:cards.length-open,followupSent:cards.filter(x=>String(x.workflowStatus||'').toUpperCase()==='FOLLOW_UP_SENT').length,waitingReturn:cards.filter(x=>String(x.workflowStatus||'').toUpperCase()==='WAITING_RETURN').length,waitingRenewal:cards.filter(x=>String(x.workflowStatus||'').toUpperCase()==='WAITING_RENEWAL').length};}
 function sd_v262IndexDevices_(){const map={};((SD_DASH.raw&&SD_DASH.raw.devices)||[]).forEach(d=>{const due=sd_v260IsoDate_(d.expectedReturn||d.expectedReturnDate||d.dueDate||''),k=[String(d.location||''),String(d.borrower||''),due].join('||');(map[k]||(map[k]=[])).push(d);});return map;}
-function sd_rentalDueLabelV260_(days){
+function sd_rentalDueLabel_(days){
   days=Number(days||0);
   return days<0?`Overdue ${Math.abs(days)}d`:`Due in ${days}d`;
 }
-function sd_renderRentalWorkflowV248(data){
+function sd_renderRentalWorkflow(data){
   const wrap=document.getElementById('sdRentalWorkflowCardsV248'),sum=document.getElementById('sdRentalWorkflowSummaryV248');
   if(!wrap)return;
   const cards=(data&&data.cards)||[],sm=(data&&data.summary)||{};
@@ -679,15 +679,15 @@ function sd_renderRentalWorkflowV248(data){
   wrap.innerHTML=`<div class="sp-table-wrap ces-rental-follow-table-wrap-v261"><table class="sp-table ces-rental-follow-table-v261"><thead><tr><th>Status</th><th>Contract / Borrower</th><th>Due</th><th>Items</th><th>Last Email</th><th>Follow-up Action</th><th>Detail</th></tr></thead><tbody>${cards.map((c,index)=>{
     const days=Number(c.daysToDue||0),status=String(c.workflowStatus||'OPEN').toUpperCase(),mail=String(c.borrowerEmail||'').trim(),closed=status==='COMPLETED';
     const key=encodeURIComponent(c.contractKey||'');
-    const actions=closed?'<span class="ces-rental-closed-v261"><i class="fas fa-circle-check"></i> Closed</span>':`<div class="ces-rental-actions-v261"><button type="button" class="ces-rental-action-v261 follow" onclick="sd_updateRentalWorkflowV248('${key}','FOLLOW_UP_SENT',false)" title="Send follow-up email"><i class="fas fa-paper-plane"></i><span>Follow</span></button><button type="button" class="ces-rental-action-v261 return" onclick="sd_updateRentalWorkflowV248('${key}','WAITING_RETURN',false)" title="Set Return status"><i class="fas fa-rotate-left"></i><span>Return</span></button><button type="button" class="ces-rental-action-v261 renew" onclick="sd_updateRentalWorkflowV248('${key}','WAITING_RENEWAL',false)" title="Set Renewal status"><i class="fas fa-calendar-plus"></i><span>Renew</span></button><button type="button" class="ces-rental-action-v261 complete" onclick="sd_updateRentalWorkflowV248('${key}','COMPLETED',false)" title="Complete follow-up"><i class="fas fa-check"></i><span>Complete</span></button></div>`;
-    return `<tr class="ces-rental-row-v261 ${sd_rentalStatusClassV248_(status)}">
-      <td><span class="ces-rental-status-v260 ${sd_rentalStatusClassV248_(status)}">${spEsc(status.replaceAll('_',' '))}</span></td>
+    const actions=closed?'<span class="ces-rental-closed-v261"><i class="fas fa-circle-check"></i> Closed</span>':`<div class="ces-rental-actions-v261"><button type="button" class="ces-rental-action-v261 follow" onclick="sd_updateRentalWorkflow('${key}','FOLLOW_UP_SENT',false)" title="Send follow-up email"><i class="fas fa-paper-plane"></i><span>Follow</span></button><button type="button" class="ces-rental-action-v261 return" onclick="sd_updateRentalWorkflow('${key}','WAITING_RETURN',false)" title="Set Return status"><i class="fas fa-rotate-left"></i><span>Return</span></button><button type="button" class="ces-rental-action-v261 renew" onclick="sd_updateRentalWorkflow('${key}','WAITING_RENEWAL',false)" title="Set Renewal status"><i class="fas fa-calendar-plus"></i><span>Renew</span></button><button type="button" class="ces-rental-action-v261 complete" onclick="sd_updateRentalWorkflow('${key}','COMPLETED',false)" title="Complete follow-up"><i class="fas fa-check"></i><span>Complete</span></button></div>`;
+    return `<tr class="ces-rental-row-v261 ${sd_rentalStatusClass_(status)}">
+      <td><span class="ces-rental-status-v260 ${sd_rentalStatusClass_(status)}">${spEsc(status.replaceAll('_',' '))}</span></td>
       <td><b>${spEsc(c.location||'-')}</b><span class="sp-sub">${spEsc(c.borrower||'-')}${mail?' · '+spEsc(mail):''}</span></td>
-      <td><b class="${days<0?'ces-rental-over-v260':''}">${spEsc(c.dueDate||'-')}</b><span class="sp-sub ${days<0?'ces-rental-over-v260':''}">${spEsc(sd_rentalDueLabelV260_(days))}</span></td>
+      <td><b class="${days<0?'ces-rental-over-v260':''}">${spEsc(c.dueDate||'-')}</b><span class="sp-sub ${days<0?'ces-rental-over-v260':''}">${spEsc(sd_rentalDueLabel_(days))}</span></td>
       <td>${spNum(c.itemCount||0)}</td>
       <td>${spEsc(c.lastEmailType||'Not sent')}<span class="sp-sub">${spEsc(c.lastEmailAt||c.alertStatus||'-')}</span></td>
       <td>${actions}</td>
-      <td><button type="button" class="sp-btn soft ces-rental-view-btn-v260" onclick="sd_openRentalWorkflowDetailV260(${index})"><i class="fas fa-eye"></i> View</button></td>
+      <td><button type="button" class="sp-btn soft ces-rental-view-btn-v260" onclick="sd_openRentalWorkflowDetail(${index})"><i class="fas fa-eye"></i> View</button></td>
     </tr>`;
   }).join('')}</tbody></table></div>`;
 }
@@ -696,7 +696,7 @@ function sd_v260IsoDate_(value){
   const m=text.match(/^(\d{4})-(\d{2})-(\d{2})/);if(m)return `${m[1]}-${m[2]}-${m[3]}`;
   const d=new Date(text);if(isNaN(d))return text.slice(0,10);return d.toISOString().slice(0,10);
 }
-function sd_openRentalWorkflowDetailV260(index){
+function sd_openRentalWorkflowDetail(index){
   const c=(SD_RENTAL_WORKFLOW_V260.cards||[])[Number(index)];
   if(!c){Swal.fire('Rental Contract','Contract record not found.','info');return;}
   const targetDue=sd_v260IsoDate_(c.dueDate),targetLocation=String(c.location||''),targetBorrower=String(c.borrower||'');
@@ -705,36 +705,36 @@ function sd_openRentalWorkflowDetailV260(index){
   const rows=devices.map((d,i)=>`<tr><td>${i+1}</td><td><b>${spEsc(d.idCode||d.id_code||'-')}</b></td><td>${spEsc(d.sn||d.serialNumber||'-')}</td><td>${spEsc(d.acPlugSn||d.ac_plug_sn||'-')}</td><td>${spEsc(d.clampSn||d.clamp_sn||'-')}</td><td>${spEsc(d.brand||'-')}<span class="sp-sub">${spEsc(d.model||d.itemName||'-')}</span></td><td>${spEsc(d.status||'-')}</td><td>${spEsc(d.actionRequired||d.action_required||'-')}</td></tr>`).join('');
   const status=String(c.workflowStatus||'OPEN').toUpperCase(),canComplete=status!=='COMPLETED';
   const html=`<div class="ces-rental-v260-detail">
-    <div class="ces-rental-v260-detail-grid"><div><small>LOCATION</small><b>${spEsc(c.location||'-')}</b></div><div><small>BORROWER</small><b>${spEsc(c.borrower||'-')}</b></div><div><small>BORROWER EMAIL</small><b>${c.borrowerEmail?`<a href="mailto:${spEsc(c.borrowerEmail)}">${spEsc(c.borrowerEmail)}</a>`:'-'}</b></div><div><small>DUE DATE</small><b>${spEsc(c.dueDate||'-')}</b></div><div><small>ITEMS</small><b>${spNum(c.itemCount||devices.length||0)}</b></div><div><small>STATUS</small><b>${spEsc(status.replaceAll('_',' '))}</b></div><div><small>BORROWER ACTION</small><b>${spEsc(sd_rentalActionLabelV248_(c.borrowerAction))}</b></div><div><small>LAST EMAIL</small><b>${spEsc(c.lastEmailType||'Not sent')} ${c.lastEmailAt?'· '+spEsc(c.lastEmailAt):''}</b></div></div>
+    <div class="ces-rental-v260-detail-grid"><div><small>LOCATION</small><b>${spEsc(c.location||'-')}</b></div><div><small>BORROWER</small><b>${spEsc(c.borrower||'-')}</b></div><div><small>BORROWER EMAIL</small><b>${c.borrowerEmail?`<a href="mailto:${spEsc(c.borrowerEmail)}">${spEsc(c.borrowerEmail)}</a>`:'-'}</b></div><div><small>DUE DATE</small><b>${spEsc(c.dueDate||'-')}</b></div><div><small>ITEMS</small><b>${spNum(c.itemCount||devices.length||0)}</b></div><div><small>STATUS</small><b>${spEsc(status.replaceAll('_',' '))}</b></div><div><small>BORROWER ACTION</small><b>${spEsc(sd_rentalActionLabel_(c.borrowerAction))}</b></div><div><small>LAST EMAIL</small><b>${spEsc(c.lastEmailType||'Not sent')} ${c.lastEmailAt?'· '+spEsc(c.lastEmailAt):''}</b></div></div>
     ${c.newRenewalDate||c.renewalName||c.renewalEmail?`<div class="ces-renewal-summary-v262"><div><small>RENEWAL REQUESTED</small><b>${spEsc(c.renewalRequestedAt||'-')}</b></div><div><small>NEW RENEWAL DATE</small><b>${spEsc(c.newRenewalDate||'-')}</b></div><div><small>CONTACT NAME</small><b>${spEsc(c.renewalName||'-')}</b></div><div><small>EMAIL</small><b>${spEsc(c.renewalEmail||'-')}</b></div></div>`:''}
     ${c.lastError?`<div class="ces-rental-v260-error">${spEsc(c.lastError)}</div>`:''}
     <div class="sp-table-wrap ces-rental-v260-device-wrap"><table class="sp-table"><thead><tr><th>#</th><th>ID Code</th><th>SN</th><th>AC Plug SN</th><th>Clamp SN</th><th>Brand / Model</th><th>Status</th><th>Action Required</th></tr></thead><tbody>${rows||'<tr><td colspan="8" class="sp-muted">No item-level rows matched this contract key.</td></tr>'}</tbody></table></div>
-    <div class="ces-rental-v260-detail-actions">${canComplete?`<button class="sp-btn primary" onclick="sd_updateRentalWorkflowV248('${encodeURIComponent(c.contractKey||'')}','FOLLOW_UP_SENT',true)"><i class="fas fa-paper-plane"></i> Send Follow-up</button><button class="sp-btn warn" onclick="sd_updateRentalWorkflowV248('${encodeURIComponent(c.contractKey||'')}','WAITING_RETURN',true)"><i class="fas fa-rotate-left"></i> Return</button><button class="sp-btn success" onclick="sd_updateRentalWorkflowV248('${encodeURIComponent(c.contractKey||'')}','WAITING_RENEWAL',true)"><i class="fas fa-calendar-plus"></i> Renewal</button><button class="sp-btn dark" onclick="sd_updateRentalWorkflowV248('${encodeURIComponent(c.contractKey||'')}','COMPLETED',true)"><i class="fas fa-check"></i> Complete</button>`:'<span class="sp-chip ok"><i class="fas fa-check"></i> Closed</span>'}<a class="sp-btn ghost" href="${SD_RENTAL_SOURCE_V248}" target="_blank" rel="noopener"><i class="fas fa-link"></i> Source</a></div>
+    <div class="ces-rental-v260-detail-actions">${canComplete?`<button class="sp-btn primary" onclick="sd_updateRentalWorkflow('${encodeURIComponent(c.contractKey||'')}','FOLLOW_UP_SENT',true)"><i class="fas fa-paper-plane"></i> Send Follow-up</button><button class="sp-btn warn" onclick="sd_updateRentalWorkflow('${encodeURIComponent(c.contractKey||'')}','WAITING_RETURN',true)"><i class="fas fa-rotate-left"></i> Return</button><button class="sp-btn success" onclick="sd_updateRentalWorkflow('${encodeURIComponent(c.contractKey||'')}','WAITING_RENEWAL',true)"><i class="fas fa-calendar-plus"></i> Renewal</button><button class="sp-btn dark" onclick="sd_updateRentalWorkflow('${encodeURIComponent(c.contractKey||'')}','COMPLETED',true)"><i class="fas fa-check"></i> Complete</button>`:'<span class="sp-chip ok"><i class="fas fa-check"></i> Closed</span>'}<a class="sp-btn ghost" href="${SD_RENTAL_SOURCE_V248}" target="_blank" rel="noopener"><i class="fas fa-link"></i> Source</a></div>
   </div>`;
   Swal.fire({title:'Rental Contract Follow-up Detail',width:'min(1220px,97vw)',html,confirmButtonText:'Close',animation:false,customClass:{popup:'ces-rental-v260-detail-popup'}});
 }
-function sd_switchStockTabV260(tab){
+function sd_switchStockTab(tab){
   tab=String(tab||'dashboard').toLowerCase();
   const isContract=tab==='contract';
   const dash=document.getElementById('sdDashboardPanelV260'),contract=document.getElementById('sdContractPanelV260');
   const dashBtn=document.getElementById('sdTabDashboardV260'),contractBtn=document.getElementById('sdTabContractV260');
   if(dash)dash.classList.toggle('hidden',isContract);if(contract)contract.classList.toggle('hidden',!isContract);
   if(dashBtn)dashBtn.classList.toggle('active',!isContract);if(contractBtn)contractBtn.classList.toggle('active',isContract);
-  if(isContract){try{sd_renderContractSummary();}catch(e){};sd_loadRentalWorkflowV248(false).catch(()=>{});}
+  if(isContract){try{sd_renderContractSummary();}catch(e){};sd_loadRentalWorkflow(false).catch(()=>{});}
   try{sessionStorage.setItem('CES_STOCK_TAB_V260',isContract?'contract':'dashboard');}catch(e){}
 }
-async function sd_loadRentalWorkflowV248(force=false){
+async function sd_loadRentalWorkflow(force=false){
   const wrap=document.getElementById('sdRentalWorkflowCardsV248');if(!wrap)return;
-  if(!force){const cached=sd_v262ReadRentalCache_();if(cached){sd_renderRentalWorkflowV248(cached);return cached;}}
+  if(!force){const cached=sd_v262ReadRentalCache_();if(cached){sd_renderRentalWorkflow(cached);return cached;}}
   if(force)wrap.insertAdjacentHTML('afterbegin','<div id="sdRentalSyncNoteV262" class="ces-rental-sync-note-v262"><i class="fas fa-rotate fa-spin"></i> Syncing latest contracts…</div>');
   try{
     const r=await window.CES_API.callFunction('sd_getRentalWorkflowCards',[force===true],{priority:force?'user':'background',background:!force,dedupe:true});
     if(!r||!r.success)throw new Error((r&&r.message)||'Rental workflow unavailable');
-    sd_renderRentalWorkflowV248(r);return r;
+    sd_renderRentalWorkflow(r);return r;
   }catch(e){if(!SD_RENTAL_WORKFLOW_V260.cards.length)wrap.innerHTML=`<div class="sp-muted">Rental workflow unavailable: ${spEsc(e.message||String(e))}</div>`;throw e;
   }finally{const n=document.getElementById('sdRentalSyncNoteV262');if(n)n.remove();}
 }
-async function sd_updateRentalWorkflowV248(contractKey,status,closePopup){
+async function sd_updateRentalWorkflow(contractKey,status,closePopup){
   try{contractKey=decodeURIComponent(String(contractKey||''));}catch(ignore){}
   status=String(status||'IN_PROGRESS').toUpperCase();
   const card=(SD_RENTAL_WORKFLOW_V260.cards||[]).find(x=>String(x.contractKey||'')===contractKey)||{};
@@ -755,13 +755,13 @@ async function sd_updateRentalWorkflowV248(contractKey,status,closePopup){
     const idx=(SD_RENTAL_WORKFLOW_V260.cards||[]).findIndex(x=>String(x.contractKey||'')===contractKey);
     if(idx>=0&&r.card)SD_RENTAL_WORKFLOW_V260.cards[idx]=Object.assign({},SD_RENTAL_WORKFLOW_V260.cards[idx],r.card);
     const data={success:true,cards:(SD_RENTAL_WORKFLOW_V260.cards||[]).slice(),summary:sd_v262Summary_(SD_RENTAL_WORKFLOW_V260.cards||[]),sourceSheetUrl:SD_RENTAL_SOURCE_V248};
-    sd_renderRentalWorkflowV248(data);try{sd_renderContractSummary();}catch(ignore){}
+    sd_renderRentalWorkflow(data);try{sd_renderContractSummary();}catch(ignore){}
     if(closePopup&&typeof Swal!=='undefined'&&Swal.isVisible())Swal.close();else if(status==='FOLLOW_UP_SENT')Swal.fire({icon:'success',title:'Follow-up sent',timer:1100,showConfirmButton:false,animation:false});
   }catch(e){Swal.fire({icon:'error',title:'Rental workflow',text:e.message||String(e),animation:false});}
   finally{if(button&&button.isConnected){button.disabled=false;button.innerHTML=oldHtml;}}
 }
 
-window.sd_loadRentalWorkflowV248=sd_loadRentalWorkflowV248;
-window.sd_updateRentalWorkflowV248=sd_updateRentalWorkflowV248;
-window.sd_openRentalWorkflowDetailV260=sd_openRentalWorkflowDetailV260;
-window.sd_switchStockTabV260=sd_switchStockTabV260;
+window.sd_loadRentalWorkflow=sd_loadRentalWorkflow;
+window.sd_updateRentalWorkflow=sd_updateRentalWorkflow;
+window.sd_openRentalWorkflowDetail=sd_openRentalWorkflowDetail;
+window.sd_switchStockTab=sd_switchStockTab;

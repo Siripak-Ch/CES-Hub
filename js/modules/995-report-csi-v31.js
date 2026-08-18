@@ -113,7 +113,7 @@
     return normalized;
   }
 
-  function loadReportCSIOnlyV31(force, showLoading) {
+  function loadReportCSIData_(force, showLoading) {
     force = force === true;
     showLoading = showLoading === true;
     var cached = cacheRead();
@@ -141,10 +141,10 @@
 
   function patchReportControls() {
     var input = id('reportFileInput');
-    if (input) input.setAttribute('onchange', 'handleReportUploadV31(event)');
+    if (input) input.setAttribute('onchange', 'handleReportUpload(event)');
     var refresh = document.querySelector('#view-report button[title="Refresh Data"],#view-report button[title="Refresh Report CSI"]');
     if (refresh) {
-      refresh.setAttribute('onclick', 'loadReportCSIOnlyV31(true,true)');
+      refresh.setAttribute('onclick', 'loadReportCSIOnly(true,true)');
       refresh.setAttribute('title', 'Refresh Report CSI');
     }
   }
@@ -154,8 +154,12 @@
     patchReportControls();
   }
 
-  window.loadReportCSIOnlyV31 = loadReportCSIOnlyV31;
-  window.loadReportCSIOnly = function (showLoading) { return loadReportCSIOnlyV31(true, !!showLoading); };
+  window.loadReportCSIOnly = function (forceOrLoading, showLoading) {
+    // Stable public function; preserve the previous one-argument API where the argument
+    // controlled only the loading overlay and the data request was always a refresh.
+    if (arguments.length >= 2) return loadReportCSIData_(forceOrLoading === true, showLoading === true);
+    return loadReportCSIData_(true, forceOrLoading === true);
+  };
 
   apply();
   setTimeout(apply, 100);
@@ -173,7 +177,7 @@
     window.switchTab.__cesV31Wrapped = true;
   }
 
-  window.CES_REPORT_V31_API_TEST = function () {
+  window.CES_REPORT_API_TEST = function () {
     return apiHealth().then(function (result) {
       console.log('[CES Report V31 API Test] connected', result);
       return { ok:true, result:result, apiUrl:configuredApiUrl() };
@@ -184,7 +188,7 @@
     });
   };
 
-  window.CES_REPORT_UI_V31_RECHECK = function () {
+  window.CES_REPORT_UI_RECHECK = function () {
     var icons = Array.prototype.slice.call(document.querySelectorAll('.ces-page-header-icon-v31'));
     var notWhite = icons.filter(function (node) {
       return getComputedStyle(node).backgroundColor !== 'rgb(255, 255, 255)';
@@ -197,7 +201,7 @@
       uploadHandler:input ? input.getAttribute('onchange') : '',
       apiUrl:configuredApiUrl(),
       endpoint:'saveReportDataArray',
-      uploadHandlerReady:typeof window.handleReportUploadV31 === 'function',
+      uploadHandlerReady:typeof window.handleReportUpload === 'function',
       refreshPending:!!refreshPromise
     };
     console.log('[CES Report V31 Recheck]', result);

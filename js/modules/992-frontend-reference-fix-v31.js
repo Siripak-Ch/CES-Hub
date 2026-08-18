@@ -286,17 +286,17 @@
     window.switchTab.__cesV31Wrapped = true;
   }
 
-  window.CES_FRONTEND_V31_RECHECK = function () {
+  window.CES_FRONTEND_RECHECK = function () {
     var envSample = [];
     try {
-      var envResult = typeof window.kpiEnvWorkflowV31Recheck === 'function' ? window.kpiEnvWorkflowV31Recheck() : null;
+      var envResult = typeof window.kpiEnvWorkflowRecheck === 'function' ? window.kpiEnvWorkflowRecheck() : null;
       envSample = envResult && Array.isArray(envResult.sample) ? envResult.sample : [];
     } catch (e) {}
     var badEnv = envSample.filter(function (r) { return !r.currentStatus || r.currentStatus === 'รอเริ่มงาน'; });
     var actionGroups = Array.from(document.querySelectorAll('#view-inventory .csv5-actions'));
     var out = {
       version: 'V31',
-      systemRuntimeCompleted: !!window.CESUI && typeof window.kpiEnvWorkflowV31Recheck === 'function',
+      systemRuntimeCompleted: !!window.CESUI && typeof window.kpiEnvWorkflowRecheck === 'function',
       stockRuntimeLoaded: typeof window.CES_STOCK_RECHECK === 'function' && typeof window.initStockDashboardModule === 'function',
       envWorkflowSample: envSample.map(function(r){return r.currentStatus;}),
       envRowsWithWrongStartStatus: badEnv.length,
@@ -310,7 +310,7 @@
   };
 })(window, document);
 
-  function cesFixSidebarSelectionV186_(){
+  function cesFixSidebarSelection_(){
     var tab=String(window.currentTab||document.body.getAttribute('data-ces-active-tab')||'portal').toLowerCase();
     if(tab==='home')tab='portal';
     document.querySelectorAll('.nav-item').forEach(function(btn){
@@ -321,5 +321,5 @@
       if(active)btn.setAttribute('aria-current','page');else btn.removeAttribute('aria-current');
     });
   }
-  window.addEventListener('ces:tab-changed',cesFixSidebarSelectionV186_);
-  document.addEventListener('DOMContentLoaded',function(){setTimeout(cesFixSidebarSelectionV186_,120);});
+  window.addEventListener('ces:tab-changed',cesFixSidebarSelection_);
+  document.addEventListener('DOMContentLoaded',function(){setTimeout(cesFixSidebarSelection_,120);});

@@ -20,163 +20,73 @@
   const JSONP_URL_LIMIT = 6500;
   let seq = 0;
   const inflightReads = new Map();
+  let activeUserRequestsV262 = 0;
+  let activeNormalRequestsV266 = 0;
+  let activeBackgroundRequestsV266 = 0;
+  let lastUserInteractionV262 = 0;
+  const backgroundQueueV262 = [];
+  const normalQueueV266 = [];
+  const MAX_NORMAL_REQUESTS_V266 = 2;
+  const MAX_BACKGROUND_REQUESTS_V266 = 1;
+  try{['click','submit','change'].forEach(function(evt){document.addEventListener(evt,function(){lastUserInteractionV262=Date.now();},true);});}catch(ignore){}
 
-  // V26.8 foreground scheduler
-  // - active/current tab is always preferred
-  // - user writes and direct actions run before passive reads
-  // - queued reads at the same priority are LIFO (latest call first); writes stay FIFO
-  // - background work stays throttled so it cannot crowd out interactive work
-  const requestQueueV268 = [];
-  let schedulerSeqV268 = 0;
-  let activeUserRequestsV268 = 0;
-  let activeNormalRequestsV268 = 0;
-  let activeBackgroundRequestsV268 = 0;
-  let activeWriteRequestsV268 = 0;
-  let lastUserInteractionV268 = 0;
-  const MAX_USER_REQUESTS_V268 = 3;
-  const MAX_NORMAL_REQUESTS_V268 = 1;
-  const MAX_BACKGROUND_REQUESTS_V268 = 1;
-  const MAX_TOTAL_REQUESTS_V268 = 4;
-  const MAX_LOCAL_WRITES_V268 = 1; // Per browser only; different users remain concurrent.
-
-  try {
-    ['click','submit','change','input','keydown'].forEach(function (evt) {
-      document.addEventListener(evt, function () { lastUserInteractionV268 = Date.now(); }, true);
+  function startNormal_(job){
+    activeNormalRequestsV266 += 1;
+    Promise.resolve().then(job.factory).then(job.resolve,job.reject).finally(function(){
+      activeNormalRequestsV266=Math.max(0,activeNormalRequestsV266-1);
+      flushBackground_();
     });
-  } catch (ignore) {}
-
-  function getActiveTabV268_() {
-    try {
-      return String(
-        window.currentTab || window.CES_ACTIVE_TAB ||
-        (document.body && (document.body.getAttribute('data-ces-active-tab') || document.body.dataset.cesTab)) ||
-        ''
-      ).trim().toLowerCase();
-    } catch (ignore) { return ''; }
   }
-
-  function schedulerTotalActiveV268_() {
-    return activeUserRequestsV268 + activeNormalRequestsV268 + activeBackgroundRequestsV268;
+  function startBackground_(job){
+    activeBackgroundRequestsV266 += 1;
+    Promise.resolve().then(job.factory).then(job.resolve,job.reject).finally(function(){
+      activeBackgroundRequestsV266=Math.max(0,activeBackgroundRequestsV266-1);
+      flushBackground_();
+    });
   }
-
-  function schedulerPriorityV268_(options, writeLike, ownerTab) {
-    options = options || {};
-    const explicit = String(options.priority || '').toLowerCase();
-    if (explicit === 'user' || explicit === 'normal' || explicit === 'background') return explicit;
-    const activeTab = getActiveTabV268_();
-    const recentUserAction = (Date.now() - lastUserInteractionV268) < 1500;
-    if (writeLike || options.userAction === true || recentUserAction || (ownerTab && activeTab && ownerTab === activeTab && options.background !== true)) return 'user';
-    return options.background === true ? 'background' : 'normal';
-  }
-
-  function schedulerScoreV268_(job) {
-    const activeTab = getActiveTabV268_();
-    let score = job.priority === 'user' ? 3000 : (job.priority === 'normal' ? 2000 : 1000);
-    if (job.ownerTab && activeTab && job.ownerTab === activeTab) score += 600;
-    if (job.writeLike) score += 150;
-    return score;
-  }
-
-  function schedulerCanStartV268_(job) {
-    if (schedulerTotalActiveV268_() >= MAX_TOTAL_REQUESTS_V268) return false;
-    // Keep mutations ordered inside one browser session. This does not serialize
-    // different users because every client has its own scheduler instance.
-    if (job.writeLike && activeWriteRequestsV268 >= MAX_LOCAL_WRITES_V268) return false;
-    if (job.priority === 'user') return activeUserRequestsV268 < MAX_USER_REQUESTS_V268;
-    if (job.priority === 'normal') {
-      if (requestQueueV268.some(function (q) { return q.priority === 'user'; })) return false;
-      return activeNormalRequestsV268 < MAX_NORMAL_REQUESTS_V268;
+  function flushBackground_(){
+    // A click/save/import on the active page always gets the next free slot.
+    if(activeUserRequestsV262>0)return;
+    while(normalQueueV266.length && activeNormalRequestsV266<MAX_NORMAL_REQUESTS_V266){
+      startNormal_(normalQueueV266.shift());
     }
-    if (requestQueueV268.some(function (q) { return q.priority !== 'background'; })) return false;
-    if (activeUserRequestsV268 > 0 || activeNormalRequestsV268 > 0) return false;
-    return activeBackgroundRequestsV268 < MAX_BACKGROUND_REQUESTS_V268;
-  }
-
-  function schedulerStartV268_(job) {
-    if (job.writeLike) activeWriteRequestsV268 += 1;
-    if (job.priority === 'user') activeUserRequestsV268 += 1;
-    else if (job.priority === 'normal') activeNormalRequestsV268 += 1;
-    else activeBackgroundRequestsV268 += 1;
-
-    Promise.resolve().then(job.factory).then(job.resolve, job.reject).finally(function () {
-      if (job.writeLike) activeWriteRequestsV268 = Math.max(0, activeWriteRequestsV268 - 1);
-      if (job.priority === 'user') activeUserRequestsV268 = Math.max(0, activeUserRequestsV268 - 1);
-      else if (job.priority === 'normal') activeNormalRequestsV268 = Math.max(0, activeNormalRequestsV268 - 1);
-      else activeBackgroundRequestsV268 = Math.max(0, activeBackgroundRequestsV268 - 1);
-      flushRequestQueueV268_();
-    });
-  }
-
-  function flushRequestQueueV268_() {
-    let progressed = true;
-    while (progressed && requestQueueV268.length && schedulerTotalActiveV268_() < MAX_TOTAL_REQUESTS_V268) {
-      progressed = false;
-      requestQueueV268.sort(function (a, b) {
-        var scoreDiff = schedulerScoreV268_(b) - schedulerScoreV268_(a);
-        if (scoreDiff) return scoreDiff;
-        // Reads use latest-first so the page the user just opened wins.
-        // Writes keep FIFO order to avoid reversing consecutive saves from the same UI.
-        if (a.writeLike && b.writeLike) return a.seq - b.seq;
-        return b.seq - a.seq;
-      });
-      for (let i = 0; i < requestQueueV268.length; i += 1) {
-        if (!schedulerCanStartV268_(requestQueueV268[i])) continue;
-        const job = requestQueueV268.splice(i, 1)[0];
-        schedulerStartV268_(job);
-        progressed = true;
-        break;
-      }
+    // Background work is deliberately single-flight. This prevents a page from
+    // launching 10–20 simultaneous sheet reads while the user is trying to act.
+    if(activeNormalRequestsV266===0 && activeBackgroundRequestsV266<MAX_BACKGROUND_REQUESTS_V266 && backgroundQueueV262.length){
+      startBackground_(backgroundQueueV262.shift());
     }
   }
-
-  function scheduleRequestV268_(factory, options, writeLike) {
-    options = options || {};
-    const ownerTab = String(options.tab || options.ownerTab || getActiveTabV268_() || '').trim().toLowerCase();
-    const priority = schedulerPriorityV268_(options, writeLike, ownerTab);
-    return new Promise(function (resolve, reject) {
-      requestQueueV268.push({
-        factory: factory,
-        resolve: resolve,
-        reject: reject,
-        writeLike: !!writeLike,
-        ownerTab: ownerTab,
-        priority: priority,
-        seq: ++schedulerSeqV268,
-        queuedAt: Date.now()
-      });
-      flushRequestQueueV268_();
-    });
+  function queuedPromise_(queue,factory){
+    return new Promise(function(resolve,reject){queue.push({factory:factory,resolve:resolve,reject:reject});flushBackground_();});
   }
-
-  try {
-    window.addEventListener('ces:tab-changed', function () { flushRequestQueueV268_(); });
-    document.addEventListener('visibilitychange', function () { flushRequestQueueV268_(); });
-  } catch (ignore) {}
-
-  window.CES_TASK_PRIORITY = {
-    stats: function () {
-      return {
-        version:'V26.8',
-        activeTab:getActiveTabV268_(),
-        user:activeUserRequestsV268,
-        normal:activeNormalRequestsV268,
-        background:activeBackgroundRequestsV268,
-        writes:activeWriteRequestsV268,
-        queued:requestQueueV268.length,
-        queuedUser:requestQueueV268.filter(function(q){return q.priority==='user';}).length,
-        queuedNormal:requestQueueV268.filter(function(q){return q.priority==='normal';}).length,
-        queuedBackground:requestQueueV268.filter(function(q){return q.priority==='background';}).length
-      };
-    },
-    flush: flushRequestQueueV268_,
-    version:'V26.8'
+  function scheduleRequest_(factory, options, writeLike){
+    options=options||{};
+    const recentUserAction=(Date.now()-lastUserInteractionV262)<1200;
+    const priority=options.priority||((writeLike||options.userAction||recentUserAction)?'user':(options.background?'background':'normal'));
+    if(priority==='user'){
+      activeUserRequestsV262++;
+      return Promise.resolve().then(factory).finally(function(){activeUserRequestsV262=Math.max(0,activeUserRequestsV262-1);flushBackground_();});
+    }
+    if(priority==='background')return queuedPromise_(backgroundQueueV262,factory);
+    if(activeUserRequestsV262>0 || activeNormalRequestsV266>=MAX_NORMAL_REQUESTS_V266)return queuedPromise_(normalQueueV266,factory);
+    activeNormalRequestsV266++;
+    return Promise.resolve().then(factory).finally(function(){activeNormalRequestsV266=Math.max(0,activeNormalRequestsV266-1);flushBackground_();});
+  }
+  window.CES_TASK_PRIORITY_V266={
+    stats:function(){return{user:activeUserRequestsV262,normal:activeNormalRequestsV266,background:activeBackgroundRequestsV266,normalQueued:normalQueueV266.length,backgroundQueued:backgroundQueueV262.length};},
+    version:'V26.6'
   };
   let writeLoadingCount = 0;
+  let writeLoadingTimer = null;
+  let loadingShowDelayTimer = null;
+  let loadingWatchdogTimer = null;
 
   // V24.7 — routine API activity is non-blocking.
   // No modal, no grey backdrop, no page lock. CES_UI renders the thin top
   // progress bar + header Syncing status and each feature may still disable
   // its own submit button when duplicate submission would be unsafe.
+  function ensureWriteLoadingUi() { return null; }
+
   function shouldShowWriteLoading(fnName, options) {
     if (options && (options.silentLoading === true || options.globalLoading === false)) return false;
     return !/^(?:recordUserLastUsage|recordPortalUsage|recordPortalEventView|logCesAiQuestion)$/i.test(String(fnName || ''));
@@ -476,7 +386,7 @@
 
     const testUrl = buildJsonpUrl(fnName, args || [], 'x');
 
-    // LINE ID tokens are credentials. Never put them in a JSONP/GET URL,
+    // V23.8: LINE ID tokens are credentials. Never put them in a JSONP/GET URL,
     // browser history, proxy log or referrer. Force POST + async polling.
     if (/^(?:verifyLineIdToken|checkUserByLineToken|updateStaffLineDataByToken)$/i.test(String(fnName || ''))) {
       return true;
@@ -515,14 +425,14 @@
       : '';
     if (key && inflightReads.has(key)) return inflightReads.get(key);
 
-    // V26.8: queued calls do not inflate the header "Syncing N requests" count.
+    // V26.6: queued background/normal calls do not inflate the header "Syncing N requests" count.
     // Loading begins only when the request actually gets a scheduler slot.
     const requestFactory = function(){
       const loadingTicket = beginWriteLoading(fnName, Object.assign({}, options, { loadingLabel:(options&&options.loadingLabel)||(writeLike?undefined:'Loading data…') }));
       const actual = transport === 'iframe' ? iframePostCall(fnName, args, options) : jsonpCall(fnName, args, options);
       return Promise.resolve(actual).finally(function(){ endWriteLoading(loadingTicket); });
     };
-    const request = scheduleRequestV268_(requestFactory, options, writeLike);
+    const request = scheduleRequest_(requestFactory, options, writeLike);
     const wrapped = Promise.resolve(request);
     if (!key) return wrapped;
 
@@ -713,5 +623,5 @@
     } catch (ignore) {}
   }, 2500);
 
-  console.log('[CES Hub] gas-polyfill.js loaded: V26.8 active-tab priority + concurrent transport');
+  console.log('[CES Hub] gas-polyfill.js loaded: V26.2 user-action priority + adaptive transport');
 })();

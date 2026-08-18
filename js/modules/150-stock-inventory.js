@@ -28,7 +28,7 @@ function si_exportCurrent(){spDownloadJsonAsExcel(SI.tab==='equip'?SI.filtered:S
 
 
 
-function siEnsureStyleV31(){
+function siEnsureStyle(){
   if(document.getElementById('stockpro-inventory-style-v8'))return;
   const style=document.createElement('style');style.id='stockpro-inventory-style-v8';style.textContent=`
     .sp-acc-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:14px}.sp-acc-card{border-radius:18px;border:1px solid #e8eef6;background:#fff;padding:16px;box-shadow:0 4px 16px rgba(30,58,138,.06)}.sp-acc-head{display:flex;align-items:center;gap:12px;margin-bottom:12px}.sp-acc-icon{width:44px;height:44px;border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:18px}.sp-team-med{background:#dbeafe;color:#1d4ed8}.sp-team-lab{background:#e0f2fe;color:#0284c7}.sp-team-ehs{background:#ccfbf1;color:#0f766e}.sp-team-general{background:#f1f5f9;color:#64748b}.sp-acc-title{font-weight:1000;color:#0f172a;line-height:1.25}.sp-acc-meta{font-size:11px;color:#64748b;margin-top:2px}.sp-acc-stock{font-size:30px;font-weight:1000;line-height:1.1;margin-top:8px}.sp-acc-actions{display:grid;grid-template-columns:72px 1fr auto;gap:8px;margin-top:12px}.sp-acc-actions input{border:1px solid #dbe3ef;border-radius:10px;text-align:center;font-weight:900;padding:8px}.cart-item{display:flex;align-items:center;justify-content:space-between;gap:12px;border:1px solid #dbeafe;background:#f8fbff;border-radius:14px;padding:12px;margin-bottom:10px}.sp-cart-summary{display:grid;grid-template-columns:1fr 1fr;gap:8px}.sp-cart-summary>div{background:#f8fafc;border:1px solid #e8eef6;border-radius:12px;padding:10px}.sp-cart-summary b{display:block;font-size:11px;color:#64748b}.sp-cart-summary span{font-size:16px;font-weight:1000;color:#0f172a}.sp-action-group{display:flex;gap:6px;align-items:center;justify-content:center;flex-wrap:wrap}.sp-icon-btn{width:34px;height:34px;border-radius:10px;border:1px solid #dbeafe;background:#eff6ff;color:#2563eb;display:inline-flex;align-items:center;justify-content:center;cursor:pointer;font-weight:900}.sp-icon-btn.green{background:#ecfdf5;border-color:#a7f3d0;color:#059669}.sp-icon-btn.red{background:#fef2f2;border-color:#fecaca;color:#dc2626}.sp-icon-btn.gray{background:#f8fafc;border-color:#e2e8f0;color:#475569}.sp-icon-btn.orange{background:#fff7ed;border-color:#fed7aa;color:#ea580c}@media(max-width:780px){.sp-acc-grid{grid-template-columns:1fr}.sp-acc-actions{grid-template-columns:70px 1fr}.sp-acc-actions .sp-btn.warn{grid-column:1/-1}.sp-cart-summary{grid-template-columns:1fr}}
@@ -1307,7 +1307,7 @@ if(!window.__siV31ApplyFilterPatch){
       Swal.close();
       if(!res || !res.success){ Swal.fire('Alert Error',(res&&res.message)||'Cannot load alerts','error'); return; }
       const pending=res.pending||[], low=res.lowStock||[], due=res.checkDue||[], soon=res.checkSoon||[];
-      window.siAlertTabLegacyV31=function(tab){
+      window.siAlertTabLegacy=function(tab){
         document.querySelectorAll('.si-v31-tabs button').forEach(b=>b.classList.remove('active'));
         const btn=document.getElementById('siV31Tab_'+tab); if(btn) btn.classList.add('active');
         const body=document.getElementById('siV31AlertBody'); if(!body) return;
@@ -1316,7 +1316,7 @@ if(!window.__siV31ApplyFilterPatch){
         else if(tab==='soon') body.innerHTML=renderAlertTable(soon,'soon');
         else body.innerHTML=renderAlertTable(due,'due');
       };
-      const html=`<div class="si-v31-note">Alert แสดงแบบ table เพื่อลด DOM/card จำนวนมากและทำงานเร็วขึ้น</div><div class="si-v31-tabs"><button id="siV31Tab_due" class="active" onclick="siAlertTabLegacyV31('due')"><i class="fas fa-calendar-times"></i> Check Due (${due.length})</button><button id="siV31Tab_low" onclick="siAlertTabLegacyV31('low')"><i class="fas fa-battery-quarter"></i> Restock / Low (${low.length})</button><button id="siV31Tab_pending" onclick="siAlertTabLegacyV31('pending')"><i class="fas fa-clock"></i> Pending (${pending.length})</button><button id="siV31Tab_soon" onclick="siAlertTabLegacyV31('soon')"><i class="fas fa-hourglass-half"></i> Due Soon (${soon.length})</button></div><div id="siV31AlertBody">${renderAlertTable(due,'due')}</div>`;
+      const html=`<div class="si-v31-note">Alert แสดงแบบ table เพื่อลด DOM/card จำนวนมากและทำงานเร็วขึ้น</div><div class="si-v31-tabs"><button id="siV31Tab_due" class="active" onclick="siAlertTabLegacy('due')"><i class="fas fa-calendar-times"></i> Check Due (${due.length})</button><button id="siV31Tab_low" onclick="siAlertTabLegacy('low')"><i class="fas fa-battery-quarter"></i> Restock / Low (${low.length})</button><button id="siV31Tab_pending" onclick="siAlertTabLegacy('pending')"><i class="fas fa-clock"></i> Pending (${pending.length})</button><button id="siV31Tab_soon" onclick="siAlertTabLegacy('soon')"><i class="fas fa-hourglass-half"></i> Due Soon (${soon.length})</button></div><div id="siV31AlertBody">${renderAlertTable(due,'due')}</div>`;
       Swal.fire({title:'Accessories Alerts',width:1180,html,confirmButtonText:'Close'});
       setHtml('siLowStockHeaderCount', due.length+low.length+pending.length);
     }).withFailureHandler(err=>Swal.fire('Alert Error',err.message||String(err),'error')).si_getAccessoryStockAlerts({limit:300});
@@ -1520,7 +1520,7 @@ if(!window.__siV31ApplyFilterPatch){
     const action = alerts.actionRequired || [];
     const pending = alerts.pending || [];
     const soon = alerts.checkSoon || [];
-    window.siAlertTabV31 = function(tab){
+    window.siAlertTab = function(tab){
       document.querySelectorAll('.si-v32-tabs button').forEach(b=>b.classList.remove('active'));
       const btn=document.getElementById('siV32Tab_'+tab); if(btn) btn.classList.add('active');
       const body=document.getElementById('siV32AlertBody'); if(!body) return;
@@ -1528,7 +1528,7 @@ if(!window.__siV31ApplyFilterPatch){
       else if(tab==='soon') body.innerHTML=renderActionTable(soon,'soon');
       else body.innerHTML=renderActionTable(action,'action');
     };
-    const html=`<div class="si-v32-note">รวม Check due + Restock/Low ไว้ในแท็บเดียว ลดความซ้ำซ้อน และเลือกหลายรายการเพื่อ Recheck พร้อมกันได้</div><div class="si-v32-tabs"><button id="siV32Tab_action" class="active" onclick="siAlertTabV31('action')"><i class="fas fa-triangle-exclamation"></i> Action Required (${action.length})</button><button id="siV32Tab_pending" onclick="siAlertTabV31('pending')"><i class="fas fa-clock"></i> Pending Approval (${pending.length})</button><button id="siV32Tab_soon" onclick="siAlertTabV31('soon')"><i class="fas fa-hourglass-half"></i> Due Soon (${soon.length})</button></div><div id="siV32AlertBody">${renderActionTable(action,'action')}</div>`;
+    const html=`<div class="si-v32-note">รวม Check due + Restock/Low ไว้ในแท็บเดียว ลดความซ้ำซ้อน และเลือกหลายรายการเพื่อ Recheck พร้อมกันได้</div><div class="si-v32-tabs"><button id="siV32Tab_action" class="active" onclick="siAlertTab('action')"><i class="fas fa-triangle-exclamation"></i> Action Required (${action.length})</button><button id="siV32Tab_pending" onclick="siAlertTab('pending')"><i class="fas fa-clock"></i> Pending Approval (${pending.length})</button><button id="siV32Tab_soon" onclick="siAlertTab('soon')"><i class="fas fa-hourglass-half"></i> Due Soon (${soon.length})</button></div><div id="siV32AlertBody">${renderActionTable(action,'action')}</div>`;
     Swal.fire({title:'Accessories Alerts',width:1200,html,confirmButtonText:'Close'});
     setHtml('siLowStockHeaderCount', action.length + pending.length);
   }

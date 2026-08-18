@@ -15,8 +15,8 @@
 <button class="ces-segmented-btn" id="btn-rteam-EHS" onclick="setRFilter('team','EHS')">EHS</button>
 </div>
 <button class="ces-standard-icon-btn ces-external-link-btn" type="button" onclick="cesOpenExternalLink('REPORT_CSI_SUMMARY')" title="Open Report CSI Formbricks Summary"><i class="fas fa-link"></i></button>
-<button class="ces-header-action-btn ces-action-neutral" onclick="loadReportCSIOnlyV31(true,true)" title="Refresh Report CSI"><i class="fas fa-sync-alt"></i></button>
-<label class="ces-standard-icon-btn ces-upload-icon-btn cursor-pointer" title="Upload CSI Data"><i class="fas fa-arrow-up-from-bracket"></i><input accept=".xlsx" class="hidden" id="reportFileInput" onchange="handleReportUploadV31(event)" type="file"/></label>
+<button class="ces-header-action-btn ces-action-neutral" onclick="loadReportCSIOnly(true,true)" title="Refresh Report CSI"><i class="fas fa-sync-alt"></i></button>
+<label class="ces-standard-icon-btn ces-upload-icon-btn cursor-pointer" title="Upload CSI Data"><i class="fas fa-arrow-up-from-bracket"></i><input accept=".xlsx" class="hidden" id="reportFileInput" onchange="handleReportUpload(event)" type="file"/></label>
 <button class="ces-header-action-btn ces-action-excel" onclick="exportCSIToExcel()" title="Export to Excel"><i class="fas fa-file-excel"></i></button>
 <button class="ces-header-action-btn ces-action-pdf" onclick="exportReportToPDF()" title="Export Page to PDF"><i class="fas fa-file-pdf"></i></button>
 </div>

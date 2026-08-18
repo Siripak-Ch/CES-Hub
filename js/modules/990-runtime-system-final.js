@@ -422,7 +422,7 @@
       .getServiceDataOnly();
   };
 
-  window.serviceReloadDataV31 = function () { return window.loadServiceCSIOnly(true); };
+  window.serviceReloadData = function () { return window.loadServiceCSIOnly(true); };
 
   function patchServiceButtons() {
     const view = document.getElementById('view-service');
@@ -696,20 +696,20 @@
     if (!window.Swal || window.Swal.__cesThemePatched) return;
 
     const originalFire = window.Swal.fire.bind(window.Swal);
-    function cesSwalMessageV209(value) {
+    function cesSwalMessage(value) {
       if (value == null) return '';
       if (typeof value === 'string' || typeof value === 'number' || typeof value === 'boolean') return String(value);
       if (value instanceof Error) return value.message || String(value);
       if (typeof value === 'object') {
         const msg = value.message || value.error || value.details || value.reason || (value.response && (value.response.message || value.response.error));
-        if (msg) return cesSwalMessageV209(msg);
+        if (msg) return cesSwalMessage(msg);
         try { return JSON.stringify(value, null, 2); } catch (_) { return 'Unexpected system error.'; }
       }
       return String(value);
     }
-    window.cesSwalMessageV209 = cesSwalMessageV209;
+    window.cesSwalMessage = cesSwalMessage;
     window.Swal.fire = function patchedCesSwalFire(...args) {
-      if (args.length > 1 && args[1] && typeof args[1] === 'object') args[1] = cesSwalMessageV209(args[1]);
+      if (args.length > 1 && args[1] && typeof args[1] === 'object') args[1] = cesSwalMessage(args[1]);
       if (args.length === 1 && args[0] && typeof args[0] === 'object') {
         args[0] = Object.assign({
           buttonsStyling: true,
@@ -1683,7 +1683,7 @@
     if (modal) modal.classList.remove('hidden');
   };
 
-  window.kpiEnvWorkflowV31Recheck = function () {
+  window.kpiEnvWorkflowRecheck = function () {
     var sample = [
       { workflowType:'ENV', rawStatus:{ sup:'', rep:'' } },
       { workflowType:'ENV', rawStatus:{ sup:'กำลังตรวจ', rep:'' } },
@@ -2365,7 +2365,7 @@
     } catch(e) {}
   }
 
-  function ensureCalendarTeamUiV39(){
+  function ensureCalendarTeamUi(){
     var buttons = [
       {key:'ENV', after:'EHS'},
       {key:'TES', after:'ENV'},
@@ -2386,12 +2386,11 @@
     var mgtNode = qs('#stat-mgt');
     if(mgtNode){ var mgtCard = mgtNode.closest('.kpi-card'); if(mgtCard) mgtCard.remove(); }
   }
-  function ensureCalendarTeamUiV37(){ return ensureCalendarTeamUiV39(); }
 
   // Compatibility alias retained for older runtime diagnostics.
-  function ensureCalendarTESCard(){ return ensureCalendarTeamUiV37(); }
+  function ensureCalendarTESCard(){ return ensureCalendarTeamUi(); }
 
-  function calendarSourceTeamV37_(value){
+  function calendarNormalizeSourceTeam_(value){
     var t = text(value).trim().toUpperCase();
     if(t === 'MANAGEMENT' || t === 'MNG') return 'MGT';
     if(t.indexOf('MED') >= 0) return 'MED';
@@ -2402,23 +2401,23 @@
     if(t.indexOf('MGT') >= 0 || t.indexOf('MANAG') >= 0) return 'MGT';
     return t;
   }
-  function calendarSourceTeamV39_(item){
+  function calendarSourceTeam_(item){
     var calendarId = text(item && item.calendarId).trim().toLowerCase();
     if(calendarId === 'chiraphat.env@gmail.com') return 'ENV';
     if(calendarId === 'natkanok.8942@gmail.com') return 'EHS';
-    if(calendarId === 'bmecalibration@gmail.com' || calendarId === 'cescalmedteam@gmail.com') return 'MED';
+    if(calendarId === 'cescalmedteam@gmail.com') return 'MED';
     if(calendarId === 'nhealthcallab@gmail.com') return 'LAB';
     if(calendarId === 'technicalsupport.tes@gmail.com') return 'TES';
     if(calendarId === 'cesmanagement2026@gmail.com') return 'MGT';
-    return calendarSourceTeamV37_(item && item.team);
+    return calendarNormalizeSourceTeam_(item && item.team);
   }
-  function calendarCapacityTeamV37_(item, sourceTeam){
-    return sourceTeam || calendarSourceTeamV39_(item);
+  function calendarCapacityTeam_(item, sourceTeam){
+    return sourceTeam || calendarSourceTeam_(item);
   }
-  function calendarUiMatchesV37_(current, sourceTeam){
+  function calendarUiMatches_(current, sourceTeam){
     return current === 'ALL' || current === sourceTeam;
   }
-  function calendarDateV37_(value){
+  function calendarDate_(value){
     var raw = text(value).trim();
     var p = raw.split('/');
     if(p.length >= 3) return new Date(Number(p[2]), Number(p[1])-1, Number(p[0]));
@@ -2427,7 +2426,7 @@
   }
 
   function processCalendarDataFinal(data, targetM, targetY){
-    ensureCalendarTeamUiV37();
+    ensureCalendarTeamUi();
     data = Array.isArray(data) ? data : [];
     var current = (typeof currentService !== 'undefined') ? currentService : 'ALL';
     var teamKeys = ['MED','LAB','EHS','ENV','TES','MGT'];
@@ -2438,19 +2437,17 @@
       var itemM = parseInt(item.month,10), itemY = parseInt(item.year,10);
       if(itemM !== targetM || itemY !== targetY) return;
       var title = text(item.title);
-      var sourceTeam = calendarSourceTeamV39_(item);
+      var sourceTeam = calendarSourceTeam_(item);
       if(teamKeys.indexOf(sourceTeam) < 0) return;
-      var capacityTeam = calendarCapacityTeamV37_(item, sourceTeam);
-      var d = calendarDateV37_(item.date);
-      var isWeekend = !isNaN(d.getTime()) && (d.getDay()===0 || d.getDay()===6);
+      var capacityTeam = calendarCapacityTeam_(item, sourceTeam);
       var isLeave = (typeof checkIsLeaveEvent === 'function') ? checkIsLeaveEvent(title) : /leave|off|ลา|หยุด|ป่วย/i.test(title);
-      if(isLeave){ if(calendarUiMatchesV37_(current, sourceTeam)) leave.push(Object.assign({}, item, {team:sourceTeam})); return; }
+      if(isLeave){ if(calendarUiMatches_(current, sourceTeam)) leave.push(Object.assign({}, item, {team:sourceTeam})); return; }
       if(!title) return;
-      var shouldCount = !(capacityTeam === 'MED' && isWeekend);
-      if(shouldCount && man.hasOwnProperty(capacityTeam)) man[capacityTeam] += 1;
+      // Count every scheduled non-leave work day, including weekend work.
+      if(man.hasOwnProperty(capacityTeam)) man[capacityTeam] += 1;
       var key = item.uniqueKey || [sourceTeam,item.date,title].join('|');
       sets[sourceTeam].add(key);
-      if(calendarUiMatchesV37_(current, sourceTeam)) jobs.push(Object.assign({}, item, {team:sourceTeam, capacityTeam:capacityTeam}));
+      if(calendarUiMatches_(current, sourceTeam)) jobs.push(Object.assign({}, item, {team:sourceTeam, capacityTeam:capacityTeam}));
     });
     var total = ['MED','LAB','EHS','ENV','TES'].reduce(function(a,t){ return a + sets[t].size; }, 0);
     var el;
@@ -2489,7 +2486,7 @@
   try { if(typeof window.processCalendarData !== 'function') window.processCalendarData = processCalendarDataFinal; if(typeof window.renderCapacityBars !== 'function') window.renderCapacityBars = renderCapacityBarsFinal; } catch(e) {}
 
   function patchCalendarAndTracker(){
-    injectFinalCss(); ensureCalendarTeamUiV39();
+    injectFinalCss(); ensureCalendarTeamUi();
     if(typeof updateCalendarUI === 'function') { try { updateCalendarUI(); } catch(e){} }
   }
 
@@ -3074,7 +3071,7 @@
 })(window, document);
 
 // CES Hub V20.9 — critical module static/runtime smoke check.
-window.CES_MODULES_V209_RECHECK = function CES_MODULES_V209_RECHECK() {
+window.CES_MODULES_RECHECK = function CES_MODULES_RECHECK() {
   var checks = {
     reportManagement: typeof window.initReportManage === 'function' && !!document.getElementById('view-report_manage'),
     checkin: typeof window.initCheckin === 'function' && !!document.getElementById('view-checkin'),

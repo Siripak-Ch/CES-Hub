@@ -3276,10 +3276,24 @@ textarea.ces-detail-input-v243{min-height:58px;resize:vertical;margin-bottom:9px
   color:#64748b!important;border:1px solid #cbd5e1!important;box-shadow:none!important;
 }
 #view-stock_dashboard .ces-ready-stock-alert-v263{
-  background:#fef3c7!important;color:#a16207!important;border:1px solid #fbbf24!important;
-  box-shadow:0 0 0 2px rgba(245,158,11,.08)!important;
+  background:#f59e0b!important;color:#ffffff!important;border:1px solid #d97706!important;
+  box-shadow:none!important;opacity:1!important;
 }
-#view-stock_dashboard .ces-ready-stock-alert-v263:hover{background:#fde68a!important;color:#92400e!important}
+#view-stock_dashboard .ces-ready-stock-alert-v263:hover{background:#d97706!important;color:#ffffff!important}
+#view-stock_dashboard .stockpro-actions .ces-action-neutral,
+#view-stock_dashboard .stockpro-actions .sp-btn.ghost,
+#view-stock_dashboard .stockpro-actions a.sp-btn.ghost{
+  background:#f1f5f9!important;color:#64748b!important;border:1px solid #cbd5e1!important;box-shadow:none!important;
+}
+#view-stock_dashboard .stockpro-actions .ces-action-neutral:hover,
+#view-stock_dashboard .stockpro-actions .sp-btn.ghost:hover,
+#view-stock_dashboard .stockpro-actions a.sp-btn.ghost:hover{
+  background:#e2e8f0!important;color:#334155!important;
+}
+#view-stock_dashboard .stockpro-actions .ces-ready-stock-alert-v263,
+#view-stock_dashboard .stockpro-actions .ces-ready-stock-alert-v263:hover{
+  color:#ffffff!important;
+}
 @media(max-width:900px){
   #view-stock_dashboard .csv5-dashboard-filters{grid-template-columns:repeat(2,minmax(0,1fr))!important}
 }

@@ -34,7 +34,7 @@ let _userCache = null;
         { id:'health',name:'System Health',group:'System',icon:'fa-heart-pulse' }
     ];
 
-    function getPermissionModulesV228() {
+    function getPermissionModules() {
         const byId = new Map(ALL_MODULES.map(m => [m.id, Object.assign({}, m)]));
         const ordered = [];
         const seen = new Set();
@@ -54,7 +54,7 @@ let _userCache = null;
         ALL_MODULES.forEach(m => { if (!seen.has(m.id)) ordered.push(Object.assign({},m)); });
         return ordered;
     }
-    window.CES_PERMISSION_MODULES_V228 = getPermissionModulesV228;
+    window.CES_PERMISSION_MODULES = getPermissionModules;
 
 
     function initUsers() {
@@ -312,7 +312,7 @@ let _userCache = null;
                 'checkin', 'car_booking', 'van_booking', 'weekly', 'report_manage', 'kpi',
                 'stock_dashboard', 'inventory', 'check_stock', 'team_information'
             ],
-            'ADMIN': getPermissionModulesV228().map(m => m.id)
+            'ADMIN': getPermissionModules().map(m => m.id)
         };
 
         if (!globalPermissions) {
@@ -326,7 +326,7 @@ let _userCache = null;
             });
 
             // ADMIN always sees every module.
-            _permConfig.ADMIN = getPermissionModulesV228().map(m => m.id);
+            _permConfig.ADMIN = getPermissionModules().map(m => m.id);
         }
 
         renderPermissionTable();
@@ -341,7 +341,7 @@ let _userCache = null;
         let currentGroup = '';
         const rows = [];
 
-        getPermissionModulesV228().forEach(mod => {
+        getPermissionModules().forEach(mod => {
             if (mod.group !== currentGroup) {
                 currentGroup = mod.group;
                 rows.push(`
@@ -394,12 +394,12 @@ let _userCache = null;
         });
 
         tbody.innerHTML = rows.join('');
-        updatePermissionSummaryV228(_permConfig);
+        updatePermissionSummary(_permConfig);
     }
 
-    function updatePermissionSummaryV228(source) {
+    function updatePermissionSummary(source) {
         try {
-            const modules = getPermissionModulesV228();
+            const modules = getPermissionModules();
             const total = modules.length;
             const perms = source && typeof source === 'object' ? source : ((typeof globalPermissions !== 'undefined' && globalPermissions) ? globalPermissions : _permConfig || {});
             const validIds = new Set(modules.map(m => m.id));
@@ -412,13 +412,13 @@ let _userCache = null;
             write('perm-count-total-v228', total);
         } catch(ignore) {}
     }
-    window.updatePermissionSummaryV228 = updatePermissionSummaryV228;
+    window.updatePermissionSummary = updatePermissionSummary;
 
     function savePermissions() {
         const newPerms = { ADMIN: [], MANAGER: [], SUPERVISOR: [], STAFF: [] };
 
         // ADMIN always receives all modules; only the other roles are editable.
-        newPerms.ADMIN = getPermissionModulesV228().map(m => m.id);
+        newPerms.ADMIN = getPermissionModules().map(m => m.id);
         document.querySelectorAll('.perm-chk:checked').forEach(chk => {
             const r = chk.dataset.role;
             const m = chk.dataset.mod;
@@ -548,7 +548,7 @@ let _userCache = null;
             .saveRolePermissions(JSON.stringify(newPerms));
     }
 
-window.refreshPermissionSummaryV228=function(){try{updatePermissionSummaryV228();}catch(e){}};
+window.refreshPermissionSummary=function(){try{updatePermissionSummary();}catch(e){}};
 
-function setAllRolePermissionsV240_(role,checked){role=String(role||'').toUpperCase();if(role==='ADMIN')return;document.querySelectorAll('.perm-chk[data-role="'+role+'"]').forEach(function(chk){chk.checked=!!checked;});}
-window.setAllRolePermissionsV240_=setAllRolePermissionsV240_;
+function setAllRolePermissions_(role,checked){role=String(role||'').toUpperCase();if(role==='ADMIN')return;document.querySelectorAll('.perm-chk[data-role="'+role+'"]').forEach(function(chk){chk.checked=!!checked;});}
+window.setAllRolePermissions_=setAllRolePermissions_;
