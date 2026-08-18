@@ -547,48 +547,69 @@ async function sd_saveRentalEmail(location){
   try{const r=await window.CES_API.callFunction('sd_saveRentalBorrowerEmail',[{location,email}],{loadingLabel:'Saving borrower email…'});if(!r||!r.success)throw new Error((r&&r.message)||'Save failed');Swal.fire({icon:'success',title:'Email saved',text:r.email+' · '+r.updated+' active rental row(s)',timer:1600,showConfirmButton:false});if(SD_DASH.raw&&SD_DASH.raw.devices)SD_DASH.raw.devices.filter(d=>String(d.location||'')===String(location)).forEach(d=>{d.borrowerEmail=r.email;d.borrower_email=r.email;});}catch(e){Swal.fire({icon:'error',title:'Save failed',text:e.message||String(e)});}
 }
 function sd_showLocationDetail(location){
-  const rows=(SD_DASH.raw&&SD_DASH.raw.devices||[]).filter(d=>String(d.location||'')===String(location)&&(['In-Use','Overdue'].includes(d.status)||Number(d.overdueDays||0)>0));
+  const rows=(SD_DASH.raw&&SD_DASH.raw.devices||[]).filter(d=>String(d.location||'')===String(location)&&(['In-Use','Overdue','เช่ายืม'].includes(d.status)||Number(d.overdueDays||0)>0));
   if(!rows.length){Swal.fire('ไม่พบรายการ','','info');return;}
   const emailRow=rows.find(d=>d.borrowerEmail||d.borrower_email);
-  const borrowerEmail=String((emailRow&&(emailRow.borrowerEmail||emailRow.borrower_email))||'Siripak.Ch@nhealth-asia.com').trim();
+  const borrowerEmail=String((emailRow&&(emailRow.borrowerEmail||emailRow.borrower_email))||'').trim();
   const borrowers=[...new Set(rows.map(d=>String(d.borrower||'-')).filter(Boolean))];
   const overdue=rows.filter(d=>d.status==='Overdue'||Number(d.overdueDays||0)>0).length;
   const dueDates=rows.map(d=>String(d.expectedReturn||d.expectedReturnDate||'')).filter(Boolean).sort();
-  const tableRows=rows.map((d,i)=>{
+  const cards=rows.map((d,i)=>{
     const due=String(d.expectedReturn||d.expectedReturnDate||'');
     const late=d.status==='Overdue'||Number(d.overdueDays||0)>0;
     const mail=String(d.borrowerEmail||d.borrower_email||borrowerEmail||'').trim();
-    return `<tr>
-      <td>${i+1}</td>
-      <td><b>${spEsc(d.idCode||d.id_code||'-')}</b></td>
-      <td>${spEsc(d.sn||d.serialNumber||'-')}</td>
-      <td>${spEsc(d.acPlugSn||d.ac_plug_sn||'-')}</td>
-      <td>${spEsc(d.clampSn||d.clamp_sn||'-')}</td>
-      <td><b>${spEsc(d.brand||'-')}</b><br><small>${spEsc(d.model||d.itemName||'-')}</small></td>
-      <td>${spEsc(d.borrower||'-')}</td>
-      <td>${mail?`<a href="mailto:${spEsc(mail)}">${spEsc(mail)}</a>`:'-'}</td>
-      <td>${spFmtDate(d.borrowDate||d.borrow_date)}</td>
-      <td>${spFmtDate(due)}${late?`<br><small style="color:#dc2626;font-weight:800">Overdue ${spNum(d.overdueDays||0)} day(s)</small>`:''}</td>
-      <td>${spBadge(d.status)}</td>
-      <td>${spEsc(d.actionRequired||d.action_required||'-')}</td>
-    </tr>`;
+    const id=spEsc(d.idCode||d.id_code||'-');
+    return `<article class="ces-rental-detail-item">
+      <div class="ces-rental-detail-item-head">
+        <div><small>ITEM ${i+1}</small><strong>${id}</strong></div>
+        <div>${spBadge(d.status)}</div>
+      </div>
+      <div class="ces-rental-serial-grid">
+        <div><span>SN</span><b>${spEsc(d.sn||d.serialNumber||'-')}</b></div>
+        <div><span>AC SN</span><b>${spEsc(d.acPlugSn||d.ac_plug_sn||'-')}</b></div>
+        <div><span>Clamp SN</span><b>${spEsc(d.clampSn||d.clamp_sn||'-')}</b></div>
+      </div>
+      <div class="ces-rental-detail-grid">
+        <div><span>Brand / Model</span><b>${spEsc(d.brand||'-')} · ${spEsc(d.model||d.itemName||'-')}</b></div>
+        <div><span>Borrower</span><b>${spEsc(d.borrower||'-')}</b></div>
+        <div class="wide"><span>Borrower Email</span>${mail?`<a href="mailto:${spEsc(mail)}">${spEsc(mail)}</a>`:'<b>-</b>'}</div>
+        <div><span>Borrow Date</span><b>${spFmtDate(d.borrowDate||d.borrow_date)}</b></div>
+        <div><span>Due Date</span><b>${spFmtDate(due)}</b>${late?`<small class="late">Overdue ${spNum(d.overdueDays||0)} day(s)</small>`:''}</div>
+        <div class="wide"><span>Action Required</span><b>${spEsc(d.actionRequired||d.action_required||'-')}</b></div>
+      </div>
+    </article>`;
   }).join('');
   const html=`
-    <div class="ces-v255-rental-detail-summary">
+    <style>
+      .ces-rental-detail-popup{border-radius:24px!important}.ces-rental-detail-popup .swal2-html-container{margin:0 22px 18px!important;overflow:visible!important}
+      .ces-rental-detail-summary{display:grid;grid-template-columns:2fr repeat(3,1fr);gap:10px;margin:4px 0 12px;text-align:left}
+      .ces-rental-detail-summary>div,.ces-rental-contact>div{border:1px solid #dfe7f1;background:#f8fafc;border-radius:14px;padding:11px 12px;min-width:0}
+      .ces-rental-detail-summary small,.ces-rental-contact span,.ces-rental-detail-grid span,.ces-rental-serial-grid span{display:block;font-size:9px;font-weight:900;color:#64748b;text-transform:uppercase;letter-spacing:.03em;margin-bottom:4px}
+      .ces-rental-detail-summary strong{display:block;font-size:13px;color:#0f172a;overflow-wrap:anywhere}.ces-rental-detail-summary .danger{color:#dc2626}
+      .ces-rental-contact{display:grid;grid-template-columns:1fr 2fr;gap:10px;margin-bottom:12px;text-align:left}.ces-rental-contact b{font-size:12px;color:#0f172a;overflow-wrap:anywhere}
+      .ces-rental-email-edit{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px}.ces-rental-email-edit input{min-width:0;width:100%;border:1px solid #cbd5e1;border-radius:9px;padding:8px 10px;font-size:11px}.ces-rental-email-edit button{white-space:nowrap}
+      .ces-rental-detail-list{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;max-height:54vh;overflow:auto;padding:2px 4px 8px 2px;text-align:left}
+      .ces-rental-detail-item{border:1px solid #dfe7f1;border-radius:16px;background:#fff;padding:12px;box-shadow:0 4px 14px rgba(15,23,42,.035);min-width:0}
+      .ces-rental-detail-item-head{display:flex;align-items:center;justify-content:space-between;gap:10px;padding-bottom:9px;border-bottom:1px solid #edf2f7}.ces-rental-detail-item-head small{display:block;font-size:9px;color:#94a3b8;font-weight:900}.ces-rental-detail-item-head strong{font-size:13px;color:#0f4aa3;overflow-wrap:anywhere}
+      .ces-rental-serial-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:7px;margin-top:9px}.ces-rental-serial-grid>div{background:#f8fafc;border-radius:10px;padding:8px;min-width:0}.ces-rental-serial-grid b{font-size:11px;color:#0f172a;overflow-wrap:anywhere}
+      .ces-rental-detail-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin-top:9px}.ces-rental-detail-grid>div{min-width:0}.ces-rental-detail-grid .wide{grid-column:1/-1}.ces-rental-detail-grid b,.ces-rental-detail-grid a{display:block;font-size:11px;line-height:1.35;color:#334155;overflow-wrap:anywhere}.ces-rental-detail-grid a{color:#2563eb}.ces-rental-detail-grid .late{display:block;color:#dc2626;font-size:9px;font-weight:900;margin-top:3px}
+      @media(max-width:820px){.ces-rental-detail-summary{grid-template-columns:repeat(2,1fr)}.ces-rental-contact{grid-template-columns:1fr}.ces-rental-detail-list{grid-template-columns:1fr;max-height:58vh}}
+      @media(max-width:520px){.ces-rental-serial-grid{grid-template-columns:1fr}.ces-rental-detail-grid{grid-template-columns:1fr}.ces-rental-detail-grid .wide{grid-column:auto}.ces-rental-email-edit{grid-template-columns:1fr}.ces-rental-detail-popup .swal2-html-container{margin:0 12px 14px!important}}
+    </style>
+    <div class="ces-rental-detail-summary">
       <div><small>LOCATION</small><strong>${spEsc(location)}</strong></div>
       <div><small>ITEMS</small><strong>${spNum(rows.length)}</strong></div>
       <div><small>OVERDUE</small><strong class="${overdue?'danger':''}">${spNum(overdue)}</strong></div>
       <div><small>EARLIEST DUE</small><strong>${dueDates[0]?spFmtDate(dueDates[0]):'-'}</strong></div>
     </div>
-    <div class="ces-v255-rental-contact-grid">
+    <div class="ces-rental-contact">
       <div><span>Borrower</span><b>${spEsc(borrowers.join(', ')||'-')}</b></div>
-      <div><span>Borrower Email / Contract Contact</span><div class="ces-v255-rental-email-edit"><input id="sd-v245-borrower-email" type="email" value="${spEsc(borrowerEmail)}"><button class="sp-btn" onclick='sd_saveRentalEmail(${JSON.stringify(location)})'>Save Email</button></div></div>
+      <div><span>Borrower Email / Contract Contact</span><div class="ces-rental-email-edit"><input id="sd-v245-borrower-email" type="email" value="${spEsc(borrowerEmail)}" placeholder="name@company.com"><button class="sp-btn" onclick='sd_saveRentalEmail(${JSON.stringify(location)})'>Save Email</button></div></div>
     </div>
-    <div class="ces-v255-rental-detail-table-wrap">
-      <table class="ces-v255-rental-detail-table"><thead><tr><th>#</th><th>ID Code</th><th>SN</th><th>AC Plug SN</th><th>Clamp SN</th><th>Brand / Model</th><th>Borrower</th><th>Borrower Email</th><th>Borrow Date</th><th>Due Date</th><th>Status</th><th>Action Required</th></tr></thead><tbody>${tableRows}</tbody></table>
-    </div>`;
-  Swal.fire({title:'Rental Contract Detail',width:'min(1460px,98vw)',html,confirmButtonText:'Close',customClass:{popup:'ces-v255-rental-detail-popup'}});
+    <div class="ces-rental-detail-list">${cards}</div>`;
+  Swal.fire({title:'Rental Contract Detail',width:'min(1180px,96vw)',html,confirmButtonText:'Close',customClass:{popup:'ces-rental-detail-popup'}});
 }
+
 function sd_openRentalContractAlertPopup(){
   const rows=sdContractRows_().filter(r=>{if(!r.dueDate)return false;const due=new Date(r.dueDate+'T00:00:00'),today=new Date();today.setHours(0,0,0,0);if(isNaN(due))return r.overdue>0;const days=Math.round((due-today)/86400000);r.daysToDue=days;return days<=7;});
   const html=`<div style="text-align:left"><div style="display:flex;justify-content:flex-end;margin-bottom:10px"><button class="sp-btn soft" onclick="sd_openRentalAlertsSheet()"><i class="fas fa-table-list"></i> Rental Alerts Sheet</button></div><div class="sp-table-wrap"><table class="sp-table"><thead><tr><th>Contract / Location</th><th>Borrower</th><th>Email</th><th>Due</th><th>Items</th><th>Status</th></tr></thead><tbody>${rows.map(r=>`<tr><td><b>${spEsc(r.location)}</b></td><td>${spEsc(r.borrower)}</td><td>${spEsc(r.borrowerEmail)}</td><td>${spFmtDate(r.dueDate)}</td><td>${spNum(r.total)}</td><td>${r.daysToDue<0?`<span class="sp-chip low">Overdue ${Math.abs(r.daysToDue)}d</span>`:`<span class="sp-chip ok">Due in ${r.daysToDue}d</span>`}</td></tr>`).join('')||'<tr><td colspan="6" class="sp-muted">No contract alert in the next 7 days</td></tr>'}</tbody></table></div></div>`;

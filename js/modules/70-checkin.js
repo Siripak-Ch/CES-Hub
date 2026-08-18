@@ -182,28 +182,49 @@ function renderRecentActivity() {
     }).join('');
 }
 
+function checkinSafe_(value) {
+    return String(value == null ? '' : value).replace(/[&<>"']/g, function(ch) {
+        return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch];
+    });
+}
+
 function filterActivityTable() {
-    const search = document.getElementById('act-search').value.toLowerCase();
+    const search = String(document.getElementById('act-search').value || '').toLowerCase();
     const team = document.getElementById('act-filter-team').value;
     const container = document.getElementById('team-activity-tbody');
     let logs = currentCheckinData.activityLogs || [];
     logs = logs.filter(l => {
-        const matchSearch = l.user.toLowerCase().includes(search) || l.job.toLowerCase().includes(search);
+        const user = String(l.user || '');
+        const job = String(l.job || '');
+        const matchSearch = user.toLowerCase().includes(search) || job.toLowerCase().includes(search);
         const matchTeam = team === 'All' || l.team === team;
         return matchSearch && matchTeam;
     });
     if (logs.length === 0) { container.innerHTML = `<tr><td colspan="7" class="p-6 text-center text-gray-400 italic">No records found.</td></tr>`; return; }
     container.innerHTML = logs.map(row => {
-        const isIN = row.type === 'IN'; const badge = isIN ? 'bg-blue-100 text-[#0057B8]' : 'bg-rose-100 text-[#E4002B]'; const time = row.ts.split(' ')[1];
-        const hasPhoto = row.photo && row.photo.includes('http');
-        const photoHtml = hasPhoto ? `<a href="${row.photo}" target="_blank" class="text-indigo-500 hover:text-indigo-700" onclick="event.stopPropagation()"><i class="fas fa-image"></i></a>` : `<span class="text-gray-300">-</span>`;
-        
-        const isMapLink = row.gps && (row.gps.includes('google.com/maps') || row.gps.includes('maps.google'));
+        const isIN = row.type === 'IN';
+        const badge = isIN ? 'bg-blue-100 text-[#0057B8]' : 'bg-rose-100 text-[#E4002B]';
+        const ts = String(row.ts || '');
+        const time = (ts.split(' ')[1] || '-');
+        const date = String(row.date || ts.split(' ')[0] || '-');
+        const hasPhoto = row.photo && /^https?:\/\//i.test(String(row.photo));
+        const photoHtml = hasPhoto
+            ? `<a href="${checkinSafe_(row.photo)}" target="_blank" rel="noopener" class="checkin-log-icon photo" title="View photo" onclick="event.stopPropagation()"><i class="fas fa-image"></i></a>`
+            : `<span class="checkin-log-icon disabled" title="No photo"><i class="far fa-image"></i></span>`;
+        const isMapLink = row.gps && (/google\.com\/maps/i.test(String(row.gps)) || /maps\.google/i.test(String(row.gps)));
         const gpsHtml = isMapLink
-            ? `<a href="${row.gps}" target="_blank" class="text-blue-500 hover:text-blue-700 font-bold bg-blue-50 px-2 py-1 rounded-md border border-blue-100 text-[9px] flex items-center justify-center w-16 mx-auto" onclick="event.stopPropagation()"><i class="fas fa-map-marked-alt mr-1"></i> Map</a>` 
-            : `<span class="text-gray-300 text-[9px] block text-center">-</span>`;
-            
-        return `<tr onclick='openLogDetail(${JSON.stringify(row).replace(/'/g, "\\'")})' class="hover:bg-gray-50 transition-colors border-b last:border-0 border-gray-100 cursor-pointer"><td class="p-4 font-bold text-gray-600 text-xs">${time} <span class="ml-1 text-[9px] text-gray-400">${row.date}</span></td><td class="p-4 font-bold text-xs"><span style="color:${checkinTeamStyle_(row.team).text}">${row.team}</span></td><td class="p-4 font-bold text-gray-800 text-xs">${row.user}</td><td class="p-4"><span class="px-2 py-1 rounded text-[9px] font-bold ${badge}">${row.type}</span></td><td class="p-4 text-gray-500 text-xs truncate max-w-[150px]" title="${row.job}">${row.job}</td><td class="p-4 text-center">${photoHtml}</td><td class="p-4">${gpsHtml}</td></tr>`;
+            ? `<a href="${checkinSafe_(row.gps)}" target="_blank" rel="noopener" class="checkin-log-icon map" title="Open map" onclick="event.stopPropagation()"><i class="fas fa-map-location-dot"></i></a>`
+            : `<span class="checkin-log-icon disabled" title="No location"><i class="fas fa-location-dot"></i></span>`;
+        const rowJson = JSON.stringify(row).replace(/'/g, "\\'");
+        return `<tr onclick='openLogDetail(${rowJson})' class="checkin-log-row hover:bg-gray-50 transition-colors border-b last:border-0 border-gray-100 cursor-pointer">
+            <td class="checkin-log-time"><strong>${checkinSafe_(time)}</strong><small>${checkinSafe_(date)}</small></td>
+            <td><span class="checkin-log-team" style="color:${checkinTeamStyle_(row.team).text}">${checkinSafe_(row.team || '-')}</span></td>
+            <td class="checkin-log-name">${checkinSafe_(row.user || '-')}</td>
+            <td><span class="px-2 py-1 rounded text-[9px] font-bold ${badge}">${checkinSafe_(row.type || '-')}</span></td>
+            <td class="checkin-log-job" title="${checkinSafe_(row.job || '')}">${checkinSafe_(row.job || '-')}</td>
+            <td class="checkin-log-action">${photoHtml}</td>
+            <td class="checkin-log-action">${gpsHtml}</td>
+        </tr>`;
     }).join('');
 }
 

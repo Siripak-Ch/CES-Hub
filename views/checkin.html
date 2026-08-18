@@ -90,9 +90,9 @@
 </div>
 </div>
 <div class="overflow-x-auto rounded-xl border border-gray-100 max-h-[400px] custom-scrollbar">
-<table class="w-full text-left border-collapse sticky top-0">
+<table class="w-full text-left border-collapse sticky top-0 checkin-log-table">
 <thead class="bg-gray-50 text-gray-500 uppercase text-[10px] font-bold sticky top-0 z-10 shadow-sm">
-<tr><th class="p-4">Time</th><th class="p-4">Team</th><th class="p-4">Name</th><th class="p-4">Status</th><th class="p-4">Job Title</th><th class="p-4 text-center">Photo</th><th class="p-4 text-center">Location</th></tr>
+<tr><th>Time</th><th>Team</th><th>Name</th><th>Status</th><th>Job Title</th><th class="text-center">Photo</th><th class="text-center">Location</th></tr>
 </thead>
 <tbody class="text-xs text-gray-700 divide-y divide-gray-100 font-medium bg-white" id="team-activity-tbody"></tbody>
 </table>
@@ -213,4 +213,28 @@
 </div><div class="fixed inset-0 bg-black/60 z-[170] hidden flex items-center justify-center backdrop-blur-sm p-4 animate-fade-in" id="logDetailModal"><div class="bg-white rounded-2xl w-full max-w-sm shadow-xl overflow-hidden"><div class="bg-white px-5 py-4 border-b flex justify-between items-center"><h3 class="font-bold text-gray-800 text-sm">Activity Details</h3><button class="text-gray-400 hover:text-gray-600" onclick="document.getElementById('logDetailModal').classList.add('hidden')"><i class="fas fa-times"></i></button></div><div class="p-6 space-y-4"><div class="flex items-center gap-4"><div class="w-12 h-12 rounded-full flex items-center justify-center text-xl font-bold text-white shadow-md" id="ld-icon"></div><div><h4 class="font-bold text-gray-800 text-lg" id="ld-user"></h4><p class="text-xs text-gray-500 font-bold bg-gray-100 px-2 py-0.5 rounded-md inline-block mt-1" id="ld-team"></p></div></div><div class="space-y-2 text-sm text-gray-600"><p><i class="fas fa-briefcase w-5 text-center text-gray-400"></i> <span id="ld-job"></span></p><p><i class="fas fa-clock w-5 text-center text-gray-400"></i> <span id="ld-time"></span></p><p><i class="fas fa-map-marker-alt w-5 text-center text-gray-400"></i> <span id="ld-gps"></span></p></div><div class="mt-4 hidden" id="ld-photo-container"><a class="block w-full py-3 bg-indigo-50 text-indigo-600 font-bold text-center rounded-xl hover:bg-indigo-100 transition-colors border border-[#003DA5]/20" href="#" id="ld-photo-link" target="_blank"><i class="fas fa-image mr-2"></i> View Evidence Photo</a></div><a class="hidden block w-full py-3 bg-blue-50 text-blue-600 font-bold text-center rounded-xl hover:bg-blue-100 transition-colors border border-blue-100 mt-2" href="#" id="ld-map-btn" target="_blank"><i class="fas fa-map-marked-alt mr-2"></i> Open Location in Maps</a></div></div></div><div class="fixed inset-0 bg-black/60 z-[170] hidden flex items-center justify-center backdrop-blur-sm p-4 animate-fade-in" id="detailModal"><div class="bg-white rounded-2xl w-full max-w-sm shadow-xl overflow-hidden"><div class="bg-white px-5 py-4 border-b flex justify-between items-center"><h3 class="font-bold text-gray-800 text-sm flex items-center gap-2"><i class="fas fa-users text-indigo-500"></i> Job Participants</h3><button class="text-gray-400 hover:text-gray-600" onclick="document.getElementById('detailModal').classList.add('hidden')"><i class="fas fa-times"></i></button></div><div class="p-3 overflow-y-auto max-h-72 custom-scrollbar space-y-2 bg-gray-50/50" id="detail-list"></div></div></div><style>
     #view-report_manage.hidden { display: none !important; }
     #view-report_manage.hidden * { display: none !important; visibility: hidden !important; }
+</style>
+
+<style id="checkin-activity-layout-style">
+#view-checkin .checkin-log-table{min-width:980px;table-layout:fixed}
+#view-checkin .checkin-log-table th{padding:12px 14px;white-space:nowrap}
+#view-checkin .checkin-log-table th:nth-child(1){width:112px}
+#view-checkin .checkin-log-table th:nth-child(2){width:82px}
+#view-checkin .checkin-log-table th:nth-child(3){width:190px}
+#view-checkin .checkin-log-table th:nth-child(4){width:82px}
+#view-checkin .checkin-log-table th:nth-child(5){width:auto;min-width:280px}
+#view-checkin .checkin-log-table th:nth-child(6),#view-checkin .checkin-log-table th:nth-child(7){width:72px}
+#view-checkin .checkin-log-row td{padding:12px 14px;vertical-align:middle}
+#view-checkin .checkin-log-time strong{display:block;color:#334155;font-size:12px;line-height:1.2}
+#view-checkin .checkin-log-time small{display:block;margin-top:4px;color:#94a3b8;font-size:9px;font-weight:700}
+#view-checkin .checkin-log-team{display:inline-flex;align-items:center;font-size:11px;font-weight:900;white-space:nowrap}
+#view-checkin .checkin-log-name{font-size:11px;font-weight:800;color:#1e293b;white-space:normal;line-height:1.35;word-break:break-word}
+#view-checkin .checkin-log-job{font-size:11px;color:#475569;line-height:1.4;white-space:normal;overflow-wrap:anywhere;display:table-cell}
+#view-checkin .checkin-log-action{text-align:center}
+#view-checkin .checkin-log-icon{width:34px;height:34px;margin:0 auto;border-radius:10px;display:inline-flex;align-items:center;justify-content:center;border:1px solid #dbeafe;background:#eff6ff;color:#2563eb;transition:.15s}
+#view-checkin .checkin-log-icon.photo{background:#eef2ff;border-color:#c7d2fe;color:#4f46e5}
+#view-checkin .checkin-log-icon.map{background:#eff6ff;border-color:#bfdbfe;color:#2563eb}
+#view-checkin .checkin-log-icon:not(.disabled):hover{transform:translateY(-1px);box-shadow:0 5px 12px rgba(37,99,235,.16)}
+#view-checkin .checkin-log-icon.disabled{background:#f8fafc;border-color:#eef2f7;color:#cbd5e1;cursor:default}
+@media(max-width:900px){#view-checkin .checkin-log-table{min-width:900px}#view-checkin #team-activity-section{padding:16px!important}}
 </style>

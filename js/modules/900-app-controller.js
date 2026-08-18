@@ -47,6 +47,7 @@
     function cesRestoreCoreCache_(){try{var c=JSON.parse(localStorage.getItem(CES_CORE_CACHE_KEY_V20)||'null');if(c&&c.data)cesApplyCoreData_(c.data);}catch(e){}}
     function cesStoreCoreCache_(data){try{localStorage.setItem(CES_CORE_CACHE_KEY_V20,JSON.stringify({at:Date.now(),data:data}));}catch(e){}}
     function cesTabNeedsInit_(tab){
+        if(tab==='monthly_report'&&window.CES_MONTHLY_REPORT_READY!==true)return true;
         if(!CES_TAB_RUNTIME_V20.initialized[tab])return true;
         if(!CES_LIVE_TABS_V20[tab])return false;
         return Date.now()-Number(CES_TAB_RUNTIME_V20.lastSync[tab]||0)>Number(CES_SYNC_POLICY[tab]||60000);

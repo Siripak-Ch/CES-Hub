@@ -6,7 +6,7 @@
 
 window.CES_CONFIG = {
   // IMPORTANT: After deploying Apps Script backend, paste the latest /exec URL here.
-  GAS_API_URL: 'https://script.google.com/macros/s/AKfycbwszWk73OlLgtODrDfg6f82VBfCkmXAFFlKHDF-WyrdVAOjSipkImAoH7oaZ0GMuCxocg/exec',
+  GAS_API_URL: 'https://script.google.com/macros/s/AKfycbzjfw93KOCvyXDUEdDhltnhtbgjmdrQa8q5gfRxIJ66ayPcAR2VuJD83wkSUwqVXlpeGQ/exec',
 
   CSI_SURVEY_URL: 'https://survey.nhealth-asia.com/s/cm1hci0mw00jf45vmps2myg1g',
 
@@ -24,7 +24,7 @@ window.CES_CONFIG = {
   },
 
   DEBUG: false,
-  RELEASE: 'CES-HUB-V27.4-CHECKIN-REAL-OT-SEAMLESS-TABS',
+  RELEASE: 'CES-HUB-V27.5-MONTHLY-STOCK-LINE-RENTAL',
 
   // External links are kept in one place. Config sheet values override these defaults at runtime.
   EXTERNAL_LINKS: {
