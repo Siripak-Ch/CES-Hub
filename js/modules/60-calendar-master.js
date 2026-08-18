@@ -14,13 +14,13 @@
     
     const CAL_MAP = {
         'ALL': "https://calendar.google.com/calendar/embed?height=600&wkst=1&bgcolor=%23ffffff&ctz=Asia%2FBangkok&showTitle=0&showNav=0&showDate=1&showPrint=0&showTabs=0&showCalendars=0&showTz=1" +
-               "&src=cescalmedteam%40gmail.com&color=%23004aad" + 
+               "&src=bmecalibration%40gmail.com&color=%23004aad" + 
                "&src=nhealthcallab%40gmail.com&color=%2319a7ce" + 
                "&src=natkanok.8942%40gmail.com&color=%230fc1a1" +
                "&src=chiraphat.env%40gmail.com&color=%237ed957" +
                "&src=technicalsupport.tes%40gmail.com&color=%23ffde59" +
                "&src=cesmanagement2026%40gmail.com&color=%23b4b4b4", 
-        'MED': "https://calendar.google.com/calendar/embed?showTitle=0&showNav=0&src=cescalmedteam%40gmail.com&ctz=Asia%2FBangkok&color=%23004aad",
+        'MED': "https://calendar.google.com/calendar/embed?showTitle=0&showNav=0&src=bmecalibration%40gmail.com&ctz=Asia%2FBangkok&color=%23004aad",
         'LAB': "https://calendar.google.com/calendar/embed?showTitle=0&showNav=0&src=nhealthcallab%40gmail.com&ctz=Asia%2FBangkok&color=%2319a7ce",
         'EHS': "https://calendar.google.com/calendar/embed?showTitle=0&showNav=0&src=natkanok.8942%40gmail.com&ctz=Asia%2FBangkok&color=%230fc1a1",
         'ENV': "https://calendar.google.com/calendar/embed?showTitle=0&showNav=0&src=chiraphat.env%40gmail.com&ctz=Asia%2FBangkok&color=%237ed957",
@@ -30,7 +30,7 @@
 
     function calendarEmbedUrlV41_(service) {
         const cfg=(typeof globalConfig!=='undefined'&&globalConfig)||{};
-        const ids={MED:cfg.CAL_ID_MED||'cescalmedteam@gmail.com',LAB:cfg.CAL_ID_LAB||'nhealthcallab@gmail.com',EHS:cfg.CAL_ID_EHS||'natkanok.8942@gmail.com',ENV:cfg.CAL_ID_ENV||'chiraphat.env@gmail.com',TES:cfg.CAL_ID_TES||'technicalsupport.tes@gmail.com',MGT:cfg.CAL_ID_MNG||'cesmanagement2026@gmail.com'};
+        const ids={MED:cfg.CAL_ID_MED||'bmecalibration@gmail.com',LAB:cfg.CAL_ID_LAB||'nhealthcallab@gmail.com',EHS:cfg.CAL_ID_EHS||'natkanok.8942@gmail.com',ENV:cfg.CAL_ID_ENV||'chiraphat.env@gmail.com',TES:cfg.CAL_ID_TES||'technicalsupport.tes@gmail.com',MGT:cfg.CAL_ID_MNG||'cesmanagement2026@gmail.com'};
         const teams=service==='ALL'?['MED','LAB','EHS','ENV','TES','MGT']:[service];
         let url='https://calendar.google.com/calendar/embed?height=600&wkst=1&bgcolor=%23ffffff&ctz=Asia%2FBangkok&showTitle=0&showNav=0&showDate=1&showPrint=0&showTabs=0&showCalendars=0&showTz=1';
         teams.forEach(team=>{ if(!ids[team])return; const color=calendarTeamStyleV41_(team).color; url+='&src='+encodeURIComponent(ids[team])+'&color='+encodeURIComponent(color); });
@@ -290,7 +290,7 @@
         const calendarId = String((item && item.calendarId) || '').trim().toLowerCase();
         if (calendarId === 'chiraphat.env@gmail.com') return 'ENV';
         if (calendarId === 'natkanok.8942@gmail.com') return 'EHS';
-        if (calendarId === 'cescalmedteam@gmail.com') return 'MED';
+        if (calendarId === 'bmecalibration@gmail.com' || calendarId === 'cescalmedteam@gmail.com') return 'MED';
         if (calendarId === 'nhealthcallab@gmail.com') return 'LAB';
         if (calendarId === 'technicalsupport.tes@gmail.com') return 'TES';
         if (calendarId === 'cesmanagement2026@gmail.com') return 'MGT';
@@ -868,7 +868,7 @@
         const answer=await Swal.fire({title:'Import MED Monthly Work Plan Jul–Oct 2026?',html:`<div class="text-left text-xs"><div class="mb-3"><b>${rows.length}</b> MED work-plan blocks found in <b>${calendarEscV37_(file.name)}</b>.</div><div class="max-h-72 overflow-auto border rounded-xl"><table class="w-full"><thead class="bg-slate-50"><tr><th class="p-2">Date range</th><th class="p-2">Team</th><th class="p-2">Work plan</th><th class="p-2">Engineer</th></tr></thead><tbody>${sample}</tbody></table></div><p class="mt-3 text-slate-500">Only Monday–Friday are added. V26.6 creates compact weekday date-ranges and updates only changed CES-imported MED events. Existing matching imports and manual MED Calendar events are kept.</p></div>`,icon:'question',showCancelButton:true,confirmButtonText:'Import to MED Calendar',confirmButtonColor:'#004aad',width:820});
         if(!answer.isConfirmed)return;
         Swal.fire({title:'Importing MED calendar…',html:'Syncing compact Monday–Friday work-plan blocks. Matching events are reused; only changed events are updated.',allowOutsideClick:false,showConfirmButton:false,didOpen:()=>Swal.showLoading()});
-        const result=await window.CES_API.callFunction('importMedMonthlyWorkPlan',[{rows,sourceFile:file.name},{calendarId:'cescalmedteam@gmail.com',syncDashboard:false,hardReplace:false}],{transport:'iframe',timeoutMs:180000,priority:'user',userAction:true,loadingLabel:'Importing MED calendar…'});
+        const result=await window.CES_API.callFunction('importMedMonthlyWorkPlan',[{rows,sourceFile:file.name},{calendarId:((typeof globalConfig!=='undefined'&&globalConfig&&globalConfig.CAL_ID_MED)||'bmecalibration@gmail.com'),syncDashboard:false,hardReplace:false}],{transport:'iframe',timeoutMs:180000,priority:'user',userAction:true,loadingLabel:'Importing MED calendar…'});
         if(!result||(!result.success&&Number(result.created||0)===0)){
           const details=result&&Array.isArray(result.errors)&&result.errors.length?'\n'+result.errors.join('\n'):'';
           throw new Error((result&&result.message)||'MED import failed.'+details);
@@ -885,7 +885,7 @@
       }catch(error){
         Swal.close();
         const message=String(error&&error.message||error||'MED import failed.');
-        const setup=/not accessible|permission|calendar/i.test(message)?'<hr class="my-3"><b>Calendar setup:</b><ol class="list-decimal pl-5 mt-1 space-y-1"><li>Share <code>cescalmedteam@gmail.com</code> calendar with the Apps Script deployment account.</li><li>Permission must be <b>Make changes to events</b>.</li><li>Set Config <code>CAL_ID_MED</code> when another Calendar ID is used.</li></ol>':'';
+        const setup=/not accessible|permission|calendar/i.test(message)?'<hr class="my-3"><b>Calendar setup:</b><ol class="list-decimal pl-5 mt-1 space-y-1"><li>Share <code>bmecalibration@gmail.com</code> calendar with the Apps Script deployment account.</li><li>Permission must be <b>Make changes to events</b>.</li><li>Set Config <code>CAL_ID_MED</code> when another Calendar ID is used.</li></ol>':'';
         Swal.fire({title:'MED Import Error',html:'<div class="text-left text-sm">'+calendarEscV37_(message).replace(/\n/g,'<br>')+setup+'</div>',icon:'error',width:720,confirmButtonColor:'#004aad'});
       }finally{if(input)input.value='';}
     }

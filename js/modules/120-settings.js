@@ -60,7 +60,7 @@
         try { if (data.ROLE_PERMISSIONS && typeof window.updatePermissionSummaryV228 === 'function') window.updatePermissionSummaryV228(JSON.parse(data.ROLE_PERMISSIONS)); } catch(ignorePermV228) {}
 
         // 2. รหัสปฏิทิน (Calendar IDs)[cite: 12]
-        setVal('cfg-cal-med', (!data.CAL_ID_MED || String(data.CAL_ID_MED).toLowerCase()==='bmecalibration@gmail.com') ? 'cescalmedteam@gmail.com' : data.CAL_ID_MED);
+        setVal('cfg-cal-med', data.CAL_ID_MED || 'bmecalibration@gmail.com');
         setVal('cfg-cal-lab', data.CAL_ID_LAB);
         setVal('cfg-cal-ehs', data.CAL_ID_EHS);
         setVal('cfg-cal-env', data.CAL_ID_ENV);
@@ -128,7 +128,7 @@
     function collectFullSystemConfig_() {
         const getVal = (id) => document.getElementById(id) ? document.getElementById(id).value : '';
         return {
-            CONFIG_SCHEMA_VERSION:'23.8',
+            CONFIG_SCHEMA_VERSION:'26.8',
             CAPACITY_MED:getVal('cfg-cap-med'), CAPACITY_LAB:getVal('cfg-cap-lab'), CAPACITY_EHS:getVal('cfg-cap-ehs'), CAPACITY_ENV:getVal('cfg-cap-env'), CAPACITY_MNG:getVal('cfg-cap-mng'), CAPACITY_TES:getVal('cfg-cap-tes'),
             TEAM_COLOR_MED:getVal('cfg-color-med'), TEAM_COLOR_LAB:getVal('cfg-color-lab'), TEAM_COLOR_EHS:getVal('cfg-color-ehs'), TEAM_COLOR_ENV:getVal('cfg-color-env'), TEAM_COLOR_TES:getVal('cfg-color-tes'), TEAM_COLOR_QM:getVal('cfg-color-qm'), TEAM_COLOR_MNG:getVal('cfg-color-mng'),
             CAL_ID_MED:getVal('cfg-cal-med'), CAL_ID_LAB:getVal('cfg-cal-lab'), CAL_ID_EHS:getVal('cfg-cal-ehs'), CAL_ID_ENV:getVal('cfg-cal-env'), CAL_ID_MNG:getVal('cfg-cal-mng'), CAL_ID_TES:getVal('cfg-cal-tes'),
@@ -220,7 +220,7 @@
     async function saveSettingSectionV264(section, button) {
         const keys = CES_SETTING_SECTION_KEYS_V264[String(section || '').toLowerCase()] || [];
         if (!keys.length) return;
-        const all = collectFullSystemConfig_(), patch = {CONFIG_SCHEMA_VERSION:'26.4'};
+        const all = collectFullSystemConfig_(), patch = {CONFIG_SCHEMA_VERSION:'26.8'};
         keys.forEach(key => { patch[key] = all[key]; });
         const btn = button || null, oldHtml = btn ? btn.innerHTML : '';
         if (btn) { btn.disabled = true; btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saving'; }

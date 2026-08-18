@@ -2406,7 +2406,7 @@
     var calendarId = text(item && item.calendarId).trim().toLowerCase();
     if(calendarId === 'chiraphat.env@gmail.com') return 'ENV';
     if(calendarId === 'natkanok.8942@gmail.com') return 'EHS';
-    if(calendarId === 'cescalmedteam@gmail.com') return 'MED';
+    if(calendarId === 'bmecalibration@gmail.com' || calendarId === 'cescalmedteam@gmail.com') return 'MED';
     if(calendarId === 'nhealthcallab@gmail.com') return 'LAB';
     if(calendarId === 'technicalsupport.tes@gmail.com') return 'TES';
     if(calendarId === 'cesmanagement2026@gmail.com') return 'MGT';
