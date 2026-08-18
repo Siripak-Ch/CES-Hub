@@ -109,9 +109,9 @@ function sc_hideWarning(){document.getElementById('scWarning')?.classList.add('h
 SC.accessories = SC.accessories || [];
 SC.accFiltered = SC.accFiltered || [];
 
-if(typeof window.sc_v15OriginalInit === 'undefined'){
-  window.sc_v15OriginalInit = initStockCheckModule;
-  initStockCheckModule = function(force=false){ window.sc_v15OriginalInit(force); setTimeout(()=>sc_loadAccessoryOptions(force),250); };
+if(typeof window.scOriginalInitBeforeAccessory === 'undefined'){
+  window.scOriginalInitBeforeAccessory = initStockCheckModule;
+  initStockCheckModule = function(force=false){ window.scOriginalInitBeforeAccessory(force); setTimeout(()=>sc_loadAccessoryOptions(force),250); };
 }
 
 function sc_currentRequester_(){
@@ -154,10 +154,10 @@ function sc_issueSelectedAccessory(){
 
 
 /* V16 — Check Stock accessory issue UX polish */
-if(typeof window.sc_v16OriginalIssueSelectedAccessory==='undefined' && typeof sc_issueSelectedAccessory==='function'){
-  window.sc_v16OriginalIssueSelectedAccessory=sc_issueSelectedAccessory;
+if(typeof window.scOriginalIssueSelectedAccessory==='undefined' && typeof sc_issueSelectedAccessory==='function'){
+  window.scOriginalIssueSelectedAccessory=sc_issueSelectedAccessory;
   sc_issueSelectedAccessory=function(){
     Swal.fire({title:'Sending approval request...',allowOutsideClick:false,didOpen:()=>Swal.showLoading()});
-    try { window.sc_v16OriginalIssueSelectedAccessory(); } finally { setTimeout(()=>{try{Swal.close();}catch(e){}},1200); }
+    try { window.scOriginalIssueSelectedAccessory(); } finally { setTimeout(()=>{try{Swal.close();}catch(e){}},1200); }
   };
 }

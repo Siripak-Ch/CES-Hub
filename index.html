@@ -87,8 +87,8 @@
 
 
 
-    <link rel="stylesheet" href="css/app.css?v=20260818-v266-performance">
-    <link rel="stylesheet" href="css/ai-local-assistant.css?v=20260818-v266-performance">
+    <link rel="stylesheet" href="css/app.css?v=20260818-v268-priority-concurrency">
+    <link rel="stylesheet" href="css/ai-local-assistant.css?v=20260818-v268-priority-concurrency">
 
 
 
@@ -109,12 +109,12 @@
 
     <script src="https://cdn.tailwindcss.com"></script>
 
-    <link rel="stylesheet" href="css/theme-v31.css?v=20260818-v266-performance">
+    <link rel="stylesheet" href="css/theme-v31.css?v=20260818-v268-priority-concurrency">
 
 
 
 
-    <script src="js/config.js?v=20260818-v266-performance"></script>
+    <script src="js/config.js?v=20260818-v273-stable-active"></script>
 
     <!-- LINE LIFF SDK V2 edge. Required for Rich Menu -> LINE identity auto-login. -->
     <script defer src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
@@ -122,12 +122,12 @@
 
 
 
-    <script src="js/gas-polyfill.js?v=20260818-v266-performance"></script>
+    <script src="js/gas-polyfill.js?v=20260818-v273-stable-active"></script>
 
 
 
 
-    <script defer src="js/core/session-cache.js?v=20260818-v266-performance"></script>
+    <script defer src="js/core/session-cache.js?v=20260818-v268-priority-concurrency"></script>
 
 
 
@@ -281,7 +281,7 @@
 
 
 
-    <script src="js/core/include-loader.js?v=20260818-v266-performance"></script>
+    <script src="js/core/include-loader.js?v=20260818-v273-stable-active"></script>
 
 
 
@@ -291,8 +291,8 @@
 
 
 
-      window.CES_BUILD_HASH = 'CES-HUB-V26.7-READMODEL-ASYNC-20260818-1035';
-      window.CES_BUILD_VERSION = 'V26.7-READMODEL-ASYNC';
+      window.CES_BUILD_HASH = 'CES-HUB-V27.3-STABLE-ACTIVE-CALENDAR-TABS-20260818-1657';
+      window.CES_BUILD_VERSION = 'V27.3-STABLE-ACTIVE-CALENDAR-TABS';
 
       // CES_V221_CACHE_MIGRATION: force fresh shell/config/permissions after a release.
       try {
@@ -524,28 +524,150 @@
         ]
       };
 
-      function cesPrepareBootItemV19(item) {
+      function cesPrepareBootItem(item) {
         var copy={};Object.keys(item||{}).forEach(function(key){copy[key]=item[key];});
         copy.optional=copy.optional===true||copy.required===false;copy.url=window.CES_asset(copy.url);return copy;
       }
 
-      var deferredPromiseV19=null;
-      window.CES_loadDeferredModules=function(){
-        if(deferredPromiseV19)return deferredPromiseV19;
-        deferredPromiseV19=CESBoot.loadHtml(window.CES_BOOT_MANIFEST.deferredHtml.map(cesPrepareBootItemV19))
-          .then(function(){return CESBoot.loadScripts(window.CES_BOOT_MANIFEST.deferredScripts.map(cesPrepareBootItemV19));})
-          .then(function(result){try{window.dispatchEvent(new CustomEvent('ces:deferred-ready',{detail:CESBoot.getReport()}));}catch(ignore){}return result;});
-        return deferredPromiseV19;
+      // Active-tab deferred loader.
+      // Only the business logic needed by the selected tab is executed.  HTML is
+      // warmed separately because it has no API side effects and keeps legacy DOM
+      // assumptions intact without starting every module/runtime at once.
+      var cesDeferredViewWarmPromise = null;
+      var cesDeferredGroupPromises = Object.create(null);
+      var cesDeferredCodePromises = Object.create(null);
+      var cesDeferredScriptPromises = Object.create(null);
+      var cesDeferredLoadedScripts = Object.create(null);
+
+      var CES_DEFERRED_TAB_SCRIPTS = {
+        management_overview:['js/modules/10-management-overview-dashboard.js','js/modules/990-runtime-system-final.js'],
+        service:['js/modules/20-service-csi.js','js/modules/990-runtime-system-final.js'],
+        report:['js/modules/30-report-csi.js','js/modules/990-runtime-system-final.js','js/modules/995-report-csi-v31.js','js/modules/996-report-csi-upload-v31.js'],
+        memo_workorder:['js/modules/185-memo-workorder.js','js/modules/990-runtime-system-final.js'],
+        yearly:['js/modules/40-yearly-dashboard.js','js/modules/990-runtime-system-final.js'],
+        revenue:['js/modules/50-revenue-dashboard.js','js/modules/990-runtime-system-final.js'],
+        calendar:['js/modules/60-calendar-master.js','js/modules/990-runtime-system-final.js'],
+        checkin:['js/modules/70-checkin.js','js/modules/990-runtime-system-final.js'],
+        car_booking:['js/modules/170-vehicle-booking.js','js/modules/990-runtime-system-final.js'],
+        van_booking:['js/modules/170-vehicle-booking.js','js/modules/990-runtime-system-final.js'],
+        report_manage:['js/modules/80-report-management.js','js/modules/990-runtime-system-final.js'],
+        weekly:['js/modules/90-weekly-report.js','js/modules/990-runtime-system-final.js'],
+        ot:['js/modules/100-ot-dashboard.js','js/modules/990-runtime-system-final.js'],
+        team_information:['js/modules/180-team-information.js','js/modules/990-runtime-system-final.js'],
+        team_plan:['js/modules/180-team-information.js','js/modules/990-runtime-system-final.js'],
+        monthly_report:['js/modules/186-monthly-report.js','js/modules/990-runtime-system-final.js'],
+        users:['js/modules/110-users-management.js','js/modules/990-runtime-system-final.js'],
+        ces_evaluation:['js/modules/195-ces-hub-evaluation.js','js/modules/990-runtime-system-final.js'],
+        ces_ai_knowledge:['js/modules/196-ces-ai-knowledge.js','js/modules/990-runtime-system-final.js'],
+        setting:['js/modules/120-settings.js','js/modules/990-runtime-system-final.js','js/modules/997-stock-inventory-settings-kpi-v31.js'],
+        health:['js/modules/190-system-health.js','js/modules/990-runtime-system-final.js'],
+        kpi:['js/modules/130-kpi-dashboard.js','js/modules/131-lab-kpi-dashboard.js','js/modules/990-runtime-system-final.js','js/modules/992-frontend-reference-fix-v31.js','js/modules/997-stock-inventory-settings-kpi-v31.js'],
+        stock_dashboard:['js/modules/140-stock-dashboard.js','js/modules/991-runtime-stock-final.js'],
+        inventory:['js/modules/140-stock-dashboard.js','js/modules/150-stock-inventory.js','js/modules/991-runtime-stock-final.js','js/modules/997-stock-inventory-settings-kpi-v31.js'],
+        check_stock:['js/modules/140-stock-dashboard.js','js/modules/160-stock-check.js','js/modules/991-runtime-stock-final.js']
+      };
+      var CES_DEFERRED_SHARED_TAIL = [
+        'js/modules/206-global-header-actions-v226.js',
+        'js/modules/207-ui-consistency-v228.js',
+        'js/modules/208-ui-refinement-v229.js',
+        'js/modules/209-stability-access-line-readiness-v230.js',
+        'js/modules/210-line-oa.js'
+      ];
+
+      function cesDeferredItemByUrl(url){
+        var list=window.CES_BOOT_MANIFEST.deferredScripts||[];
+        for(var i=0;i<list.length;i++)if(list[i].url===url)return cesPrepareBootItem(list[i]);
+        return cesPrepareBootItem({url:url,optional:true});
+      }
+      function cesDeferredViewItem(tab){
+        var id='view-'+String(tab||'');
+        var list=window.CES_BOOT_MANIFEST.deferredHtml||[];
+        for(var i=0;i<list.length;i++)if(list[i].viewId===id)return cesPrepareBootItem(list[i]);
+        return null;
+      }
+      function cesPreloadDeferredViews(){
+        if(cesDeferredViewWarmPromise)return cesDeferredViewWarmPromise;
+        var missing=(window.CES_BOOT_MANIFEST.deferredHtml||[]).filter(function(item){return !document.getElementById(item.viewId);}).map(cesPrepareBootItem);
+        if(!missing.length)return Promise.resolve([]);
+        cesDeferredViewWarmPromise=CESBoot.loadHtml(missing).catch(function(error){console.warn('[CES deferred HTML warm]',error);return[];});
+        return cesDeferredViewWarmPromise;
+      }
+      window.CES_preloadDeferredViews=cesPreloadDeferredViews;
+
+      function cesPrepareDeferredCode(item){
+        var key=String(item.url||'');
+        if(!cesDeferredCodePromises[key])cesDeferredCodePromises[key]=CESBoot.getText(item.url);
+        return cesDeferredCodePromises[key];
+      }
+      function cesExecuteDeferredScript(item){
+        var clean=String(item.url||'').replace(/([?&])v=[^&]*/g,'$1').replace(/[?&]$/,'');
+        if(cesDeferredLoadedScripts[clean]||document.querySelector('script[data-ces-source="'+clean+'"]')){
+          cesDeferredLoadedScripts[clean]=true;return Promise.resolve(true);
+        }
+        if(cesDeferredScriptPromises[clean])return cesDeferredScriptPromises[clean];
+        cesDeferredScriptPromises[clean]=cesPrepareDeferredCode(item).then(function(code){
+          if(cesDeferredLoadedScripts[clean])return true;
+          var script=document.createElement('script');script.setAttribute('data-ces-source',clean);script.text=code+'\n//# sourceURL='+clean;document.head.appendChild(script);cesDeferredLoadedScripts[clean]=true;
+          try{window.dispatchEvent(new CustomEvent('ces:deferred-script-loaded',{detail:{url:clean}}));}catch(ignore){}
+          return new Promise(function(resolve){if(typeof requestAnimationFrame==='function')requestAnimationFrame(function(){setTimeout(function(){resolve(true);},0);});else setTimeout(function(){resolve(true);},0);});
+        }).catch(function(error){console.warn('[CES deferred script]',clean,error);if(item.optional)return false;throw error;});
+        return cesDeferredScriptPromises[clean];
+      }
+      function cesDeferredScriptsForTab(tab){
+        var urls=(CES_DEFERRED_TAB_SCRIPTS[tab]||[]).slice();
+        var seen=Object.create(null);return urls.filter(function(url){if(seen[url])return false;seen[url]=true;return true;});
+      }
+      var cesDeferredSharedTailPromise=null;
+      function cesLoadDeferredSharedTailLater_(){
+        if(cesDeferredSharedTailPromise)return cesDeferredSharedTailPromise;
+        var items=CES_DEFERRED_SHARED_TAIL.map(cesDeferredItemByUrl);
+        items.forEach(cesPrepareDeferredCode);
+        cesDeferredSharedTailPromise=new Promise(function(resolve){
+          var run=function(){var chain=Promise.resolve();items.forEach(function(item){chain=chain.then(function(){return cesExecuteDeferredScript(item);});});chain.then(resolve,function(error){console.warn('[CES shared tail]',error);resolve(false);});};
+          if(window.CES_TASK_PRIORITY&&typeof window.CES_TASK_PRIORITY.whenIdle==='function')window.CES_TASK_PRIORITY.whenIdle(run,{timeout:7000});else setTimeout(run,1800);
+        });
+        return cesDeferredSharedTailPromise;
+      }
+      window.CES_isDeferredTabReady=function(tab){
+        if(!tab||tab==='portal')return true;
+        if(!document.getElementById('view-'+tab))return false;
+        return cesDeferredScriptsForTab(tab).every(function(url){return !!cesDeferredLoadedScripts[url]||!!document.querySelector('script[data-ces-source="'+url+'"]');});
       };
 
-      CESBoot.loadHtml(window.CES_BOOT_MANIFEST.coreHtml.map(cesPrepareBootItemV19))
-        .then(function(){return CESBoot.loadScripts(window.CES_BOOT_MANIFEST.coreScripts.map(cesPrepareBootItemV19));})
+      window.CES_loadDeferredModules=function(focusTab){
+        if(!focusTab)return cesPreloadDeferredViews();
+        focusTab=String(focusTab||'').trim();
+        if(window.CES_TASK_PRIORITY&&typeof window.CES_TASK_PRIORITY.setActiveTab==='function')window.CES_TASK_PRIORITY.setActiveTab(focusTab);
+        if(window.CES_isDeferredTabReady(focusTab))return Promise.resolve(true);
+        if(cesDeferredGroupPromises[focusTab])return cesDeferredGroupPromises[focusTab];
+        var viewItem=cesDeferredViewItem(focusTab);
+        var ensureView=document.getElementById('view-'+focusTab)?Promise.resolve(true):(viewItem?CESBoot.loadHtml([viewItem]):Promise.resolve(true));
+        // Do not warm unrelated views while the user is waiting for this page.
+        // The selected view + selected business scripts get the network/main-thread first.
+        var items=cesDeferredScriptsForTab(focusTab).map(cesDeferredItemByUrl);
+        // Fetch the selected tab's code in parallel, then execute only that
+        // ordered subset.  This keeps legacy override order while avoiding the
+        // previous 30+ module burst and its API side effects.
+        items.forEach(cesPrepareDeferredCode);
+        cesDeferredGroupPromises[focusTab]=ensureView.then(function(){
+          var chain=Promise.resolve();items.forEach(function(item){chain=chain.then(function(){return cesExecuteDeferredScript(item);});});return chain;
+        }).then(function(){
+          try{window.dispatchEvent(new CustomEvent('ces:deferred-ready',{detail:{tab:focusTab,report:CESBoot.getReport()}}));}catch(ignore){}
+          setTimeout(function(){cesLoadDeferredSharedTailLater_();},0);
+          return true;
+        }).catch(function(error){delete cesDeferredGroupPromises[focusTab];throw error;});
+        return cesDeferredGroupPromises[focusTab];
+      };
+
+      CESBoot.loadHtml(window.CES_BOOT_MANIFEST.coreHtml.map(cesPrepareBootItem))
+        .then(function(){return CESBoot.loadScripts(window.CES_BOOT_MANIFEST.coreScripts.map(cesPrepareBootItem));})
         .then(function(){
           if(window.CES_BOOT_WATCHDOG)clearTimeout(window.CES_BOOT_WATCHDOG);CES_hideSplash();
           try{window.dispatchEvent(new CustomEvent('ces:app-ready',{detail:CESBoot.getReport()}));}catch(ignore){}
-          var deferredStartedV205=false;var schedule=function(){if(deferredStartedV205)return;deferredStartedV205=true;window.CES_loadDeferredModules().catch(function(error){console.warn('[CES deferred modules]',error);});};
-          window.addEventListener('ces:home-ready',schedule,{once:true});
-          setTimeout(function(){if('requestIdleCallback' in window)requestIdleCallback(schedule,{timeout:700});else schedule();},2600);
+          // Warm markup only. Business scripts remain demand-loaded by the
+          // active tab so background work can never create a multi-module sync burst.
+          var deferredWarmStarted=false;var schedule=function(){if(deferredWarmStarted)return;deferredWarmStarted=true;var run=function(){var warm=function(){if(window.CES_preloadDeferredViews)window.CES_preloadDeferredViews().catch(function(error){console.warn('[CES deferred HTML]',error);});};if(window.CES_TASK_PRIORITY&&typeof window.CES_TASK_PRIORITY.whenIdle==='function')window.CES_TASK_PRIORITY.whenIdle(warm,{timeout:9000});else setTimeout(warm,1200);};if('requestIdleCallback' in window)requestIdleCallback(run,{timeout:5000});else setTimeout(run,1200);};
+          setTimeout(schedule,3500);
         })
         .catch(function(err){
           if(window.CES_BOOT_WATCHDOG)clearTimeout(window.CES_BOOT_WATCHDOG);console.error('[CES Hub boot failed]',err);CES_hideSplash();

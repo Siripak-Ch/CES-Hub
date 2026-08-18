@@ -20,61 +20,193 @@
   const JSONP_URL_LIMIT = 6500;
   let seq = 0;
   const inflightReads = new Map();
-  let activeUserRequestsV262 = 0;
-  let activeNormalRequestsV266 = 0;
-  let activeBackgroundRequestsV266 = 0;
-  let lastUserInteractionV262 = 0;
-  const backgroundQueueV262 = [];
-  const normalQueueV266 = [];
-  const MAX_NORMAL_REQUESTS_V266 = 2;
-  const MAX_BACKGROUND_REQUESTS_V266 = 1;
-  try{['click','submit','change'].forEach(function(evt){document.addEventListener(evt,function(){lastUserInteractionV262=Date.now();},true);});}catch(ignore){}
 
-  function startNormalV266_(job){
-    activeNormalRequestsV266 += 1;
-    Promise.resolve().then(job.factory).then(job.resolve,job.reject).finally(function(){
-      activeNormalRequestsV266=Math.max(0,activeNormalRequestsV266-1);
-      flushBackgroundV262_();
-    });
+  // Active-page-first scheduler.
+  // - Current tab reads: latest queued read first, max 3 concurrent.
+  // - Current tab writes: FIFO, max 1 concurrent per browser to preserve save order.
+  // - Normal work: max 1 concurrent.
+  // - Background sync/prefetch: single-flight and only when foreground is idle.
+  // This prevents unrelated sync bursts from delaying the page/button the user is using.
+  const taskState = {
+    activeReads: 0,
+    activeWrites: 0,
+    normal: 0,
+    background: 0,
+    activeTab: '',
+    lastInteractionAt: 0,
+    lastInteractionTab: ''
+  };
+  const activeReadQueue = [];
+  const activeWriteQueue = [];
+  const normalQueue = [];
+  const backgroundQueue = [];
+  const MAX_ACTIVE_READS = 3;
+  const MAX_ACTIVE_WRITES = 1;
+  const MAX_NORMAL_REQUESTS = 1;
+  const MAX_BACKGROUND_REQUESTS = 1;
+  const MAX_TOTAL_REQUESTS = 5;
+  const idleWaiters = [];
+  const BACKGROUND_INTERACTION_GRACE_MS = 1400;
+  const DIRECT_INTERACTION_PRIORITY_MS = 350;
+  let backgroundWakeTimer = null;
+
+  function getActiveTab_(){
+    try {
+      return String(taskState.activeTab || window.CES_ACTIVE_TAB || window.currentTab || (document.body && document.body.getAttribute('data-ces-active-tab')) || '').trim();
+    } catch(ignore) { return String(taskState.activeTab || ''); }
   }
-  function startBackgroundV266_(job){
-    activeBackgroundRequestsV266 += 1;
-    Promise.resolve().then(job.factory).then(job.resolve,job.reject).finally(function(){
-      activeBackgroundRequestsV266=Math.max(0,activeBackgroundRequestsV266-1);
-      flushBackgroundV262_();
-    });
-  }
-  function flushBackgroundV262_(){
-    // A click/save/import on the active page always gets the next free slot.
-    if(activeUserRequestsV262>0)return;
-    while(normalQueueV266.length && activeNormalRequestsV266<MAX_NORMAL_REQUESTS_V266){
-      startNormalV266_(normalQueueV266.shift());
-    }
-    // Background work is deliberately single-flight. This prevents a page from
-    // launching 10–20 simultaneous sheet reads while the user is trying to act.
-    if(activeNormalRequestsV266===0 && activeBackgroundRequestsV266<MAX_BACKGROUND_REQUESTS_V266 && backgroundQueueV262.length){
-      startBackgroundV266_(backgroundQueueV262.shift());
-    }
-  }
-  function queuedPromiseV266_(queue,factory){
-    return new Promise(function(resolve,reject){queue.push({factory:factory,resolve:resolve,reject:reject});flushBackgroundV262_();});
-  }
-  function scheduleRequestV262_(factory, options, writeLike){
+
+  function inferRequestModule_(fnName, options){
     options=options||{};
-    const recentUserAction=(Date.now()-lastUserInteractionV262)<1200;
-    const priority=options.priority||((writeLike||options.userAction||recentUserAction)?'user':(options.background?'background':'normal'));
-    if(priority==='user'){
-      activeUserRequestsV262++;
-      return Promise.resolve().then(factory).finally(function(){activeUserRequestsV262=Math.max(0,activeUserRequestsV262-1);flushBackgroundV262_();});
+    if(options.module)return String(options.module);
+    var fn=String(fnName||'');
+    if(/^(?:cesStock_getDashboardData|sd_)/i.test(fn))return 'stock_dashboard';
+    if(/^(?:cesStock_getInventoryData|si_)/i.test(fn)||/Accessory/i.test(fn))return 'inventory';
+    if(/^(?:cesStock_(?:lookup|verifyCalibration|getLogs|scanCalPm|cfCalPm)|sc_)/i.test(fn))return 'check_stock';
+    if(/^cesStock_/i.test(fn)||/Stock|Infusion/i.test(fn)){
+      var stockTab=typeof getActiveTab_==='function'?String(getActiveTab_()||''):'';
+      return /^(?:stock_dashboard|inventory|check_stock)$/.test(stockTab)?stockTab:'stock';
     }
-    if(priority==='background')return queuedPromiseV266_(backgroundQueueV262,factory);
-    if(activeUserRequestsV262>0 || activeNormalRequestsV266>=MAX_NORMAL_REQUESTS_V266)return queuedPromiseV266_(normalQueueV266,factory);
-    activeNormalRequestsV266++;
-    return Promise.resolve().then(factory).finally(function(){activeNormalRequestsV266=Math.max(0,activeNormalRequestsV266-1);flushBackgroundV262_();});
+    if(/Calendar/i.test(fn))return 'calendar';
+    if(/CoreReadModel|AllData/i.test(fn))return 'core';
+    if(/ManagementOverview/i.test(fn))return 'management_overview';
+    if(/Yearly|JobDashboard/i.test(fn))return 'yearly';
+    if(/Revenue/i.test(fn))return 'revenue';
+    if(/Vehicle|CarBooking/i.test(fn))return 'car_booking';
+    if(/VanBooking/i.test(fn))return 'van_booking';
+    if(/Checkin/i.test(fn))return 'checkin';
+    if(/TeamInformation/i.test(fn))return 'team_information';
+    if(/TeamPlan/i.test(fn))return 'team_plan';
+    if(/MonthlyReport/i.test(fn))return 'monthly_report';
+    if(/ReportManage|RM/i.test(fn))return 'report_manage';
+    if(/ServiceCSI/i.test(fn))return 'service';
+    if(/ReportCSI/i.test(fn))return 'report';
+    if(/Memo|WorkOrder/i.test(fn))return 'memo_workorder';
+    if(/KPI/i.test(fn))return 'kpi';
+    if(/User|Permission|Setting/i.test(fn))return 'setting';
+    if(/Home|Portal|Startup/i.test(fn))return 'portal';
+    return '';
   }
-  window.CES_TASK_PRIORITY_V266={
-    stats:function(){return{user:activeUserRequestsV262,normal:activeNormalRequestsV266,background:activeBackgroundRequestsV266,normalQueued:normalQueueV266.length,backgroundQueued:backgroundQueueV262.length};},
-    version:'V26.6'
+
+  function moduleMatchesActiveTab_(moduleName, activeTab){
+    moduleName=String(moduleName||'');activeTab=String(activeTab||'');
+    if(!moduleName||!activeTab)return false;
+    if(moduleName==='stock')return /^(?:stock_dashboard|inventory|check_stock)$/.test(activeTab);
+    if(moduleName==='core')return /^(?:portal|management_overview|yearly|calendar)$/.test(activeTab);
+    if(moduleName==='car_booking')return activeTab==='car_booking';
+    if(moduleName==='van_booking')return activeTab==='van_booking';
+    return moduleName===activeTab;
+  }
+
+  function totalActive_(){return taskState.activeReads+taskState.activeWrites+taskState.normal+taskState.background;}
+  function foregroundBusy_(){return taskState.activeReads+taskState.activeWrites+taskState.normal>0||activeReadQueue.length>0||activeWriteQueue.length>0||normalQueue.length>0;}
+  function backgroundGraceRemaining_(){return Math.max(0,BACKGROUND_INTERACTION_GRACE_MS-(Date.now()-Number(taskState.lastInteractionAt||0)));}
+  function scheduleBackgroundWake_(){var wait=backgroundGraceRemaining_();if(!backgroundQueue.length||wait<=0)return;clearTimeout(backgroundWakeTimer);backgroundWakeTimer=setTimeout(function(){backgroundWakeTimer=null;flushTaskQueue_();},wait+20);}
+
+  function removeQueuedJob_(job){
+    [activeReadQueue,activeWriteQueue,normalQueue,backgroundQueue].some(function(q){
+      var i=q.indexOf(job);if(i<0)return false;q.splice(i,1);return true;
+    });
+  }
+
+  function queueForLane_(lane,writeLike){
+    if(lane==='active')return writeLike?activeWriteQueue:activeReadQueue;
+    if(lane==='background')return backgroundQueue;
+    return normalQueue;
+  }
+
+  function startJob_(job,counter){
+    if(!job||job.state!=='queued')return;
+    job.state='running';job.startedAt=Date.now();taskState[counter]+=1;
+    Promise.resolve().then(job.factory).then(job.resolve,job.reject).finally(function(){
+      taskState[counter]=Math.max(0,taskState[counter]-1);job.state='done';job.finishedAt=Date.now();
+      flushTaskQueue_();notifyIdleWaiters_();
+    });
+  }
+
+  function flushTaskQueue_(){
+    var progressed=true;
+    while(progressed&&totalActive_()<MAX_TOTAL_REQUESTS){
+      progressed=false;
+      if(activeWriteQueue.length&&taskState.activeWrites<MAX_ACTIVE_WRITES){startJob_(activeWriteQueue.shift(),'activeWrites');progressed=true;continue;}
+      if(activeReadQueue.length&&taskState.activeReads<MAX_ACTIVE_READS){startJob_(activeReadQueue.pop(),'activeReads');progressed=true;continue;}
+      if(!activeWriteQueue.length&&!activeReadQueue.length&&normalQueue.length&&taskState.normal<MAX_NORMAL_REQUESTS){startJob_(normalQueue.shift(),'normal');progressed=true;continue;}
+      if(!foregroundBusy_()&&taskState.background<MAX_BACKGROUND_REQUESTS&&backgroundQueue.length&&backgroundGraceRemaining_()===0){startJob_(backgroundQueue.shift(),'background');progressed=true;continue;}
+      if(backgroundQueue.length&&backgroundGraceRemaining_()>0)scheduleBackgroundWake_();
+    }
+    notifyIdleWaiters_();
+  }
+
+  function notifyIdleWaiters_(){
+    if(foregroundBusy_())return;
+    while(idleWaiters.length){
+      var item=idleWaiters.shift();clearTimeout(item.timer);setTimeout(item.callback,0);
+    }
+  }
+
+  function resolveLane_(fnName,options,writeLike){
+    options=options||{};
+    var explicit=String(options.priority||'').toLowerCase();
+    if(options.background===true||explicit==='background')return 'background';
+    if(explicit==='user'||explicit==='active'||options.userAction===true)return 'active';
+    if(explicit==='normal')return 'normal';
+    var moduleName=inferRequestModule_(fnName,options),activeTab=getActiveTab_();
+    if(moduleMatchesActiveTab_(moduleName,activeTab))return 'active';
+    // A server call fired synchronously by the user's current click/change is
+    // interactive even when its backend function belongs to a shared module
+    // (for example Calendar sync launched from Job Dashboard).  Keep this
+    // window intentionally short; explicit background work was returned above
+    // and can never be promoted by this heuristic.
+    var directAge=Date.now()-Number(taskState.lastInteractionAt||0);
+    if(directAge>=0&&directAge<=DIRECT_INTERACTION_PRIORITY_MS&&String(taskState.lastInteractionTab||'')===String(activeTab||''))return 'active';
+    return 'normal';
+  }
+
+  // Create a scheduled Promise and keep its queued job available for dedupe
+  // promotion when the same read becomes necessary on the active page.
+  function createScheduledRequest_(factory,meta){
+    var jobRef=null;
+    var promise=new Promise(function(resolve,reject){
+      jobRef={factory:factory,resolve:resolve,reject:reject,lane:meta.lane||'normal',writeLike:!!meta.writeLike,module:meta.module||'',fnName:meta.fnName||'',state:'queued',queuedAt:Date.now()};
+      queueForLane_(jobRef.lane,jobRef.writeLike).push(jobRef);
+      flushTaskQueue_();
+    });
+    promise.__cesJob=jobRef;
+    return promise;
+  }
+
+  function promoteQueuedJob_(job,targetLane){
+    if(!job||job.state!=='queued'||job.lane===targetLane)return;
+    if(targetLane!=='active')return;
+    removeQueuedJob_(job);job.lane='active';queueForLane_('active',job.writeLike).push(job);flushTaskQueue_();
+  }
+
+  function setActiveTab_(tab){
+    tab=String(tab||'').trim();if(!tab)return;
+    taskState.activeTab=tab;
+    // Promote queued reads for the page the user just opened and demote stale
+    // queued reads from pages no longer visible. Writes are never reordered.
+    normalQueue.slice().forEach(function(job){if(!job.writeLike&&moduleMatchesActiveTab_(job.module,tab)){removeQueuedJob_(job);job.lane='active';activeReadQueue.push(job);}});
+    activeReadQueue.slice().forEach(function(job){if(job.module&&!moduleMatchesActiveTab_(job.module,tab)){removeQueuedJob_(job);job.lane='background';backgroundQueue.push(job);}});
+    flushTaskQueue_();
+  }
+
+  function noteInteraction_(tab){taskState.lastInteractionAt=Date.now();taskState.lastInteractionTab=String(tab||getActiveTab_()||'');if(tab)setActiveTab_(tab);if(backgroundQueue.length)scheduleBackgroundWake_();}
+
+  try{['click','submit','change'].forEach(function(evt){document.addEventListener(evt,function(){noteInteraction_(getActiveTab_());},true);});}catch(ignore){}
+
+  window.CES_TASK_PRIORITY={
+    setActiveTab:setActiveTab_,
+    noteInteraction:noteInteraction_,
+    whenIdle:function(callback,options){
+      options=options||{};if(typeof callback!=='function')return;
+      if(!foregroundBusy_()){setTimeout(callback,0);return;}
+      var item={callback:callback,timer:null};
+      item.timer=setTimeout(function(){var i=idleWaiters.indexOf(item);if(i>=0)idleWaiters.splice(i,1);callback();},Number(options.timeout||2500));
+      idleWaiters.push(item);
+    },
+    stats:function(){return{activeTab:getActiveTab_(),activeReads:taskState.activeReads,activeWrites:taskState.activeWrites,normal:taskState.normal,background:taskState.background,activeReadQueued:activeReadQueue.length,activeWriteQueued:activeWriteQueue.length,normalQueued:normalQueue.length,backgroundQueued:backgroundQueue.length,totalActive:totalActive_()};},
+    version:'ACTIVE-FIRST-STABLE'
   };
   let writeLoadingCount = 0;
   let writeLoadingTimer = null;
@@ -419,25 +551,34 @@
     options = options || {};
     args = Array.isArray(args) ? args : [];
     const writeLike = isWriteLikeFunction(fnName);
+    const schedulerWriteLike = writeLike && !/^(?:syncCalendarToSheet|syncCalendarDashboard|fullSyncCalendar2025_2026)$/i.test(String(fnName||''));
     const transport = shouldUseIframe(fnName, args, options) ? 'iframe' : 'jsonp';
+    const moduleName = inferRequestModule_(fnName, options);
+    const lane = resolveLane_(fnName, options, writeLike);
     const key = !writeLike && options.dedupe !== false
       ? String(fnName) + '|' + safeStringify(args) + '|' + transport
       : '';
-    if (key && inflightReads.has(key)) return inflightReads.get(key);
 
-    // V26.6: queued background/normal calls do not inflate the header "Syncing N requests" count.
-    // Loading begins only when the request actually gets a scheduler slot.
+    if (key && inflightReads.has(key)) {
+      const existing = inflightReads.get(key);
+      if (lane === 'active' && existing && existing.job) promoteQueuedJob_(existing.job, 'active');
+      return existing && existing.promise ? existing.promise : existing;
+    }
+
+    // Background sync is intentionally silent in the global header. The active
+    // page/function owns visible loading feedback and always receives the next slot.
+    const effectiveOptions = Object.assign({}, options);
+    if (lane === 'background' && typeof effectiveOptions.silentLoading === 'undefined') effectiveOptions.silentLoading = true;
     const requestFactory = function(){
-      const loadingTicket = beginWriteLoading(fnName, Object.assign({}, options, { loadingLabel:(options&&options.loadingLabel)||(writeLike?undefined:'Loading data…') }));
-      const actual = transport === 'iframe' ? iframePostCall(fnName, args, options) : jsonpCall(fnName, args, options);
+      const loadingTicket = beginWriteLoading(fnName, Object.assign({}, effectiveOptions, { loadingLabel:(effectiveOptions&&effectiveOptions.loadingLabel)||(writeLike?undefined:'Loading data…') }));
+      const actual = transport === 'iframe' ? iframePostCall(fnName, args, effectiveOptions) : jsonpCall(fnName, args, effectiveOptions);
       return Promise.resolve(actual).finally(function(){ endWriteLoading(loadingTicket); });
     };
-    const request = scheduleRequestV262_(requestFactory, options, writeLike);
-    const wrapped = Promise.resolve(request);
+    const wrapped = createScheduledRequest_(requestFactory, {lane:lane,writeLike:schedulerWriteLike,module:moduleName,fnName:fnName});
     if (!key) return wrapped;
 
     const tracked = wrapped.finally(function () { inflightReads.delete(key); });
-    inflightReads.set(key, tracked);
+    inflightReads.set(key, {promise:tracked,job:wrapped.__cesJob});
     return tracked;
   }
 
@@ -623,5 +764,5 @@
     } catch (ignore) {}
   }, 2500);
 
-  console.log('[CES Hub] gas-polyfill.js loaded: V26.2 user-action priority + adaptive transport');
+  console.log('[CES Hub] gas-polyfill.js loaded: active-page-first scheduler + adaptive transport');
 })();

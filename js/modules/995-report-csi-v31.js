@@ -90,12 +90,13 @@
     return timeout(window.CES_API.health(), 25000, 'Apps Script API health check');
   }
 
-  function cacheRead() {
+  function cacheReadBox() {
     try {
       var cached = JSON.parse(localStorage.getItem(CACHE_KEY) || 'null');
-      return cached && cached.data ? cached.data : null;
+      return cached && cached.data ? cached : null;
     } catch (_) { return null; }
   }
+  function cacheRead() { var box = cacheReadBox(); return box ? box.data : null; }
   function cacheWrite(data) {
     try { localStorage.setItem(CACHE_KEY, JSON.stringify({ ts:Date.now(), data:data })); } catch (_) {}
   }
@@ -113,22 +114,33 @@
     return normalized;
   }
 
-  function loadReportCSIOnlyV31(force, showLoading) {
+  function loadReportCSIData_(force, showLoading) {
     force = force === true;
     showLoading = showLoading === true;
-    var cached = cacheRead();
-    if (!force && cached) renderReport(cached);
+    var cacheBox = cacheReadBox();
+    var cached = cacheBox && cacheBox.data;
+    var cacheAge = cacheBox ? Date.now() - Number(cacheBox.ts || 0) : Infinity;
+    var cacheFresh = cacheAge < 30 * 60 * 1000;
+    if (!force && cached) {
+      renderReport(cached);
+      if (cacheFresh) return Promise.resolve(cached);
+    }
     if (refreshPromise) return refreshPromise;
+    var backgroundRefresh = !force && !!cached;
     if (showLoading && !cached) showOverlay('Loading Report CSI...');
 
     refreshPromise = timeout(
-      apiCall('getReportDataOnly', [], { transport:'jsonp', timeoutMs:50000 }),
+      apiCall('getReportDataOnly', [], {
+        transport:'jsonp', timeoutMs:50000, dedupe:true,
+        priority:backgroundRefresh?'background':'active', background:backgroundRefresh,
+        silentLoading:backgroundRefresh, userAction:!backgroundRefresh, module:'report'
+      }),
       55000,
       'Report CSI load'
     ).then(renderReport).catch(function (err) {
       if (cached) {
         renderReport(cached);
-        if (window.Swal) Swal.fire({ icon:'warning', title:'Using cached Report CSI', text:messageOf(err), timer:2500, showConfirmButton:false });
+        if (force && window.Swal) Swal.fire({ icon:'warning', title:'Using cached Report CSI', text:messageOf(err), timer:2500, showConfirmButton:false });
         return cached;
       }
       throw err;
@@ -141,10 +153,10 @@
 
   function patchReportControls() {
     var input = id('reportFileInput');
-    if (input) input.setAttribute('onchange', 'handleReportUploadV31(event)');
+    if (input) input.setAttribute('onchange', 'handleReportUpload(event)');
     var refresh = document.querySelector('#view-report button[title="Refresh Data"],#view-report button[title="Refresh Report CSI"]');
     if (refresh) {
-      refresh.setAttribute('onclick', 'loadReportCSIOnlyV31(true,true)');
+      refresh.setAttribute('onclick', 'loadReportCSIOnly(true,true)');
       refresh.setAttribute('title', 'Refresh Report CSI');
     }
   }
@@ -154,8 +166,10 @@
     patchReportControls();
   }
 
-  window.loadReportCSIOnlyV31 = loadReportCSIOnlyV31;
-  window.loadReportCSIOnly = function (showLoading) { return loadReportCSIOnlyV31(true, !!showLoading); };
+  window.loadReportCSIOnly = function (forceRefresh, showLoading) {
+    if (arguments.length >= 2) return loadReportCSIData_(forceRefresh === true, showLoading === true);
+    return loadReportCSIData_(forceRefresh === true, forceRefresh === true);
+  };
 
   apply();
   setTimeout(apply, 100);
@@ -173,7 +187,7 @@
     window.switchTab.__cesV31Wrapped = true;
   }
 
-  window.CES_REPORT_V31_API_TEST = function () {
+  window.CES_REPORT_API_TEST = function () {
     return apiHealth().then(function (result) {
       console.log('[CES Report V31 API Test] connected', result);
       return { ok:true, result:result, apiUrl:configuredApiUrl() };
@@ -184,7 +198,7 @@
     });
   };
 
-  window.CES_REPORT_UI_V31_RECHECK = function () {
+  window.CES_REPORT_UI_RECHECK = function () {
     var icons = Array.prototype.slice.call(document.querySelectorAll('.ces-page-header-icon-v31'));
     var notWhite = icons.filter(function (node) {
       return getComputedStyle(node).backgroundColor !== 'rgb(255, 255, 255)';
@@ -197,7 +211,7 @@
       uploadHandler:input ? input.getAttribute('onchange') : '',
       apiUrl:configuredApiUrl(),
       endpoint:'saveReportDataArray',
-      uploadHandlerReady:typeof window.handleReportUploadV31 === 'function',
+      uploadHandlerReady:typeof window.handleReportUpload === 'function',
       refreshPending:!!refreshPromise
     };
     console.log('[CES Report V31 Recheck]', result);

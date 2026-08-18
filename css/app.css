@@ -3276,10 +3276,24 @@ textarea.ces-detail-input-v243{min-height:58px;resize:vertical;margin-bottom:9px
   color:#64748b!important;border:1px solid #cbd5e1!important;box-shadow:none!important;
 }
 #view-stock_dashboard .ces-ready-stock-alert-v263{
-  background:#fef3c7!important;color:#a16207!important;border:1px solid #fbbf24!important;
-  box-shadow:0 0 0 2px rgba(245,158,11,.08)!important;
+  background:#f59e0b!important;color:#ffffff!important;border:1px solid #d97706!important;
+  box-shadow:none!important;opacity:1!important;
 }
-#view-stock_dashboard .ces-ready-stock-alert-v263:hover{background:#fde68a!important;color:#92400e!important}
+#view-stock_dashboard .ces-ready-stock-alert-v263:hover{background:#d97706!important;color:#ffffff!important}
+#view-stock_dashboard .stockpro-actions .ces-action-neutral,
+#view-stock_dashboard .stockpro-actions .sp-btn.ghost,
+#view-stock_dashboard .stockpro-actions a.sp-btn.ghost{
+  background:#f1f5f9!important;color:#64748b!important;border:1px solid #cbd5e1!important;box-shadow:none!important;
+}
+#view-stock_dashboard .stockpro-actions .ces-action-neutral:hover,
+#view-stock_dashboard .stockpro-actions .sp-btn.ghost:hover,
+#view-stock_dashboard .stockpro-actions a.sp-btn.ghost:hover{
+  background:#e2e8f0!important;color:#334155!important;
+}
+#view-stock_dashboard .stockpro-actions .ces-ready-stock-alert-v263,
+#view-stock_dashboard .stockpro-actions .ces-ready-stock-alert-v263:hover{
+  color:#ffffff!important;
+}
 @media(max-width:900px){
   #view-stock_dashboard .csv5-dashboard-filters{grid-template-columns:repeat(2,minmax(0,1fr))!important}
 }
@@ -3298,3 +3312,127 @@ textarea.ces-detail-input-v243{min-height:58px;resize:vertical;margin-bottom:9px
 /* V26.6 — Serialized infusion-pump rental accessories */
 #view-inventory .ces-rental-accessory-row-v266{background:#f0fdfa!important;border-color:#99f6e4!important}
 #view-inventory .ces-rental-accessory-row-v266 .acc-title{color:#0f766e!important}
+
+
+/* CES Hub active-first stability: critical Inventory/Stock layout is static so a
+   deferred runtime error cannot collapse cards into full-width rows. */
+#view-stock_dashboard .stockpro-model-grid{display:grid!important;grid-template-columns:repeat(3,minmax(0,1fr))!important;gap:12px!important}
+#view-stock_dashboard .sp-model-card{display:block!important;text-align:center!important;min-width:0!important}
+#view-stock_dashboard .sp-model-icon{width:34px!important;height:34px!important;min-width:34px!important;border-radius:12px!important;margin:0 auto 8px!important;display:flex!important;align-items:center!important;justify-content:center!important}
+#view-stock_dashboard .stockpro-kpi-grid,#view-inventory .stockpro-kpi-grid{display:grid!important;gap:12px!important}
+#view-stock_dashboard .stockpro-kpi-grid{grid-template-columns:repeat(4,minmax(0,1fr))!important}
+#view-inventory #siEquipKpiGrid{grid-template-columns:repeat(6,minmax(0,1fr))!important}
+#view-inventory #siAccKpiGrid{grid-template-columns:repeat(4,minmax(0,1fr))!important}
+#view-stock_dashboard .sp-kpi,#view-inventory .sp-kpi{min-width:0!important;min-height:112px!important;background:#fff!important;border:1px solid #e8eef6!important;border-radius:18px!important;padding:16px!important;text-align:center!important;display:flex!important;flex-direction:column!important;align-items:center!important;justify-content:center!important;box-shadow:0 4px 16px rgba(30,58,138,.05)!important}
+#view-stock_dashboard .sp-kpi .ico,#view-inventory .sp-kpi .ico{width:34px!important;height:34px!important;min-width:34px!important;border-radius:12px!important;margin:0 auto 8px!important;display:flex!important;align-items:center!important;justify-content:center!important}
+#view-stock_dashboard .sp-kpi .label,#view-inventory .sp-kpi .label{font-size:11px!important;font-weight:900!important;line-height:1.25!important;color:#64748b!important}
+#view-stock_dashboard .sp-kpi .val,#view-inventory .sp-kpi .val{font-size:27px!important;font-weight:900!important;line-height:1.1!important}
+
+/* Rental Contract Follow-up: readable controls without text overflow. */
+#view-stock_dashboard .ces-rental-workflow-head-v248{display:flex!important;align-items:center!important;justify-content:space-between!important;gap:12px!important;flex-wrap:wrap!important}
+#view-stock_dashboard .ces-rental-workflow-actions-v248{display:flex!important;align-items:center!important;justify-content:flex-end!important;gap:8px!important;flex-wrap:wrap!important}
+#view-stock_dashboard .ces-rental-workflow-actions-v248 .sp-btn{min-height:36px!important;padding:8px 11px!important;font-size:10.5px!important;line-height:1.1!important;white-space:nowrap!important;flex:0 0 auto!important}
+#view-stock_dashboard .ces-rental-follow-table-v261 td:nth-child(6){min-width:220px!important;width:220px!important;white-space:normal!important}
+#view-stock_dashboard .ces-rental-actions-v261{display:grid!important;grid-template-columns:repeat(2,minmax(82px,1fr))!important;gap:6px!important;min-width:190px!important;width:100%!important}
+#view-stock_dashboard .ces-rental-action-v261{width:100%!important;min-width:0!important;min-height:34px!important;padding:6px 7px!important;font-size:10px!important;line-height:1!important;white-space:nowrap!important;overflow:hidden!important;text-overflow:ellipsis!important}
+#view-stock_dashboard .ces-rental-action-v261 span{display:inline!important;overflow:hidden!important;text-overflow:ellipsis!important}
+#view-stock_dashboard .ces-rental-workflow-summary-v248{min-width:0!important;overflow-wrap:anywhere!important}
+
+/* KPI header notification uses the same 40px action geometry as other tools. */
+#view-kpi #kpi-header-actions{max-width:100%;min-width:0}
+#view-kpi #kpi-late-alert-button{width:40px!important;height:40px!important;min-width:40px!important;padding:0!important;position:relative!important;border-radius:12px!important;display:inline-flex!important;align-items:center!important;justify-content:center!important}
+#view-kpi #kpi-late-alert-button .ces-notification-count{position:absolute!important;top:-7px!important;right:-7px!important}
+
+@media(max-width:1000px){
+  #view-stock_dashboard .stockpro-model-grid{grid-template-columns:1fr!important}
+  #view-stock_dashboard .stockpro-kpi-grid,#view-inventory #siEquipKpiGrid{grid-template-columns:repeat(2,minmax(0,1fr))!important}
+  #view-inventory #siAccKpiGrid{grid-template-columns:repeat(2,minmax(0,1fr))!important}
+}
+@media(max-width:620px){
+  #view-stock_dashboard .ces-rental-actions-v261{grid-template-columns:repeat(4,34px)!important;min-width:154px!important;width:auto!important}
+  #view-stock_dashboard .ces-rental-action-v261{width:34px!important;min-width:34px!important;padding:6px!important}
+  #view-stock_dashboard .ces-rental-action-v261 span{display:none!important}
+}
+
+/* ============================================================
+   CES Hub stable UI — active-first compact subtabs and stock actions
+   ============================================================ */
+/* Infusion Pump header actions: notification yellow, Excel green, PDF red,
+   all non-semantic utility buttons neutral grey. */
+#view-stock_dashboard .stockpro-actions .ces-ready-stock-alert-v263,
+#view-stock_dashboard .stockpro-actions .ces-ready-stock-alert-v263.has-alert{
+  background:#f59e0b!important;color:#fff!important;border:1px solid #d97706!important;
+  opacity:1!important;box-shadow:none!important;
+}
+#view-stock_dashboard .stockpro-actions .ces-ready-stock-alert-v263:hover{background:#d97706!important;color:#fff!important}
+#view-stock_dashboard .stockpro-actions .ces-action-excel{
+  background:#059669!important;color:#fff!important;border:1px solid #047857!important;box-shadow:none!important;
+}
+#view-stock_dashboard .stockpro-actions .ces-action-excel:hover{background:#047857!important;color:#fff!important}
+#view-stock_dashboard .stockpro-actions .ces-action-pdf-danger{
+  background:#dc2626!important;color:#fff!important;border:1px solid #b91c1c!important;box-shadow:none!important;
+}
+#view-stock_dashboard .stockpro-actions .ces-action-pdf-danger:hover{background:#b91c1c!important;color:#fff!important}
+
+/* Calendar / Plan Tracker are first-class tabs, not a modal workflow. */
+#view-calendar .ces-calendar-workspace-tabs{
+  display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:7px!important;
+  padding:5px!important;margin-top:4px!important;margin-bottom:9px!important;
+  background:#eef3f8!important;border:1px solid #dde6f0!important;border-radius:15px!important;
+}
+#view-calendar .ces-calendar-workspace-tabs button{
+  min-height:40px!important;border:0!important;border-radius:11px!important;background:transparent!important;
+  color:#64748b!important;font-size:11px!important;font-weight:900!important;display:flex!important;
+  align-items:center!important;justify-content:center!important;gap:7px!important;cursor:pointer!important;
+}
+#view-calendar .ces-calendar-workspace-tabs button.active{
+  background:#fff!important;color:#003da5!important;box-shadow:0 2px 9px rgba(15,23,42,.07)!important;
+}
+#view-calendar #calendar-workspace-panel-plan{min-width:0!important}
+#view-calendar #calendar-plan-tracker-content{min-width:0!important}
+
+/* Keep internal tab rails visually attached to the page header.  This only
+   changes spacing; it does not change any tab behavior or data flow. */
+#view-service > .ces-service-tabs-v266,
+#view-calendar > .ces-calendar-workspace-tabs,
+#view-stock_dashboard .stockpro-header-card + .ces-stock-tabs-v260,
+#view-inventory .stockpro-header-card + .ces-inventory-mode-tabs,
+#view-weekly > .ces-weekly-view-tabs,
+#view-car_booking > .ces-car-workspace-tabs-v204,
+#view-ces_ai_knowledge > .ces-ai-k-tabs-v225{
+  margin-top:4px!important;margin-bottom:9px!important;
+}
+#view-service > :first-child,
+#view-calendar > .ces-function-header,
+#view-stock_dashboard .stockpro-header-card,
+#view-inventory .stockpro-header-card,
+#view-ces_ai_knowledge > :first-child{
+  margin-bottom:0!important;
+}
+#view-stock_dashboard .ces-stock-tabs-v260,
+#view-inventory .ces-inventory-mode-tabs{margin-bottom:10px!important}
+
+/* Rental follow-up action text must stay inside its button at all widths. */
+#view-stock_dashboard .ces-rental-workflow-actions-v248 .sp-btn,
+#view-stock_dashboard .ces-rental-actions-v261 .ces-rental-action-v261{
+  box-sizing:border-box!important;max-width:100%!important;
+}
+#view-stock_dashboard .ces-rental-workflow-actions-v248 .sp-btn{
+  min-width:118px!important;justify-content:center!important;overflow:hidden!important;text-overflow:ellipsis!important;
+}
+#view-stock_dashboard .ces-rental-actions-v261 .ces-rental-action-v261 span{
+  min-width:0!important;max-width:100%!important;overflow:hidden!important;text-overflow:ellipsis!important;
+}
+
+@media(max-width:680px){
+  #view-calendar .ces-calendar-workspace-tabs button{font-size:10px!important;min-height:38px!important}
+  #view-stock_dashboard .ces-rental-workflow-actions-v248{display:grid!important;grid-template-columns:1fr 1fr!important;width:100%!important}
+  #view-stock_dashboard .ces-rental-workflow-actions-v248 .sp-btn{width:100%!important;min-width:0!important}
+}
+
+/* Remaining internal tab/filter rails use the same compact vertical rhythm. */
+#view-team_plan .ces-training-plan-tabs,
+#view-health .ces-health-filter-tabs,
+#view-ot .ces-ot-team-tabs{
+  margin-top:4px!important;margin-bottom:9px!important;
+}

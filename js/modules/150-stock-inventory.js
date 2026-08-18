@@ -28,7 +28,7 @@ function si_exportCurrent(){spDownloadJsonAsExcel(SI.tab==='equip'?SI.filtered:S
 
 
 
-function siEnsureStyleV31(){
+function siEnsureStyle(){
   if(document.getElementById('stockpro-inventory-style-v8'))return;
   const style=document.createElement('style');style.id='stockpro-inventory-style-v8';style.textContent=`
     .sp-acc-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:14px}.sp-acc-card{border-radius:18px;border:1px solid #e8eef6;background:#fff;padding:16px;box-shadow:0 4px 16px rgba(30,58,138,.06)}.sp-acc-head{display:flex;align-items:center;gap:12px;margin-bottom:12px}.sp-acc-icon{width:44px;height:44px;border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:18px}.sp-team-med{background:#dbeafe;color:#1d4ed8}.sp-team-lab{background:#e0f2fe;color:#0284c7}.sp-team-ehs{background:#ccfbf1;color:#0f766e}.sp-team-general{background:#f1f5f9;color:#64748b}.sp-acc-title{font-weight:1000;color:#0f172a;line-height:1.25}.sp-acc-meta{font-size:11px;color:#64748b;margin-top:2px}.sp-acc-stock{font-size:30px;font-weight:1000;line-height:1.1;margin-top:8px}.sp-acc-actions{display:grid;grid-template-columns:72px 1fr auto;gap:8px;margin-top:12px}.sp-acc-actions input{border:1px solid #dbe3ef;border-radius:10px;text-align:center;font-weight:900;padding:8px}.cart-item{display:flex;align-items:center;justify-content:space-between;gap:12px;border:1px solid #dbeafe;background:#f8fbff;border-radius:14px;padding:12px;margin-bottom:10px}.sp-cart-summary{display:grid;grid-template-columns:1fr 1fr;gap:8px}.sp-cart-summary>div{background:#f8fafc;border:1px solid #e8eef6;border-radius:12px;padding:10px}.sp-cart-summary b{display:block;font-size:11px;color:#64748b}.sp-cart-summary span{font-size:16px;font-weight:1000;color:#0f172a}.sp-action-group{display:flex;gap:6px;align-items:center;justify-content:center;flex-wrap:wrap}.sp-icon-btn{width:34px;height:34px;border-radius:10px;border:1px solid #dbeafe;background:#eff6ff;color:#2563eb;display:inline-flex;align-items:center;justify-content:center;cursor:pointer;font-weight:900}.sp-icon-btn.green{background:#ecfdf5;border-color:#a7f3d0;color:#059669}.sp-icon-btn.red{background:#fef2f2;border-color:#fecaca;color:#dc2626}.sp-icon-btn.gray{background:#f8fafc;border-color:#e2e8f0;color:#475569}.sp-icon-btn.orange{background:#fff7ed;border-color:#fed7aa;color:#ea580c}@media(max-width:780px){.sp-acc-grid{grid-template-columns:1fr}.sp-acc-actions{grid-template-columns:70px 1fr}.sp-acc-actions .sp-btn.warn{grid-column:1/-1}.sp-cart-summary{grid-template-columns:1fr}}
@@ -47,7 +47,7 @@ function si_restockPrompt(a){Swal.fire({title:`Restock ${spEsc(a.itemName||a.nam
    CES Stock Pro V11 — V8 ORIGINAL ADDITIVE PATCH
    Keeps V8 functions and overrides only final inventory UX layer.
 ============================================================ */
-function si_v11Style(){
+function siBaseStyle(){
   if(document.getElementById('stockpro-inv-v11-style'))return;
   const style=document.createElement('style');style.id='stockpro-inv-v11-style';style.textContent=`
     .sp-cart-fab{position:fixed;right:24px;bottom:28px;width:58px;height:58px;border-radius:999px;border:0;background:#2563eb;color:#fff;z-index:170;box-shadow:0 14px 30px rgba(37,99,235,.34);display:flex;align-items:center;justify-content:center;font-size:22px;cursor:pointer;transition:.18s}.sp-cart-fab:hover{transform:translateY(-3px);background:#1d4ed8}.sp-cart-fab span{position:absolute;right:-5px;top:-5px;background:#ef4444;color:#fff;border-radius:999px;min-width:20px;height:20px;font-size:11px;font-weight:1000;display:flex;align-items:center;justify-content:center;border:2px solid #fff}.sp-compact-table .sp-table th{padding:8px 10px!important;font-size:10px}.sp-compact-table .sp-table td{padding:8px 10px!important;font-size:11px;vertical-align:middle}.sp-compact-table .sp-icon-btn{width:28px;height:28px;border-radius:8px;font-size:11px}.sp-compact-table .sp-action-group{gap:4px;flex-wrap:nowrap}.sp-equip-search-title,.sp-acc-search-title{font-size:16px;font-weight:1000;color:#0f172a;margin:8px 0 8px;display:flex;align-items:center;gap:8px}.sp-acc-grid-v11{display:grid;grid-template-columns:repeat(auto-fill,minmax(245px,1fr));gap:14px}.sp-acc-card-v11{background:#fff;border:1px solid #e8eef6;border-radius:18px;padding:16px;box-shadow:0 4px 16px rgba(30,58,138,.06);transition:.18s}.sp-acc-card-v11:hover{transform:translateY(-2px);box-shadow:0 10px 24px rgba(30,58,138,.1)}.sp-acc-card-head-v11{display:flex;gap:12px;align-items:flex-start}.sp-acc-icon-v11{width:46px;height:46px;border-radius:15px;display:flex;align-items:center;justify-content:center;font-size:18px;flex:none}.team-med{background:#dbeafe;color:#0046a3}.team-lab{background:#e0f2fe;color:#006cff}.team-ehs{background:#ccfbf1;color:#0f766e}.team-other{background:#f1f5f9;color:#64748b}.sp-acc-name-v11{font-size:15px;font-weight:1000;color:#0f172a;line-height:1.35}.sp-acc-meta-v11{font-size:11px;color:#64748b;margin-top:3px}.sp-acc-stock-v11{display:flex;justify-content:space-between;align-items:flex-end;margin:14px 0 10px}.sp-acc-stock-v11 .num{font-size:30px;font-weight:1000;line-height:1}.sp-acc-control-v11{display:grid;grid-template-columns:72px 1fr 38px;gap:8px;align-items:center}.sp-acc-control-v11 input{border:1px solid #dbe3ef;border-radius:10px;padding:8px;text-align:center;font-weight:900}.sp-acc-control-v11 .sp-btn{padding:8px 10px;font-size:12px}.sp-acc-card-v11.is-low{background:#fff7ed;border-color:#fed7aa}.sp-cart-detail-card{background:#f8fbff;border:1px solid #e8eef6;border-radius:12px;padding:10px;margin-bottom:8px}.sp-cart-detail-title{font-weight:1000;color:#0f172a}.sp-cart-detail-sub{font-size:11px;color:#64748b;margin-top:2px}.sp-filter-section-hidden{display:none!important}
@@ -82,7 +82,7 @@ function si_accIcon(a){const txt=[a.itemName,a.name,a.type].join(' ').toLowerCas
    5) Edit min stock directly from accessory card.
    Additive only: overrides public functions by same name; no V8/V11 function is deleted.
 ============================================================ */
-function si_v12Style(){
+function siTabStyle(){
   if(document.getElementById('stockpro-inventory-v12-style')) return;
   const st=document.createElement('style');
   st.id='stockpro-inventory-v12-style';
@@ -118,9 +118,9 @@ function si_v12Style(){
   `;
   document.head.appendChild(st);
 }
-function si_v12SetVisible(id,show){const el=document.getElementById(id);if(!el)return;el.classList.toggle('hidden',!show);el.classList.toggle('sp-tab-hidden',!show);}
+function siSetVisible(id,show){const el=document.getElementById(id);if(!el)return;el.classList.toggle('hidden',!show);el.classList.toggle('sp-tab-hidden',!show);}
 function si_applyFilters(){
-  si_v11Style();si_v12Style();
+  siBaseStyle();siTabStyle();
   if(SI.tab==='equip'){
     const q=spVal('siSearch','').toLowerCase(),b=spVal('siBrand','all'),m=spVal('siModel','all'),l=spVal('siLocation','all'),s=spVal('siStatus','all');
     SI.filtered=(SI.inv||[]).filter(d=>{const text=[d.idCode,d.sn,d.brand,d.model,d.itemName,d.location,d.status,d.borrower,d.actionRequired].join(' ').toLowerCase();if(q&&!text.includes(q))return false;if(b!=='all'&&d.brand!==b)return false;if(m!=='all'&&d.model!==m)return false;if(l!=='all'&&d.location!==l)return false;if(s!=='all'&&d.status!==s)return false;return true;});
@@ -132,7 +132,7 @@ function si_applyFilters(){
   }
 }
 function si_renderTable(){
-  si_v11Style();si_v12Style();const start=(SI.page-1)*SI.pageSize,rows=SI.filtered.slice(start,start+SI.pageSize);spSetHtml('siTableCount',`${SI.filtered.length} items`);
+  siBaseStyle();siTabStyle();const start=(SI.page-1)*SI.pageSize,rows=SI.filtered.slice(start,start+SI.pageSize);spSetHtml('siTableCount',`${SI.filtered.length} items`);
   if(!rows.length){spSetHtml('siTable','<div class="sp-muted">No equipment found</div>');spSetHtml('siPagination','');return;}
   spSetHtml('siTable',`<div class="sp-table-wrap sp-compact-table"><table class="sp-table"><thead><tr><th>#</th><th>ID Code</th><th>SN</th><th>Brand / Model</th><th>Status</th><th>Borrower</th><th>Location</th><th>Due Date</th><th>Action Required</th><th>Rent Action</th><th>Equipment Action</th></tr></thead><tbody>${rows.map((d,i)=>`<tr><td>${start+i+1}</td><td><span class="sp-id">${spEsc(d.idCode)}</span></td><td>${spEsc(d.sn||'-')}</td><td><b>${spEsc(d.brand||'-')}</b><span class="sp-sub">${spEsc(d.model||d.itemName||'-')}</span></td><td>${spBadge(d.status)}</td><td>${spEsc(d.borrower||'-')}</td><td>${spEsc(d.location||'-')}</td><td>${spFmtDate(d.expectedReturn||d.expectedReturnDate)}</td><td>${spEsc(d.actionRequired||d.recheckNote||'-')}</td><td>${si_rentButtons(d)}</td><td>${si_equipmentButtons(d)}</td></tr>`).join('')}</tbody></table></div>`);
   si_renderPagination();
@@ -162,7 +162,7 @@ function si_isCartOpen(){const d=document.getElementById('siCartDrawer');return 
    4) Header Setting button for min stock config.
    5) Header History button for activity/history popup.
 ============================================================ */
-function si_v13Style(){
+function siLayoutStyle(){
   if(document.getElementById('stockpro-inventory-v13-style')) return;
   const st=document.createElement('style');
   st.id='stockpro-inventory-v13-style';
@@ -199,7 +199,7 @@ function si_v13Style(){
 
 
 function si_openMinStockConfig(){
-  si_v13Style();
+  siLayoutStyle();
   const rows=(SI.accFiltered&&SI.accFiltered.length?SI.accFiltered:SI.acc||[]).slice(0,80);
   if(!rows.length){Swal.fire('ไม่มีข้อมูล Accessories','','info');return;}
   const html=`<div style="text-align:left;max-height:62vh;overflow:auto"><table class="si-minstock-table"><thead><tr><th>Team</th><th>Item</th><th>Stock</th><th>Min Stock</th></tr></thead><tbody>${rows.map((a,i)=>{const key=a.accessoryId||a.accessory_id||a.idCode||a.id_code||a.itemName||a.item_name||a.name;const min=Number(a.minStockQty||a.min_stock_qty||a.minStock||0);const stock=Number(a.stockQty||a.stock_qty||a.qty||0);return `<tr><td>${spEsc(a.team||'-')}</td><td><b>${spEsc(a.itemName||a.item_name||a.name||'-')}</b><div class="sp-sub">${spEsc(key||'-')}</div></td><td>${spNum(stock)}</td><td><input id="siMin_${i}" type="number" min="0" step="1" value="${min}" data-key="${spEsc(key||'')}"></td></tr>`;}).join('')}</tbody></table><div class="sp-muted" style="margin-top:8px">แสดงสูงสุด 80 รายการตาม filter ปัจจุบัน</div></div>`;
@@ -211,7 +211,7 @@ function si_openMinStockConfig(){
 
 
 // Ensure V13 style is active after module init as well.
-try{si_v13Style();}catch(e){}
+try{siLayoutStyle();}catch(e){}
 
 
 
@@ -223,7 +223,7 @@ try{si_v13Style();}catch(e){}
    3) History follows current tab: Equipment or Accessories.
    4) Keeps equipment/accessory tab isolation and cart behavior.
 ============================================================ */
-function si_v14Style(){
+function siResponsiveStyle(){
   if(document.getElementById('stockpro-inventory-v14-style')) return;
   const st=document.createElement('style');
   st.id='stockpro-inventory-v14-style';
@@ -255,15 +255,15 @@ function si_v14Style(){
 
 
 // Re-wrap init to ensure V14 CSS is always applied after page render.
-if(typeof window.si_v14OriginalInitInventory === 'undefined'){
-  window.si_v14OriginalInitInventory = initStockInventoryModule;
+if(typeof window.siOriginalInitBeforeAccessory === 'undefined'){
+  window.siOriginalInitBeforeAccessory = initStockInventoryModule;
   initStockInventoryModule = function(force=false){
-    si_v14Style();
-    window.si_v14OriginalInitInventory(force);
-    setTimeout(()=>{try{si_v14Style();si_switchTab(SI.tab||'equip');si_updateCart();}catch(e){}},250);
+    siResponsiveStyle();
+    window.siOriginalInitBeforeAccessory(force);
+    setTimeout(()=>{try{siResponsiveStyle();si_switchTab(SI.tab||'equip');si_updateCart();}catch(e){}},250);
   };
 }
-try{si_v14Style();}catch(e){}
+try{siResponsiveStyle();}catch(e){}
 
 
 
@@ -271,7 +271,7 @@ try{si_v14Style();}catch(e){}
    CES Stock Pro V15 — Inventory UX/Approval Patch
    Keeps existing public functions, overrides only final behavior.
 ============================================================ */
-function si_v15Style(){
+function siUserStyle(){
   if(document.getElementById('stockpro-inventory-v15-style')) return;
   const st=document.createElement('style');
   st.id='stockpro-inventory-v15-style';
@@ -292,12 +292,12 @@ function si_v15Style(){
   document.head.appendChild(st);
 }
 
-function si_v15ApplyCurrentUser_(){
+function siApplyCurrentUser_(){
   const u=(typeof currentUser!=='undefined'&&currentUser)?currentUser:{};
   return {id:u.id||'',name:u.name_eng||u.name_th||u.id||'',email:u.email||'',team:u.team||''};
 }
 
-function si_v15SyncLowStockCount(){
+function siSyncLowStockCount(){
   const n=(SI.acc||[]).filter(a=>Number(a.stockQty||a.qty||0)<=Number(a.minStockQty||a.minStock||0)).length;
   const el=document.getElementById('siLowStockHeaderCount'); if(el)el.textContent=n>99?'99+':n;
 }
@@ -314,11 +314,11 @@ function si_accRow(a,i){
 
 
 
-if(typeof window.si_v15OriginalInitInventory==='undefined'){
-  window.si_v15OriginalInitInventory=initStockInventoryModule;
-  initStockInventoryModule=function(force=false){si_v15Style();window.si_v15OriginalInitInventory(force);setTimeout(()=>{try{si_v15Style();si_v15SyncLowStockCount();si_switchTab(SI.tab||'equip');si_updateCart();}catch(e){}},350);};
+if(typeof window.siOriginalInitBeforeLayout==='undefined'){
+  window.siOriginalInitBeforeLayout=initStockInventoryModule;
+  initStockInventoryModule=function(force=false){siUserStyle();window.siOriginalInitBeforeLayout(force);setTimeout(()=>{try{siUserStyle();siSyncLowStockCount();si_switchTab(SI.tab||'equip');si_updateCart();}catch(e){}},350);};
 }
-try{si_v15Style();}catch(e){}
+try{siUserStyle();}catch(e){}
 
 
 
@@ -331,7 +331,7 @@ try{si_v15Style();}catch(e){}
    - Loading UX on header actions.
    - Scoped history only current tab.
 ============================================================ */
-function si_v16Style(){
+function siAccessoryStyle(){
   if(document.getElementById('stockpro-inventory-v16-style')) return;
   const st=document.createElement('style'); st.id='stockpro-inventory-v16-style';
   st.textContent=`
@@ -350,23 +350,16 @@ function si_v16Style(){
   `;
   document.head.appendChild(st);
 }
-function si_v16ApplyCartPosition(){
-  si_v16Style();
+function siApplyCartPosition(){
+  siAccessoryStyle();
   const fab=document.getElementById('siCartFab');
   if(fab){fab.style.position='fixed';fab.style.right='24px';fab.style.left='auto';fab.style.bottom='24px';fab.style.top='auto';}
 }
-function si_v16TeamClass(team){const t=String(team||'').toUpperCase();if(t.includes('MED'))return'team-med';if(t.includes('LAB'))return'team-lab';if(t.includes('EHS'))return'team-ehs';if(t.includes('TES'))return'team-tes';return'team-other';}
-function si_v16AccIcon(a){const txt=[a.itemName,a.name,a.type].join(' ').toLowerCase();if(txt.includes('battery'))return'fa-battery-half';if(txt.includes('plug')||txt.includes('cord'))return'fa-plug';if(txt.includes('cuff'))return'fa-puzzle-piece';if(txt.includes('sensor'))return'fa-wave-square';if(txt.includes('pole'))return'fa-grip-lines-vertical';return'fa-puzzle-piece';}
-function si_v16AccRow(a,i){
-  const id=a.accessoryId||a.accessory_id||a.idCode||a.id_code||a.itemName||a.name||('ACC'+i);
-  const name=a.itemName||a.item_name||a.name||'-';
-  const qty=Number(a.stockQty||a.stock_qty||a.qty||0), min=Number(a.minStockQty||a.min_stock_qty||a.minStock||0);
-  const low=qty<=min, inputId=`siAccQty_${i}`;
-  return `<div class="sp-acc-row ${low?'low':''}"><div class="acc-ico ${si_v16TeamClass(a.team)}"><i class="fas ${si_v16AccIcon(a)}"></i></div><div><div class="acc-title">${spEsc(name)}</div><div class="acc-sub">${spEsc(a.team||'-')} • ${spEsc(id)}</div></div><div><div class="acc-stock" style="color:${low?'#dc2626':'#059669'}">${spNum(qty)}</div><div class="acc-min">Stock qty</div></div><div><b>${spNum(min)}</b><div class="acc-min">Min stock</div></div><div>${low?'<span class="sp-badge Overdue">LOW STOCK</span>':spBadge(a.status||'STOCK')}</div><div class="acc-sub">${spEsc(a.actionRequired||a.action_required||'No action')}</div><div class="acc-actions"><button class="acc-mini" onclick="si_v16Qty('${inputId}',-1)">−</button><input id="${inputId}" type="number" min="1" step="1" value="1"><button class="acc-mini" onclick="si_v16Qty('${inputId}',1)">+</button><button class="acc-mini green" ${low?'disabled':''} title="Add to cart" onclick='si_addAccessoryToCart(${si_json(a)},"${inputId}")'><i class="fas fa-cart-plus"></i></button><button class="acc-mini orange" title="Restock" onclick='si_restockPrompt(${si_json(a)})'><i class="fas fa-box-open"></i></button><button class="acc-mini blue" title="Min stock" onclick='si_editMinStockPrompt(${si_json(a)})'><i class="fas fa-sliders"></i></button></div></div>`;
-}
-function si_v16Qty(id,delta){const el=document.getElementById(id);if(!el)return;el.value=Math.max(1,(Number(el.value)||1)+Number(delta||0));}
+function siTeamClass(team){const t=String(team||'').toUpperCase();if(t.includes('MED'))return'team-med';if(t.includes('LAB'))return'team-lab';if(t.includes('EHS'))return'team-ehs';if(t.includes('TES'))return'team-tes';return'team-other';}
+function siAccIcon(a){const txt=[a.itemName,a.name,a.type].join(' ').toLowerCase();if(txt.includes('battery'))return'fa-battery-half';if(txt.includes('plug')||txt.includes('cord'))return'fa-plug';if(txt.includes('cuff'))return'fa-puzzle-piece';if(txt.includes('sensor'))return'fa-wave-square';if(txt.includes('pole'))return'fa-grip-lines-vertical';return'fa-puzzle-piece';}
+function siQty(id,delta){const el=document.getElementById(id);if(!el)return;el.value=Math.max(1,(Number(el.value)||1)+Number(delta||0));}
 function si_addAccessoryToCart(a,inputId){
-  si_v16Style();
+  siAccessoryStyle();
   const qty=Math.max(1,Number(spVal(inputId,'1'))||1);
   const stock=Number(a.stockQty||a.stock_qty||a.qty||0), min=Number(a.minStockQty||a.min_stock_qty||a.minStock||0);
   if(stock<=min){Swal.fire('ต้อง Restock ก่อนเบิกใช้','จำนวนคงเหลือเท่ากับหรือต่ำกว่า minimum stock','warning');return;}
@@ -374,42 +367,42 @@ function si_addAccessoryToCart(a,inputId){
   const key=a.accessoryId||a.accessory_id||a.idCode||a.id_code||a.itemName||a.name;
   const ex=SI.cart.find(x=>x.kind==='accessory'&&(x.accessoryId||x.idCode||x.itemName)===key);
   if(ex){ex.issueQty=Number(ex.issueQty||ex.qty||0)+qty;ex.qty=ex.issueQty;} else SI.cart.push(Object.assign({},a,{kind:'accessory',type:'accessory',accessoryId:key,issueQty:qty,qty:qty,stockQty:stock}));
-  si_updateCart(); si_v16ApplyCartPosition();
+  si_updateCart(); siApplyCartPosition();
   Swal.fire({toast:true,position:'top-end',icon:'success',title:`เพิ่ม ${a.itemName||a.name||key} x${qty}`,timer:1200,showConfirmButton:false});
 }
 function si_updateCart(){
-  si_v16Style();
+  siAccessoryStyle();
   const n=SI.cart.length;spSetHtml('siCartCount',n);spSetHtml('siCartDrawerCount',n);spSetHtml('siCartFabBadge',n);const badge=document.getElementById('siCartFabBadge');if(badge)badge.style.display=n?'flex':'none';
   const list=n?SI.cart.map((d,i)=>{const isAcc=d.kind==='accessory';const qty=Number(d.issueQty||d.qty||1);const name=isAcc?(d.itemName||d.item_name||d.name||d.accessoryId||d.idCode):(d.idCode||d.sn||'-');const sub=isAcc?`Accessory • ${spEsc(d.team||'-')} • Qty: ${spNum(qty)} pcs`:`${spEsc(d.brand||'-')} ${spEsc(d.model||d.itemName||'-')} • SN:${spEsc(d.sn||'-')}`;return `<div class="sp-cart-detail-card"><div class="sp-cart-detail-title">${isAcc?'🔌 ':'⚙️ '}${spEsc(name)}</div><div class="sp-cart-detail-sub">${sub}</div><button onclick="SI.cart.splice(${i},1);si_updateCart()" class="sp-btn ghost" style="margin-top:8px;padding:6px 10px"><i class="fas fa-times"></i> Remove</button></div>`;}).join(''):`<div class="sp-muted text-center py-10">ตะกร้าว่าง</div>`;
   spSetHtml('siCartItems',list);
   const eq=SI.cart.filter(x=>x.kind==='equipment').length, acc=SI.cart.filter(x=>x.kind==='accessory').reduce((s,x)=>s+Number(x.issueQty||x.qty||1),0);
   spSetHtml('siCartDetailSummary',`<div class="sp-cart-detail-card"><b>Summary</b><div class="sp-cart-detail-sub">Equipment: ${spNum(eq)} รายการ • Accessories: ${spNum(acc)} pcs ${acc?'(รออนุมัติ)':''}</div></div>`);
 }
-function si_openCart(){si_v16Style();si_updateCart();document.getElementById('siCartOverlay')?.classList.remove('hidden');const d=document.getElementById('siCartDrawer');if(d)d.style.right='0';si_v16ApplyCartPosition();}
-function si_closeCart(){document.getElementById('siCartOverlay')?.classList.add('hidden');const d=document.getElementById('siCartDrawer');if(d)d.style.right='-520px';si_v16ApplyCartPosition();}
+function si_openCart(){siAccessoryStyle();si_updateCart();document.getElementById('siCartOverlay')?.classList.remove('hidden');const d=document.getElementById('siCartDrawer');if(d)d.style.right='0';siApplyCartPosition();}
+function si_closeCart(){document.getElementById('siCartOverlay')?.classList.add('hidden');const d=document.getElementById('siCartDrawer');if(d)d.style.right='-520px';siApplyCartPosition();}
 function si_toggleCart(){const d=document.getElementById('siCartDrawer');(d&&d.style.right==='0px')?si_closeCart():si_openCart();}
-function si_v16ResetCheckoutFields(){['siBorrower','siCheckoutLocation','siNote'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});const bd=document.getElementById('siBorrowDate');if(bd)bd.value=new Date().toISOString().slice(0,10);const due=document.getElementById('siDueDate');if(due)due.value='';}
+function siResetCheckoutFields(){['siBorrower','siCheckoutLocation','siNote'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});const bd=document.getElementById('siBorrowDate');if(bd)bd.value=new Date().toISOString().slice(0,10);const due=document.getElementById('siDueDate');if(due)due.value='';}
 function si_submitCheckout(){
   if(!SI.cart.length){Swal.fire('ตะกร้าว่าง','','info');return;}
   const borrower=spVal('siBorrower','').trim(),location=spVal('siCheckoutLocation','').trim(),borrowDate=spVal('siBorrowDate',''),due=spVal('siDueDate',''),note=spVal('siNote','');
   const equipment=SI.cart.filter(x=>x.kind==='equipment'), accessories=SI.cart.filter(x=>x.kind==='accessory');
   if(!borrower||!location||!borrowDate){Swal.fire('ข้อมูลไม่ครบ','กรุณากรอกผู้เบิก / สถานที่ / วันที่เบิกออก','warning');return;}
   if(equipment.length && !due){Swal.fire('ข้อมูลไม่ครบ','รายการ Equipment ต้องมีวันคืน','warning');return;}
-  const requester=si_v15ApplyCurrentUser_?si_v15ApplyCurrentUser_():{};
+  const requester=siApplyCurrentUser_?siApplyCurrentUser_():{};
   Swal.fire({title:'กำลังส่งรายการ...',html:`Equipment ${equipment.length} รายการ<br>Accessories ${accessories.reduce((s,x)=>s+Number(x.issueQty||x.qty||1),0)} pcs`,allowOutsideClick:false,didOpen:()=>Swal.showLoading()});
-  google.script.run.withSuccessHandler(res=>{Swal.close();if(res&&res.success){SI.cart=[];si_updateCart();si_closeCart();si_v16ResetCheckoutFields();initStockInventoryModule(true);if(typeof initStockDashboardModule==='function')initStockDashboardModule(true);Swal.fire('สำเร็จ',res.message,'success');}else Swal.fire('ไม่สำเร็จ',(res&&res.message)||'Checkout failed','error');}).withFailureHandler(e=>Swal.fire('Error',e.message||String(e),'error')).si_checkoutCart({equipment,accessories,borrower,location,borrowDate,expectedReturnDate:due,note,requester});
+  google.script.run.withSuccessHandler(res=>{Swal.close();if(res&&res.success){SI.cart=[];si_updateCart();si_closeCart();siResetCheckoutFields();initStockInventoryModule(true);if(typeof initStockDashboardModule==='function')initStockDashboardModule(true);Swal.fire('สำเร็จ',res.message,'success');}else Swal.fire('ไม่สำเร็จ',(res&&res.message)||'Checkout failed','error');}).withFailureHandler(e=>Swal.fire('Error',e.message||String(e),'error')).si_checkoutCart({equipment,accessories,borrower,location,borrowDate,expectedReturnDate:due,note,requester});
 }
-if(typeof window.si_v16OriginalInitInventory==='undefined'){
-  window.si_v16OriginalInitInventory=initStockInventoryModule;
-  initStockInventoryModule=function(force=false){ if(force)Swal.fire({title:'Resync inventory...',allowOutsideClick:false,didOpen:()=>Swal.showLoading()}); window.si_v16OriginalInitInventory(force); setTimeout(()=>{if(force)Swal.close();si_v16Style();si_v16ApplyCartPosition();si_switchTab(SI.tab||'equip');},900); };
+if(typeof window.siOriginalInitBeforeFilterPatch==='undefined'){
+  window.siOriginalInitBeforeFilterPatch=initStockInventoryModule;
+  initStockInventoryModule=function(force=false){ if(force)Swal.fire({title:'Resync inventory...',allowOutsideClick:false,didOpen:()=>Swal.showLoading()}); window.siOriginalInitBeforeFilterPatch(force); setTimeout(()=>{if(force)Swal.close();siAccessoryStyle();siApplyCartPosition();si_switchTab(SI.tab||'equip');},900); };
 }
-document.addEventListener('DOMContentLoaded',()=>setTimeout(si_v16ApplyCartPosition,500));
+document.addEventListener('DOMContentLoaded',()=>setTimeout(siApplyCartPosition,500));
 
 
 /* ============================================================
    CES Stock Pro V17 — Inventory final UI/behavior patch
 ============================================================ */
-function si_v17Style(){
+function siCurrentLayoutStyle(){
   if(document.getElementById('stockpro-inventory-v17-style')) return;
   const st=document.createElement('style');
   st.id='stockpro-inventory-v17-style';
@@ -440,23 +433,8 @@ function si_v17Style(){
   document.head.appendChild(st);
 }
 
-function si_v17ForceCartRight(){
-  si_v17Style();
-  const fab=document.getElementById('siCartFab');
-  if(fab){
-    fab.style.setProperty('position','fixed','important');
-    fab.style.setProperty('right','24px','important');
-    fab.style.setProperty('left','auto','important');
-    fab.style.setProperty('bottom','24px','important');
-    fab.style.setProperty('top','auto','important');
-    fab.style.setProperty('z-index','9999','important');
-  }
-  document.querySelectorAll('.checkout-cart-fab,.stock-cart-fab,#siFloatingCart,#siFloatingCartFab').forEach(el=>{
-    if(el.id!=='siCartFab') el.style.display='none';
-  });
-}
 
-function si_v17ForceTabLayout(){
+function siForceTabLayout(){
   const isAcc = SI && SI.tab === 'acc';
   const pairs = [
     ['siEquipFilters', !isAcc], ['siEquipKpiGrid', !isAcc], ['siEquipSection', !isAcc],
@@ -472,16 +450,16 @@ function si_v17ForceTabLayout(){
 
 function si_switchTab(tab){
   SI.tab = tab === 'acc' ? 'acc' : 'equip';
-  si_v17Style();
+  siCurrentLayoutStyle();
   si_renderKpi();
-  si_v17ForceTabLayout();
+  siForceTabLayout();
   si_applyFilters();
-  si_v17ForceCartRight();
+  siForceCartRight();
 }
 
 function si_renderAccCards(){
-  si_v17Style();
-  si_v17ForceTabLayout();
+  siCurrentLayoutStyle();
+  siForceTabLayout();
   const start=(SI.accPage-1)*SI.pageSize;
   const rows=SI.accFiltered.slice(start,start+SI.pageSize);
   spSetHtml('siAccCount',`${SI.accFiltered.length} items`);
@@ -490,7 +468,7 @@ function si_renderAccCards(){
     spSetHtml('siAccPagination','');
     return;
   }
-  spSetHtml('siAccCards',`<div class="sp-acc-list-v17">${rows.map((a,i)=>si_v17AccRow(a,start+i)).join('')}</div>`);
+  spSetHtml('siAccCards',`<div class="sp-acc-list-v17">${rows.map((a,i)=>siAccRow(a,start+i)).join('')}</div>`);
   const total=Math.max(1,Math.ceil(SI.accFiltered.length/SI.pageSize));
   let btns='';
   const from=Math.max(1,SI.accPage-2), to=Math.min(total,SI.accPage+2);
@@ -498,7 +476,7 @@ function si_renderAccCards(){
   spSetHtml('siAccPagination',`<div class="sp-muted">Page ${SI.accPage} / ${total} • 50 rows per page</div><div class="sp-page-buttons"><button ${SI.accPage<=1?'disabled':''} onclick="SI.accPage--;si_renderAccCards()">Prev</button>${btns}<button ${SI.accPage>=total?'disabled':''} onclick="SI.accPage++;si_renderAccCards()">Next</button></div>`);
 }
 
-function si_v17AccRow(a,i){
+function siAccRow(a,i){
   const id=a.accessoryId||a.accessory_id||a.idCode||a.id_code||a.itemName||a.name||('ACC'+i);
   const name=a.itemName||a.item_name||a.name||'-';
   const team=String(a.team||'-').toUpperCase();
@@ -509,14 +487,14 @@ function si_v17AccRow(a,i){
   const teamCls=team.includes('MED')?'med':team.includes('LAB')?'lab':team.includes('EHS')?'ehs':team.includes('TES')?'tes':'';
   const sub=[team,id,serial?('SN '+serial):''].filter(Boolean).map(spEsc).join(' • ');
   return `<div class="sp-acc-row-v17 ${low?'low':''} ${rental?'ces-rental-accessory-row-v266':''}">
-    <div class="acc-ico ${teamCls}"><i class="fas ${(typeof si_v16AccIcon==='function')?si_v16AccIcon(a):'fa-plug'}"></i></div>
+    <div class="acc-ico ${teamCls}"><i class="fas ${(typeof siAccIcon==='function')?siAccIcon(a):'fa-plug'}"></i></div>
     <div><div class="acc-title">${spEsc(name)}</div><div class="acc-sub">${sub}</div>${rental?'<div class="acc-sub" style="color:#0f766e;font-weight:800">Assigned with '+spEsc(a.equipmentId||'-')+' · '+spEsc(a.borrower||'-')+'</div>':''}</div>
     <div><div class="acc-stock" style="color:${low?'#dc2626':(rental?'#0f766e':'#059669')}">${spNum(qty)}</div><div class="acc-sub">${rental?'Assigned qty':'Stock qty'}</div></div>
     <div><b>${rental?'—':spNum(min)}</b><div class="acc-sub">${rental?'Rental item':'Min stock'}</div></div>
     <div>${rental?'<span class="sp-badge In-Use">IN USE</span>':(low?'<span class="sp-badge Overdue">LOW STOCK</span>':spBadge(a.status||'STOCK'))}</div>
     <div class="acc-sub">${spEsc(a.actionRequired||a.action_required||'No action')}</div>
     <div class="acc-actions">
-      ${rental?'<span class="sp-muted" style="font-size:10px">Synced from rental</span>':`<button class="acc-mini" onclick="si_v16Qty('${inputId}',-1)">−</button><input id="${inputId}" type="number" min="1" step="1" value="1"><button class="acc-mini" onclick="si_v16Qty('${inputId}',1)">+</button><button class="acc-mini green" ${low?'disabled':''} title="Add to cart" onclick='si_addAccessoryToCart(${si_json(a)},"${inputId}")'><i class="fas fa-cart-plus"></i></button><button class="acc-mini orange" title="Restock" onclick='si_restockPrompt(${si_json(a)})'><i class="fas fa-box-open"></i></button><button class="acc-mini blue" title="Min stock" onclick='si_editMinStockPrompt(${si_json(a)})'><i class="fas fa-sliders"></i></button>`}
+      ${rental?'<span class="sp-muted" style="font-size:10px">Synced from rental</span>':`<button class="acc-mini" onclick="siQty('${inputId}',-1)">−</button><input id="${inputId}" type="number" min="1" step="1" value="1"><button class="acc-mini" onclick="siQty('${inputId}',1)">+</button><button class="acc-mini green" ${low?'disabled':''} title="Add to cart" onclick='si_addAccessoryToCart(${si_json(a)},"${inputId}")'><i class="fas fa-cart-plus"></i></button><button class="acc-mini orange" title="Restock" onclick='si_restockPrompt(${si_json(a)})'><i class="fas fa-box-open"></i></button><button class="acc-mini blue" title="Min stock" onclick='si_editMinStockPrompt(${si_json(a)})'><i class="fas fa-sliders"></i></button>`}
     </div>
   </div>`;
 }
@@ -527,8 +505,8 @@ if(!window.__siV17InitPatch){
   initStockInventoryModule=function(force=false){
     if(force) Swal.fire({title:'Resync inventory...',allowOutsideClick:false,showConfirmButton:false,didOpen:()=>Swal.showLoading()});
     _baseInit(force);
-    setTimeout(()=>{ if(force) Swal.close(); si_v17Style(); si_v17ForceTabLayout(); si_v17ForceCartRight(); },900);
-    setTimeout(()=>{ si_v17ForceTabLayout(); si_v17ForceCartRight(); },1800);
+    setTimeout(()=>{ if(force) Swal.close(); siCurrentLayoutStyle(); siForceTabLayout(); siForceCartRight(); },900);
+    setTimeout(()=>{ siForceTabLayout(); siForceCartRight(); },1800);
   };
 }
 if(!window.__siV17UpdateCartPatch && typeof si_updateCart==='function'){
@@ -536,7 +514,7 @@ if(!window.__siV17UpdateCartPatch && typeof si_updateCart==='function'){
   const _baseUpdateCart=si_updateCart;
   si_updateCart=function(){
     _baseUpdateCart();
-    si_v17ForceCartRight();
+    siForceCartRight();
   };
 }
 if(!window.__siV17OpenCartPatch && typeof si_openCart==='function'){
@@ -544,10 +522,10 @@ if(!window.__siV17OpenCartPatch && typeof si_openCart==='function'){
   const _baseOpenCart=si_openCart;
   si_openCart=function(){
     _baseOpenCart();
-    si_v17ForceCartRight();
+    siForceCartRight();
   };
 }
-document.addEventListener('DOMContentLoaded',()=>setTimeout(()=>{si_v17Style();si_v17ForceTabLayout();si_v17ForceCartRight();},500));
+document.addEventListener('DOMContentLoaded',()=>setTimeout(()=>{siCurrentLayoutStyle();siForceTabLayout();siForceCartRight();},500));
 
 
 /* ============================================================
@@ -557,7 +535,7 @@ document.addEventListener('DOMContentLoaded',()=>setTimeout(()=>{si_v17Style();s
    - Better checkout success message.
    - Keeps cart on right-bottom.
 ============================================================ */
-function si_v28HistoryStyle(){
+function siHistoryStyle(){
   if(document.getElementById('stockpro-inventory-v28-style')) return;
   const st=document.createElement('style');
   st.id='stockpro-inventory-v28-style';
@@ -577,7 +555,7 @@ function si_v28HistoryStyle(){
   document.head.appendChild(st);
 }
 
-function si_v28ForceCartRight(){
+function siForceCartRight(){
   const fab=document.getElementById('siCartFab');
   if(fab){
     fab.style.setProperty('position','fixed','important');
@@ -593,8 +571,8 @@ function si_v28ForceCartRight(){
 }
 
 function si_openInventoryHistory(){
-  si_v28HistoryStyle();
-  si_v28ForceCartRight();
+  siHistoryStyle();
+  siForceCartRight();
   const scope = SI.tab === 'acc' ? 'accessories' : 'equipment';
   const label = scope === 'accessories' ? 'Accessories History' : 'Equipment History';
   Swal.fire({title:'Loading history...',allowOutsideClick:false,showConfirmButton:false,didOpen:()=>Swal.showLoading()});
@@ -651,7 +629,7 @@ if(!window.__siV28SubmitCheckoutPatch && typeof si_submitCheckout === 'function'
       Swal.fire('ข้อมูลไม่ครบ','รายการ Equipment ต้องมีวันคืน','warning');return;
     }
 
-    const requester=(typeof si_v15ApplyCurrentUser_ === 'function') ? si_v15ApplyCurrentUser_() : ((typeof currentUser !== 'undefined' && currentUser) ? {
+    const requester=(typeof siApplyCurrentUser_ === 'function') ? siApplyCurrentUser_() : ((typeof currentUser !== 'undefined' && currentUser) ? {
       id: currentUser.id || '',
       name: currentUser.name_eng || currentUser.name_th || currentUser.id || '',
       email: currentUser.email || '',
@@ -674,7 +652,7 @@ if(!window.__siV28SubmitCheckoutPatch && typeof si_submitCheckout === 'function'
           SI.cart=[];
           si_updateCart();
           si_closeCart();
-          if(typeof si_v16ResetCheckoutFields === 'function') si_v16ResetCheckoutFields();
+          if(typeof siResetCheckoutFields === 'function') siResetCheckoutFields();
           else ['siBorrower','siCheckoutLocation','siNote','siDueDate'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
           initStockInventoryModule(true);
           if(typeof initStockDashboardModule==='function') initStockDashboardModule(true);
@@ -693,7 +671,7 @@ if(!window.__siV28SubmitCheckoutPatch && typeof si_submitCheckout === 'function'
   };
 }
 
-document.addEventListener('DOMContentLoaded',()=>setTimeout(()=>{si_v28HistoryStyle();si_v28ForceCartRight();},600));
+document.addEventListener('DOMContentLoaded',()=>setTimeout(()=>{siHistoryStyle();siForceCartRight();},600));
 
 
 /* ============================================================
@@ -703,7 +681,7 @@ document.addEventListener('DOMContentLoaded',()=>setTimeout(()=>{si_v28HistorySt
    - Bell/Alert popup shows Low Stock + Pending Approval.
    - Approve/Reject can be processed from the notification popup.
 ============================================================ */
-function si_v31Style(){
+function siApprovalStyle(){
   if(document.getElementById('stockpro-inventory-v31-style')) return;
   const st=document.createElement('style');
   st.id='stockpro-inventory-v31-style';
@@ -722,9 +700,9 @@ function si_v31Style(){
   document.head.appendChild(st);
 }
 
-function si_v31CurrentUserPayload(){
+function siCurrentUserPayload(){
   try{
-    if(typeof si_v15ApplyCurrentUser_ === 'function') return si_v15ApplyCurrentUser_();
+    if(typeof siApplyCurrentUser_ === 'function') return siApplyCurrentUser_();
     if(typeof currentUser !== 'undefined' && currentUser){
       return {id:currentUser.id||'',name:currentUser.name_eng||currentUser.name_th||currentUser.id||'',email:currentUser.email||'',team:currentUser.team||''};
     }
@@ -732,7 +710,7 @@ function si_v31CurrentUserPayload(){
   return {};
 }
 
-function si_v31UpdateHeaderBadges(){
+function siUpdateHeaderBadges(){
   const low = (SI.acc||[]).filter(a=>Number(a.stockQty||a.stock_qty||a.qty||0)<=Number(a.minStockQty||a.min_stock_qty||a.minStock||0)).length;
   google.script.run.withSuccessHandler(res=>{
     const pending = res && res.success ? Number(res.count||0) : Number((SI.raw&&SI.raw.kpi&&SI.raw.kpi.accPending)||0);
@@ -740,11 +718,11 @@ function si_v31UpdateHeaderBadges(){
     const h=document.getElementById('siLowStockHeaderCount');
     if(h){h.textContent=total>99?'99+':String(total);h.style.display=total>0?'flex':'none';}
     const k=SI.raw&&SI.raw.kpi;if(k){k.accPending=pending;k.pendingApproval=pending;}
-    si_v31PatchPendingCard(pending);
+    siPatchPendingCard(pending);
   }).withFailureHandler(()=>{const h=document.getElementById('siLowStockHeaderCount');if(h){h.textContent=low;h.style.display=low>0?'flex':'none';}}).si_getAccessoryApprovalAlerts({pendingOnly:true,limit:1});
 }
 
-function si_v31PatchPendingCard(pending){
+function siPatchPendingCard(pending){
   const grid=document.getElementById('siAccKpiGrid'); if(!grid)return;
   const cards=[...grid.querySelectorAll('.sp-kpi')];
   const card=cards.find(c=>(c.textContent||'').toLowerCase().includes('pending'));
@@ -753,16 +731,16 @@ function si_v31PatchPendingCard(pending){
 
 if(!window.__siV31RenderKpiPatch && typeof si_renderKpi === 'function'){
   window.__siV31RenderKpiPatch = true;
-  const _v31BaseRenderKpi = si_renderKpi;
+  const siBaseRenderKpiBeforePendingPatch = si_renderKpi;
   si_renderKpi = function(){
-    _v31BaseRenderKpi();
+    siBaseRenderKpiBeforePendingPatch();
     const p = Number((SI.raw&&SI.raw.kpi&&(SI.raw.kpi.accPending||SI.raw.kpi.pendingApproval))||0);
-    si_v31PatchPendingCard(p);
-    setTimeout(si_v31UpdateHeaderBadges,100);
+    siPatchPendingCard(p);
+    setTimeout(siUpdateHeaderBadges,100);
   };
 }
 
-function si_v31LowStockHtml(rows){
+function siLowStockHtml(rows){
   rows = rows || [];
   if(!rows.length) return '<div class="sp-muted">No low stock accessories</div>';
   return `<div class="si-v31-list">${rows.map(a=>{
@@ -771,32 +749,32 @@ function si_v31LowStockHtml(rows){
   }).join('')}</div>`;
 }
 
-function si_v31PendingHtml(rows){
+function siPendingHtml(rows){
   rows = rows || [];
   if(!rows.length) return '<div class="sp-muted">No pending approval requests</div>';
-  return `<div class="si-v31-list">${rows.map(r=>`<div class="si-v31-row" id="siReq_${spEsc(r.requestId)}"><div class="si-v31-dot pending"><i class="fas fa-clock"></i></div><div><div class="si-v31-title">${spEsc(r.requestId||'-')} • ${spEsc(r.itemName||r.accessoryId||'-')}</div><div class="si-v31-sub">${spEsc(r.team||'-')} • Qty ${spNum(r.qty||0)} pcs<br>Borrower: ${spEsc(r.borrower||'-')} / ${spEsc(r.location||'-')}<br>Requester: ${spEsc(r.requestedBy||r.requesterEmail||'-')} • ${spEsc(r.timestamp||'')}</div></div><div class="si-v31-actions"><button class="si-v31-mini ok" onclick="si_v31ApproveFromAlert('${spEsc(r.requestId)}')"><i class="fas fa-check"></i> Approve</button><button class="si-v31-mini bad" onclick="si_v31RejectFromAlert('${spEsc(r.requestId)}')"><i class="fas fa-times"></i> Reject</button></div></div>`).join('')}</div>`;
+  return `<div class="si-v31-list">${rows.map(r=>`<div class="si-v31-row" id="siReq_${spEsc(r.requestId)}"><div class="si-v31-dot pending"><i class="fas fa-clock"></i></div><div><div class="si-v31-title">${spEsc(r.requestId||'-')} • ${spEsc(r.itemName||r.accessoryId||'-')}</div><div class="si-v31-sub">${spEsc(r.team||'-')} • Qty ${spNum(r.qty||0)} pcs<br>Borrower: ${spEsc(r.borrower||'-')} / ${spEsc(r.location||'-')}<br>Requester: ${spEsc(r.requestedBy||r.requesterEmail||'-')} • ${spEsc(r.timestamp||'')}</div></div><div class="si-v31-actions"><button class="si-v31-mini ok" onclick="siApproveFromAlert('${spEsc(r.requestId)}')"><i class="fas fa-check"></i> Approve</button><button class="si-v31-mini bad" onclick="siRejectFromAlert('${spEsc(r.requestId)}')"><i class="fas fa-times"></i> Reject</button></div></div>`).join('')}</div>`;
 }
 
 function si_openAccessoryLowStockAlerts(){
-  si_v31Style();
+  siApprovalStyle();
   const low=(SI.acc||[]).filter(a=>Number(a.stockQty||a.stock_qty||a.qty||0)<=Number(a.minStockQty||a.min_stock_qty||a.minStock||0));
   Swal.fire({title:'Loading alerts...',allowOutsideClick:false,showConfirmButton:false,didOpen:()=>Swal.showLoading()});
   google.script.run.withSuccessHandler(res=>{
     Swal.close();
     const pending=(res&&res.success)?(res.data||res.approvals||[]):[];
-    window.si_v31AlertTab=function(tab){
+    window.siAlertTab=function(tab){
       document.querySelectorAll('.si-v31-alert-tabs button').forEach(b=>b.classList.remove('active'));
       const btn=document.getElementById('siV31Tab_'+tab); if(btn)btn.classList.add('active');
       const body=document.getElementById('siV31AlertBody'); if(!body)return;
-      body.innerHTML = tab==='pending' ? si_v31PendingHtml(pending) : si_v31LowStockHtml(low);
+      body.innerHTML = tab==='pending' ? siPendingHtml(pending) : siLowStockHtml(low);
     };
-    const html=`<div class="si-v31-alert-tabs"><button id="siV31Tab_pending" class="active" onclick="si_v31AlertTab('pending')"><i class="fas fa-clock"></i> Pending Approval (${pending.length})</button><button id="siV31Tab_low" onclick="si_v31AlertTab('low')"><i class="fas fa-battery-quarter"></i> Low Stock (${low.length})</button></div><div id="siV31AlertBody">${si_v31PendingHtml(pending)}</div>`;
+    const html=`<div class="si-v31-alert-tabs"><button id="siV31Tab_pending" class="active" onclick="siAlertTab('pending')"><i class="fas fa-clock"></i> Pending Approval (${pending.length})</button><button id="siV31Tab_low" onclick="siAlertTab('low')"><i class="fas fa-battery-quarter"></i> Low Stock (${low.length})</button></div><div id="siV31AlertBody">${siPendingHtml(pending)}</div>`;
     Swal.fire({title:'Inventory Alerts',width:980,html,confirmButtonText:'Close'});
   }).withFailureHandler(err=>Swal.fire('Alert Error',err.message||String(err),'error')).si_getAccessoryApprovalAlerts({pendingOnly:true,limit:200});
 }
 
-function si_v31ApproveFromAlert(requestId){
-  const user=si_v31CurrentUserPayload();
+function siApproveFromAlert(requestId){
+  const user=siCurrentUserPayload();
   Swal.fire({title:'Approve request?',text:requestId,icon:'question',showCancelButton:true,confirmButtonText:'Approve',confirmButtonColor:'#059669'}).then(r=>{
     if(!r.isConfirmed)return;
     Swal.fire({title:'Approving...',allowOutsideClick:false,showConfirmButton:false,didOpen:()=>Swal.showLoading()});
@@ -806,8 +784,8 @@ function si_v31ApproveFromAlert(requestId){
   });
 }
 
-function si_v31RejectFromAlert(requestId){
-  const user=si_v31CurrentUserPayload();
+function siRejectFromAlert(requestId){
+  const user=siCurrentUserPayload();
   Swal.fire({title:'Reject request?',html:`<input id="siV31RejectNote" class="swal2-input" placeholder="Reason / note">`,icon:'warning',showCancelButton:true,confirmButtonText:'Reject',confirmButtonColor:'#ef4444'}).then(r=>{
     if(!r.isConfirmed)return;
     Swal.fire({title:'Rejecting...',allowOutsideClick:false,showConfirmButton:false,didOpen:()=>Swal.showLoading()});
@@ -819,14 +797,14 @@ function si_v31RejectFromAlert(requestId){
 
 if(!window.__siV31InitPatch && typeof initStockInventoryModule === 'function'){
   window.__siV31InitPatch=true;
-  const _v31BaseInit=initStockInventoryModule;
+  const siBaseInitBeforeAlertPatch=initStockInventoryModule;
   initStockInventoryModule=function(force=false){
-    _v31BaseInit(force);
-    setTimeout(()=>{try{si_v31UpdateHeaderBadges();}catch(e){}},1200);
+    siBaseInitBeforeAlertPatch(force);
+    setTimeout(()=>{try{siUpdateHeaderBadges();}catch(e){}},1200);
   };
 }
 
-document.addEventListener('DOMContentLoaded',()=>setTimeout(()=>{try{si_v31Style();si_v31UpdateHeaderBadges();}catch(e){}},1200));
+document.addEventListener('DOMContentLoaded',()=>setTimeout(()=>{try{siApprovalStyle();siUpdateHeaderBadges();}catch(e){}},1200));
 
 
 /* ============================================================
@@ -838,7 +816,7 @@ document.addEventListener('DOMContentLoaded',()=>setTimeout(()=>{try{si_v31Style
    - Pending Approval card is refreshed from approval sheet and matched
      with current Accessories search/team/item/status/action filters.
 ============================================================ */
-function si_v31StatusOf(d){
+function siStatusOf(d){
   d = d || {};
   const text = [d.status,d.baseStatus,d.base_status,d.rentalStatus,d.rental_status,d.dqStatus,d.dq_status,d.actionRequired,d.action_required,d.recheckNote,d.recheck_note].join(' ').toUpperCase();
   if(/BROKEN|BREAK|DAMAGED|DEFECT|เสีย|ชำรุด|พัง/.test(text)) return 'Broken';
@@ -849,9 +827,9 @@ function si_v31StatusOf(d){
   return 'Stock';
 }
 
-function si_v31EquipmentKpi(rows){
+function siEquipmentKpi(rows){
   rows = rows || [];
-  const stRows = rows.map(d => Object.assign({}, d, {status: si_v31StatusOf(d)}));
+  const stRows = rows.map(d => Object.assign({}, d, {status: siStatusOf(d)}));
   const overdue = stRows.filter(d => d.status === 'Overdue').length;
   const missing  = stRows.filter(d => d.status === 'Missing').length;
   const broken   = stRows.filter(d => d.status === 'Broken').length;
@@ -868,7 +846,7 @@ function si_v31EquipmentKpi(rows){
   };
 }
 
-function si_v31AccessoryKpi(rows){
+function siAccessoryKpi(rows){
   rows = rows || [];
   const stockOf = a => Number(a.stockQty||a.stock_qty||a.qty||0);
   const minOf = a => Number(a.minStockQty||a.min_stock_qty||a.minStock||0);
@@ -881,23 +859,23 @@ function si_v31AccessoryKpi(rows){
   };
 }
 
-function si_v31KpiCard(i){
+function siKpiCard(i){
   return `<div class="sp-kpi"><div class="ico" style="background:${i[4]}"><i class="fas ${i[2]}" style="color:${i[3]}"></i></div><div class="label">${i[0]}</div><div class="val" style="color:${i[3]}">${spNum(i[1])}</div></div>`;
 }
 
-function si_v31RenderEquipmentKpi(rows){
-  const k = si_v31EquipmentKpi(rows || SI.filtered || []);
+function siRenderEquipmentKpi(rows){
+  const k = siEquipmentKpi(rows || SI.filtered || []);
   const eqItems = [
     ['อุปกรณ์หลักทั้งหมด', k.total, 'fa-microchip', '#2563eb', '#dbeafe'],
     ['STOCK', k.stock, 'fa-warehouse', '#059669', '#dcfce7'],
     ['IN-USE', k.inUse, 'fa-arrow-right-from-bracket', '#d97706', '#fef3c7'],
     ['OVERDUE/MISSING/BROKEN', k.risk, 'fa-triangle-exclamation', '#dc2626', '#fee2e2']
   ];
-  spSetHtml('siEquipKpiGrid', eqItems.map(si_v31KpiCard).join(''));
+  spSetHtml('siEquipKpiGrid', eqItems.map(siKpiCard).join(''));
 }
 
-function si_v31RenderAccessoryKpi(rows, pendingOverride){
-  const k = si_v31AccessoryKpi(rows || SI.accFiltered || []);
+function siRenderAccessoryKpi(rows, pendingOverride){
+  const k = siAccessoryKpi(rows || SI.accFiltered || []);
   const pending = pendingOverride !== undefined ? Number(pendingOverride||0) : Number(k.accPendingLocal||0);
   const accItems = [
     ['Accessories', k.accessories, 'fa-plug', '#0ea5e9', '#e0f2fe'],
@@ -905,19 +883,19 @@ function si_v31RenderAccessoryKpi(rows, pendingOverride){
     ['Low Stock', k.accLow, 'fa-battery-quarter', '#ea580c', '#ffedd5'],
     ['Pending Approval', pending, 'fa-bell', '#7c3aed', '#ede9fe']
   ];
-  spSetHtml('siAccKpiGrid', accItems.map(si_v31KpiCard).join(''));
+  spSetHtml('siAccKpiGrid', accItems.map(siKpiCard).join(''));
 }
 
-function si_v31RenderFilteredKpi(){
+function siRenderFilteredKpi(){
   if(SI.tab === 'equip') {
-    si_v31RenderEquipmentKpi(SI.filtered || []);
+    siRenderEquipmentKpi(SI.filtered || []);
   } else {
-    si_v31RenderAccessoryKpi(SI.accFiltered || []);
-    si_v31UpdatePendingKpiFromApprovalSheet();
+    siRenderAccessoryKpi(SI.accFiltered || []);
+    siUpdatePendingKpiFromApprovalSheet();
   }
 }
 
-function si_v31ApprovalMatchesCurrentAccFilter(r){
+function siApprovalMatchesCurrentAccFilter(r){
   r = r || {};
   const q = spVal('siAccSearch','').toLowerCase();
   const team = spVal('siAccTeam','all');
@@ -935,16 +913,16 @@ function si_v31ApprovalMatchesCurrentAccFilter(r){
   return true;
 }
 
-function si_v31UpdatePendingKpiFromApprovalSheet(){
+function siUpdatePendingKpiFromApprovalSheet(){
   if(typeof google === 'undefined' || !google.script || !google.script.run || typeof google.script.run.si_getAccessoryApprovalAlerts !== 'function') return;
   google.script.run
     .withSuccessHandler(res=>{
       const pendingRows = (res && res.success) ? (res.data || res.approvals || []) : [];
-      const filteredPending = pendingRows.filter(si_v31ApprovalMatchesCurrentAccFilter).length;
-      si_v31RenderAccessoryKpi(SI.accFiltered || [], filteredPending);
+      const filteredPending = pendingRows.filter(siApprovalMatchesCurrentAccFilter).length;
+      siRenderAccessoryKpi(SI.accFiltered || [], filteredPending);
       const k = SI.raw && SI.raw.kpi;
       if(k){ k.accPending = filteredPending; k.pendingApproval = filteredPending; }
-      if(typeof si_v31PatchPendingCard === 'function') si_v31PatchPendingCard(filteredPending);
+      if(typeof siPatchPendingCard === 'function') siPatchPendingCard(filteredPending);
     })
     .withFailureHandler(()=>{})
     .si_getAccessoryApprovalAlerts({pendingOnly:true,limit:500});
@@ -955,20 +933,20 @@ if(!window.__siV31RenderKpiPatch){
   si_renderKpi = function(){
     const eqRows = (SI.filtered && SI.filtered.length) ? SI.filtered : (SI.inv || []);
     const accRows = (SI.accFiltered && SI.accFiltered.length) ? SI.accFiltered : (SI.acc || []);
-    si_v31RenderEquipmentKpi(eqRows);
-    si_v31RenderAccessoryKpi(accRows, (SI.raw&&SI.raw.kpi&&(SI.raw.kpi.accPending||SI.raw.kpi.pendingApproval))||0);
+    siRenderEquipmentKpi(eqRows);
+    siRenderAccessoryKpi(accRows, (SI.raw&&SI.raw.kpi&&(SI.raw.kpi.accPending||SI.raw.kpi.pendingApproval))||0);
   };
 }
 
 if(!window.__siV31ApplyFilterPatch){
   window.__siV31ApplyFilterPatch = true;
   si_applyFilters = function(){
-    if(typeof si_v11Style === 'function') si_v11Style();
-    if(typeof si_v12Style === 'function') si_v12Style();
+    if(typeof siBaseStyle === 'function') siBaseStyle();
+    if(typeof siTabStyle === 'function') siTabStyle();
     if(SI.tab === 'equip'){
       const q=spVal('siSearch','').toLowerCase(), b=spVal('siBrand','all'), m=spVal('siModel','all'), l=spVal('siLocation','all'), s=spVal('siStatus','all');
       SI.filtered=(SI.inv||[]).filter(d=>{
-        const status = si_v31StatusOf(d);
+        const status = siStatusOf(d);
         const text=[d.idCode,d.sn,d.brand,d.model,d.itemName,d.location,status,d.status,d.borrower,d.actionRequired].join(' ').toLowerCase();
         if(q && !text.includes(q)) return false;
         if(b !== 'all' && d.brand !== b) return false;
@@ -976,10 +954,10 @@ if(!window.__siV31ApplyFilterPatch){
         if(l !== 'all' && d.location !== l) return false;
         if(s !== 'all' && status !== s && d.status !== s) return false;
         return true;
-      }).map(d=>Object.assign({}, d, {status: si_v31StatusOf(d)}));
+      }).map(d=>Object.assign({}, d, {status: siStatusOf(d)}));
       SI.page=1;
       si_renderTable();
-      si_v31RenderEquipmentKpi(SI.filtered);
+      siRenderEquipmentKpi(SI.filtered);
     } else {
       const q=spVal('siAccSearch','').toLowerCase(), team=spVal('siAccTeam','all'), item=spVal('siAccItem','all'), st=spVal('siAccStatus','all'), act=spVal('siAccAction','all');
       SI.accFiltered=(SI.acc||[]).filter(a=>{
@@ -1002,8 +980,8 @@ if(!window.__siV31ApplyFilterPatch){
       });
       SI.accPage=1;
       si_renderAccCards();
-      si_v31RenderAccessoryKpi(SI.accFiltered);
-      si_v31UpdatePendingKpiFromApprovalSheet();
+      siRenderAccessoryKpi(SI.accFiltered);
+      siUpdatePendingKpiFromApprovalSheet();
     }
   };
 }
@@ -1145,7 +1123,7 @@ if(!window.__siV31ApplyFilterPatch){
         document.querySelectorAll('.si-v31-alert-tabs button').forEach(b=>b.classList.remove('active'));
         const btn=document.getElementById('siCiTab_'+tab); if(btn) btn.classList.add('active');
         const body=document.getElementById('siCiAlertBody'); if(!body) return;
-        if(tab==='pending' && typeof si_v31PendingHtml==='function') body.innerHTML=si_v31PendingHtml(pending);
+        if(tab==='pending' && typeof siPendingHtml==='function') body.innerHTML=siPendingHtml(pending);
         else if(tab==='low') body.innerHTML=renderAlertList(low,'low');
         else if(tab==='soon') body.innerHTML=renderAlertList(soon,'soon');
         else body.innerHTML=renderAlertList(due,'due');
@@ -1307,16 +1285,16 @@ if(!window.__siV31ApplyFilterPatch){
       Swal.close();
       if(!res || !res.success){ Swal.fire('Alert Error',(res&&res.message)||'Cannot load alerts','error'); return; }
       const pending=res.pending||[], low=res.lowStock||[], due=res.checkDue||[], soon=res.checkSoon||[];
-      window.siAlertTabLegacyV31=function(tab){
+      window.siAlertTabLegacy=function(tab){
         document.querySelectorAll('.si-v31-tabs button').forEach(b=>b.classList.remove('active'));
         const btn=document.getElementById('siV31Tab_'+tab); if(btn) btn.classList.add('active');
         const body=document.getElementById('siV31AlertBody'); if(!body) return;
-        if(tab==='pending' && typeof si_v31PendingHtml==='function') body.innerHTML=si_v31PendingHtml(pending);
+        if(tab==='pending' && typeof siPendingHtml==='function') body.innerHTML=siPendingHtml(pending);
         else if(tab==='low') body.innerHTML=renderAlertTable(low,'low');
         else if(tab==='soon') body.innerHTML=renderAlertTable(soon,'soon');
         else body.innerHTML=renderAlertTable(due,'due');
       };
-      const html=`<div class="si-v31-note">Alert แสดงแบบ table เพื่อลด DOM/card จำนวนมากและทำงานเร็วขึ้น</div><div class="si-v31-tabs"><button id="siV31Tab_due" class="active" onclick="siAlertTabLegacyV31('due')"><i class="fas fa-calendar-times"></i> Check Due (${due.length})</button><button id="siV31Tab_low" onclick="siAlertTabLegacyV31('low')"><i class="fas fa-battery-quarter"></i> Restock / Low (${low.length})</button><button id="siV31Tab_pending" onclick="siAlertTabLegacyV31('pending')"><i class="fas fa-clock"></i> Pending (${pending.length})</button><button id="siV31Tab_soon" onclick="siAlertTabLegacyV31('soon')"><i class="fas fa-hourglass-half"></i> Due Soon (${soon.length})</button></div><div id="siV31AlertBody">${renderAlertTable(due,'due')}</div>`;
+      const html=`<div class="si-v31-note">Alert แสดงแบบ table เพื่อลด DOM/card จำนวนมากและทำงานเร็วขึ้น</div><div class="si-v31-tabs"><button id="siV31Tab_due" class="active" onclick="siAlertTabLegacy('due')"><i class="fas fa-calendar-times"></i> Check Due (${due.length})</button><button id="siV31Tab_low" onclick="siAlertTabLegacy('low')"><i class="fas fa-battery-quarter"></i> Restock / Low (${low.length})</button><button id="siV31Tab_pending" onclick="siAlertTabLegacy('pending')"><i class="fas fa-clock"></i> Pending (${pending.length})</button><button id="siV31Tab_soon" onclick="siAlertTabLegacy('soon')"><i class="fas fa-hourglass-half"></i> Due Soon (${soon.length})</button></div><div id="siV31AlertBody">${renderAlertTable(due,'due')}</div>`;
       Swal.fire({title:'Accessories Alerts',width:1180,html,confirmButtonText:'Close'});
       setHtml('siLowStockHeaderCount', due.length+low.length+pending.length);
     }).withFailureHandler(err=>Swal.fire('Alert Error',err.message||String(err),'error')).si_getAccessoryStockAlerts({limit:300});
@@ -1474,8 +1452,8 @@ if(!window.__siV31ApplyFilterPatch){
     window.siAlertRowsV31 = rows;
     if(!rows.length) return '<div class="si-v32-empty">No items</div>';
     const canBatch = mode !== 'pending';
-    const toolbar = canBatch ? `<div class="si-v32-toolbar"><div class="si-v32-toolbar-left"><button class="si-v32-btn soft" onclick="si_v32ToggleAllAlertRows(true)">Select all</button><button class="si-v32-btn gray" onclick="si_v32ToggleAllAlertRows(false)">Clear</button></div><button class="si-v32-btn primary" onclick="si_v32BatchRecheckFromModal()"><i class="fas fa-clipboard-check"></i> Batch Recheck Selected</button></div>` : '';
-    const headChk = canBatch ? '<th class="chk"><input type="checkbox" onchange="si_v32ToggleAllAlertRows(this.checked)"></th>' : '';
+    const toolbar = canBatch ? `<div class="si-v32-toolbar"><div class="si-v32-toolbar-left"><button class="si-v32-btn soft" onclick="siToggleAllAlertRows(true)">Select all</button><button class="si-v32-btn gray" onclick="siToggleAllAlertRows(false)">Clear</button></div><button class="si-v32-btn primary" onclick="siBatchRecheckFromModal()"><i class="fas fa-clipboard-check"></i> Batch Recheck Selected</button></div>` : '';
+    const headChk = canBatch ? '<th class="chk"><input type="checkbox" onchange="siToggleAllAlertRows(this.checked)"></th>' : '';
     const body = rows.map((a,i)=>{
       const low=isLow(a), cs=checkStatus(a), id=idOf(a);
       const chk = canBatch ? `<td class="chk"><input type="checkbox" class="siV32Chk" data-idx="${i}" ${mode==='action'?'checked':''}></td>` : '';
@@ -1488,12 +1466,12 @@ if(!window.__siV31ApplyFilterPatch){
   function renderPendingTable(rows){
     rows = rows || [];
     if(!rows.length) return '<div class="si-v32-empty">No pending approval requests</div>';
-    return `<div class="si-v32-table-wrap"><table class="si-v32-table"><thead><tr><th>Request</th><th>Item</th><th>Team</th><th class="num">Qty</th><th>Borrower / Location</th><th>Requester</th><th>Status</th><th>Action</th></tr></thead><tbody>${rows.map(r=>`<tr><td><b>${esc(r.requestId||'-')}</b><div class="sp-muted">${esc(r.timestamp||'')}</div></td><td>${esc(r.itemName||r.accessoryId||'-')}<div class="sp-muted">${esc(r.accessoryId||'')}</div></td><td>${esc(r.team||'-')}</td><td class="num">${num(r.qty||0)}</td><td>${esc(r.borrower||'-')}<div class="sp-muted">${esc(r.location||'-')}</div></td><td>${esc(r.requestedBy||r.requesterEmail||'-')}</td><td><span class="si-v32-chip warn">${esc(r.status||'PENDING')}</span></td><td><div style="display:flex;gap:6px;flex-wrap:wrap"><button class="si-v32-btn ok" onclick="si_v32Approve('${esc(r.requestId||'')}')">Approve</button><button class="si-v32-btn bad" onclick="si_v32Reject('${esc(r.requestId||'')}')">Reject</button></div></td></tr>`).join('')}</tbody></table></div>`;
+    return `<div class="si-v32-table-wrap"><table class="si-v32-table"><thead><tr><th>Request</th><th>Item</th><th>Team</th><th class="num">Qty</th><th>Borrower / Location</th><th>Requester</th><th>Status</th><th>Action</th></tr></thead><tbody>${rows.map(r=>`<tr><td><b>${esc(r.requestId||'-')}</b><div class="sp-muted">${esc(r.timestamp||'')}</div></td><td>${esc(r.itemName||r.accessoryId||'-')}<div class="sp-muted">${esc(r.accessoryId||'')}</div></td><td>${esc(r.team||'-')}</td><td class="num">${num(r.qty||0)}</td><td>${esc(r.borrower||'-')}<div class="sp-muted">${esc(r.location||'-')}</div></td><td>${esc(r.requestedBy||r.requesterEmail||'-')}</td><td><span class="si-v32-chip warn">${esc(r.status||'PENDING')}</span></td><td><div style="display:flex;gap:6px;flex-wrap:wrap"><button class="si-v32-btn ok" onclick="siApprove('${esc(r.requestId||'')}')">Approve</button><button class="si-v32-btn bad" onclick="siReject('${esc(r.requestId||'')}')">Reject</button></div></td></tr>`).join('')}</tbody></table></div>`;
   }
 
-  window.si_v32ToggleAllAlertRows = function(checked){ document.querySelectorAll('.siV32Chk').forEach(x=>{ x.checked=!!checked; }); };
+  window.siToggleAllAlertRows = function(checked){ document.querySelectorAll('.siV32Chk').forEach(x=>{ x.checked=!!checked; }); };
 
-  window.si_v32BatchRecheckFromModal = function(){
+  window.siBatchRecheckFromModal = function(){
     const rows = window.siAlertRowsV31 || [];
     const items = [];
     document.querySelectorAll('.siV32Chk:checked').forEach(chk=>{
@@ -1520,7 +1498,7 @@ if(!window.__siV31ApplyFilterPatch){
     const action = alerts.actionRequired || [];
     const pending = alerts.pending || [];
     const soon = alerts.checkSoon || [];
-    window.siAlertTabV31 = function(tab){
+    window.siAlertTab = function(tab){
       document.querySelectorAll('.si-v32-tabs button').forEach(b=>b.classList.remove('active'));
       const btn=document.getElementById('siV32Tab_'+tab); if(btn) btn.classList.add('active');
       const body=document.getElementById('siV32AlertBody'); if(!body) return;
@@ -1528,7 +1506,7 @@ if(!window.__siV31ApplyFilterPatch){
       else if(tab==='soon') body.innerHTML=renderActionTable(soon,'soon');
       else body.innerHTML=renderActionTable(action,'action');
     };
-    const html=`<div class="si-v32-note">รวม Check due + Restock/Low ไว้ในแท็บเดียว ลดความซ้ำซ้อน และเลือกหลายรายการเพื่อ Recheck พร้อมกันได้</div><div class="si-v32-tabs"><button id="siV32Tab_action" class="active" onclick="siAlertTabV31('action')"><i class="fas fa-triangle-exclamation"></i> Action Required (${action.length})</button><button id="siV32Tab_pending" onclick="siAlertTabV31('pending')"><i class="fas fa-clock"></i> Pending Approval (${pending.length})</button><button id="siV32Tab_soon" onclick="siAlertTabV31('soon')"><i class="fas fa-hourglass-half"></i> Due Soon (${soon.length})</button></div><div id="siV32AlertBody">${renderActionTable(action,'action')}</div>`;
+    const html=`<div class="si-v32-note">รวม Check due + Restock/Low ไว้ในแท็บเดียว ลดความซ้ำซ้อน และเลือกหลายรายการเพื่อ Recheck พร้อมกันได้</div><div class="si-v32-tabs"><button id="siV32Tab_action" class="active" onclick="siAlertTab('action')"><i class="fas fa-triangle-exclamation"></i> Action Required (${action.length})</button><button id="siV32Tab_pending" onclick="siAlertTab('pending')"><i class="fas fa-clock"></i> Pending Approval (${pending.length})</button><button id="siV32Tab_soon" onclick="siAlertTab('soon')"><i class="fas fa-hourglass-half"></i> Due Soon (${soon.length})</button></div><div id="siV32AlertBody">${renderActionTable(action,'action')}</div>`;
     Swal.fire({title:'Accessories Alerts',width:1200,html,confirmButtonText:'Close'});
     setHtml('siLowStockHeaderCount', action.length + pending.length);
   }
@@ -1585,15 +1563,15 @@ if(!window.__siV31ApplyFilterPatch){
     });
   };
 
-  window.si_v32Approve = function(requestId){
+  window.siApprove = function(requestId){
     if(!requestId) return;
-    const fn = (typeof si_v31ApproveFromAlert === 'function') ? si_v31ApproveFromAlert : null;
+    const fn = (typeof siApproveFromAlert === 'function') ? siApproveFromAlert : null;
     if(fn) return fn(requestId);
     Swal.fire({title:'Approve request?',text:requestId,icon:'question',showCancelButton:true,confirmButtonText:'Approve'}).then(r=>{ if(!r.isConfirmed) return; google.script.run.withSuccessHandler(res=>{ if(res&&res.success){ Swal.fire('Approved',res.message||'Done','success'); initStockInventoryModule(true); } else Swal.fire('Error',(res&&res.message)||'Failed','error'); }).si_approveAccessoryRequestFromWeb({requestId}); });
   };
-  window.si_v32Reject = function(requestId){
+  window.siReject = function(requestId){
     if(!requestId) return;
-    const fn = (typeof si_v31RejectFromAlert === 'function') ? si_v31RejectFromAlert : null;
+    const fn = (typeof siRejectFromAlert === 'function') ? siRejectFromAlert : null;
     if(fn) return fn(requestId);
     Swal.fire({title:'Reject request?',text:requestId,icon:'warning',showCancelButton:true,confirmButtonText:'Reject'}).then(r=>{ if(!r.isConfirmed) return; google.script.run.withSuccessHandler(res=>{ if(res&&res.success){ Swal.fire('Rejected',res.message||'Done','success'); initStockInventoryModule(true); } else Swal.fire('Error',(res&&res.message)||'Failed','error'); }).si_rejectAccessoryRequestFromWeb({requestId}); });
   };

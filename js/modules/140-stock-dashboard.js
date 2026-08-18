@@ -75,9 +75,9 @@ function spDownloadJsonAsExcel(rows, name){
 
 function initStockDashboardModule(force=false){
   spEnsureStyle();
-  try{sd_primeRentalWorkflowV263_();}catch(ignorePrimeV263){}
-  setTimeout(function(){try{sd_switchStockTabV260(sessionStorage.getItem('CES_STOCK_TAB_V260')||'dashboard');}catch(e){}},0);
-  if (typeof sd_v17Style === 'function') sd_v17Style();
+  try{sd_primeRentalWorkflow_();}catch(ignorePrimeV263){}
+  setTimeout(function(){try{sd_switchStockTab(sessionStorage.getItem('CES_STOCK_TAB_V260')||'dashboard');}catch(e){}},0);
+  if (typeof sdStyle === 'function') sdStyle();
 
   const cacheKey = 'CES_STOCK_DASHBOARD_CACHE_V17';
   const cacheTtlMs = 5 * 60 * 1000;
@@ -92,8 +92,8 @@ function initStockDashboardModule(force=false){
     try { sessionStorage.setItem(cacheKey, JSON.stringify({ts:Date.now(), data:res})); } catch(e) {}
     sd_fillFilters();
     sd_renderAll();
-    try{sd_updateReadyStockBenchmarkV263();}catch(ignoreBenchmarkV263){}
-    setTimeout(()=>{try{sd_loadRentalWorkflowV248(false);}catch(e){}},160);
+    try{sd_updateReadyStockBenchmark();}catch(ignoreBenchmarkV263){}
+    setTimeout(()=>{try{sd_loadRentalWorkflow(false);}catch(e){}},160);
   }
 
   if(!force){
@@ -175,7 +175,7 @@ function sd_exportSummary(){
    CES Stock Pro V8 — ADDITIVE FRONTEND PATCH FROM V6 BASE
    Keeps all V6 functions, overrides dashboard render/action functions only.
 ============================================================ */
-function spEnsureStyleV31(){
+function spEnsureStyle(){
   if(document.getElementById('stockpro-style-v8'))return;
   const style=document.createElement('style');
   style.id='stockpro-style-v8';
@@ -214,23 +214,23 @@ function sd_returnLocation(location){
    CES Stock Pro V11 — V8 ORIGINAL ADDITIVE PATCH
    Keeps V8 functions and overrides only final dashboard render/action layer.
 ============================================================ */
-function sd_v11IsWarehouseLocation(loc){
+function sdIsWarehouseLocation(loc){
   const s=String(loc||'').trim().toUpperCase();
   return s==='WAREHOUSE'||s==='STORE'||s==='STOCK ROOM'||s==='STOCKROOM'||s.includes('WAREHOUSE')||s.includes('คลัง')||s.includes('สโตร์');
 }
-function sd_v11NormalizeDevice(d){
+function sdNormalizeDevice(d){
   d=Object.assign({},d||{});
-  if(sd_v11IsWarehouseLocation(d.location)){
+  if(sdIsWarehouseLocation(d.location)){
     d.location='Warehouse';d.status='Stock';d.finalStatus='Stock';d.rentalStatus='STOCK';
     d.borrower='-';d.borrowDate='';d.expectedReturn='';d.expectedReturnDate='';d.dueDate='';d.overdueDays=0;d.daysRemaining='';
   }
   return d;
 }
-function sd_v11FilteredDevices(){
+function sdFilteredDevices(){
   const base=(typeof sd_getFilteredDevices==='function'?sd_getFilteredDevices():(SD_DASH.raw&&SD_DASH.raw.inventory)||[]);
-  return (base||[]).map(sd_v11NormalizeDevice);
+  return (base||[]).map(sdNormalizeDevice);
 }
-function sd_v11ApplyStyle(){
+function sdApplyStyle(){
   if(document.getElementById('stockpro-style-v11'))return;
   const style=document.createElement('style');style.id='stockpro-style-v11';style.textContent=`
     .sp-compact-alert-list{display:grid;gap:8px;max-height:60vh;overflow:auto;text-align:left}.sp-alert-row{display:grid;grid-template-columns:34px 1fr auto;gap:10px;align-items:center;border:1px solid #e8eef6;border-radius:14px;background:#fff;padding:10px}.sp-alert-ico{width:32px;height:32px;border-radius:11px;display:flex;align-items:center;justify-content:center}.sp-alert-title{font-weight:1000;color:#0f172a;font-size:13px}.sp-alert-sub{font-size:11px;color:#64748b;margin-top:2px}.sp-contract-row-overdue td{background:#fff1f2!important}.sp-contract-row-completed td{background:#eff6ff!important}.sp-contract-row-active td{background:#fff!important}.sp-contract-filter-card{position:relative;z-index:2}.sp-detail-list-v11{display:grid;gap:8px;max-height:62vh;overflow:auto;text-align:left}.sp-detail-item-v11{display:grid;grid-template-columns:40px 1fr auto;gap:10px;align-items:center;border:1px solid #e8eef6;border-radius:14px;background:#f8fbff;padding:10px}.sp-detail-icon-v11{width:36px;height:36px;border-radius:12px;background:#dbeafe;color:#2563eb;display:flex;align-items:center;justify-content:center}.sp-model-card.byond{border-color:#bfdbfe;background:linear-gradient(180deg,#fff,#eff6ff)}.sp-model-card.infusomat{border-color:#bbf7d0;background:linear-gradient(180deg,#fff,#f0fdf4)}.sp-model-card.spaceplus{border-color:#fde68a;background:linear-gradient(180deg,#fff,#fffbeb)}
@@ -238,10 +238,10 @@ function sd_v11ApplyStyle(){
   `;document.head.appendChild(style);
 }
 function sd_renderFiltered(){
-  spEnsureStyle();sd_v11ApplyStyle();
-  const rows=sd_v11FilteredDevices();
+  spEnsureStyle();sdApplyStyle();
+  const rows=sdFilteredDevices();
   sd_renderModelCards(rows);
-  sd_renderKpis(sd_v11FilteredKpi(rows));
+  sd_renderKpis(sdFilteredKpi(rows));
   sd_renderCharts(rows);
   sd_renderSummaryTables();
   sd_renderContractSummary();
@@ -249,7 +249,7 @@ function sd_renderFiltered(){
 }
 function sd_renderAll(){sd_renderFiltered();}
 function sd_renderModelCards(filteredRows){
-  const rows=filteredRows||sd_v11FilteredDevices();
+  const rows=filteredRows||sdFilteredDevices();
   const cards=sd_filteredModelCards_?sd_filteredModelCards_(rows):[];
   const html=cards.map(x=>{
     const key=String(x.label||'').toUpperCase();
@@ -261,7 +261,7 @@ function sd_renderModelCards(filteredRows){
   spSetHtml('sdModelCards',html);
 }
 function sd_renderCharts(filteredRows){
-  const rows=filteredRows||sd_v11FilteredDevices();
+  const rows=filteredRows||sdFilteredDevices();
   if(typeof Chart==='undefined')return;
   const byStatus=sd_countBy(rows,'status');
   const labels=byStatus.map(x=>x.name), data=byStatus.map(x=>x.count);
@@ -273,12 +273,12 @@ function sd_renderCharts(filteredRows){
   const rentCanvas=document.getElementById('sdRentalChart');
   if(rentCanvas){ if(SD_DASH.rentalChart)SD_DASH.rentalChart.destroy(); SD_DASH.rentalChart=new Chart(rentCanvas,{type:'bar',data:{labels:months,datasets:[{label:'BYOND',data:byond,backgroundColor:'#93c5fd'},{label:'B.Braun',data:bbraun,backgroundColor:'#86efac'}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'top'}},scales:{y:{beginAtZero:true}}}});}
 }
-function sd_v11ResetContractFilter(){
+function sdResetContractFilter(){
   const f=document.getElementById('sdContractFilter'),s=document.getElementById('sdContractSort');
   if(f)f.value='all'; if(s)s.value='risk'; sd_renderContractSummary();
 }
-function sd_v11ContractRows(){
-  const active=sd_v11FilteredDevices().filter(d=>['In-Use','Overdue'].includes(d.status)||Number(d.overdueDays||0)>0);
+function sdContractRows(){
+  const active=sdFilteredDevices().filter(d=>['In-Use','Overdue'].includes(d.status)||Number(d.overdueDays||0)>0);
   const map={};
   active.forEach(d=>{const loc=d.location||'Unknown';if(!map[loc])map[loc]={location:loc,total:0,inUse:0,overdue:0,completed:0,ids:[],modelMap:{},borrowDate:'',expectedReturn:'',maxOverdue:0,state:'active'};const x=map[loc];x.total++;if(d.status==='Overdue'||Number(d.overdueDays||0)>0){x.overdue++;x.state='overdue';}else x.inUse++;x.ids.push(d.idCode);const model=d.model||d.itemName||'Unknown';x.modelMap[model]=(x.modelMap[model]||0)+1;if(!x.borrowDate&&d.borrowDate)x.borrowDate=d.borrowDate;if(!x.expectedReturn&&d.expectedReturn)x.expectedReturn=d.expectedReturn;x.maxOverdue=Math.max(x.maxOverdue,Number(d.overdueDays||0));});
   (SD_DASH.raw&&SD_DASH.raw.rentals||[]).forEach(r=>{const status=String(r.rentalStatus||r.rental_status||'').toUpperCase();const returned=!!(r.returnDate||r.return_date)||status==='RETURNED'||status==='COMPLETED'||status==='DONE';if(!returned)return;const loc=r.location||'Unknown';if(!map[loc])map[loc]={location:loc,total:0,inUse:0,overdue:0,completed:0,ids:[],modelMap:{},borrowDate:'',expectedReturn:'',maxOverdue:0,state:'completed'};const x=map[loc];x.completed++;x.total++;x.state=x.state==='overdue'?'overdue':(x.inUse?'active':'completed');const model=r.model||'Returned';x.modelMap[model]=(x.modelMap[model]||0)+1;if(!x.borrowDate&&r.borrowDate)x.borrowDate=r.borrowDate;if(!x.expectedReturn&&(r.returnDate||r.expectedReturnDate))x.expectedReturn=r.returnDate||r.expectedReturnDate;});
@@ -291,24 +291,24 @@ function sd_v11ContractRows(){
   rows.sort((a,b)=>{if(sort==='location')return String(a.location).localeCompare(String(b.location));if(sort==='due_asc')return new Date(a.expectedReturn||'2999-12-31')-new Date(b.expectedReturn||'2999-12-31');if(sort==='due_desc')return new Date(b.expectedReturn||'1900-01-01')-new Date(a.expectedReturn||'1900-01-01');return (b.overdue-a.overdue)||(b.inUse-a.inUse)||(b.total-a.total);});
   return rows;
 }
-function sd_showLocationDetailV11_(location){
-  const rows=sd_v11FilteredDevices().filter(d=>(d.location||'Unknown')===location);
+function sd_showLocationDetail_(location){
+  const rows=sdFilteredDevices().filter(d=>(d.location||'Unknown')===location);
   const html=`<div class="sp-detail-list-v11">${rows.map(d=>`<div class="sp-detail-item-v11"><div class="sp-detail-icon-v11"><i class="fas fa-microchip"></i></div><div><div class="sp-detail-title">${spEsc(d.idCode||'-')} ${spBadge(d.status)}</div><div class="sp-detail-sub">${spEsc(d.brand||'-')} ${spEsc(d.model||d.itemName||'-')} • SN:${spEsc(d.sn||'-')}</div><div class="sp-detail-sub">Borrower: ${spEsc(d.borrower||'-')} • Due: ${spFmtDate(d.expectedReturn||d.expectedReturnDate)}</div></div><div class="sp-action-group"><button class="sp-icon-btn orange" onclick='sd_bulkExtend([${JSON.stringify(d.idCode)}],"${spEsc(d.expectedReturn||'')}","")'><i class="fas fa-calendar-plus"></i></button><button class="sp-icon-btn green" onclick='sd_bulkReturn([${JSON.stringify(d.idCode)}])'><i class="fas fa-undo"></i></button></div></div>`).join('')}</div>`;
   Swal.fire({title:'รายละเอียด: '+location,width:900,html,confirmButtonText:'Close'});
 }
 function sd_extendLocation(location){
-  const rows=sd_v11FilteredDevices().filter(d=>(d.location||'Unknown')===location&&(['In-Use','Overdue'].includes(d.status)||Number(d.overdueDays||0)>0));
+  const rows=sdFilteredDevices().filter(d=>(d.location||'Unknown')===location&&(['In-Use','Overdue'].includes(d.status)||Number(d.overdueDays||0)>0));
   const oldDue=(rows.find(x=>x.expectedReturn)||{}).expectedReturn||'';
   Swal.fire({title:'ต่อสัญญา: '+location,html:`<div class="sp-muted" style="margin-bottom:8px">วันคืนเดิม: <b>${spFmtDate(oldDue)}</b></div><input id="swDue" class="swal2-input" type="date" value="${spEsc(oldDue)}"><input id="swNote" class="swal2-input" placeholder="หมายเหตุ">`,showCancelButton:true,confirmButtonText:'ต่อสัญญา'}).then(r=>{if(!r.isConfirmed)return;const due=spVal('swDue','');if(!due){Swal.fire('กรุณาเลือกวันที่','','warning');return;}sd_bulkExtend(rows.map(x=>x.idCode),due,spVal('swNote',''));});
 }
 function sd_renderAlerts(){
-  const rows=sd_v11FilteredDevices().filter(d=>d.status==='Overdue'||d.status==='Missing'||d.status==='Broken'||d.status==='Recheck'||Number(d.overdueDays||0)>0||d.actionRequired);
+  const rows=sdFilteredDevices().filter(d=>d.status==='Overdue'||d.status==='Missing'||d.status==='Broken'||d.status==='Recheck'||Number(d.overdueDays||0)>0||d.actionRequired);
   spSetHtml('sdAlertCount',`${rows.length} alerts`);spSetHtml('sdAlertHeaderCount',rows.length>99?'99+':rows.length);
   const shortRows=rows.slice(0,8).map(d=>({type:d.status,id:d.idCode,location:d.location,action:d.actionRequired||'-'}));
   spSetHtml('sdAlertTable',sd_table(shortRows,[['type','Type'],['id','ID'],['location','Location'],['action','Action']]));
 }
 function sd_showAlertDetail(id){
-  const d=sd_v11FilteredDevices().find(x=>x.idCode===id)||{};
+  const d=sdFilteredDevices().find(x=>x.idCode===id)||{};
   Swal.fire({title:'รายละเอียด Alert',html:`<div style="text-align:left"><b>${spEsc(d.idCode||'-')}</b> ${spBadge(d.status)}<br>SN: ${spEsc(d.sn||'-')}<br>Model: ${spEsc(d.brand||'-')} ${spEsc(d.model||d.itemName||'-')}<br>Location: ${spEsc(d.location||'-')}<br>Borrower: ${spEsc(d.borrower||'-')}<br>Due: ${spFmtDate(d.expectedReturn||d.expectedReturnDate)}<br>Action: ${spEsc(d.actionRequired||d.recheckNote||'-')}</div>`});
 }
 
@@ -321,7 +321,7 @@ function sd_showAlertDetail(id){
 const SD_CACHE_KEY_V15 = 'CES_STOCK_DASHBOARD_CACHE_V15';
 const SD_CACHE_TTL_MS_V15 = 5 * 60 * 1000;
 
-function sd_v15ApplyThemeStyle(){
+function sdApplyThemeStyle(){
   if(document.getElementById('stockpro-dashboard-v15-style')) return;
   const st=document.createElement('style');
   st.id='stockpro-dashboard-v15-style';
@@ -347,35 +347,35 @@ function sd_v15ApplyThemeStyle(){
   document.head.appendChild(st);
 }
 
-function sd_v15SaveCache_(res){try{sessionStorage.setItem(SD_CACHE_KEY_V15,JSON.stringify({ts:Date.now(),data:res}));}catch(e){}}
-function sd_v15ReadCache_(){try{const x=JSON.parse(sessionStorage.getItem(SD_CACHE_KEY_V15)||'null');if(x&&x.data&&(Date.now()-x.ts)<SD_CACHE_TTL_MS_V15)return x.data;}catch(e){}return null;}
+function sdSaveCache_(res){try{sessionStorage.setItem(SD_CACHE_KEY_V15,JSON.stringify({ts:Date.now(),data:res}));}catch(e){}}
+function sdReadCache_(){try{const x=JSON.parse(sessionStorage.getItem(SD_CACHE_KEY_V15)||'null');if(x&&x.data&&(Date.now()-x.ts)<SD_CACHE_TTL_MS_V15)return x.data;}catch(e){}return null;}
 
-if(typeof window.sd_v15OriginalInit === 'undefined' && typeof initStockDashboardModule === 'function'){
-  window.sd_v15OriginalInit = initStockDashboardModule;
+if(typeof window.sdOriginalInitBeforeCachePatch === 'undefined' && typeof initStockDashboardModule === 'function'){
+  window.sdOriginalInitBeforeCachePatch = initStockDashboardModule;
   initStockDashboardModule = function(force=false){
-    sd_v15ApplyThemeStyle();
-    const cached = !force ? sd_v15ReadCache_() : null;
+    sdApplyThemeStyle();
+    const cached = !force ? sdReadCache_() : null;
     if(cached){SD_DASH.loaded=true;SD_DASH.raw=cached;try{sd_fillFilters();sd_renderAll();}catch(e){console.warn(e);} }
     const refreshStock=()=>window.CES_API.callFunction('sd_getStockDashboardData',[force===true],{priority:cached&&!force?'background':'user',background:!!(cached&&!force),dedupe:true}).then(res=>{
       if(!res||!res.success){if(!cached)Swal.fire('Stock Dashboard Error',(res&&res.message)||'Cannot load dashboard','error');return;}
-      SD_DASH.loaded=true;SD_DASH.raw=res;sd_v15SaveCache_(res);sd_fillFilters();sd_renderAll();
+      SD_DASH.loaded=true;SD_DASH.raw=res;sdSaveCache_(res);sd_fillFilters();sd_renderAll();
     }).catch(err=>{if(!cached)Swal.fire('Stock Dashboard Error',err.message||String(err),'error');});
     if(cached&&!force)setTimeout(refreshStock,1200);else refreshStock();
   };
 }
 
-if(typeof window.sd_v15OriginalRenderContract === 'undefined' && typeof sd_renderContractSummary === 'function'){
-  window.sd_v15OriginalRenderContract = sd_renderContractSummary;
+if(typeof window.sdOriginalRenderContract === 'undefined' && typeof sd_renderContractSummary === 'function'){
+  window.sdOriginalRenderContract = sd_renderContractSummary;
   sd_renderContractSummary = function(){
-    window.sd_v15OriginalRenderContract();
+    window.sdOriginalRenderContract();
     setTimeout(()=>{document.querySelectorAll('#sdContractTable tbody tr').forEach(tr=>{if(!tr.querySelector('.sp-status-dot')){const first=tr.querySelector('td');if(first){const dot=document.createElement('span');dot.className='sp-status-dot';first.prepend(dot);}}});},0);
   };
 }
 
-if(typeof window.sd_v15OriginalRenderAlerts === 'undefined' && typeof sd_renderAlerts === 'function'){
-  window.sd_v15OriginalRenderAlerts = sd_renderAlerts;
+if(typeof window.sdOriginalRenderAlerts === 'undefined' && typeof sd_renderAlerts === 'function'){
+  window.sdOriginalRenderAlerts = sd_renderAlerts;
   sd_renderAlerts = function(){
-    window.sd_v15OriginalRenderAlerts();
+    window.sdOriginalRenderAlerts();
     const text=(document.getElementById('sdAlertCount')||{}).textContent||'0';
     const n=(text.match(/\d+/)||['0'])[0];
     const h=document.getElementById('sdAlertHeaderCount'); if(h)h.textContent=Number(n)>99?'99+':n;
@@ -383,25 +383,25 @@ if(typeof window.sd_v15OriginalRenderAlerts === 'undefined' && typeof sd_renderA
 }
 
 function sd_openAlertPopup(){
-  sd_v15ApplyThemeStyle();
-  const base=(typeof sd_v11FilteredDevices==='function'?sd_v11FilteredDevices():(SD_DASH.raw&&SD_DASH.raw.alerts)||[]);
+  sdApplyThemeStyle();
+  const base=(typeof sdFilteredDevices==='function'?sdFilteredDevices():(SD_DASH.raw&&SD_DASH.raw.alerts)||[]);
   const rows=(base||[]).filter(d=>d.status==='Overdue'||d.status==='Missing'||d.status==='Broken'||d.status==='Recheck'||Number(d.overdueDays||0)>0||d.actionRequired||d.recheckNote);
   const types=['all','Overdue','Missing','Broken','Recheck','Action Required'];
-  window.sd_v15AlertList=function(type){
+  window.sdAlertList=function(type){
     let list=rows;
     if(type&&type!=='all')list=rows.filter(d=>type==='Action Required'?!!(d.actionRequired||d.recheckNote):(d.status===type||(type==='Overdue'&&Number(d.overdueDays||0)>0)));
     return `<div class="sd-v15-alert-list">${list.map(d=>`<div class="sd-v15-alert-row"><div class="sd-v15-alert-dot" style="background:${d.status==='Overdue'?'#fee2e2':'#eff6ff'};color:${d.status==='Overdue'?'#dc2626':'#2563eb'}"><i class="fas fa-bell"></i></div><div><div class="sd-v15-alert-title">${spEsc(d.idCode||'-')} ${spBadge(d.status)}</div><div class="sd-v15-alert-sub">${spEsc(d.brand||'-')} ${spEsc(d.model||d.itemName||'-')} • ${spEsc(d.location||'-')}</div></div><button class="sp-btn soft" onclick='sd_showAlertDetail(${JSON.stringify(d.idCode)})'>รายละเอียด</button></div>`).join('')||'<div class="sp-muted">No alert</div>'}</div>`;
   };
-  Swal.fire({title:'Stock Alerts',width:900,html:`<select id="sdV15AlertFilter" class="swal2-input" style="width:260px;margin:0 0 14px" onchange="document.getElementById('sdV15AlertList').innerHTML=sd_v15AlertList(this.value)">${types.map(t=>`<option value="${t}">${t==='all'?'ทุกประเภท':t}</option>`).join('')}</select><div id="sdV15AlertList">${sd_v15AlertList('all')}</div>`,confirmButtonText:'Close'});
+  Swal.fire({title:'Stock Alerts',width:900,html:`<select id="sdV15AlertFilter" class="swal2-input" style="width:260px;margin:0 0 14px" onchange="document.getElementById('sdV15AlertList').innerHTML=sdAlertList(this.value)">${types.map(t=>`<option value="${t}">${t==='all'?'ทุกประเภท':t}</option>`).join('')}</select><div id="sdV15AlertList">${sdAlertList('all')}</div>`,confirmButtonText:'Close'});
 }
 
-try{sd_v15ApplyThemeStyle();}catch(e){}
+try{sdApplyThemeStyle();}catch(e){}
 
 
 /* ============================================================
    CES Stock Pro V17 — Dashboard UX patch
 ============================================================ */
-function sd_v17Style(){
+function sdStyle(){
   if(document.getElementById('stock-dashboard-v17-style')) return;
   const style=document.createElement('style');
   style.id='stock-dashboard-v17-style';
@@ -425,7 +425,7 @@ function sd_v17Style(){
    - Rental Contract Summary can be exported as Excel.
    - Contract summary rows stay white and use a status dot.
 ============================================================ */
-function sd_v31StatusOf(d){
+function sdStatusOf(d){
   const text=[d.status,d.baseStatus,d.base_status,d.rentalStatus,d.rental_status,d.dqStatus,d.dq_status,d.actionRequired,d.action_required,d.recheckNote,d.recheck_note].join(' ').toUpperCase();
   if(/BROKEN|BREAK|DAMAGED|DEFECT|เสีย|ชำรุด|พัง/.test(text)) return 'Broken';
   if(/MISSING|LOST|สูญหาย|หาย|หาไม่พบ/.test(text)) return 'Missing';
@@ -434,16 +434,16 @@ function sd_v31StatusOf(d){
   if(/IN[_\s-]*USE|BORROW|RENT|ยืม|ใช้งาน/.test(text)) return 'In-Use';
   return 'Stock';
 }
-function sd_v31NormalizedRows(rows){
-  return (rows||[]).map(d=>Object.assign({},d,{status:sd_v31StatusOf(d)}));
+function sdNormalizedRows(rows){
+  return (rows||[]).map(d=>Object.assign({},d,{status:sdStatusOf(d)}));
 }
-if(typeof sd_v11FilteredDevices === 'function' && !window.__sdV31FilteredPatch){
+if(typeof sdFilteredDevices === 'function' && !window.__sdV31FilteredPatch){
   window.__sdV31FilteredPatch=true;
-  const _baseFiltered=sd_v11FilteredDevices;
-  sd_v11FilteredDevices=function(){ return sd_v31NormalizedRows(_baseFiltered()); };
+  const _baseFiltered=sdFilteredDevices;
+  sdFilteredDevices=function(){ return sdNormalizedRows(_baseFiltered()); };
 }
-function sd_v11FilteredKpi(rows){
-  rows = sd_v31NormalizedRows(rows||[]);
+function sdFilteredKpi(rows){
+  rows = sdNormalizedRows(rows||[]);
   return {
     total: rows.length,
     stock: rows.filter(d=>d.status==='Stock').length,
@@ -456,7 +456,7 @@ function sd_v11FilteredKpi(rows){
   };
 }
 function sd_renderKpis(k){
-  k = k || sd_v11FilteredKpi(typeof sd_v11FilteredDevices==='function'?sd_v11FilteredDevices():[]);
+  k = k || sdFilteredKpi(typeof sdFilteredDevices==='function'?sdFilteredDevices():[]);
   const items=[
     ['ทั้งหมด',k.total,'fa-boxes','#2563eb','#dbeafe'],
     ['อยู่ในคลัง',k.stock,'fa-warehouse','#059669','#dcfce7'],
@@ -469,8 +469,8 @@ function sd_renderKpis(k){
   ];
   spSetHtml('sdKpiGrid',items.map(i=>`<div class="sp-kpi"><div class="ico" style="background:${i[4]}"><i class="fas ${i[2]}" style="color:${i[3]}"></i></div><div class="label">${i[0]}</div><div class="val" style="color:${i[3]}">${spNum(i[1])}</div></div>`).join(''));
 }
-function sd_v31ContractRowsFlat(){
-  const rows = typeof sd_v11ContractRows==='function' ? sd_v11ContractRows() : [];
+function sdContractRowsFlat(){
+  const rows = typeof sdContractRows==='function' ? sdContractRows() : [];
   return rows.map(r=>({
     Location:r.location,
     Total:r.total,
@@ -486,7 +486,7 @@ function sd_v31ContractRowsFlat(){
   }));
 }
 function sd_exportContractSummaryExcel(){
-  const data = sd_v31ContractRowsFlat();
+  const data = sdContractRowsFlat();
   if(!data.length){Swal.fire('No contract records','','info');return;}
   if(typeof XLSX === 'undefined'){
     Swal.fire('Export Error','XLSX library not loaded','error');return;
@@ -496,7 +496,7 @@ function sd_exportContractSummaryExcel(){
   XLSX.utils.book_append_sheet(wb,ws,'Rental Contract Summary');
   XLSX.writeFile(wb,'CES_Rental_Contract_Summary.xlsx');
 }
-function sd_v31EnsureContractExportButton(){
+function sdEnsureContractExportButton(){
   const head=document.querySelector('#view-stock_dashboard #sdContractTable')?.closest('.stockpro-card')?.querySelector('.stockpro-card-head');
   if(!head || document.getElementById('sdContractExportBtn')) return;
   const btn=document.createElement('button');
@@ -508,40 +508,40 @@ function sd_v31EnsureContractExportButton(){
   head.appendChild(btn);
 }
 function sd_renderContractSummary(){
-  const rows=typeof sd_v11ContractRows==='function'?sd_v11ContractRows():[];
+  const rows=typeof sdContractRows==='function'?sdContractRows():[];
   spSetHtml('sdContractCount',`${rows.length} locations`);
-  if(!rows.length){spSetHtml('sdContractTable','<div class="sp-muted">No contract records</div>');sd_v31EnsureContractExportButton();return;}
+  if(!rows.length){spSetHtml('sdContractTable','<div class="sp-muted">No contract records</div>');sdEnsureContractExportButton();return;}
   spSetHtml('sdContractTable',`<div class="sp-table-wrap"><table class="sp-table"><thead><tr><th>Location</th><th>Items</th><th>Status</th><th>Borrow Date</th><th>Expected / Return</th><th>Action</th></tr></thead><tbody>${rows.map(r=>{const cls=r.overdue?'sp-contract-row-overdue':(r.completed&&!r.inUse?'sp-contract-row-completed':'sp-contract-row-active');const state=r.overdue?'OVERDUE':((r.completed&&!r.inUse)?'COMPLETED':'ACTIVE');return `<tr class="${cls}"><td><span class="sp-status-dot"></span><span class="sp-id">${spEsc(r.location)}</span><span class="sp-sub">${spEsc(r.modelList)}</span></td><td>${spNum(r.total)}</td><td><span class="sp-chip ok">In-Use ${spNum(r.inUse)}</span> <span class="sp-chip low">Overdue ${spNum(r.overdue)}</span> <span class="sp-chip">Done ${spNum(r.completed||0)}</span><span class="sp-sub">${state}</span></td><td>${spFmtDate(r.borrowDate)}</td><td>${spFmtDate(r.expectedReturn)}${r.maxOverdue?`<span class="sp-sub" style="color:#dc2626">เลย ${spNum(r.maxOverdue)} วัน</span>`:''}</td><td><div class="sp-action-group"><button class="sp-icon-btn" title="รายละเอียด" onclick='sd_showLocationDetail(${JSON.stringify(r.location)})'><i class="fas fa-magnifying-glass-plus"></i></button><button class="sp-icon-btn orange" title="ต่อสัญญา" onclick='sd_extendLocation(${JSON.stringify(r.location)})'><i class="fas fa-calendar-plus"></i></button><button class="sp-icon-btn green" title="รับคืน" onclick='sd_returnLocation(${JSON.stringify(r.location)})'><i class="fas fa-undo"></i></button></div></td></tr>`;}).join('')}</tbody></table></div>`);
-  sd_v31EnsureContractExportButton();
+  sdEnsureContractExportButton();
 }
 if(!window.__sdV31RenderFilteredPatch && typeof sd_renderFiltered==='function'){
   window.__sdV31RenderFilteredPatch=true;
   const _baseSdRenderFiltered=sd_renderFiltered;
   sd_renderFiltered=function(){
-    const rows = typeof sd_v11FilteredDevices==='function'?sd_v11FilteredDevices():sd_getFilteredDevices();
+    const rows = typeof sdFilteredDevices==='function'?sdFilteredDevices():sd_getFilteredDevices();
     sd_renderModelCards(rows);
-    sd_renderKpis(sd_v11FilteredKpi(rows));
+    sd_renderKpis(sdFilteredKpi(rows));
     sd_renderSummaryTables();
     sd_renderContractSummary();
     sd_renderAlerts();
   };
 }
-document.addEventListener('DOMContentLoaded',()=>setTimeout(()=>{try{sd_v31EnsureContractExportButton();}catch(e){}},1000));
+document.addEventListener('DOMContentLoaded',()=>setTimeout(()=>{try{sdEnsureContractExportButton();}catch(e){}},1000));
 
 
 /* ============================================================
    CES Stock Pro V24.5 — Contract email / contract-level alerts
 ============================================================ */
-function sd_v245ContractRows_(){
-  const devices=(typeof sd_v11FilteredDevices==='function'?sd_v11FilteredDevices():(SD_DASH.raw&&SD_DASH.raw.devices)||[]).filter(d=>['In-Use','Overdue'].includes(d.status)||Number(d.overdueDays||0)>0);
+function sdContractRows_(){
+  const devices=(typeof sdFilteredDevices==='function'?sdFilteredDevices():(SD_DASH.raw&&SD_DASH.raw.devices)||[]).filter(d=>['In-Use','Overdue'].includes(d.status)||Number(d.overdueDays||0)>0);
   const map={};
   devices.forEach(d=>{const loc=String(d.location||'Unknown'),borrower=String(d.borrower||'-'),due=String(d.expectedReturn||d.expectedReturnDate||''),key=[loc,borrower,due].join('||');if(!map[key])map[key]={key,location:loc,borrower,borrowerEmail:d.borrowerEmail||d.borrower_email||'Siripak.Ch@nhealth-asia.com',dueDate:due,total:0,overdue:0,ids:[]};const x=map[key];x.total++;x.ids.push(d.idCode);if(d.status==='Overdue'||Number(d.overdueDays||0)>0)x.overdue++;});
   return Object.values(map).sort((a,b)=>String(a.dueDate).localeCompare(String(b.dueDate)));
 }
-async function sd_openRentalAlertsSheetV245(){
+async function sd_openRentalAlertsSheet(){
   try{const r=await window.CES_API.callFunction('sd_getRentalAlertsInfo',[],{loadingLabel:'Opening Rental Alerts…'});if(!r||!r.success)throw new Error((r&&r.message)||'Rental Alerts unavailable');window.open(r.sheetUrl,'_blank','noopener');}catch(e){Swal.fire({icon:'error',title:'Rental Alerts',text:e.message||String(e)});}
 }
-async function sd_saveRentalEmailV245(location){
+async function sd_saveRentalEmail(location){
   const el=document.getElementById('sd-v245-borrower-email');const email=String(el&&el.value||'').trim();
   try{const r=await window.CES_API.callFunction('sd_saveRentalBorrowerEmail',[{location,email}],{loadingLabel:'Saving borrower email…'});if(!r||!r.success)throw new Error((r&&r.message)||'Save failed');Swal.fire({icon:'success',title:'Email saved',text:r.email+' · '+r.updated+' active rental row(s)',timer:1600,showConfirmButton:false});if(SD_DASH.raw&&SD_DASH.raw.devices)SD_DASH.raw.devices.filter(d=>String(d.location||'')===String(location)).forEach(d=>{d.borrowerEmail=r.email;d.borrower_email=r.email;});}catch(e){Swal.fire({icon:'error',title:'Save failed',text:e.message||String(e)});}
 }
@@ -581,26 +581,26 @@ function sd_showLocationDetail(location){
     </div>
     <div class="ces-v255-rental-contact-grid">
       <div><span>Borrower</span><b>${spEsc(borrowers.join(', ')||'-')}</b></div>
-      <div><span>Borrower Email / Contract Contact</span><div class="ces-v255-rental-email-edit"><input id="sd-v245-borrower-email" type="email" value="${spEsc(borrowerEmail)}"><button class="sp-btn" onclick='sd_saveRentalEmailV245(${JSON.stringify(location)})'>Save Email</button></div></div>
+      <div><span>Borrower Email / Contract Contact</span><div class="ces-v255-rental-email-edit"><input id="sd-v245-borrower-email" type="email" value="${spEsc(borrowerEmail)}"><button class="sp-btn" onclick='sd_saveRentalEmail(${JSON.stringify(location)})'>Save Email</button></div></div>
     </div>
     <div class="ces-v255-rental-detail-table-wrap">
       <table class="ces-v255-rental-detail-table"><thead><tr><th>#</th><th>ID Code</th><th>SN</th><th>AC Plug SN</th><th>Clamp SN</th><th>Brand / Model</th><th>Borrower</th><th>Borrower Email</th><th>Borrow Date</th><th>Due Date</th><th>Status</th><th>Action Required</th></tr></thead><tbody>${tableRows}</tbody></table>
     </div>`;
   Swal.fire({title:'Rental Contract Detail',width:'min(1460px,98vw)',html,confirmButtonText:'Close',customClass:{popup:'ces-v255-rental-detail-popup'}});
 }
-function sd_openRentalContractAlertPopupV245(){
-  const rows=sd_v245ContractRows_().filter(r=>{if(!r.dueDate)return false;const due=new Date(r.dueDate+'T00:00:00'),today=new Date();today.setHours(0,0,0,0);if(isNaN(due))return r.overdue>0;const days=Math.round((due-today)/86400000);r.daysToDue=days;return days<=7;});
-  const html=`<div style="text-align:left"><div style="display:flex;justify-content:flex-end;margin-bottom:10px"><button class="sp-btn soft" onclick="sd_openRentalAlertsSheetV245()"><i class="fas fa-table-list"></i> Rental Alerts Sheet</button></div><div class="sp-table-wrap"><table class="sp-table"><thead><tr><th>Contract / Location</th><th>Borrower</th><th>Email</th><th>Due</th><th>Items</th><th>Status</th></tr></thead><tbody>${rows.map(r=>`<tr><td><b>${spEsc(r.location)}</b></td><td>${spEsc(r.borrower)}</td><td>${spEsc(r.borrowerEmail)}</td><td>${spFmtDate(r.dueDate)}</td><td>${spNum(r.total)}</td><td>${r.daysToDue<0?`<span class="sp-chip low">Overdue ${Math.abs(r.daysToDue)}d</span>`:`<span class="sp-chip ok">Due in ${r.daysToDue}d</span>`}</td></tr>`).join('')||'<tr><td colspan="6" class="sp-muted">No contract alert in the next 7 days</td></tr>'}</tbody></table></div></div>`;
+function sd_openRentalContractAlertPopup(){
+  const rows=sdContractRows_().filter(r=>{if(!r.dueDate)return false;const due=new Date(r.dueDate+'T00:00:00'),today=new Date();today.setHours(0,0,0,0);if(isNaN(due))return r.overdue>0;const days=Math.round((due-today)/86400000);r.daysToDue=days;return days<=7;});
+  const html=`<div style="text-align:left"><div style="display:flex;justify-content:flex-end;margin-bottom:10px"><button class="sp-btn soft" onclick="sd_openRentalAlertsSheet()"><i class="fas fa-table-list"></i> Rental Alerts Sheet</button></div><div class="sp-table-wrap"><table class="sp-table"><thead><tr><th>Contract / Location</th><th>Borrower</th><th>Email</th><th>Due</th><th>Items</th><th>Status</th></tr></thead><tbody>${rows.map(r=>`<tr><td><b>${spEsc(r.location)}</b></td><td>${spEsc(r.borrower)}</td><td>${spEsc(r.borrowerEmail)}</td><td>${spFmtDate(r.dueDate)}</td><td>${spNum(r.total)}</td><td>${r.daysToDue<0?`<span class="sp-chip low">Overdue ${Math.abs(r.daysToDue)}d</span>`:`<span class="sp-chip ok">Due in ${r.daysToDue}d</span>`}</td></tr>`).join('')||'<tr><td colspan="6" class="sp-muted">No contract alert in the next 7 days</td></tr>'}</tbody></table></div></div>`;
   Swal.fire({title:'Rental Contract Alerts',width:950,html,confirmButtonText:'Close'});
 }
-window.sd_openRentalAlertsSheetV245=sd_openRentalAlertsSheetV245;window.sd_saveRentalEmailV245=sd_saveRentalEmailV245;window.sd_openRentalContractAlertPopupV245=sd_openRentalContractAlertPopupV245;
+window.sd_openRentalAlertsSheet=sd_openRentalAlertsSheet;window.sd_saveRentalEmail=sd_saveRentalEmail;window.sd_openRentalContractAlertPopup=sd_openRentalContractAlertPopup;
 
 
 /* ============================================================
    CES Stock Pro V24.8 — Rental workflow cards
 ============================================================ */
 const SD_RENTAL_SOURCE_V248='https://docs.google.com/spreadsheets/d/1X7f6BatQ-y5ZW6VYTv2oT34rbsCLeNgac0APt7njFrk/edit?gid=554643121#gid=554643121';
-function sd_rentalStatusClassV248_(s){
+function sd_rentalStatusClass_(s){
   s=String(s||'OPEN').toUpperCase();
   if(s==='COMPLETED')return 'complete';
   if(s==='WAITING_RETURN')return 'return';
@@ -609,7 +609,7 @@ function sd_rentalStatusClassV248_(s){
   if(s==='FOLLOW_UP_SENT')return 'follow';
   return 'open';
 }
-function sd_rentalActionLabelV248_(a){
+function sd_rentalActionLabel_(a){
   a=String(a||'NONE').toUpperCase();
   if(a==='RETURN_REQUESTED')return 'Return requested';
   if(a==='RENEWAL_REQUESTED')return 'Renewal requested';
@@ -618,14 +618,14 @@ function sd_rentalActionLabelV248_(a){
 let SD_RENTAL_WORKFLOW_V260={cards:[],summary:{}};
 const SD_RENTAL_CACHE_KEY_V262='CES_RENTAL_WORKFLOW_CACHE_V262';
 const SD_RENTAL_CACHE_TTL_V262=6*60*60*1000;
-function sd_v262ReadRentalCache_(){try{let raw=localStorage.getItem(SD_RENTAL_CACHE_KEY_V262);if(!raw){raw=sessionStorage.getItem(SD_RENTAL_CACHE_KEY_V262);if(raw)localStorage.setItem(SD_RENTAL_CACHE_KEY_V262,raw);}const x=JSON.parse(raw||'null');return x&&x.data&&(Date.now()-Number(x.ts||0)<SD_RENTAL_CACHE_TTL_V262)?x.data:null;}catch(e){return null;}}
-function sd_v262SaveRentalCache_(data){try{localStorage.setItem(SD_RENTAL_CACHE_KEY_V262,JSON.stringify({ts:Date.now(),data:data}));}catch(e){}}
-function sd_primeRentalWorkflowV263_(){
-  const cached=sd_v262ReadRentalCache_();
-  if(cached&&document.getElementById('sdRentalWorkflowCardsV248')){sd_renderRentalWorkflowV248(cached);return true;}
+function sdReadRentalCache_(){try{let raw=localStorage.getItem(SD_RENTAL_CACHE_KEY_V262);if(!raw){raw=sessionStorage.getItem(SD_RENTAL_CACHE_KEY_V262);if(raw)localStorage.setItem(SD_RENTAL_CACHE_KEY_V262,raw);}const x=JSON.parse(raw||'null');return x&&x.data&&(Date.now()-Number(x.ts||0)<SD_RENTAL_CACHE_TTL_V262)?x.data:null;}catch(e){return null;}}
+function sdSaveRentalCache_(data){try{localStorage.setItem(SD_RENTAL_CACHE_KEY_V262,JSON.stringify({ts:Date.now(),data:data}));}catch(e){}}
+function sd_primeRentalWorkflow_(){
+  const cached=sdReadRentalCache_();
+  if(cached&&document.getElementById('sdRentalWorkflowCardsV248')){sd_renderRentalWorkflow(cached);return true;}
   return false;
 }
-function sd_readyStockBenchmarkDataV263_(){
+function sd_readyStockBenchmarkData_(){
   // V26.6: read the exact counts attached to the visible Model Cards first.
   // This guarantees Ready Stock Benchmark = the "พร้อมส่ง" number users see.
   const visible=[...document.querySelectorAll('#sdModelCards .sp-model-card[data-ready-stock]')].map(el=>({
@@ -635,113 +635,113 @@ function sd_readyStockBenchmarkDataV263_(){
   if(visible.length)return visible.map(x=>{const minimum=10,ready=Number(x.readyStock||0);return{brand:x.brand,model:x.model,readyStock:ready,minimum,gap:Math.max(0,minimum-ready),low:ready<minimum};});
   const live=Array.isArray(window.CES_READY_STOCK_MODEL_COUNTS_V264)?window.CES_READY_STOCK_MODEL_COUNTS_V264:[];
   if(live.length)return live.map(x=>{const ready=Number(x.readyStock||0),minimum=10;return{brand:x.brand||'',model:x.model||'',readyStock:ready,minimum,gap:Math.max(0,minimum-ready),low:ready<minimum};});
-  const rows=typeof sd_v11FilteredDevices==='function'?sd_v11FilteredDevices():[];
+  const rows=typeof sdFilteredDevices==='function'?sdFilteredDevices():[];
   const cards=typeof sd_filteredModelCards_==='function'?sd_filteredModelCards_(rows):[];
   return cards.map(x=>{const ready=Number(x.stock||0),minimum=10;return{brand:x.brand||'',model:x.label||'',readyStock:ready,minimum,gap:Math.max(0,minimum-ready),low:ready<minimum};});
 }
-function sd_updateReadyStockBenchmarkV263(){
-  const rows=sd_readyStockBenchmarkDataV263_(),low=rows.filter(x=>x.low).length,badge=document.getElementById('sdReadyStockAlertCountV263'),btn=document.getElementById('sdReadyStockAlertBtnV263');
+function sd_updateReadyStockBenchmark(){
+  const rows=sd_readyStockBenchmarkData_(),low=rows.filter(x=>x.low).length,badge=document.getElementById('sdReadyStockAlertCountV263'),btn=document.getElementById('sdReadyStockAlertBtnV263');
   if(badge)badge.textContent=String(low);if(btn){btn.classList.toggle('has-alert',low>0);btn.title=low?`${low} model(s) below minimum ready stock 10`:'All models meet minimum ready stock 10';}
   return rows;
 }
-function sd_openReadyStockBenchmarkV263(){
-  const rows=sd_updateReadyStockBenchmarkV263();
+function sd_openReadyStockBenchmark(){
+  const rows=sd_updateReadyStockBenchmark();
   if(!rows.length){Swal.fire('Ready Stock Benchmark','No model data available.','info');return;}
   const html=`<div class="ces-ready-stock-popup-v263"><div class="ces-ready-stock-note-v263"><b>Benchmark:</b> minimum <b>10 ready-to-deliver units per model</b><br><span>Email summary is scheduled to ADMIN every 2 weeks.</span></div><div class="sp-table-wrap"><table class="sp-table"><thead><tr><th>Model</th><th>Ready Stock</th><th>Minimum</th><th>Gap</th><th>Status</th></tr></thead><tbody>${rows.map(r=>`<tr><td><b>${spEsc(r.brand)}</b><span class="sp-sub">${spEsc(r.model)}</span></td><td><b>${spNum(r.readyStock)}</b></td><td>${r.minimum}</td><td>${r.gap?`<b style="color:#dc2626">-${r.gap}</b>`:'0'}</td><td>${r.low?'<span class="sp-chip low">LOW STOCK</span>':'<span class="sp-chip ok">OK</span>'}</td></tr>`).join('')}</tbody></table></div></div>`;
   Swal.fire({title:'Ready Stock Benchmark',html,width:'min(760px,96vw)',confirmButtonText:'Close',confirmButtonColor:'#003DA5',animation:false});
 }
-window.sd_openReadyStockBenchmarkV263=sd_openReadyStockBenchmarkV263;
-window.sd_updateReadyStockBenchmarkV263=sd_updateReadyStockBenchmarkV263;
+window.sd_openReadyStockBenchmark=sd_openReadyStockBenchmark;
+window.sd_updateReadyStockBenchmark=sd_updateReadyStockBenchmark;
 
-async function sd_testRentalNotificationV266(){
+async function sd_testRentalNotification(){
   try{
-    const r=await window.CES_API.callFunction('sd_sendRentalNotificationTestV266',[],{transport:'iframe',timeoutMs:90000,priority:'user',userAction:true,loadingLabel:'Sending rental test mail…'});
+    const r=await window.CES_API.callFunction('sd_sendRentalNotificationTest',[],{transport:'iframe',timeoutMs:90000,priority:'user',userAction:true,loadingLabel:'Sending rental test mail…'});
     if(!r||r.success===false)throw new Error((r&&r.message)||'Rental test mail failed.');
     const sent=Number(r.sent||r.emailsSent||((r.test&&r.to)?1:0));const recipient=r.recipient||r.to||'';
     Swal.fire({icon:'success',title:'Rental Test Mail',html:`Test complete.<br><b>${sent}</b> email(s) sent.${recipient?`<br>${spEsc(recipient)}`:''}`});
   }catch(e){Swal.fire({icon:'error',title:'Rental Test Mail',text:e.message||String(e)});}
 }
-window.sd_testRentalNotificationV266=sd_testRentalNotificationV266;
-function sd_v262Summary_(cards){cards=cards||[];const open=cards.filter(x=>String(x.workflowStatus||'').toUpperCase()!=='COMPLETED').length;return{total:cards.length,open:open,completed:cards.length-open,followupSent:cards.filter(x=>String(x.workflowStatus||'').toUpperCase()==='FOLLOW_UP_SENT').length,waitingReturn:cards.filter(x=>String(x.workflowStatus||'').toUpperCase()==='WAITING_RETURN').length,waitingRenewal:cards.filter(x=>String(x.workflowStatus||'').toUpperCase()==='WAITING_RENEWAL').length};}
-function sd_v262IndexDevices_(){const map={};((SD_DASH.raw&&SD_DASH.raw.devices)||[]).forEach(d=>{const due=sd_v260IsoDate_(d.expectedReturn||d.expectedReturnDate||d.dueDate||''),k=[String(d.location||''),String(d.borrower||''),due].join('||');(map[k]||(map[k]=[])).push(d);});return map;}
-function sd_rentalDueLabelV260_(days){
+window.sd_testRentalNotification=sd_testRentalNotification;
+function sdSummary_(cards){cards=cards||[];const open=cards.filter(x=>String(x.workflowStatus||'').toUpperCase()!=='COMPLETED').length;return{total:cards.length,open:open,completed:cards.length-open,followupSent:cards.filter(x=>String(x.workflowStatus||'').toUpperCase()==='FOLLOW_UP_SENT').length,waitingReturn:cards.filter(x=>String(x.workflowStatus||'').toUpperCase()==='WAITING_RETURN').length,waitingRenewal:cards.filter(x=>String(x.workflowStatus||'').toUpperCase()==='WAITING_RENEWAL').length};}
+function sdIndexDevices_(){const map={};((SD_DASH.raw&&SD_DASH.raw.devices)||[]).forEach(d=>{const due=sdIsoDate_(d.expectedReturn||d.expectedReturnDate||d.dueDate||''),k=[String(d.location||''),String(d.borrower||''),due].join('||');(map[k]||(map[k]=[])).push(d);});return map;}
+function sd_rentalDueLabel_(days){
   days=Number(days||0);
   return days<0?`Overdue ${Math.abs(days)}d`:`Due in ${days}d`;
 }
-function sd_renderRentalWorkflowV248(data){
+function sd_renderRentalWorkflow(data){
   const wrap=document.getElementById('sdRentalWorkflowCardsV248'),sum=document.getElementById('sdRentalWorkflowSummaryV248');
   if(!wrap)return;
   const cards=(data&&data.cards)||[],sm=(data&&data.summary)||{};
-  SD_RENTAL_WORKFLOW_V260={cards:cards.slice(),summary:sm,deviceIndex:sd_v262IndexDevices_()};
-  sd_v262SaveRentalCache_({success:true,cards:cards,summary:sm,sourceSheetUrl:data&&data.sourceSheetUrl||SD_RENTAL_SOURCE_V248,defaultEmail:data&&data.defaultEmail||''});
+  SD_RENTAL_WORKFLOW_V260={cards:cards.slice(),summary:sm,deviceIndex:sdIndexDevices_()};
+  sdSaveRentalCache_({success:true,cards:cards,summary:sm,sourceSheetUrl:data&&data.sourceSheetUrl||SD_RENTAL_SOURCE_V248,defaultEmail:data&&data.defaultEmail||''});
   if(sum)sum.innerHTML=`<span class="sp-chip">${spNum(sm.open||0)} active</span> <span class="sp-chip" style="background:#e0f2fe;color:#0369a1">${spNum(sm.followupSent||0)} follow-up</span> <span class="sp-chip low">${spNum(sm.waitingReturn||0)} return</span> <span class="sp-chip ok">${spNum(sm.waitingRenewal||0)} renewal</span> <span class="sp-chip">${spNum(sm.completed||0)} completed</span>`;
   if(!cards.length){wrap.innerHTML='<div class="sp-muted">No rental workflow records.</div>';return;}
   wrap.innerHTML=`<div class="sp-table-wrap ces-rental-follow-table-wrap-v261"><table class="sp-table ces-rental-follow-table-v261"><thead><tr><th>Status</th><th>Contract / Borrower</th><th>Due</th><th>Items</th><th>Last Email</th><th>Follow-up Action</th><th>Detail</th></tr></thead><tbody>${cards.map((c,index)=>{
     const days=Number(c.daysToDue||0),status=String(c.workflowStatus||'OPEN').toUpperCase(),mail=String(c.borrowerEmail||'').trim(),closed=status==='COMPLETED';
     const key=encodeURIComponent(c.contractKey||'');
-    const actions=closed?'<span class="ces-rental-closed-v261"><i class="fas fa-circle-check"></i> Closed</span>':`<div class="ces-rental-actions-v261"><button type="button" class="ces-rental-action-v261 follow" onclick="sd_updateRentalWorkflowV248('${key}','FOLLOW_UP_SENT',false)" title="Send follow-up email"><i class="fas fa-paper-plane"></i><span>Follow</span></button><button type="button" class="ces-rental-action-v261 return" onclick="sd_updateRentalWorkflowV248('${key}','WAITING_RETURN',false)" title="Set Return status"><i class="fas fa-rotate-left"></i><span>Return</span></button><button type="button" class="ces-rental-action-v261 renew" onclick="sd_updateRentalWorkflowV248('${key}','WAITING_RENEWAL',false)" title="Set Renewal status"><i class="fas fa-calendar-plus"></i><span>Renew</span></button><button type="button" class="ces-rental-action-v261 complete" onclick="sd_updateRentalWorkflowV248('${key}','COMPLETED',false)" title="Complete follow-up"><i class="fas fa-check"></i><span>Complete</span></button></div>`;
-    return `<tr class="ces-rental-row-v261 ${sd_rentalStatusClassV248_(status)}">
-      <td><span class="ces-rental-status-v260 ${sd_rentalStatusClassV248_(status)}">${spEsc(status.replaceAll('_',' '))}</span></td>
+    const actions=closed?'<span class="ces-rental-closed-v261"><i class="fas fa-circle-check"></i> Closed</span>':`<div class="ces-rental-actions-v261"><button type="button" class="ces-rental-action-v261 follow" onclick="sd_updateRentalWorkflow('${key}','FOLLOW_UP_SENT',false)" title="Send follow-up email"><i class="fas fa-paper-plane"></i><span>Follow</span></button><button type="button" class="ces-rental-action-v261 return" onclick="sd_updateRentalWorkflow('${key}','WAITING_RETURN',false)" title="Set Return status"><i class="fas fa-rotate-left"></i><span>Return</span></button><button type="button" class="ces-rental-action-v261 renew" onclick="sd_updateRentalWorkflow('${key}','WAITING_RENEWAL',false)" title="Set Renewal status"><i class="fas fa-calendar-plus"></i><span>Renew</span></button><button type="button" class="ces-rental-action-v261 complete" onclick="sd_updateRentalWorkflow('${key}','COMPLETED',false)" title="Complete follow-up"><i class="fas fa-check"></i><span>Complete</span></button></div>`;
+    return `<tr class="ces-rental-row-v261 ${sd_rentalStatusClass_(status)}">
+      <td><span class="ces-rental-status-v260 ${sd_rentalStatusClass_(status)}">${spEsc(status.replaceAll('_',' '))}</span></td>
       <td><b>${spEsc(c.location||'-')}</b><span class="sp-sub">${spEsc(c.borrower||'-')}${mail?' · '+spEsc(mail):''}</span></td>
-      <td><b class="${days<0?'ces-rental-over-v260':''}">${spEsc(c.dueDate||'-')}</b><span class="sp-sub ${days<0?'ces-rental-over-v260':''}">${spEsc(sd_rentalDueLabelV260_(days))}</span></td>
+      <td><b class="${days<0?'ces-rental-over-v260':''}">${spEsc(c.dueDate||'-')}</b><span class="sp-sub ${days<0?'ces-rental-over-v260':''}">${spEsc(sd_rentalDueLabel_(days))}</span></td>
       <td>${spNum(c.itemCount||0)}</td>
       <td>${spEsc(c.lastEmailType||'Not sent')}<span class="sp-sub">${spEsc(c.lastEmailAt||c.alertStatus||'-')}</span></td>
       <td>${actions}</td>
-      <td><button type="button" class="sp-btn soft ces-rental-view-btn-v260" onclick="sd_openRentalWorkflowDetailV260(${index})"><i class="fas fa-eye"></i> View</button></td>
+      <td><button type="button" class="sp-btn soft ces-rental-view-btn-v260" onclick="sd_openRentalWorkflowDetail(${index})"><i class="fas fa-eye"></i> View</button></td>
     </tr>`;
   }).join('')}</tbody></table></div>`;
 }
-function sd_v260IsoDate_(value){
+function sdIsoDate_(value){
   const text=String(value||'').trim();if(!text)return '';
   const m=text.match(/^(\d{4})-(\d{2})-(\d{2})/);if(m)return `${m[1]}-${m[2]}-${m[3]}`;
   const d=new Date(text);if(isNaN(d))return text.slice(0,10);return d.toISOString().slice(0,10);
 }
-function sd_openRentalWorkflowDetailV260(index){
+function sd_openRentalWorkflowDetail(index){
   const c=(SD_RENTAL_WORKFLOW_V260.cards||[])[Number(index)];
   if(!c){Swal.fire('Rental Contract','Contract record not found.','info');return;}
-  const targetDue=sd_v260IsoDate_(c.dueDate),targetLocation=String(c.location||''),targetBorrower=String(c.borrower||'');
+  const targetDue=sdIsoDate_(c.dueDate),targetLocation=String(c.location||''),targetBorrower=String(c.borrower||'');
   const deviceKey=[targetLocation,targetBorrower,targetDue].join('||');
   const devices=((SD_RENTAL_WORKFLOW_V260.deviceIndex||{})[deviceKey]||[]).slice();
   const rows=devices.map((d,i)=>`<tr><td>${i+1}</td><td><b>${spEsc(d.idCode||d.id_code||'-')}</b></td><td>${spEsc(d.sn||d.serialNumber||'-')}</td><td>${spEsc(d.acPlugSn||d.ac_plug_sn||'-')}</td><td>${spEsc(d.clampSn||d.clamp_sn||'-')}</td><td>${spEsc(d.brand||'-')}<span class="sp-sub">${spEsc(d.model||d.itemName||'-')}</span></td><td>${spEsc(d.status||'-')}</td><td>${spEsc(d.actionRequired||d.action_required||'-')}</td></tr>`).join('');
   const status=String(c.workflowStatus||'OPEN').toUpperCase(),canComplete=status!=='COMPLETED';
   const html=`<div class="ces-rental-v260-detail">
-    <div class="ces-rental-v260-detail-grid"><div><small>LOCATION</small><b>${spEsc(c.location||'-')}</b></div><div><small>BORROWER</small><b>${spEsc(c.borrower||'-')}</b></div><div><small>BORROWER EMAIL</small><b>${c.borrowerEmail?`<a href="mailto:${spEsc(c.borrowerEmail)}">${spEsc(c.borrowerEmail)}</a>`:'-'}</b></div><div><small>DUE DATE</small><b>${spEsc(c.dueDate||'-')}</b></div><div><small>ITEMS</small><b>${spNum(c.itemCount||devices.length||0)}</b></div><div><small>STATUS</small><b>${spEsc(status.replaceAll('_',' '))}</b></div><div><small>BORROWER ACTION</small><b>${spEsc(sd_rentalActionLabelV248_(c.borrowerAction))}</b></div><div><small>LAST EMAIL</small><b>${spEsc(c.lastEmailType||'Not sent')} ${c.lastEmailAt?'· '+spEsc(c.lastEmailAt):''}</b></div></div>
+    <div class="ces-rental-v260-detail-grid"><div><small>LOCATION</small><b>${spEsc(c.location||'-')}</b></div><div><small>BORROWER</small><b>${spEsc(c.borrower||'-')}</b></div><div><small>BORROWER EMAIL</small><b>${c.borrowerEmail?`<a href="mailto:${spEsc(c.borrowerEmail)}">${spEsc(c.borrowerEmail)}</a>`:'-'}</b></div><div><small>DUE DATE</small><b>${spEsc(c.dueDate||'-')}</b></div><div><small>ITEMS</small><b>${spNum(c.itemCount||devices.length||0)}</b></div><div><small>STATUS</small><b>${spEsc(status.replaceAll('_',' '))}</b></div><div><small>BORROWER ACTION</small><b>${spEsc(sd_rentalActionLabel_(c.borrowerAction))}</b></div><div><small>LAST EMAIL</small><b>${spEsc(c.lastEmailType||'Not sent')} ${c.lastEmailAt?'· '+spEsc(c.lastEmailAt):''}</b></div></div>
     ${c.newRenewalDate||c.renewalName||c.renewalEmail?`<div class="ces-renewal-summary-v262"><div><small>RENEWAL REQUESTED</small><b>${spEsc(c.renewalRequestedAt||'-')}</b></div><div><small>NEW RENEWAL DATE</small><b>${spEsc(c.newRenewalDate||'-')}</b></div><div><small>CONTACT NAME</small><b>${spEsc(c.renewalName||'-')}</b></div><div><small>EMAIL</small><b>${spEsc(c.renewalEmail||'-')}</b></div></div>`:''}
     ${c.lastError?`<div class="ces-rental-v260-error">${spEsc(c.lastError)}</div>`:''}
     <div class="sp-table-wrap ces-rental-v260-device-wrap"><table class="sp-table"><thead><tr><th>#</th><th>ID Code</th><th>SN</th><th>AC Plug SN</th><th>Clamp SN</th><th>Brand / Model</th><th>Status</th><th>Action Required</th></tr></thead><tbody>${rows||'<tr><td colspan="8" class="sp-muted">No item-level rows matched this contract key.</td></tr>'}</tbody></table></div>
-    <div class="ces-rental-v260-detail-actions">${canComplete?`<button class="sp-btn primary" onclick="sd_updateRentalWorkflowV248('${encodeURIComponent(c.contractKey||'')}','FOLLOW_UP_SENT',true)"><i class="fas fa-paper-plane"></i> Send Follow-up</button><button class="sp-btn warn" onclick="sd_updateRentalWorkflowV248('${encodeURIComponent(c.contractKey||'')}','WAITING_RETURN',true)"><i class="fas fa-rotate-left"></i> Return</button><button class="sp-btn success" onclick="sd_updateRentalWorkflowV248('${encodeURIComponent(c.contractKey||'')}','WAITING_RENEWAL',true)"><i class="fas fa-calendar-plus"></i> Renewal</button><button class="sp-btn dark" onclick="sd_updateRentalWorkflowV248('${encodeURIComponent(c.contractKey||'')}','COMPLETED',true)"><i class="fas fa-check"></i> Complete</button>`:'<span class="sp-chip ok"><i class="fas fa-check"></i> Closed</span>'}<a class="sp-btn ghost" href="${SD_RENTAL_SOURCE_V248}" target="_blank" rel="noopener"><i class="fas fa-link"></i> Source</a></div>
+    <div class="ces-rental-v260-detail-actions">${canComplete?`<button class="sp-btn primary" onclick="sd_updateRentalWorkflow('${encodeURIComponent(c.contractKey||'')}','FOLLOW_UP_SENT',true)"><i class="fas fa-paper-plane"></i> Send Follow-up</button><button class="sp-btn warn" onclick="sd_updateRentalWorkflow('${encodeURIComponent(c.contractKey||'')}','WAITING_RETURN',true)"><i class="fas fa-rotate-left"></i> Return</button><button class="sp-btn success" onclick="sd_updateRentalWorkflow('${encodeURIComponent(c.contractKey||'')}','WAITING_RENEWAL',true)"><i class="fas fa-calendar-plus"></i> Renewal</button><button class="sp-btn dark" onclick="sd_updateRentalWorkflow('${encodeURIComponent(c.contractKey||'')}','COMPLETED',true)"><i class="fas fa-check"></i> Complete</button>`:'<span class="sp-chip ok"><i class="fas fa-check"></i> Closed</span>'}<a class="sp-btn ghost" href="${SD_RENTAL_SOURCE_V248}" target="_blank" rel="noopener"><i class="fas fa-link"></i> Source</a></div>
   </div>`;
   Swal.fire({title:'Rental Contract Follow-up Detail',width:'min(1220px,97vw)',html,confirmButtonText:'Close',animation:false,customClass:{popup:'ces-rental-v260-detail-popup'}});
 }
-function sd_switchStockTabV260(tab){
+function sd_switchStockTab(tab){
   tab=String(tab||'dashboard').toLowerCase();
   const isContract=tab==='contract';
   const dash=document.getElementById('sdDashboardPanelV260'),contract=document.getElementById('sdContractPanelV260');
   const dashBtn=document.getElementById('sdTabDashboardV260'),contractBtn=document.getElementById('sdTabContractV260');
   if(dash)dash.classList.toggle('hidden',isContract);if(contract)contract.classList.toggle('hidden',!isContract);
   if(dashBtn)dashBtn.classList.toggle('active',!isContract);if(contractBtn)contractBtn.classList.toggle('active',isContract);
-  if(isContract){try{sd_renderContractSummary();}catch(e){};sd_loadRentalWorkflowV248(false).catch(()=>{});}
+  if(isContract){try{sd_renderContractSummary();}catch(e){};sd_loadRentalWorkflow(false).catch(()=>{});}
   try{sessionStorage.setItem('CES_STOCK_TAB_V260',isContract?'contract':'dashboard');}catch(e){}
 }
-async function sd_loadRentalWorkflowV248(force=false){
+async function sd_loadRentalWorkflow(force=false){
   const wrap=document.getElementById('sdRentalWorkflowCardsV248');if(!wrap)return;
-  if(!force){const cached=sd_v262ReadRentalCache_();if(cached){sd_renderRentalWorkflowV248(cached);return cached;}}
+  if(!force){const cached=sdReadRentalCache_();if(cached){sd_renderRentalWorkflow(cached);return cached;}}
   if(force)wrap.insertAdjacentHTML('afterbegin','<div id="sdRentalSyncNoteV262" class="ces-rental-sync-note-v262"><i class="fas fa-rotate fa-spin"></i> Syncing latest contracts…</div>');
   try{
-    const r=await window.CES_API.callFunction('sd_getRentalWorkflowCards',[force===true],{priority:force?'user':'background',background:!force,dedupe:true});
+    const r=await window.CES_API.callFunction('sd_getRentalWorkflowCards',[force===true],{priority:'active',background:false,dedupe:!force,userAction:true,module:'stock_dashboard',silentLoading:false});
     if(!r||!r.success)throw new Error((r&&r.message)||'Rental workflow unavailable');
-    sd_renderRentalWorkflowV248(r);return r;
+    sd_renderRentalWorkflow(r);return r;
   }catch(e){if(!SD_RENTAL_WORKFLOW_V260.cards.length)wrap.innerHTML=`<div class="sp-muted">Rental workflow unavailable: ${spEsc(e.message||String(e))}</div>`;throw e;
   }finally{const n=document.getElementById('sdRentalSyncNoteV262');if(n)n.remove();}
 }
-async function sd_updateRentalWorkflowV248(contractKey,status,closePopup){
+async function sd_updateRentalWorkflow(contractKey,status,closePopup){
   try{contractKey=decodeURIComponent(String(contractKey||''));}catch(ignore){}
   status=String(status||'IN_PROGRESS').toUpperCase();
   const card=(SD_RENTAL_WORKFLOW_V260.cards||[]).find(x=>String(x.contractKey||'')===contractKey)||{};
   let extra={};
   if(status==='WAITING_RENEWAL'){
     const nowLocal=new Date(),today=[nowLocal.getFullYear(),String(nowLocal.getMonth()+1).padStart(2,'0'),String(nowLocal.getDate()).padStart(2,'0')].join('-'),defaultNew=card.newRenewalDate||card.dueDate||today;
-    const result=await Swal.fire({title:'Renewal Contract',animation:false,showCancelButton:true,confirmButtonText:'Save Renewal',confirmButtonColor:'#059669',focusConfirm:false,html:`<div class="ces-renewal-form-v262"><label>Renewal Date (Today)<input id="sd-renew-today-v262" type="date" value="${spEsc(today)}" readonly></label><label>New Renewal Date <span>*</span><input id="sd-renew-new-v262" type="date" value="${spEsc(sd_v260IsoDate_(defaultNew))}"></label><label>Contact Name <span>*</span><input id="sd-renew-name-v262" type="text" value="${spEsc(card.renewalName||card.borrower||'')}"></label><label>Email <span>*</span><input id="sd-renew-email-v262" type="email" value="${spEsc(card.renewalEmail||card.borrowerEmail||'')}"></label></div>`,preConfirm:()=>{const newDate=document.getElementById('sd-renew-new-v262').value,name=document.getElementById('sd-renew-name-v262').value.trim(),email=document.getElementById('sd-renew-email-v262').value.trim();if(!newDate||!name||!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)){Swal.showValidationMessage('กรอก New Renewal Date, Name และ Email ให้ครบ');return false;}return{renewalRequestedAt:today,newRenewalDate:newDate,renewalName:name,renewalEmail:email};}});
+    const result=await Swal.fire({title:'Renewal Contract',animation:false,showCancelButton:true,confirmButtonText:'Save Renewal',confirmButtonColor:'#059669',focusConfirm:false,html:`<div class="ces-renewal-form-v262"><label>Renewal Date (Today)<input id="sd-renew-today-v262" type="date" value="${spEsc(today)}" readonly></label><label>New Renewal Date <span>*</span><input id="sd-renew-new-v262" type="date" value="${spEsc(sdIsoDate_(defaultNew))}"></label><label>Contact Name <span>*</span><input id="sd-renew-name-v262" type="text" value="${spEsc(card.renewalName||card.borrower||'')}"></label><label>Email <span>*</span><input id="sd-renew-email-v262" type="email" value="${spEsc(card.renewalEmail||card.borrowerEmail||'')}"></label></div>`,preConfirm:()=>{const newDate=document.getElementById('sd-renew-new-v262').value,name=document.getElementById('sd-renew-name-v262').value.trim(),email=document.getElementById('sd-renew-email-v262').value.trim();if(!newDate||!name||!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)){Swal.showValidationMessage('กรอก New Renewal Date, Name และ Email ให้ครบ');return false;}return{renewalRequestedAt:today,newRenewalDate:newDate,renewalName:name,renewalEmail:email};}});
     if(!result.isConfirmed)return;extra=result.value||{};
   }else{
     const confirms={FOLLOW_UP_SENT:{title:'Send follow-up email?',text:'Send a contract follow-up email to the borrower now.',confirm:'Send Follow-up',color:'#2563eb'},WAITING_RETURN:{title:'Set status to Return?',text:'Mark this contract for return follow-up. This does not receive the equipment into stock yet.',confirm:'Return',color:'#d97706'},COMPLETED:{title:'Complete rental follow-up?',text:'Close the follow-up workflow after all required return / renewal actions are finished.',confirm:'Complete',color:'#0f172a'}};
@@ -754,14 +754,14 @@ async function sd_updateRentalWorkflowV248(contractKey,status,closePopup){
     if(!r||!r.success)throw new Error((r&&r.message)||'Update failed');
     const idx=(SD_RENTAL_WORKFLOW_V260.cards||[]).findIndex(x=>String(x.contractKey||'')===contractKey);
     if(idx>=0&&r.card)SD_RENTAL_WORKFLOW_V260.cards[idx]=Object.assign({},SD_RENTAL_WORKFLOW_V260.cards[idx],r.card);
-    const data={success:true,cards:(SD_RENTAL_WORKFLOW_V260.cards||[]).slice(),summary:sd_v262Summary_(SD_RENTAL_WORKFLOW_V260.cards||[]),sourceSheetUrl:SD_RENTAL_SOURCE_V248};
-    sd_renderRentalWorkflowV248(data);try{sd_renderContractSummary();}catch(ignore){}
+    const data={success:true,cards:(SD_RENTAL_WORKFLOW_V260.cards||[]).slice(),summary:sdSummary_(SD_RENTAL_WORKFLOW_V260.cards||[]),sourceSheetUrl:SD_RENTAL_SOURCE_V248};
+    sd_renderRentalWorkflow(data);try{sd_renderContractSummary();}catch(ignore){}
     if(closePopup&&typeof Swal!=='undefined'&&Swal.isVisible())Swal.close();else if(status==='FOLLOW_UP_SENT')Swal.fire({icon:'success',title:'Follow-up sent',timer:1100,showConfirmButton:false,animation:false});
   }catch(e){Swal.fire({icon:'error',title:'Rental workflow',text:e.message||String(e),animation:false});}
   finally{if(button&&button.isConnected){button.disabled=false;button.innerHTML=oldHtml;}}
 }
 
-window.sd_loadRentalWorkflowV248=sd_loadRentalWorkflowV248;
-window.sd_updateRentalWorkflowV248=sd_updateRentalWorkflowV248;
-window.sd_openRentalWorkflowDetailV260=sd_openRentalWorkflowDetailV260;
-window.sd_switchStockTabV260=sd_switchStockTabV260;
+window.sd_loadRentalWorkflow=sd_loadRentalWorkflow;
+window.sd_updateRentalWorkflow=sd_updateRentalWorkflow;
+window.sd_openRentalWorkflowDetail=sd_openRentalWorkflowDetail;
+window.sd_switchStockTab=sd_switchStockTab;

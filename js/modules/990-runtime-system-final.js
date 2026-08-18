@@ -19,7 +19,11 @@
   window.__CES_SERVICE_CSI_INDEX_FIX_V18__ = true;
 
   const MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  const SERVICE_CACHE_KEY = 'CES_SERVICE_CSI_CACHE';
+  const SERVICE_CUSTOMER_CACHE_KEY = 'CES_SERVICE_CSI_CUSTOMER_CACHE';
+  const SERVICE_CACHE_TTL = 30 * 60 * 1000;
   let serviceLoadBusy = false;
+  let serviceLoadPromise = null;
   let lastServiceLoadAt = 0;
 
   function log() {
@@ -43,6 +47,25 @@
     if (raw && Array.isArray(raw.data)) return raw.data;
     if (raw && Array.isArray(raw.records)) return raw.records;
     return [];
+  }
+
+
+  function readServiceCache_(key) {
+    try { var box = JSON.parse(localStorage.getItem(key) || 'null'); return box && box.data ? box : null; }
+    catch (e) { return null; }
+  }
+  function writeServiceCache_(key, data) {
+    try { localStorage.setItem(key, JSON.stringify({ ts:Date.now(), data:data })); } catch (e) {}
+  }
+  function serviceApiCall_(name, args, options) {
+    if (window.CES_API && typeof window.CES_API.callFunction === 'function') return window.CES_API.callFunction(name, args || [], options || {});
+    return new Promise(function(resolve, reject){
+      try {
+        var runner = google.script.run.withSuccessHandler(resolve).withFailureHandler(reject);
+        if (!runner || typeof runner[name] !== 'function') throw new Error('Function not available: ' + name);
+        runner[name].apply(runner, args || []);
+      } catch (e) { reject(e); }
+    });
   }
 
   function str(v) { return String(v == null ? '' : v).trim(); }
@@ -360,27 +383,22 @@
       const years = getYears(serviceRawData);
       if (!years.includes(String(sFilters.year)) && sFilters.year !== 'All') sFilters.year = pickDefaultYear(serviceRawData);
 
-      customerRawData = normalizeCustomerRows([]);
+      const customerCache = readServiceCache_(SERVICE_CUSTOMER_CACHE_KEY);
+      customerRawData = customerCache ? normalizeCustomerRows(customerCache.data || []) : normalizeCustomerRows([]);
       populateServiceDropdowns();
       if (typeof populateCompareDropdowns === 'function') populateCompareDropdowns();
       applyServiceFilters();
 
-      // Refresh customer table from backend. The service data itself is already enough as fallback.
-      try {
-        google.script.run
-          .withSuccessHandler(cust => {
-            customerRawData = normalizeCustomerRows(cust || []);
-            renderCustomerList();
-          })
-          .withFailureHandler(err => {
-            console.warn('[Service CSI Fix] getCustomerListData failed; using derived customer list', err);
-            customerRawData = normalizeCustomerRows([]);
-            renderCustomerList();
-          })
-          .getCustomerListData();
-      } catch (e) {
-        customerRawData = normalizeCustomerRows([]);
-        renderCustomerList();
+      // Customer details are secondary. Render cached/derived rows first and only
+      // refresh them in the background when the cache is old.
+      if (!customerCache || Date.now() - Number(customerCache.ts || 0) > SERVICE_CACHE_TTL) {
+        serviceApiCall_('getCustomerListData', [], {transport:'jsonp',timeoutMs:30000,dedupe:true,priority:'background',background:true,silentLoading:true,module:'service'}).then(cust => {
+          customerRawData = normalizeCustomerRows(cust || []);
+          writeServiceCache_(SERVICE_CUSTOMER_CACHE_KEY, cust || []);
+          renderCustomerList();
+        }).catch(err => {
+          console.warn('[Service CSI] customer background refresh failed; keeping cached/derived rows', err);
+        });
       }
       log('initService done', { rows: serviceRawData.length, year: sFilters.year });
     } catch (e) {
@@ -395,34 +413,49 @@
     applyServiceFilters();
   };
 
-  window.loadServiceCSIOnly = function (showLoading) {
-    if (serviceLoadBusy) return;
+  window.loadServiceCSIOnly = function (forceRefresh) {
+    const force = forceRefresh === true;
+    const cachedBox = readServiceCache_(SERVICE_CACHE_KEY);
+    const cachedRows = cachedBox ? normalizeServiceRows(cachedBox.data || []) : [];
+    const cacheFresh = cachedBox && Date.now() - Number(cachedBox.ts || 0) < SERVICE_CACHE_TTL;
+    if (!force && cachedRows.length) {
+      initService(cachedRows);
+      if (cacheFresh) return Promise.resolve(cachedRows);
+    }
+    if (serviceLoadPromise) return serviceLoadPromise;
     serviceLoadBusy = true;
     lastServiceLoadAt = Date.now();
     const loader = document.getElementById('loadingOverlay');
     const text = document.getElementById('loadingText');
-    if (showLoading && loader) loader.classList.remove('hidden');
-    if (showLoading && text) text.innerText = 'Loading Service CSI...';
+    const backgroundRefresh = !force && cachedRows.length > 0;
+    if (force && loader) loader.classList.remove('hidden');
+    if (force && text) text.innerText = 'Loading Service CSI...';
 
-    google.script.run
-      .withSuccessHandler(res => {
-        serviceLoadBusy = false;
-        if (loader) loader.classList.add('hidden');
-        const rows = normalizeServiceRows(res || []);
-        initService(rows);
-        if (showLoading && window.Swal) Swal.fire({ icon:'success', title:'Service CSI Loaded', text: rows.length + ' records', timer:1200, showConfirmButton:false });
-      })
-      .withFailureHandler(err => {
-        serviceLoadBusy = false;
-        if (loader) loader.classList.add('hidden');
-        const msg = err && err.message ? err.message : String(err || 'Unknown error');
-        console.error('[Service CSI Fix] load failed', err);
-        if (window.Swal) Swal.fire('Service CSI Load Error', msg, 'error');
-      })
-      .getServiceDataOnly();
+    serviceLoadPromise = serviceApiCall_('getServiceDataOnly', [], {
+      transport:'jsonp',timeoutMs:50000,dedupe:true,
+      priority:backgroundRefresh?'background':'active',background:backgroundRefresh,
+      silentLoading:backgroundRefresh,userAction:!backgroundRefresh,module:'service'
+    }).then(res => {
+      const rows = normalizeServiceRows(res || []);
+      writeServiceCache_(SERVICE_CACHE_KEY, rows);
+      initService(rows);
+      if (force && window.Swal) Swal.fire({ icon:'success', title:'Service CSI Loaded', text: rows.length + ' records', timer:1200, showConfirmButton:false });
+      return rows;
+    }).catch(err => {
+      const msg = err && err.message ? err.message : String(err || 'Unknown error');
+      console.error('[Service CSI] load failed', err);
+      if (cachedRows.length) { initService(cachedRows); if (force && window.Swal) Swal.fire({icon:'warning',title:'Using cached Service CSI',text:msg,timer:2200,showConfirmButton:false}); return cachedRows; }
+      if (window.Swal) Swal.fire('Service CSI Load Error', msg, 'error');
+      return [];
+    }).finally(() => {
+      serviceLoadBusy = false;
+      serviceLoadPromise = null;
+      if (loader) loader.classList.add('hidden');
+    });
+    return serviceLoadPromise;
   };
 
-  window.serviceReloadDataV31 = function () { return window.loadServiceCSIOnly(true); };
+  window.serviceReloadData = function () { return window.loadServiceCSIOnly(true); };
 
   function patchServiceButtons() {
     const view = document.getElementById('view-service');
@@ -696,20 +729,20 @@
     if (!window.Swal || window.Swal.__cesThemePatched) return;
 
     const originalFire = window.Swal.fire.bind(window.Swal);
-    function cesSwalMessageV209(value) {
+    function cesSwalMessage(value) {
       if (value == null) return '';
       if (typeof value === 'string' || typeof value === 'number' || typeof value === 'boolean') return String(value);
       if (value instanceof Error) return value.message || String(value);
       if (typeof value === 'object') {
         const msg = value.message || value.error || value.details || value.reason || (value.response && (value.response.message || value.response.error));
-        if (msg) return cesSwalMessageV209(msg);
+        if (msg) return cesSwalMessage(msg);
         try { return JSON.stringify(value, null, 2); } catch (_) { return 'Unexpected system error.'; }
       }
       return String(value);
     }
-    window.cesSwalMessageV209 = cesSwalMessageV209;
+    window.cesSwalMessage = cesSwalMessage;
     window.Swal.fire = function patchedCesSwalFire(...args) {
-      if (args.length > 1 && args[1] && typeof args[1] === 'object') args[1] = cesSwalMessageV209(args[1]);
+      if (args.length > 1 && args[1] && typeof args[1] === 'object') args[1] = cesSwalMessage(args[1]);
       if (args.length === 1 && args[0] && typeof args[0] === 'object') {
         args[0] = Object.assign({
           buttonsStyling: true,
@@ -1256,9 +1289,9 @@
     function ensureStockUiTheme() {
       injectTheme();
       try { if (typeof window.spEnsureStyle === 'function') window.spEnsureStyle(); } catch (e) {}
-      try { if (typeof window.sd_v17Style === 'function') window.sd_v17Style(); } catch (e) {}
-      try { if (typeof window.si_v17Style === 'function') window.si_v17Style(); } catch (e) {}
-      try { if (typeof window.si_v14Style === 'function') window.si_v14Style(); } catch (e) {}
+      try { if (typeof window.sdStyle === 'function') window.sdStyle(); } catch (e) {}
+      try { if (typeof window.siCurrentLayoutStyle === 'function') window.siCurrentLayoutStyle(); } catch (e) {}
+      try { if (typeof window.siResponsiveStyle === 'function') window.siResponsiveStyle(); } catch (e) {}
     }
     function inlineError(targetId, title, message, retryFn) {
       var el = document.getElementById(targetId);
@@ -1683,7 +1716,7 @@
     if (modal) modal.classList.remove('hidden');
   };
 
-  window.kpiEnvWorkflowV31Recheck = function () {
+  window.kpiEnvWorkflowRecheck = function () {
     var sample = [
       { workflowType:'ENV', rawStatus:{ sup:'', rep:'' } },
       { workflowType:'ENV', rawStatus:{ sup:'กำลังตรวจ', rep:'' } },
@@ -2365,7 +2398,7 @@
     } catch(e) {}
   }
 
-  function ensureCalendarTeamUiV39(){
+  function ensureCalendarTeamUi(){
     var buttons = [
       {key:'ENV', after:'EHS'},
       {key:'TES', after:'ENV'},
@@ -2386,12 +2419,11 @@
     var mgtNode = qs('#stat-mgt');
     if(mgtNode){ var mgtCard = mgtNode.closest('.kpi-card'); if(mgtCard) mgtCard.remove(); }
   }
-  function ensureCalendarTeamUiV37(){ return ensureCalendarTeamUiV39(); }
 
   // Compatibility alias retained for older runtime diagnostics.
-  function ensureCalendarTESCard(){ return ensureCalendarTeamUiV37(); }
+  function ensureCalendarTESCard(){ return ensureCalendarTeamUi(); }
 
-  function calendarSourceTeamV37_(value){
+  function calendarNormalizeSourceTeam_(value){
     var t = text(value).trim().toUpperCase();
     if(t === 'MANAGEMENT' || t === 'MNG') return 'MGT';
     if(t.indexOf('MED') >= 0) return 'MED';
@@ -2402,7 +2434,7 @@
     if(t.indexOf('MGT') >= 0 || t.indexOf('MANAG') >= 0) return 'MGT';
     return t;
   }
-  function calendarSourceTeamV39_(item){
+  function calendarSourceTeam_(item){
     var calendarId = text(item && item.calendarId).trim().toLowerCase();
     if(calendarId === 'chiraphat.env@gmail.com') return 'ENV';
     if(calendarId === 'natkanok.8942@gmail.com') return 'EHS';
@@ -2410,15 +2442,15 @@
     if(calendarId === 'nhealthcallab@gmail.com') return 'LAB';
     if(calendarId === 'technicalsupport.tes@gmail.com') return 'TES';
     if(calendarId === 'cesmanagement2026@gmail.com') return 'MGT';
-    return calendarSourceTeamV37_(item && item.team);
+    return calendarNormalizeSourceTeam_(item && item.team);
   }
-  function calendarCapacityTeamV37_(item, sourceTeam){
-    return sourceTeam || calendarSourceTeamV39_(item);
+  function calendarCapacityTeam_(item, sourceTeam){
+    return sourceTeam || calendarSourceTeam_(item);
   }
-  function calendarUiMatchesV37_(current, sourceTeam){
+  function calendarUiMatches_(current, sourceTeam){
     return current === 'ALL' || current === sourceTeam;
   }
-  function calendarDateV37_(value){
+  function calendarDate_(value){
     var raw = text(value).trim();
     var p = raw.split('/');
     if(p.length >= 3) return new Date(Number(p[2]), Number(p[1])-1, Number(p[0]));
@@ -2427,7 +2459,7 @@
   }
 
   function processCalendarDataFinal(data, targetM, targetY){
-    ensureCalendarTeamUiV37();
+    ensureCalendarTeamUi();
     data = Array.isArray(data) ? data : [];
     var current = (typeof currentService !== 'undefined') ? currentService : 'ALL';
     var teamKeys = ['MED','LAB','EHS','ENV','TES','MGT'];
@@ -2438,19 +2470,17 @@
       var itemM = parseInt(item.month,10), itemY = parseInt(item.year,10);
       if(itemM !== targetM || itemY !== targetY) return;
       var title = text(item.title);
-      var sourceTeam = calendarSourceTeamV39_(item);
+      var sourceTeam = calendarSourceTeam_(item);
       if(teamKeys.indexOf(sourceTeam) < 0) return;
-      var capacityTeam = calendarCapacityTeamV37_(item, sourceTeam);
-      var d = calendarDateV37_(item.date);
-      var isWeekend = !isNaN(d.getTime()) && (d.getDay()===0 || d.getDay()===6);
+      var capacityTeam = calendarCapacityTeam_(item, sourceTeam);
       var isLeave = (typeof checkIsLeaveEvent === 'function') ? checkIsLeaveEvent(title) : /leave|off|ลา|หยุด|ป่วย/i.test(title);
-      if(isLeave){ if(calendarUiMatchesV37_(current, sourceTeam)) leave.push(Object.assign({}, item, {team:sourceTeam})); return; }
+      if(isLeave){ if(calendarUiMatches_(current, sourceTeam)) leave.push(Object.assign({}, item, {team:sourceTeam})); return; }
       if(!title) return;
-      var shouldCount = !(capacityTeam === 'MED' && isWeekend);
-      if(shouldCount && man.hasOwnProperty(capacityTeam)) man[capacityTeam] += 1;
+      // Count every scheduled non-leave work day, including weekend work.
+      if(man.hasOwnProperty(capacityTeam)) man[capacityTeam] += 1;
       var key = item.uniqueKey || [sourceTeam,item.date,title].join('|');
       sets[sourceTeam].add(key);
-      if(calendarUiMatchesV37_(current, sourceTeam)) jobs.push(Object.assign({}, item, {team:sourceTeam, capacityTeam:capacityTeam}));
+      if(calendarUiMatches_(current, sourceTeam)) jobs.push(Object.assign({}, item, {team:sourceTeam, capacityTeam:capacityTeam}));
     });
     var total = ['MED','LAB','EHS','ENV','TES'].reduce(function(a,t){ return a + sets[t].size; }, 0);
     var el;
@@ -2489,7 +2519,7 @@
   try { if(typeof window.processCalendarData !== 'function') window.processCalendarData = processCalendarDataFinal; if(typeof window.renderCapacityBars !== 'function') window.renderCapacityBars = renderCapacityBarsFinal; } catch(e) {}
 
   function patchCalendarAndTracker(){
-    injectFinalCss(); ensureCalendarTeamUiV39();
+    injectFinalCss(); ensureCalendarTeamUi();
     if(typeof updateCalendarUI === 'function') { try { updateCalendarUI(); } catch(e){} }
   }
 
@@ -2525,7 +2555,7 @@
 
   var V13_PDF_LIB_PROMISE = null;
 
-  function v13LoadScriptOnce(id, urls, testFn){
+  function servicePdfLoadScriptOnce(id, urls, testFn){
     return new Promise(function(resolve, reject){
       if(testFn && testFn()) return resolve();
       var i = 0;
@@ -2552,15 +2582,15 @@
     });
   }
 
-  function v13EnsurePdfLibraries(){
+  function servicePdfEnsurePdfLibraries(){
     if(window.html2canvas && window.jspdf && window.jspdf.jsPDF) return Promise.resolve();
     if(!V13_PDF_LIB_PROMISE){
-      V13_PDF_LIB_PROMISE = v13LoadScriptOnce('html2canvas', [
+      V13_PDF_LIB_PROMISE = servicePdfLoadScriptOnce('html2canvas', [
         'https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js',
         'https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js',
         'https://unpkg.com/html2canvas@1.4.1/dist/html2canvas.min.js'
       ], function(){ return !!window.html2canvas; }).then(function(){
-        return v13LoadScriptOnce('jspdf', [
+        return servicePdfLoadScriptOnce('jspdf', [
           'https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js',
           'https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js',
           'https://unpkg.com/jspdf@2.5.1/dist/jspdf.umd.min.js'
@@ -2570,7 +2600,7 @@
     return V13_PDF_LIB_PROMISE;
   }
 
-  function v13NextPaint(win){
+  function servicePdfNextPaint(win){
     win = win || window;
     return new Promise(function(resolve){
       try{
@@ -2579,7 +2609,7 @@
     });
   }
 
-  function v13CopyFieldState(sourceRoot, cloneRoot){
+  function servicePdfCopyFieldState(sourceRoot, cloneRoot){
     var sourceFields = sourceRoot.querySelectorAll('input,select,textarea');
     var cloneFields = cloneRoot.querySelectorAll('input,select,textarea');
     for(var i=0; i<sourceFields.length && i<cloneFields.length; i++){
@@ -2601,7 +2631,7 @@
     }
   }
 
-  function v13FreezeCharts(sourceRoot, cloneRoot){
+  function servicePdfFreezeCharts(sourceRoot, cloneRoot){
     var sourceCanvases = sourceRoot.querySelectorAll('canvas');
     var cloneCanvases = cloneRoot.querySelectorAll('canvas');
     for(var i=0; i<sourceCanvases.length && i<cloneCanvases.length; i++){
@@ -2624,7 +2654,7 @@
     }
   }
 
-  function v13ExpandOnlyScrollableData(cloneRoot){
+  function servicePdfExpandOnlyScrollableData(cloneRoot){
     cloneRoot.classList.remove('hidden');
     cloneRoot.classList.add('ces-service-pdf-root-v13');
     cloneRoot.style.display = 'block';
@@ -2684,12 +2714,12 @@
     for(var h=0; h<horizontal.length; h++) horizontal[h].style.setProperty('overflow-x','visible','important');
   }
 
-  function v13ClosestGrid(root, selector){
+  function servicePdfClosestGrid(root, selector){
     var el = root.querySelector(selector);
     return el && el.closest ? el.closest('.grid') : null;
   }
 
-  function v13CopyLayoutProperties(source, clone, properties){
+  function servicePdfCopyLayoutProperties(source, clone, properties){
     if(!source || !clone) return;
     var computed;
     try{ computed = window.getComputedStyle(source); }catch(ignore){ return; }
@@ -2699,7 +2729,7 @@
     });
   }
 
-  function v13PreserveDashboardLayout(sourceRoot, cloneRoot){
+  function servicePdfPreserveDashboardLayout(sourceRoot, cloneRoot){
     /*
        Some Service CSI component styles (notably .s-kpi-card) are declared in
        inline <style> blocks loaded with other views instead of document.head.
@@ -2715,25 +2745,25 @@
       ['#comm-med', ['display','grid-template-columns','grid-template-rows','column-gap','row-gap','align-items']]
     ];
     pairs.forEach(function(item){
-      var sourceGrid = v13ClosestGrid(sourceRoot, item[0]);
-      var cloneGrid = v13ClosestGrid(cloneRoot, item[0]);
-      v13CopyLayoutProperties(sourceGrid, cloneGrid, item[1]);
+      var sourceGrid = servicePdfClosestGrid(sourceRoot, item[0]);
+      var cloneGrid = servicePdfClosestGrid(cloneRoot, item[0]);
+      servicePdfCopyLayoutProperties(sourceGrid, cloneGrid, item[1]);
     });
 
     var sourceHeader = sourceRoot.firstElementChild;
     var cloneHeader = cloneRoot.firstElementChild;
-    v13CopyLayoutProperties(sourceHeader, cloneHeader, [
+    servicePdfCopyLayoutProperties(sourceHeader, cloneHeader, [
       'display','flex-direction','justify-content','align-items','column-gap','row-gap',
       'padding','border-radius','background-color','border-color','border-width','box-shadow'
     ]);
 
-    var filterGrid = v13ClosestGrid(cloneRoot, '#s-filter-year');
+    var filterGrid = servicePdfClosestGrid(cloneRoot, '#s-filter-year');
     if(filterGrid){
       filterGrid.classList.add('ces-service-filter-grid-v13');
       filterGrid.style.setProperty('grid-template-columns','repeat(4,minmax(0,1fr))','important');
     }
 
-    var kpiGrid = v13ClosestGrid(cloneRoot, '#s-total');
+    var kpiGrid = servicePdfClosestGrid(cloneRoot, '#s-total');
     if(kpiGrid){
       kpiGrid.classList.add('ces-service-kpi-grid-v13');
       kpiGrid.style.setProperty('display','grid','important');
@@ -2742,7 +2772,7 @@
       kpiGrid.style.setProperty('align-items','stretch','important');
     }
 
-    var chartGrid = v13ClosestGrid(cloneRoot, '#monthlyChart');
+    var chartGrid = servicePdfClosestGrid(cloneRoot, '#monthlyChart');
     if(chartGrid){
       chartGrid.classList.add('ces-service-chart-grid-v13');
       chartGrid.style.setProperty('display','grid','important');
@@ -2753,7 +2783,7 @@
       if(chartCards[1]) chartCards[1].style.setProperty('grid-column','span 1 / span 1','important');
     }
 
-    var scoreGrid = v13ClosestGrid(cloneRoot, '#scoreAnalysisChart');
+    var scoreGrid = servicePdfClosestGrid(cloneRoot, '#scoreAnalysisChart');
     if(scoreGrid){
       scoreGrid.classList.add('ces-service-score-grid-v13');
       scoreGrid.style.setProperty('display','grid','important');
@@ -2761,7 +2791,7 @@
       scoreGrid.style.setProperty('gap','24px','important');
     }
 
-    var feedbackGrid = v13ClosestGrid(cloneRoot, '#comm-med');
+    var feedbackGrid = servicePdfClosestGrid(cloneRoot, '#comm-med');
     if(feedbackGrid){
       feedbackGrid.classList.add('ces-service-feedback-grid-v13');
       feedbackGrid.style.setProperty('display','grid','important');
@@ -2775,7 +2805,7 @@
     for(var i=0; i<cloneCards.length; i++){
       var card = cloneCards[i];
       var sourceCard = sourceCards[i];
-      v13CopyLayoutProperties(sourceCard, card, [
+      servicePdfCopyLayoutProperties(sourceCard, card, [
         'display','flex-direction','justify-content','width','height','min-height','padding',
         'background-color','border-color','border-width','border-style','border-radius',
         'box-shadow','overflow','box-sizing'
@@ -2830,14 +2860,14 @@
     }
   }
 
-  function v13CollectStyles(){
+  function servicePdfCollectStyles(){
     var nodes = document.querySelectorAll('link[rel="stylesheet"],style');
     var out = '';
     for(var i=0; i<nodes.length; i++) out += nodes[i].outerHTML + '\n';
     return out;
   }
 
-  function v13WaitForFrame(frame){
+  function servicePdfWaitForFrame(frame){
     return new Promise(function(resolve){
       var doc = frame.contentDocument;
       var waits = [];
@@ -2864,12 +2894,12 @@
         }.bind(images[j])));
       }
       if(doc.fonts && doc.fonts.ready) waits.push(Promise.resolve(doc.fonts.ready).catch(function(){}));
-      Promise.all(waits).then(function(){ return v13NextPaint(frame.contentWindow); }).then(resolve).catch(resolve);
-      if(!waits.length) v13NextPaint(frame.contentWindow).then(resolve);
+      Promise.all(waits).then(function(){ return servicePdfNextPaint(frame.contentWindow); }).then(resolve).catch(resolve);
+      if(!waits.length) servicePdfNextPaint(frame.contentWindow).then(resolve);
     });
   }
 
-  async function v13CreateCaptureDocument(sourceRoot){
+  async function servicePdfCreateCaptureDocument(sourceRoot){
     var logicalWidth = Math.ceil(sourceRoot.offsetWidth || sourceRoot.scrollWidth || 1400);
     logicalWidth = Math.max(1180, logicalWidth);
 
@@ -2904,22 +2934,22 @@
       '</style>';
 
     doc.open();
-    doc.write('<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><base href="'+String(baseHref).replace(/"/g,'&quot;')+'">'+v13CollectStyles()+captureCss+'</head><body></body></html>');
+    doc.write('<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><base href="'+String(baseHref).replace(/"/g,'&quot;')+'">'+servicePdfCollectStyles()+captureCss+'</head><body></body></html>');
     doc.close();
 
     var cloneRoot = sourceRoot.cloneNode(true);
-    v13CopyFieldState(sourceRoot, cloneRoot);
+    servicePdfCopyFieldState(sourceRoot, cloneRoot);
     doc.body.appendChild(doc.importNode(cloneRoot, true));
     cloneRoot = doc.body.lastElementChild;
-    v13FreezeCharts(sourceRoot, cloneRoot);
-    v13ExpandOnlyScrollableData(cloneRoot);
-    v13PreserveDashboardLayout(sourceRoot, cloneRoot);
+    servicePdfFreezeCharts(sourceRoot, cloneRoot);
+    servicePdfExpandOnlyScrollableData(cloneRoot);
+    servicePdfPreserveDashboardLayout(sourceRoot, cloneRoot);
     cloneRoot.style.width = logicalWidth+'px';
 
-    await v13WaitForFrame(frame);
+    await servicePdfWaitForFrame(frame);
     var fullHeight = Math.ceil(cloneRoot.scrollHeight || cloneRoot.offsetHeight || 1);
     frame.style.height = Math.min(Math.max(1200, fullHeight + 20), 60000)+'px';
-    await v13NextPaint(frame.contentWindow);
+    await servicePdfNextPaint(frame.contentWindow);
 
     return {
       frame: frame,
@@ -2930,7 +2960,7 @@
     };
   }
 
-  function v13ReadFilterLabel(){
+  function servicePdfReadFilterLabel(){
     var filters = window.sFilters || {};
     return [
       'Team: '+(filters.team || 'All'),
@@ -2940,12 +2970,12 @@
     ].join('  |  ');
   }
 
-  function v13ReadFilename(){
+  function servicePdfReadFilename(){
     var filters = window.sFilters || {};
     return 'Service_CSI_'+(filters.team || 'All')+'_'+(filters.month || 'All')+'_'+(filters.year || new Date().getFullYear())+'.pdf';
   }
 
-  function v13BuildClassicPdf(canvas){
+  function servicePdfBuildClassicPdf(canvas){
     var jsPDF = window.jspdf.jsPDF;
     var pdf = new jsPDF({orientation:'landscape', unit:'mm', format:'a4', compress:true});
     var PDF_W=297, PDF_H=210, HEADER=8, FOOTER=7, MARGIN=10;
@@ -2953,7 +2983,7 @@
     var ratio = CONTENT_W / canvas.width;
     var pxPerPage = Math.max(1, Math.floor(CONTENT_H / ratio));
     var totalPages = Math.max(1, Math.ceil(canvas.height / pxPerPage));
-    var filterLabel = v13ReadFilterLabel();
+    var filterLabel = servicePdfReadFilterLabel();
     var exportDate = new Date().toLocaleString('en-GB', {day:'2-digit',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'});
     var previews = [];
 
@@ -2993,7 +3023,7 @@
     return {pdf:pdf, previews:previews, totalPages:totalPages};
   }
 
-  async function v13ExportServiceToPDF(){
+  async function servicePdfExportServiceToPDF(){
     var captureDoc = null;
     try{
       var sourceRoot = document.getElementById('view-service');
@@ -3009,9 +3039,9 @@
         });
       }
 
-      await v13EnsurePdfLibraries();
-      await v13NextPaint(window);
-      captureDoc = await v13CreateCaptureDocument(sourceRoot);
+      await servicePdfEnsurePdfLibraries();
+      await servicePdfNextPaint(window);
+      captureDoc = await servicePdfCreateCaptureDocument(sourceRoot);
 
       var captureScale = 1.25;
       var projectedHeight = captureDoc.height * captureScale;
@@ -3036,7 +3066,7 @@
       captureDoc = null;
       if(!canvas || canvas.width < 100 || canvas.height < 100) throw new Error('PDF capture returned an empty image.');
 
-      var output = v13BuildClassicPdf(canvas);
+      var output = servicePdfBuildClassicPdf(canvas);
       var previewHtml = '<p style="margin:0 0 10px;color:#64748b;font-weight:700;font-size:13px">รูปแบบ Preview เดิม · '+output.totalPages+' หน้า</p>'+
         '<div style="height:560px;overflow:auto;background:#f1f5f9;border:1px solid #dbe7f6;border-radius:12px;padding:18px">'+
         output.previews.map(function(src,index){
@@ -3055,7 +3085,7 @@
         confirmButtonColor:'#004aad'
       });
       if(result && result.isConfirmed){
-        output.pdf.save(v13ReadFilename());
+        output.pdf.save(servicePdfReadFilename());
         window.Swal.fire({icon:'success',title:'บันทึกสำเร็จ',timer:1600,showConfirmButton:false});
       }
       return true;
@@ -3068,13 +3098,13 @@
     }
   }
 
-  window.exportServiceToPDF = v13ExportServiceToPDF;
-  try{ exportServiceToPDF = v13ExportServiceToPDF; }catch(ignore){}
+  window.exportServiceToPDF = servicePdfExportServiceToPDF;
+  try{ exportServiceToPDF = servicePdfExportServiceToPDF; }catch(ignore){}
   window.CES_SERVICE_CSI_PDF_VERSION = 'V13-KPI-LAYOUT-FIX';
 })(window, document);
 
 // CES Hub V20.9 — critical module static/runtime smoke check.
-window.CES_MODULES_V209_RECHECK = function CES_MODULES_V209_RECHECK() {
+window.CES_MODULES_RECHECK = function CES_MODULES_RECHECK() {
   var checks = {
     reportManagement: typeof window.initReportManage === 'function' && !!document.getElementById('view-report_manage'),
     checkin: typeof window.initCheckin === 'function' && !!document.getElementById('view-checkin'),

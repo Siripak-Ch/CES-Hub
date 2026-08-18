@@ -9,19 +9,19 @@
 <p class="text-sm text-slate-400 font-medium">Strict Workflow & Notification System</p>
 </div>
 </div>
-<div class="flex items-center gap-4">
+<div class="flex flex-wrap items-center justify-end gap-2" id="kpi-header-actions">
 <div class="flex items-center gap-2" id="kpi-drive-actions">
 <a class="hidden px-4 py-2 bg-blue-50 text-blue-600 hover:bg-blue-600 hover:text-white rounded-xl text-xs font-bold transition-all shadow-sm border border-blue-100 items-center gap-2" href="#" id="kpi-drive-link" target="_blank"><i class="fas fa-folder-open"></i><span id="kpi-drive-title">Drive</span></a>
 <a class="hidden px-3 py-2 bg-emerald-50 text-emerald-700 hover:bg-emerald-600 hover:text-white rounded-xl text-xs font-bold transition-all shadow-sm border border-emerald-100 items-center gap-2" href="#" id="kpi-drive-ehs-link" target="_blank"><i class="fas fa-folder-open"></i><span>Drive EHS</span></a>
 <a class="hidden px-3 py-2 bg-cyan-50 text-cyan-700 hover:bg-cyan-600 hover:text-white rounded-xl text-xs font-bold transition-all shadow-sm border border-cyan-100 items-center gap-2" href="#" id="kpi-drive-env-link" target="_blank"><i class="fas fa-folder-open"></i><span>Drive ENV</span></a>
 </div>
 <a id="kpi-sheet-link" class="hidden ces-standard-icon-btn ces-external-link-btn" href="#" target="_blank" rel="noopener" title="Open KPI source sheet"><i class="fas fa-link"></i></a>
-<button class="sp-btn warn csv5-icon-btn ces-action-warning ces-notification-icon-btn group" onclick="openLateAlertModal()" title="Late Jobs Notification" aria-label="Late Jobs Notification"><i class="fas fa-bell"></i><span id="kpi-late-badge" class="sp-mini-badge ces-notification-count hidden">0</span></button>
 <div class="flex bg-slate-100 p-1 rounded-xl">
 <button class="px-5 py-2 rounded-lg text-xs font-bold text-slate-500 hover:text-indigo-600 transition-all" id="kpi-tab-med" onclick="switchKpiTab('MED')">MED</button>
 <button class="px-5 py-2 rounded-lg text-xs font-bold text-slate-500 hover:text-indigo-600 transition-all" id="kpi-tab-lab" onclick="switchKpiTab('LAB')">LAB</button>
 <button class="px-5 py-2 rounded-lg text-xs font-bold bg-white text-indigo-600 shadow-sm transition-all" id="kpi-tab-ehs" onclick="switchKpiTab('EHS')">EHS</button>
 </div>
+<button id="kpi-late-alert-button" class="ces-standard-icon-btn ces-action-warning ces-notification-icon-btn group" onclick="openLateAlertModal()" title="Late Jobs Notification" aria-label="Late Jobs Notification"><i class="fas fa-bell"></i><span id="kpi-late-badge" class="sp-mini-badge ces-notification-count hidden">0</span></button>
 </div>
 </div>
 <!-- KPI Performance: Before / On / Over KPI -->

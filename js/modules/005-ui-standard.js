@@ -380,30 +380,28 @@
     var original = window.CES_API.callFunction.bind(window.CES_API);
     window.CES_API.callFunction = function (fnName, args, options) {
       options = options || {};
-      if (options.silent === true || options.trackLoading === false) return original(fnName, args, options);
-      pendingApi++;
-      updateTopBar();
       var startedAt = now();
       var promise;
+      /* gas-polyfill owns visible loading and only starts CES_UI when a request
+         actually receives a scheduler slot. Counting queued CES_API calls here
+         duplicated every request and made background work look like 50+ active
+         syncs. Keep this wrapper telemetry-only. */
       try { promise = Promise.resolve(original(fnName, args, options)); }
       catch (error) {
-        pendingApi = Math.max(0, pendingApi - 1);
-        updateTopBar();
+        try { window.dispatchEvent(new CustomEvent('ces:api-complete', { detail:{functionName:fnName,elapsedMs:now()-startedAt,success:false,message:error && error.message || String(error)} })); } catch (ignore0) {}
         throw error;
       }
       return promise.then(function (result) {
-        pendingApi = Math.max(0, pendingApi - 1);
-        updateTopBar();
         try { window.dispatchEvent(new CustomEvent('ces:api-complete', { detail:{functionName:fnName,elapsedMs:now()-startedAt,success:true} })); } catch (ignore) {}
         return result;
       }, function (error) {
-        pendingApi = Math.max(0, pendingApi - 1);
-        updateTopBar();
         try { window.dispatchEvent(new CustomEvent('ces:api-complete', { detail:{functionName:fnName,elapsedMs:now()-startedAt,success:false,message:error && error.message || String(error)} })); } catch (ignore2) {}
         throw error;
       });
     };
     apiPatched = true;
+    pendingApi = 0;
+    updateTopBar();
     try { window.dispatchEvent(new CustomEvent('ces:ui-api-patched', { detail:{version:VERSION} })); } catch (ignore) {}
     return true;
   }

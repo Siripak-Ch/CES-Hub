@@ -1,5 +1,5 @@
-<div class="hidden space-y-6" id="view-calendar">
-<div class="flex flex-col md:flex-row justify-between items-center mb-6 gap-4 bg-white p-5 rounded-3xl shadow-sm border border-gray-100">
+<div class="hidden space-y-3" id="view-calendar">
+<div class="ces-function-header flex flex-col md:flex-row justify-between items-center mb-2 gap-4 bg-white p-5 rounded-3xl shadow-sm border border-gray-100">
 <div class="flex items-center gap-4">
 <div class="p-3 bg-[#003DA5]/10 rounded-xl text-[#003DA5] shadow-lg ces-page-header-icon-v15">
 <i class="fas fa-calendar-alt text-2xl"></i>
@@ -12,25 +12,27 @@
 <div class="flex flex-wrap gap-2 justify-end max-w-full">
 <select class="bg-gray-50 border border-gray-200 rounded-xl p-2.5 text-sm font-bold focus:ring-2 focus:ring-[#003DA5] cursor-pointer outline-none" id="cal-filter-month" onchange="jumpToDateFromFilter()"></select>
 <select class="bg-gray-50 border border-gray-200 rounded-xl p-2.5 text-sm font-bold focus:ring-2 focus:ring-[#003DA5] cursor-pointer outline-none" id="cal-filter-year" onchange="jumpToDateFromFilter()"></select>
-<button class="ces-calendar-header-icon-btn ces-action-neutral" onclick="loadAllData(true)" title="Sync Data">
+<button class="ces-calendar-header-icon-btn ces-action-neutral" onclick="refreshVisibleCalendarMonth()" title="Sync visible month">
 <i class="fas fa-sync-alt"></i>
 </button>
 <button class="ces-calendar-header-icon-btn ces-action-excel" onclick="exportMasterCalendarToCSV()" title="Export Current Month">
 <i class="fas fa-file-excel"></i>
 </button>
-<input id="med-plan-file" type="file" accept=".xlsx,.xls" class="hidden" onchange="handleMedPlanFileV53(this)">
+<input id="med-plan-file" type="file" accept=".xlsx,.xls" class="hidden" onchange="handleMedPlanFile(this)">
 <button class="ces-calendar-header-icon-btn ces-standard-icon-btn ces-upload-icon-btn" onclick="document.getElementById('med-plan-file').click()" title="Import MED Work Plan" aria-label="Import MED Work Plan">
 <i class="fas fa-arrow-up-from-bracket"></i>
 </button>
-<input id="tes-plan-file" type="file" accept=".xlsx,.xls" class="hidden" onchange="handleTesPlanFileV40(this)">
+<input id="tes-plan-file" type="file" accept=".xlsx,.xls" class="hidden" onchange="handleTesPlanFile(this)">
 <button class="ces-calendar-header-icon-btn ces-standard-icon-btn ces-upload-icon-btn" onclick="document.getElementById('tes-plan-file').click()" title="Import TES Booking Plan" aria-label="Import TES Booking Plan">
 <i class="fas fa-arrow-up-from-bracket"></i>
 </button>
-<button class="ces-calendar-header-icon-btn ces-calendar-plan-tracker ces-calendar-plan-tracker-v22" onclick="openJobTracker2025()" title="2025 Plan Tracker" aria-label="2025 Plan Tracker">
-<i class="fas fa-tasks"></i><span>2025 Plan Tracker</span>
-</button>
 </div>
 </div>
+<div class="ces-calendar-workspace-tabs ces-compact-subtabs" role="tablist" aria-label="Master Calendar workspace">
+<button id="calendar-workspace-tab-calendar" class="active" type="button" onclick="switchCalendarWorkspace('calendar')"><i class="fas fa-calendar-days"></i><span>1. Calendar</span></button>
+<button id="calendar-workspace-tab-plan" type="button" onclick="switchCalendarWorkspace('plan')"><i class="fas fa-list-check"></i><span>2. Plan Tracker</span></button>
+</div>
+<div id="calendar-workspace-panel-calendar" class="space-y-3">
 <div class="ces-calendar-stats-grid">
 <div class="kpi-card ces-job-card ces-job-card-total"><div class="kpi-label">Total Job Record</div><div class="flex items-baseline gap-2"><h3 class="kpi-value text-indigo-600" id="stat-total">0</h3><span class="text-xs text-gray-400 font-bold">Jobs</span></div></div>
 <div class="kpi-card ces-job-card ces-job-card-med" data-ces-team="MED"><div class="kpi-label">MED Job Record</div><div class="flex items-baseline gap-2"><h3 class="kpi-value text-[#004aad]" id="stat-med">0</h3><span class="text-xs text-gray-400 font-bold">Jobs</span></div></div>
@@ -99,6 +101,16 @@
 <ul class="space-y-3 text-sm text-gray-600" id="list-leave">
 </ul>
 </div>
+</div>
+</div>
+</div>
+<div id="calendar-workspace-panel-plan" class="hidden">
+<div class="bg-white rounded-2xl border border-slate-200 shadow-sm p-4">
+<div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-3">
+<div><h3 class="text-lg font-black text-slate-800"><i class="fas fa-list-check text-[#003DA5] mr-2"></i>Plan Tracker</h3><p class="text-xs font-bold text-slate-400 mt-1">Plan Comparison: 2025 vs 2026</p></div>
+<button class="ces-standard-icon-btn ces-action-excel" type="button" onclick="exportTrackerToCSV()" title="Export Plan Tracker"><i class="fas fa-file-excel"></i></button>
+</div>
+<div id="calendar-plan-tracker-content"><div class="ces-inline-loading-preview"><i class="fas fa-list-check"></i><span>Select Plan Tracker to prepare comparison data.</span></div></div>
 </div>
 </div>
 </div>

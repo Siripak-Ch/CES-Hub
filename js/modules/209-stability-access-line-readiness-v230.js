@@ -56,9 +56,9 @@
 
   function patchLegacyCartForce(){
     if(w.__CES_V230_CART_PATCHED) return;
-    var base=w.si_v17ForceCartRight;
+    var base=w.siForceCartRight;
     if(typeof base==='function'){
-      w.si_v17ForceCartRight=function(){try{base.apply(this,arguments);}finally{moveCartAboveAi();}};
+      w.siForceCartRight=function(){try{base.apply(this,arguments);}finally{moveCartAboveAi();}};
       w.__CES_V230_CART_PATCHED=true;
     }
   }
