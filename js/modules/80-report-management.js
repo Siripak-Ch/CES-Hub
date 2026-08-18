@@ -38,10 +38,10 @@ const thaiHolidays = [
     }
 
 
-    function rmEscapeHtmlV22(value) {
+    function rmEscapeHtml(value) {
         return String(value == null ? '' : value).replace(/[&<>"']/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
     }
-    function rmRenderSheetPreviewV22(targetId, rows, options) {
+    function rmRenderSheetPreview(targetId, rows, options) {
         const target = document.getElementById(targetId);
         if (!target) return;
         rows = Array.isArray(rows) ? rows : [];
@@ -58,14 +58,14 @@ const thaiHolidays = [
             for (let ci=0; ci<maxCols; ci++) {
                 const text = row[ci] == null ? '' : row[ci];
                 const tag = ri <= (options.headerRows || 0) ? 'th' : 'td';
-                html += '<'+tag+'>'+rmEscapeHtmlV22(text)+'</'+tag+'>';
+                html += '<'+tag+'>'+rmEscapeHtml(text)+'</'+tag+'>';
             }
             html += '</tr>';
         });
         html += '</tbody></table></div>';
         target.innerHTML = html;
     }
-    function rmSetArtifactLinkV22(id, artifact, fallback) {
+    function rmSetArtifactLink(id, artifact, fallback) {
         const el=document.getElementById(id); if(!el)return;
         const href=(artifact && (artifact.download||artifact.view||artifact.preview)) || fallback || '#';
         el.href=href; el.classList.toggle('pointer-events-none',href==='#'); el.setAttribute('aria-disabled',href==='#'?'true':'false');
@@ -419,14 +419,14 @@ function fillUserInfoRM() {
             document.getElementById('rm-sendEmailSection').classList.remove('hidden');
 
             // Exact inline preview from backend sheet values; no private Sheet iframe dependency.
-            rmRenderSheetPreviewV22('rm-tempPdfFrame', res.templatePreviewRows, {headerRows:4});
-            rmRenderSheetPreviewV22('rm-tsPdfFrame', res.timesheetPreviewRows, {headerRows:2});
-            rmSetArtifactLinkV22('rm-tempPdfView', {download:res.templatePDF.view || res.templatePDF.preview}, res.templatePDF.preview);
-            rmSetArtifactLinkV22('rm-tempPdfDown', res.templatePDF, res.templatePDF.download);
-            rmSetArtifactLinkV22('rm-tempExcelDown', res.templateExcel, res.excelTemplateUrl);
-            rmSetArtifactLinkV22('rm-tsPdfView', {download:res.timesheetPDF.view || res.timesheetPDF.preview}, res.timesheetPDF.preview);
-            rmSetArtifactLinkV22('rm-tsPdfDown', res.timesheetPDF, res.timesheetPDF.download);
-            rmSetArtifactLinkV22('rm-tsExcelDown', res.timesheetExcel, res.excelTimesheetUrl);
+            rmRenderSheetPreview('rm-tempPdfFrame', res.templatePreviewRows, {headerRows:4});
+            rmRenderSheetPreview('rm-tsPdfFrame', res.timesheetPreviewRows, {headerRows:2});
+            rmSetArtifactLink('rm-tempPdfView', {download:res.templatePDF.view || res.templatePDF.preview}, res.templatePDF.preview);
+            rmSetArtifactLink('rm-tempPdfDown', res.templatePDF, res.templatePDF.download);
+            rmSetArtifactLink('rm-tempExcelDown', res.templateExcel, res.excelTemplateUrl);
+            rmSetArtifactLink('rm-tsPdfView', {download:res.timesheetPDF.view || res.timesheetPDF.preview}, res.timesheetPDF.preview);
+            rmSetArtifactLink('rm-tsPdfDown', res.timesheetPDF, res.timesheetPDF.download);
+            rmSetArtifactLink('rm-tsExcelDown', res.timesheetExcel, res.excelTimesheetUrl);
 
             document.getElementById('rm-tsPreviewBody').innerHTML = res.tsData.map(r => 
                 `<tr class="border-b hover:bg-gray-50">` + r.map(c => `<td class="p-3 border-r text-gray-700">${c}</td>`).join('') + `</tr>`

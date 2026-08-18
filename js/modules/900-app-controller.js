@@ -29,7 +29,7 @@
     function cesLoadCoreDataOnDemand_(){
         if(CES_CORE_LOAD_PROMISE)return CES_CORE_LOAD_PROMISE;
         if(!window.CES_API||typeof window.CES_API.callFunction!=='function')return Promise.resolve(null);
-        CES_CORE_LOAD_PROMISE=window.CES_API.callFunction('getAllData',[false],{transport:'jsonp',timeoutMs:60000,dedupe:true})
+        CES_CORE_LOAD_PROMISE=window.CES_API.callFunction('getCoreReadModelV268',[false],{transport:'jsonp',timeoutMs:60000,dedupe:true,priority:'user',tab:currentTab||'portal'})
           .then(function(data){if(data&&typeof data==='object'){cesApplyCoreDataV20_(data);cesStoreCoreCacheV20_(data);}return data;})
           .catch(function(error){console.warn('[Core lazy load]',error);return null;})
           .finally(function(){CES_CORE_LOAD_PROMISE=null;});
@@ -54,7 +54,7 @@
     function cesRefreshCalendarV20_(){
         if(typeof initCalendar==='function')initCalendar(globalCalData);
         if(!window.CES_API||typeof window.CES_API.callFunction!=='function')return;
-        window.CES_API.callFunction('getCalendarData',[true],{transport:'jsonp',timeoutMs:60000}).then(function(rows){
+        window.CES_API.callFunction('getCalendarData',[true],{transport:'jsonp',timeoutMs:60000,priority:'user',tab:'calendar'}).then(function(rows){
             if(Array.isArray(rows)){globalCalData=rows;initCalendar(globalCalData);try{var cache=JSON.parse(localStorage.getItem(CES_CORE_CACHE_KEY_V20)||'{}');if(cache.data){cache.data.calSummary=rows;cache.at=Date.now();localStorage.setItem(CES_CORE_CACHE_KEY_V20,JSON.stringify(cache));}}catch(ignore){}}
         }).catch(function(error){console.warn('[V20 calendar refresh]',error);});
     }
@@ -74,7 +74,7 @@
         else if (tab === 'team_plan' && typeof window.initTeamPlanV225 === 'function') window.initTeamPlanV225();
         else if (tab === 'monthly_report' && typeof window.initMonthlyReportV226 === 'function') window.initMonthlyReportV226();
         else if (tab === 'users'         && typeof initUsers === 'function') initUsers();
-        else if (tab === 'ces_evaluation' && typeof window.initCesHubEvaluationV22 === 'function') window.initCesHubEvaluationV22();
+        else if (tab === 'ces_evaluation' && typeof window.initCesHubEvaluationV225 === 'function') window.initCesHubEvaluationV225();
         else if (tab === 'ces_ai_knowledge' && typeof window.initCesAiKnowledgeV225 === 'function') window.initCesAiKnowledgeV225();
         else if (tab === 'setting'       && typeof initSettings === 'function') initSettings();
         else if (tab === 'health') { if (typeof initSystemHealthV17 === 'function') initSystemHealthV17(); else if (typeof initSystemHealthV14 === 'function') initSystemHealthV14(); }
@@ -830,7 +830,7 @@
         }
         setTimeout(function(){
           if(window.CES_API&&typeof window.CES_API.callFunction==='function'){
-            window.CES_API.callFunction('getStartupData',[],{transport:'jsonp',timeoutMs:25000}).then(function(data){
+            window.CES_API.callFunction('getStartupData',[],{transport:'jsonp',timeoutMs:25000,priority:'background',background:true,tab:'portal'}).then(function(data){
               if(data&&data.config){globalConfig=data.config;try{if(data.config.ROLE_PERMISSIONS){globalPermissions=JSON.parse(data.config.ROLE_PERMISSIONS);localStorage.setItem('ces_role_permissions_v21',JSON.stringify(globalPermissions));}}catch(ignore2){}if(typeof window.cesApplyTeamColorConfig==='function')window.cesApplyTeamColorConfig(globalConfig);if(currentUser)applyRolePermissions(currentUser.role);}
             }).catch(function(){});
           }
@@ -904,7 +904,7 @@
                 // This lets another user see newly granted Car/Van permissions after login.
                 try {
                     if (currentUser && window.CES_API && typeof window.CES_API.callFunction === 'function') {
-                        window.CES_API.callFunction('getSystemSettings', [], {transport:'jsonp', timeoutMs:30000})
+                        window.CES_API.callFunction('getSystemSettings', [], {transport:'jsonp', timeoutMs:30000, priority:'background', background:true, tab:currentTab||'portal'})
                             .then(cfg => {
                                 if (!cfg || !cfg.ROLE_PERMISSIONS) return;
                                 try {
@@ -967,7 +967,7 @@
                 if (refreshTokenV14 && window.CES_UI) window.CES_UI.end(refreshTokenV14);
                 Swal.fire('Connection Error', (err && err.message ? err.message : 'Could not load system data. Please refresh.'), 'error');
             })
-            .getAllData(options.force === true);
+            .getCoreReadModelV268(options.force === true);
     }
 
     function loadHeavyDataBackground() {
@@ -1219,7 +1219,7 @@
             if(visible('view-checkin')) { safe(()=>renderKPIs());safe(()=>renderJobList());safe(()=>renderRecentActivity());safe(()=>filterActivityTable()); }
             if(visible('view-weekly')) safe(()=>switchWeeklyTeam(wkCurrentTeam||'MED'));
             if(visible('view-team_information')) { safe(()=>renderTeamTabs_());safe(()=>renderTeamInformation()); }
-            if(visible('view-ces_evaluation')) { safe(()=>window.initCesHubEvaluationV22&&window.initCesHubEvaluationV22()); }
+            if(visible('view-ces_evaluation')) { safe(()=>window.initCesHubEvaluationV225&&window.initCesHubEvaluationV225()); }
         },80);
     });
 })();

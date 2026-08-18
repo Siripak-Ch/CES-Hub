@@ -745,7 +745,7 @@ function renderVehicleSummaryV36(type) {
   var note = document.getElementById(prefix + '-summary-filter-note');
   if (note) note.textContent = filtered.length + ' matched records · ' + year + ' · ' + month + ' · ' + team;
 }
-function cesRenderCarEvaluationSummaryV22_(rows) {
+function cesRenderCarEvaluationSummary_(rows) {
   var rated=(Array.isArray(rows)?rows:[]).filter(function(row){
     return [row.vehicleRatingPerformance,row.vehicleRatingComfort,row.vehicleRatingValue].some(function(v){return Number(v)>0;});
   });
@@ -760,7 +760,7 @@ function cesRenderCarEvaluationSummaryV22_(rows) {
   set('car-eval-performance-v22',perf);set('car-eval-comfort-v22',comfort);set('car-eval-value-v22',value);set('car-eval-overall-v22',overall);
   var count=document.getElementById('car-evaluation-response-count-v22');if(count)count.textContent=rated.length+' evaluation'+(rated.length===1?'':'s');
 }
-window.cesRenderCarEvaluationSummaryV22_=cesRenderCarEvaluationSummaryV22_;
+window.cesRenderCarEvaluationSummary_=cesRenderCarEvaluationSummary_;
 function renderCarEvaluationWorkspaceV222(){
   var rows=cesBookingStateV31_('CAR').rows||[];
   var year=cesBookGet_('car-evaluation-year-filter')||'All',month=cesBookGet_('car-evaluation-month-filter')||'All',team=cesBookGet_('car-evaluation-team-filter')||'All';
@@ -772,7 +772,7 @@ function renderCarEvaluationWorkspaceV222(){
     if(team!=='All'&&rowTeam!==team)return false;
     return [row.vehicleRatingPerformance,row.vehicleRatingComfort,row.vehicleRatingValue].some(function(v){return Number(v)>0;});
   });
-  cesRenderCarEvaluationSummaryV22_(filtered);
+  cesRenderCarEvaluationSummary_(filtered);
   var note=document.getElementById('car-evaluation-filter-note');if(note)note.textContent=filtered.length+' matched evaluations · '+year+' · '+month+' · '+team;
   var root=document.getElementById('car-evaluation-list-v222');if(!root)return;
   if(!filtered.length){root.innerHTML='<div class="py-12 text-center text-slate-400"><i class="fas fa-inbox text-3xl mb-3"></i><div class="font-bold">No post-use evaluation in this filter</div></div>';return;}
@@ -1661,7 +1661,7 @@ window.approveCarBookingWebsiteV185Front = approveCarBookingWebsiteV185Front;
 
 /* CES Hub V21 — prevent past booking dates */
 (function(){
-  function applyV21BookingDateMinimum(){
+  function applyBookingDateMinimum(){
     var d=new Date(),off=d.getTimezoneOffset()*60000,today=new Date(d.getTime()-off).toISOString().slice(0,10);
     ['car-book-date','car-book-return-date','van-book-date','van-book-return-date'].forEach(function(id){
       var el=document.getElementById(id);if(el){el.min=today;if(el.value&&el.value<today)el.value='';}
@@ -1670,8 +1670,8 @@ window.approveCarBookingWebsiteV185Front = approveCarBookingWebsiteV185Front;
       var date=cell.getAttribute('data-date');if(date&&date<today){cell.classList.add('ces-booking-past-v21');cell.setAttribute('aria-disabled','true');}
     });
   }
-  window.addEventListener('ces:tab-changed',function(e){if(e&&['car_booking','van_booking'].indexOf(e.detail&&e.detail.tab)>=0)setTimeout(applyV21BookingDateMinimum,50);});
-  window.applyV21BookingDateMinimum=applyV21BookingDateMinimum;
+  window.addEventListener('ces:tab-changed',function(e){if(e&&['car_booking','van_booking'].indexOf(e.detail&&e.detail.tab)>=0)setTimeout(applyBookingDateMinimum,50);});
+  window.applyBookingDateMinimum=applyBookingDateMinimum;
 })();
 
 

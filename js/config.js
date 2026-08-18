@@ -6,7 +6,7 @@
 
 window.CES_CONFIG = {
   // IMPORTANT: After deploying Apps Script backend, paste the latest /exec URL here.
-  GAS_API_URL: 'https://script.google.com/macros/s/AKfycbzGnuzdMvfTMVw5KEnD_M72E-0S3tV6wAiWa0Mh_LUJoh6uaqE9FX5NxCDrHTkOG4cuEg/exec',
+  GAS_API_URL: 'https://script.google.com/macros/s/AKfycbyRuj5_9H6VAUqNxb62tQPhMlKnsNHyEOZn29n8a3C0h4C8O2vSp-KUJEmRAOHOU6bKvA/exec',
 
   CSI_SURVEY_URL: 'https://survey.nhealth-asia.com/s/cm1hci0mw00jf45vmps2myg1g',
 
@@ -24,7 +24,7 @@ window.CES_CONFIG = {
   },
 
   DEBUG: false,
-  RELEASE: 'CES-HUB-V26.8-SETTINGS-CALENDAR-FIX',
+  RELEASE: 'CES-HUB-V26.8-PRIORITY-CONCURRENCY',
 
   // External links are kept in one place. Config sheet values override these defaults at runtime.
   EXTERNAL_LINKS: {
