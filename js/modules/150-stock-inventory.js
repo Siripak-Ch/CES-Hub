@@ -417,17 +417,19 @@ function siCurrentLayoutStyle(){
     #view-inventory .sp-table th{padding:10px 12px!important;font-size:11px!important}
     #view-inventory .sp-icon-btn{width:30px!important;height:30px!important;border-radius:9px!important;font-size:12px!important}
     #view-inventory .sp-acc-list-v17{display:flex;flex-direction:column;gap:10px}
-    #view-inventory .sp-acc-row-v17{display:grid;grid-template-columns:42px 1.65fr .65fr .65fr .85fr 1.35fr 190px;gap:12px;align-items:center;border:1px solid #e2e8f0;background:#fff;border-radius:16px;padding:12px 14px;box-shadow:0 3px 12px rgba(15,23,42,.04)}
+    #view-inventory .sp-acc-row-v17{display:grid;grid-template-columns:42px minmax(180px,1.65fr) .65fr .65fr .85fr 1.1fr minmax(270px,auto);gap:12px;align-items:center;border:1px solid #e2e8f0;background:#fff;border-radius:16px;padding:12px 14px;box-shadow:0 3px 12px rgba(15,23,42,.04)}
     #view-inventory .sp-acc-row-v17.low{border-color:#fdba74;background:#fff7ed}
     #view-inventory .acc-ico{width:38px;height:38px;border-radius:12px;display:flex;align-items:center;justify-content:center;background:#dbeafe;color:#2563eb}
     #view-inventory .acc-ico.med{background:#dbeafe;color:#1d4ed8}#view-inventory .acc-ico.lab{background:#ede9fe;color:#6d28d9}#view-inventory .acc-ico.ehs{background:#d1fae5;color:#047857}#view-inventory .acc-ico.tes{background:#fef3c7;color:#d97706}
     #view-inventory .acc-title{font-weight:1000;color:#0f172a;font-size:14px;line-height:1.2}
     #view-inventory .acc-sub{font-size:11px;color:#64748b;margin-top:2px}
     #view-inventory .acc-stock{font-size:20px;font-weight:1000;line-height:1}
-    #view-inventory .acc-actions{display:flex;gap:6px;align-items:center;justify-content:flex-end;flex-wrap:nowrap}
+    #view-inventory .acc-actions{display:flex;gap:6px;align-items:center;justify-content:flex-end;flex-wrap:wrap}
     #view-inventory .acc-actions input{width:48px;height:32px;border:1px solid #dbe3ef;border-radius:10px;text-align:center;font-weight:900}
     #view-inventory .acc-mini{width:32px;height:32px;border-radius:10px;border:1px solid #dbe3ef;background:#fff;display:inline-flex;align-items:center;justify-content:center;cursor:pointer;font-size:12px;font-weight:900}
-    #view-inventory .acc-mini.green{background:#059669;color:#fff;border-color:#059669}.acc-mini.orange{background:#fff7ed;color:#ea580c;border-color:#fed7aa}.acc-mini.blue{background:#eff6ff;color:#2563eb;border-color:#bfdbfe}.acc-mini:disabled{opacity:.45;cursor:not-allowed}
+    #view-inventory .acc-mini.green{background:#059669;color:#fff;border-color:#059669}.acc-mini.orange{background:#fff7ed;color:#ea580c;border-color:#fed7aa}.acc-mini.blue{background:#eff6ff;color:#2563eb;border-color:#bfdbfe}.acc-mini.red{background:#fee2e2;color:#b91c1c;border-color:#fecaca}.acc-mini.info{background:#f8fafc;color:#334155;border-color:#cbd5e1}.acc-mini:disabled{opacity:.45;cursor:not-allowed}
+    #view-inventory .ces-accessory-head-actions{display:flex;align-items:center;gap:8px}
+    .si-accessory-form{display:grid;grid-template-columns:1fr 1fr;gap:8px;text-align:left}.si-accessory-form .wide{grid-column:1/-1}.si-accessory-form label{font-size:11px;font-weight:800;color:#475569}.si-accessory-form .swal2-input,.si-accessory-form .swal2-select{width:100%!important;margin:4px 0 0!important;height:42px!important}
     @media(max-width:980px){#view-inventory .sp-acc-row-v17{grid-template-columns:42px 1fr;align-items:start}#view-inventory .acc-actions{grid-column:1/-1;justify-content:flex-start}#siCartFab{right:16px!important;bottom:18px!important}}
   `;
   document.head.appendChild(st);
@@ -494,9 +496,92 @@ function siAccRow(a,i){
     <div>${rental?'<span class="sp-badge In-Use">IN USE</span>':(low?'<span class="sp-badge Overdue">LOW STOCK</span>':spBadge(a.status||'STOCK'))}</div>
     <div class="acc-sub">${spEsc(a.actionRequired||a.action_required||'No action')}</div>
     <div class="acc-actions">
-      ${rental?'<span class="sp-muted" style="font-size:10px">Synced from rental</span>':`<button class="acc-mini" onclick="siQty('${inputId}',-1)">−</button><input id="${inputId}" type="number" min="1" step="1" value="1"><button class="acc-mini" onclick="siQty('${inputId}',1)">+</button><button class="acc-mini green" ${low?'disabled':''} title="Add to cart" onclick='si_addAccessoryToCart(${si_json(a)},"${inputId}")'><i class="fas fa-cart-plus"></i></button><button class="acc-mini orange" title="Restock" onclick='si_restockPrompt(${si_json(a)})'><i class="fas fa-box-open"></i></button><button class="acc-mini blue" title="Min stock" onclick='si_editMinStockPrompt(${si_json(a)})'><i class="fas fa-sliders"></i></button>`}
+      ${rental?'<span class="sp-muted" style="font-size:10px">Synced from rental</span>':`<button class="acc-mini" onclick="siQty('${inputId}',-1)">−</button><input id="${inputId}" type="number" min="1" step="1" value="1"><button class="acc-mini" onclick="siQty('${inputId}',1)">+</button><button class="acc-mini green" ${low?'disabled':''} title="Add to cart" onclick='si_addAccessoryToCart(${si_json(a)},"${inputId}")'><i class="fas fa-cart-plus"></i></button><button class="acc-mini orange" title="Restock" onclick='si_restockPrompt(${si_json(a)})'><i class="fas fa-box-open"></i></button><button class="acc-mini info" title="Detail" onclick='si_accessoryDetailPrompt(${si_json(a)})'><i class="fas fa-circle-info"></i></button><button class="acc-mini blue" title="Edit details / Min stock" onclick='si_editAccessoryPrompt(${si_json(a)})'><i class="fas fa-pen"></i></button><button class="acc-mini red" title="Delete" onclick='si_deleteAccessoryPrompt(${si_json(a)})'><i class="fas fa-trash"></i></button>`}
     </div>
   </div>`;
+}
+
+function siAccessoryActor_(){
+  const u=(typeof currentUser!=='undefined'&&currentUser)?currentUser:{};
+  return {actorId:String(u.id||''),role:String(u.role||'').toUpperCase(),name:u.name_eng||u.name_th||u.id||''};
+}
+
+function siAccessoryApi_(fn,payload){
+  if(window.CES_API&&typeof window.CES_API.callFunction==='function'){
+    return window.CES_API.callFunction(fn,[payload||{}],{transport:'jsonp',timeoutMs:20000,dedupe:false,priority:'active',userAction:true,module:'inventory'});
+  }
+  return new Promise((resolve,reject)=>{
+    try{
+      google.script.run.withSuccessHandler(resolve).withFailureHandler(reject)[fn](payload||{});
+    }catch(error){reject(error);}
+  });
+}
+
+function siAccessoryApplyLocal_(data,removeId){
+  if(!window.SI)return;
+  const id=String((data&&(data.accessoryId||data.accessory_id))||removeId||'');
+  let rows=(SI.acc||[]).filter(a=>String(a.accessoryId||a.accessory_id||a.idCode||'')!==String(removeId||''));
+  if(data){
+    const index=rows.findIndex(a=>String(a.accessoryId||a.accessory_id||a.idCode||'')===id);
+    if(index>=0)rows[index]=Object.assign({},rows[index],data);else rows.push(data);
+  }
+  SI.acc=rows;
+  if(SI.raw)SI.raw.accessories=rows;
+  if(typeof si_fillFilters==='function')si_fillFilters();
+  if(typeof si_renderKpi==='function')si_renderKpi();
+  if(typeof si_applyFilters==='function')si_applyFilters();
+}
+
+function si_accessoryDetailPrompt(a){
+  const id=a.accessoryId||a.accessory_id||a.idCode||'-';
+  const canEdit=siAccessoryActor_().role==='ADMIN';
+  Swal.fire({
+    title:'Accessory Detail',width:650,
+    html:`<div class="si-accessory-form"><label>ID<input class="swal2-input" value="${spEsc(id)}" readonly></label><label>Name<input class="swal2-input" value="${spEsc(a.itemName||a.item_name||a.name||'')}" readonly></label><label>Team<input class="swal2-input" value="${spEsc(a.team||'OTHER')}" readonly></label><label>Type<input class="swal2-input" value="${spEsc(a.type||'OTHER')}" readonly></label><label>Stock<input class="swal2-input" value="${spNum(a.stockQty||a.stock_qty||a.qty||0)}" readonly></label><label>Min stock<input class="swal2-input" value="${spNum(a.minStockQty||a.min_stock_qty||a.minStock||0)}" readonly></label><label class="wide">Location<input class="swal2-input" value="${spEsc(a.location||'')}" readonly></label><label class="wide">Remark<input class="swal2-input" value="${spEsc(a.remark||'')}" readonly></label></div>`,
+    showCancelButton:canEdit,confirmButtonText:canEdit?'Edit':'Close',cancelButtonText:'Close'
+  }).then(r=>{if(r.isConfirmed&&canEdit)si_editAccessoryPrompt(a);});
+}
+
+function siAccessoryFormHtml_(a){
+  a=a||{};
+  const team=String(a.team||'OTHER').toUpperCase();
+  return `<div class="si-accessory-form"><label class="wide">Name<input id="siEdAccName" class="swal2-input" value="${spEsc(a.itemName||a.item_name||a.name||'')}" placeholder="Accessory name"></label><label>Team<select id="siEdAccTeam" class="swal2-select">${['OTHER','MED','LAB','EHS','ENV','TES'].map(t=>`<option ${t===team?'selected':''}>${t}</option>`).join('')}</select></label><label>Type<input id="siEdAccType" class="swal2-input" value="${spEsc(a.type||'OTHER')}" placeholder="Type"></label><label>Min stock<input id="siEdAccMin" class="swal2-input" type="number" min="0" value="${spNum(a.minStockQty||a.min_stock_qty||a.minStock||0)}"></label><label>Opening stock<input id="siEdAccStock" class="swal2-input" type="number" min="0" value="${spNum(a.stockQty||a.stock_qty||a.qty||0)}" ${a.accessoryId||a.accessory_id?'disabled':''}></label><label class="wide">Location<input id="siEdAccLocation" class="swal2-input" value="${spEsc(a.location||'')}" placeholder="Location"></label><label class="wide">Remark<input id="siEdAccRemark" class="swal2-input" value="${spEsc(a.remark||'')}" placeholder="Remark"></label></div>`;
+}
+
+function siAccessoryFormValue_(a){
+  const actor=siAccessoryActor_();
+  return {actorId:actor.actorId,originalAccessoryId:a&&(a.accessoryId||a.accessory_id||a.idCode)||'',itemName:spVal('siEdAccName','').trim(),team:spVal('siEdAccTeam','OTHER'),type:spVal('siEdAccType','OTHER'),minStockQty:Number(spVal('siEdAccMin','0')),stockQty:Number(spVal('siEdAccStock','0')),location:spVal('siEdAccLocation',''),remark:spVal('siEdAccRemark','')};
+}
+
+function si_editAccessoryPrompt(a){
+  const actor=siAccessoryActor_();
+  if(actor.role!=='ADMIN'){Swal.fire('Admin only','เฉพาะ ADMIN ที่แก้ไข Accessories ได้','warning');return;}
+  Swal.fire({title:'Edit Accessory',width:680,html:siAccessoryFormHtml_(a),showCancelButton:true,confirmButtonText:'Save',preConfirm:()=>{const value=siAccessoryFormValue_(a);if(!value.itemName){Swal.showValidationMessage('กรุณาใส่ชื่อ');return false;}return value;}}).then(async r=>{
+    if(!r.isConfirmed)return;
+    Swal.fire({title:'Saving...',allowOutsideClick:false,showConfirmButton:false,didOpen:()=>Swal.showLoading()});
+    try{const res=await siAccessoryApi_('si_updateAccessoryDetails',r.value);Swal.close();if(!res||res.success===false)throw new Error((res&&res.message)||'Save failed');siAccessoryApplyLocal_(res.data);Swal.fire('Saved',res.message||'Accessory updated','success');}catch(error){Swal.fire('Save Error',error.message||String(error),'error');}
+  });
+}
+
+function si_addAccessoryPrompt(){
+  const actor=siAccessoryActor_();
+  if(actor.role!=='ADMIN'){Swal.fire('Admin only','เฉพาะ ADMIN ที่เพิ่ม Accessories ได้','warning');return;}
+  Swal.fire({title:'Add Accessory',width:680,html:siAccessoryFormHtml_({team:'OTHER',type:'OTHER',minStockQty:0,stockQty:0}),showCancelButton:true,confirmButtonText:'Add',preConfirm:()=>{const value=siAccessoryFormValue_({});if(!value.itemName){Swal.showValidationMessage('กรุณาใส่ชื่อ');return false;}return value;}}).then(async r=>{
+    if(!r.isConfirmed)return;
+    Swal.fire({title:'Adding...',allowOutsideClick:false,showConfirmButton:false,didOpen:()=>Swal.showLoading()});
+    try{const res=await siAccessoryApi_('si_addAccessory',r.value);Swal.close();if(!res||res.success===false)throw new Error((res&&res.message)||'Add failed');siAccessoryApplyLocal_(res.data);Swal.fire('Added',res.message||'Accessory added','success');}catch(error){Swal.fire('Add Error',error.message||String(error),'error');}
+  });
+}
+
+function si_deleteAccessoryPrompt(a){
+  const actor=siAccessoryActor_();
+  if(actor.role!=='ADMIN'){Swal.fire('Admin only','เฉพาะ ADMIN ที่ลบ Accessories ได้','warning');return;}
+  const id=a.accessoryId||a.accessory_id||a.idCode||'';
+  Swal.fire({title:'Delete Accessory?',text:(a.itemName||a.item_name||a.name||id)+' · '+id,icon:'warning',showCancelButton:true,confirmButtonText:'Delete',confirmButtonColor:'#dc2626',input:'text',inputPlaceholder:'Reason (optional)'}).then(async r=>{
+    if(!r.isConfirmed)return;
+    Swal.fire({title:'Deleting...',allowOutsideClick:false,showConfirmButton:false,didOpen:()=>Swal.showLoading()});
+    try{const res=await siAccessoryApi_('si_deleteAccessory',{actorId:actor.actorId,accessoryId:id,reason:r.value||''});Swal.close();if(!res||res.success===false)throw new Error((res&&res.message)||'Delete failed');siAccessoryApplyLocal_(null,id);Swal.fire('Deleted',res.message||'Accessory deleted','success');}catch(error){Swal.fire('Delete Error',error.message||String(error),'error');}
+  });
 }
 
 if(!window.__siV17InitPatch){
@@ -1466,7 +1551,7 @@ if(!window.__siV31ApplyFilterPatch){
   function renderPendingTable(rows){
     rows = rows || [];
     if(!rows.length) return '<div class="si-v32-empty">No pending approval requests</div>';
-    return `<div class="si-v32-table-wrap"><table class="si-v32-table"><thead><tr><th>Request</th><th>Item</th><th>Team</th><th class="num">Qty</th><th>Borrower / Location</th><th>Requester</th><th>Status</th><th>Action</th></tr></thead><tbody>${rows.map(r=>`<tr><td><b>${esc(r.requestId||'-')}</b><div class="sp-muted">${esc(r.timestamp||'')}</div></td><td>${esc(r.itemName||r.accessoryId||'-')}<div class="sp-muted">${esc(r.accessoryId||'')}</div></td><td>${esc(r.team||'-')}</td><td class="num">${num(r.qty||0)}</td><td>${esc(r.borrower||'-')}<div class="sp-muted">${esc(r.location||'-')}</div></td><td>${esc(r.requestedBy||r.requesterEmail||'-')}</td><td><span class="si-v32-chip warn">${esc(r.status||'PENDING')}</span></td><td><div style="display:flex;gap:6px;flex-wrap:wrap"><button class="si-v32-btn ok" onclick="siApprove('${esc(r.requestId||'')}')">Approve</button><button class="si-v32-btn bad" onclick="siReject('${esc(r.requestId||'')}')">Reject</button></div></td></tr>`).join('')}</tbody></table></div>`;
+    return `<div class="si-v32-table-wrap"><table class="si-v32-table"><thead><tr><th>Request</th><th>Type</th><th>Item</th><th>Team</th><th class="num">Qty</th><th>Borrower / Location</th><th>Requester</th><th>Status</th><th>Action</th></tr></thead><tbody>${rows.map(r=>`<tr><td><b>${esc(r.requestId||'-')}</b><div class="sp-muted">${esc(r.timestamp||'')}</div></td><td><span class="si-v32-chip ${String(r.requestType||'ISSUE').toUpperCase()==='RESTOCK'?'ok':'neutral'}">${esc(String(r.requestType||'ISSUE').toUpperCase())}</span></td><td>${esc(r.itemName||r.accessoryId||'-')}<div class="sp-muted">${esc(r.accessoryId||'')}</div></td><td>${esc(r.team||'-')}</td><td class="num">${num(r.qty||0)}</td><td>${esc(r.borrower||'-')}<div class="sp-muted">${esc(r.location||'-')}</div></td><td>${esc(r.requestedBy||r.requesterEmail||'-')}</td><td><span class="si-v32-chip warn">${esc(r.status||'PENDING')}</span></td><td><div style="display:flex;gap:6px;flex-wrap:wrap"><button class="si-v32-btn ok" onclick="siApprove('${esc(r.requestId||'')}')">Approve</button><button class="si-v32-btn bad" onclick="siReject('${esc(r.requestId||'')}')">Reject</button></div></td></tr>`).join('')}</tbody></table></div>`;
   }
 
   window.siToggleAllAlertRows = function(checked){ document.querySelectorAll('.siV32Chk').forEach(x=>{ x.checked=!!checked; }); };
@@ -1535,12 +1620,15 @@ if(!window.__siV31ApplyFilterPatch){
       confirmButtonText:'Save Restock'
     }).then(r=>{
       if(!r.isConfirmed) return;
+      const request={accessoryId:idOf(a),qty:Number(val('rsQty','1')),restockDate:d,note:val('rsNote','')};
       Swal.fire({title:'Saving restock...',allowOutsideClick:false,showConfirmButton:false,didOpen:()=>Swal.showLoading()});
-      google.script.run.withSuccessHandler(res=>{
+      siAccessoryApi_('si_restockAccessory',request).then(res=>{
         Swal.close();
-        if(res&&res.success){ Swal.fire('Saved',`Restock date: ${esc(res.restockDate||d)}<br>New Qty: ${num(res.newQty||res.stockQty||0)}`,'success'); initStockInventoryModule(true); if(typeof initStockDashboardModule==='function') initStockDashboardModule(true); }
-        else Swal.fire('Error',(res&&res.message)||'Restock failed','error');
-      }).withFailureHandler(err=>Swal.fire('Error',err.message||String(err),'error')).si_restockAccessory({accessoryId:idOf(a),qty:val('rsQty','1'),restockDate:d,note:val('rsNote','')});
+        if(!res||res.success===false)throw new Error((res&&res.message)||'Restock failed');
+        const next=Number(res.newQty||res.stockQty||0), min=Number(a.minStockQty||a.min_stock_qty||a.minStock||0);
+        siAccessoryApplyLocal_(Object.assign({},a,{stockQty:next,stock_qty:next,qty:next,status:next<=min?'LOW_STOCK':'STOCK',actionRequired:next<=min?'Restock required':'No action'}));
+        Swal.fire('Saved',`Restock date: ${esc(res.restockDate||d)}<br>New Qty: ${num(next)}`,'success');
+      }).catch(err=>Swal.fire('Error',err.message||String(err),'error'));
     });
   };
 
