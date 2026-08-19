@@ -88,6 +88,35 @@
     }
     window.refreshVisibleCalendarMonth = refreshVisibleCalendarMonth;
 
+    async function fullSyncMasterCalendar() {
+        if (!window.CES_API || typeof window.CES_API.callFunction !== 'function') throw new Error('CES API bridge is not ready.');
+        const confirmation = await Swal.fire({
+            icon:'warning',
+            title:'Full Sync Calendar?',
+            html:'ระบบจะดึงข้อมูลทั้งหมดจาก Calendar ที่ตั้งค่าไว้สำหรับปี 2025–2026 และแทนที่ข้อมูลใน <b>Calendar_Summary</b> ใหม่ทั้งหมด',
+            showCancelButton:true,
+            confirmButtonText:'Full Sync',
+            cancelButtonText:'Cancel',
+            confirmButtonColor:'#003DA5'
+        });
+        if (!confirmation.isConfirmed) return null;
+        Swal.fire({title:'Full Sync Calendar…',text:'กำลังอ่านทุกทีมและสร้าง Calendar_Summary ใหม่',allowOutsideClick:false,showConfirmButton:false,didOpen:()=>Swal.showLoading()});
+        try {
+            const result = await window.CES_API.callFunction('forceFullSyncCalendar2025_2026', [], {transport:'iframe',timeoutMs:360000,dedupe:false,priority:'active',userAction:true,module:'calendar',loadingLabel:'Full Sync Calendar 2025–2026…'});
+            const rows = await window.CES_API.callFunction('getCalendarData', [true], {transport:'jsonp',timeoutMs:60000,dedupe:false,priority:'active',userAction:true,module:'calendar'});
+            if (Array.isArray(rows)) {
+                if (typeof globalCalData !== 'undefined') globalCalData = rows;
+                if (typeof initCalendar === 'function') initCalendar(rows);
+            }
+            await Swal.fire({icon:'success',title:'Full Sync Complete',text:typeof result === 'string' ? result : 'Calendar_Summary was replaced successfully.',confirmButtonColor:'#003DA5'});
+            return rows;
+        } catch (error) {
+            await Swal.fire({icon:'error',title:'Full Sync Error',text:error && error.message ? error.message : String(error),confirmButtonColor:'#003DA5'});
+            return null;
+        }
+    }
+    window.fullSyncMasterCalendar = fullSyncMasterCalendar;
+
     function jumpToDateFromFilter() {
         const m = parseInt(document.getElementById('cal-filter-month').value);
         const y = parseInt(document.getElementById('cal-filter-year').value);

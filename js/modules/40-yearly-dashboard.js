@@ -281,14 +281,14 @@
     async function syncCalendarToSheet() {
         Swal.fire({
             title: 'Synchronizing full calendar…',
-            html: '<div style="font-size:12px;color:#64748b">Fetching all MED, LAB, EHS and Management events for 2025–2026.<br>Please keep this page open.</div>',
+            html: '<div style="font-size:12px;color:#64748b">Fetching MED, LAB, EHS, ENV, TES and MGT Calendar events for 2025–2026, then replacing Calendar_Summary.<br>Please keep this page open.</div>',
             allowOutsideClick: false,
             showConfirmButton: false,
             didOpen: () => Swal.showLoading()
         });
         try {
             if (!window.CES_API || typeof window.CES_API.callFunction !== 'function') throw new Error('CES API bridge is not ready.');
-            const result = await window.CES_API.callFunction('syncCalendarDashboard', [], { transport:'iframe', timeoutMs:360000 });
+            const result = await window.CES_API.callFunction('forceFullSyncCalendar2025_2026', [], { transport:'iframe', timeoutMs:360000, dedupe:false, priority:'active', userAction:true, module:'calendar', loadingLabel:'Full Sync Calendar 2025–2026…' });
             Swal.close();
             await Swal.fire({
                 icon: 'success',

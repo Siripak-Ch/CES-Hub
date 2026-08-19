@@ -12,8 +12,11 @@
 <div class="flex flex-wrap gap-2 justify-end max-w-full">
 <select class="bg-gray-50 border border-gray-200 rounded-xl p-2.5 text-sm font-bold focus:ring-2 focus:ring-[#003DA5] cursor-pointer outline-none" id="cal-filter-month" onchange="jumpToDateFromFilter()"></select>
 <select class="bg-gray-50 border border-gray-200 rounded-xl p-2.5 text-sm font-bold focus:ring-2 focus:ring-[#003DA5] cursor-pointer outline-none" id="cal-filter-year" onchange="jumpToDateFromFilter()"></select>
-<button class="ces-calendar-header-icon-btn ces-action-neutral" onclick="refreshVisibleCalendarMonth()" title="Sync visible month">
+<button type="button" class="ces-calendar-header-icon-btn ces-action-neutral" onclick="refreshVisibleCalendarMonth()" title="Sync visible month">
 <i class="fas fa-sync-alt"></i>
+</button>
+<button type="button" class="h-10 px-3 inline-flex items-center justify-center gap-2 rounded-xl bg-[#003DA5] text-white text-xs font-black shadow-sm hover:bg-[#002D7A]" onclick="fullSyncMasterCalendar()" title="Replace Calendar_Summary with all configured Calendar data for 2025–2026">
+<i class="fas fa-arrows-rotate"></i><span>Full Sync</span>
 </button>
 <button class="ces-calendar-header-icon-btn ces-action-excel" onclick="exportMasterCalendarToCSV()" title="Export Current Month">
 <i class="fas fa-file-excel"></i>

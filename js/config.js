@@ -6,7 +6,7 @@
 
 window.CES_CONFIG = {
   // IMPORTANT: After deploying Apps Script backend, paste the latest /exec URL here.
-  GAS_API_URL: 'https://script.google.com/macros/s/AKfycbweQWzjxBKhL_QLnizEGfOZhFM2Ks12NuWlhBWRHtYWMzdVPLJM1wlKc_a-RjVSCqzc/exec',
+  GAS_API_URL: 'https://script.google.com/macros/s/AKfycbzv3qooGARDMmbb_gABVE1RG7hYGaW93gSc-2nMqV6K_UtIGeCq6zwXedlbdIaoCxmp0w/exec',
   // Optional extra /exec endpoints. The polyfill also accepts ?gasApiUrl=<url>
   // and persists that override, so a deployment URL can be corrected without
   // allowing every module to fail independently.
@@ -28,7 +28,7 @@ window.CES_CONFIG = {
   },
 
   DEBUG: false,
-  RELEASE: 'CES-HUB-V28.2-ACTIVE-TAB-API-CONTRACT-STABLE',
+  RELEASE: 'CES-HUB-V28.4-CALENDAR-FULLSYNC-LINE-TEAM-QUICK-STABLE',
 
   // External links are kept in one place. Config sheet values override these defaults at runtime.
   EXTERNAL_LINKS: {
