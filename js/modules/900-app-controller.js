@@ -48,13 +48,12 @@
     function cesStoreCoreCache_(data){try{localStorage.setItem(CES_CORE_CACHE_KEY_V20,JSON.stringify({at:Date.now(),data:data}));}catch(e){}}
     function cesTabNeedsInit_(tab){
         if(tab==='monthly_report'&&window.CES_MONTHLY_REPORT_READY!==true)return true;
-        if(!CES_TAB_RUNTIME_V20.initialized[tab])return true;
-        if(!CES_LIVE_TABS_V20[tab])return false;
-        return Date.now()-Number(CES_TAB_RUNTIME_V20.lastSync[tab]||0)>Number(CES_SYNC_POLICY[tab]||60000);
+        return !CES_TAB_RUNTIME_V20.initialized[tab];
     }
     let CES_CALENDAR_SYNC_PROMISE = null;
     let CES_DEFERRED_IDLE_SCHEDULED = false;
     let CES_CALENDAR_IDLE_SCHEDULED = false;
+    let CES_API_CONTRACT_RECHECK_SCHEDULED = false;
     function cesRunWhenForegroundIdle_(callback, delayMs, timeoutMs){
         var start=function(){
             if(window.CES_TASK_PRIORITY&&typeof window.CES_TASK_PRIORITY.whenIdle==='function'){
@@ -72,12 +71,33 @@
     function cesScheduleDeferredModules_(){
         if(CES_DEFERRED_IDLE_SCHEDULED)return;
         CES_DEFERRED_IDLE_SCHEDULED=true;
-        // Do not preload all deferred views/modules after login.  Besides wasting
-        // network/main-thread time, legacy compatibility runtimes can interpret an
-        // off-tab #view-* node as an instruction to start its API.  The navigation
-        // path now demand-loads only the active tab; hover/focus prefetch warms code
-        // without inserting HTML.
-        return;
+        // Warm source code gradually after the active page is interactive. The
+        // warm path never inserts off-tab HTML and never executes business code,
+        // so it cannot start unrelated Apps Script calls. Tabs opened in earlier
+        // sessions are warmed first and every script is still executed only once.
+        setTimeout(function(){
+            if(typeof window.CES_warmDeferredModulesInBackground==='function')window.CES_warmDeferredModulesInBackground(currentTab||window.CES_ACTIVE_TAB||'portal').catch(function(error){console.warn('[CES background module warm]',error);});
+        },700);
+        cesScheduleApiContractRecheck_();
+    }
+    function cesScheduleApiContractRecheck_(){
+        if(CES_API_CONTRACT_RECHECK_SCHEDULED)return;
+        CES_API_CONTRACT_RECHECK_SCHEDULED=true;
+        setTimeout(function(){
+            var run=function(){
+                if(!window.CES_API||typeof window.CES_API.callFunction!=='function')return;
+                window.CES_API.callFunction('CES_API_RECHECK',[],{transport:'jsonp',timeoutMs:45000,dedupe:true,priority:'background',background:true,silentLoading:true,module:'portal'}).then(function(result){
+                    var runtime=result&&String(result.runtimeUrl||'').trim(),configured='';
+                    try{configured=String(window.CES_API.getEndpoint()||'').replace(/\?.*$/,'');}catch(ignoreEndpoint){}
+                    if(runtime&&/^https:\/\/script\.google\.com\/macros\/s\/[A-Za-z0-9_-]+\/exec$/i.test(runtime)&&runtime!==configured&&typeof window.CES_API.setEndpoint==='function'){
+                        try{window.CES_API.setEndpoint(runtime);configured=runtime;}catch(ignoreSet){}
+                    }
+                    try{localStorage.setItem('CES_API_LAST_RECHECK',JSON.stringify({at:Date.now(),success:!!(result&&result.success),endpoint:configured,runtimeUrl:runtime,failedModules:(result&&result.failedModules)||[],missingAllowed:(result&&result.missingAllowed)||[]}));}catch(ignoreStore){}
+                    if(!result||result.success!==true)console.warn('[CES API contract recheck]',result);
+                }).catch(function(error){console.warn('[CES API contract recheck unavailable]',error);});
+            };
+            if(window.CES_TASK_PRIORITY&&typeof window.CES_TASK_PRIORITY.whenIdle==='function')window.CES_TASK_PRIORITY.whenIdle(run,{timeout:7000});else run();
+        },1200);
     }
     function cesScheduleCalendarBackgroundSync_(){
         if(CES_CALENDAR_IDLE_SCHEDULED)return;
@@ -904,7 +924,6 @@
         } catch(ignore) {}
         if(currentUser)applyRolePermissions(currentUser.role);
         var requested=getRequestedTabFromUrl(),remembered=cesRememberedTab_(),start=cesValidTab_(requested||remembered||'portal')||'portal';
-        if(!document.getElementById('view-'+start))start='portal';
         switchTab(start);
         var loader=document.getElementById('loadingOverlay');if(loader)loader.classList.add('hidden');
         var status=document.getElementById('lastUpdateText');if(status)status.innerHTML='<i class="fas fa-circle-notch fa-spin text-[#003DA5]"></i> Loading Home first';

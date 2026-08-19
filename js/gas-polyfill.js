@@ -257,6 +257,7 @@
     activeUrl:'', lastSuccessAt:0, lastFailureAt:0, consecutiveFailures:0,
     status:'unknown', lastError:''
   };
+  let apiRecoveryTimer = null;
 
   function normalizeGasUrl_(value) {
     const url=String(value||'').trim();
@@ -303,10 +304,21 @@
     apiConnectionState.status=status;
     if(status==='online'){
       apiConnectionState.lastSuccessAt=Date.now();apiConnectionState.consecutiveFailures=0;apiConnectionState.lastError='';
+      if(apiRecoveryTimer){clearTimeout(apiRecoveryTimer);apiRecoveryTimer=null;}
     }else if(status==='offline'){
       apiConnectionState.lastFailureAt=Date.now();apiConnectionState.consecutiveFailures+=1;apiConnectionState.lastError=String(err&&err.message||err||'');
+      scheduleApiRecovery_();
     }
     try{window.dispatchEvent(new CustomEvent('ces:api-connection',{detail:Object.assign({},apiConnectionState)}));}catch(ignore){}
+  }
+  function scheduleApiRecovery_(){
+    if(apiRecoveryTimer)return;
+    var delay=Math.min(30000,5000+Math.max(0,Number(apiConnectionState.consecutiveFailures||0)-1)*5000);
+    apiRecoveryTimer=setTimeout(function(){
+      apiRecoveryTimer=null;
+      if(apiConnectionState.status!=='offline'||document.visibilityState==='hidden'){if(apiConnectionState.status==='offline')scheduleApiRecovery_();return;}
+      jsonpCall('health',[],{raw:true,timeoutMs:20000}).catch(function(error){emitApiState_('offline',error);});
+    },delay);
   }
   function setGasApiUrlOverride_(url) {
     const normalized=normalizeGasUrl_(url);if(!normalized)throw new Error('Use a valid Apps Script /exec URL');
@@ -736,9 +748,10 @@
       options.raw = true;
       return callFunction(fnName, Array.isArray(args) ? args : [], options);
     },
-    health: function () { return jsonpCall('health', [], { raw: true, timeoutMs:30000 }); },
+    health: function () { return jsonpCall('health', [], { raw: true, timeoutMs:30000 }).catch(function(error){if(isApiNetworkError_(error))emitApiState_('offline',error);throw error;}); },
     getEndpoint: function () { return getGasApiUrl(); },
     getConnectionState: function () { return Object.assign({}, apiConnectionState); },
+    isNetworkError: function (error) { return isApiNetworkError_(error); },
     setEndpoint: function (url) { return setGasApiUrlOverride_(url); },
     clearEndpointOverride: function () { return clearGasApiUrlOverride_(); },
     login: function (employeeId) { return callFunction('checkLogin', [employeeId], {}); },

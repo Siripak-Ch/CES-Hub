@@ -25,6 +25,7 @@
   let serviceLoadBusy = false;
   let serviceLoadPromise = null;
   let lastServiceLoadAt = 0;
+  let serviceLoadedOnce = false;
 
   function log() {
     if (window.CES_CONFIG && window.CES_CONFIG.DEBUG) {
@@ -419,6 +420,7 @@
     const cachedRows = cachedBox ? normalizeServiceRows(cachedBox.data || []) : [];
     const cacheFresh = cachedBox && Date.now() - Number(cachedBox.ts || 0) < SERVICE_CACHE_TTL;
     if (!force && cachedRows.length) {
+      serviceLoadedOnce = true;
       initService(cachedRows);
       if (cacheFresh) return Promise.resolve(cachedRows);
     }
@@ -437,6 +439,7 @@
       silentLoading:backgroundRefresh,userAction:!backgroundRefresh,module:'service'
     }).then(res => {
       const rows = normalizeServiceRows(res || []);
+      serviceLoadedOnce = true;
       writeServiceCache_(SERVICE_CACHE_KEY, rows);
       initService(rows);
       if (force && window.Swal) Swal.fire({ icon:'success', title:'Service CSI Loaded', text: rows.length + ' records', timer:1200, showConfirmButton:false });
@@ -484,7 +487,7 @@
           setTimeout(function () {
             patchServiceButtons();
             const years = getYears(serviceRawData || []);
-            if (!Array.isArray(serviceRawData) || !serviceRawData.length || (!years.length && Date.now() - lastServiceLoadAt > 3000)) {
+            if (!serviceLoadedOnce && (!Array.isArray(serviceRawData) || !serviceRawData.length || (!years.length && Date.now() - lastServiceLoadAt > 3000))) {
               window.loadServiceCSIOnly(false);
             } else {
               applyServiceFilters();
@@ -1191,9 +1194,7 @@
       { fn: 'getRevenueDashboardData', args: [year] },
       { fn: 'getRevenueDashboardData', args: [{ year: year, sheet: 'Revenue_Data_' + year }] },
       { fn: 'rd_getRevenueDashboardData', args: [year] },
-      { fn: 'rd_getRevenueDashboardData', args: [{ year: year }] },
-      { fn: 'getRevenueData', args: [year] },
-      { fn: 'getRevenueData', args: [{ year: year }] }
+      { fn: 'rd_getRevenueDashboardData', args: [{ year: year }] }
     ]).then(function (res) {
       var normalized = normalizeRevenue(res, year);
       try { window.revenueCache = normalized; } catch (e) {}
@@ -1294,7 +1295,6 @@
     }
     return callAny([
       { fn: 'sd_getStockDashboardData', args: [!!force] },
-      { fn: 'getStockDashboardData', args: [!!force] },
       { fn: 'stockFinalRecheck', args: [] }
     ]).then(normalizeStockData);
   }

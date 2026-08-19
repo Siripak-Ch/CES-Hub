@@ -87,7 +87,7 @@
 
 
 
-    <link rel="stylesheet" href="css/app.css?v=20260819-v279-api-recovery-stock-ocr">
+    <link rel="stylesheet" href="css/app.css?v=20260819-v282-active-tab-api-contract">
     <link rel="stylesheet" href="css/ai-local-assistant.css?v=20260818-v268-priority-concurrency">
 
 
@@ -114,7 +114,7 @@
 
 
 
-    <script src="js/config.js?v=20260819-v281-checkin-dailyjobs-api-workflow"></script>
+    <script src="js/config.js?v=20260819-v282-active-tab-api-contract"></script>
 
     <!-- LINE LIFF SDK V2 edge. Required for Rich Menu -> LINE identity auto-login. -->
     <script defer src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
@@ -122,7 +122,7 @@
 
 
 
-    <script src="js/gas-polyfill.js?v=20260819-v281-checkin-dailyjobs-api-workflow"></script>
+    <script src="js/gas-polyfill.js?v=20260819-v282-active-tab-api-contract"></script>
 
 
 
@@ -291,8 +291,8 @@
 
 
 
-      window.CES_BUILD_HASH = 'CES-HUB-V28.1-CHECKIN-DAILYJOBS-API-WORKFLOW-STABLE-20260819-1410';
-      window.CES_BUILD_VERSION = 'V28.1-CHECKIN-DAILYJOBS-API-WORKFLOW-STABLE';
+      window.CES_BUILD_HASH = 'CES-HUB-V28.2-ACTIVE-TAB-API-CONTRACT-STABLE-20260819';
+      window.CES_BUILD_VERSION = 'V28.2-ACTIVE-TAB-API-CONTRACT-STABLE';
 
       // CES_V221_CACHE_MIGRATION: force fresh shell/config/permissions after a release.
       try {
@@ -539,6 +539,8 @@
       var cesDeferredCodePromises = Object.create(null);
       var cesDeferredScriptPromises = Object.create(null);
       var cesDeferredLoadedScripts = Object.create(null);
+      var cesDeferredBackgroundWarmPromise = null;
+      var CES_DEFERRED_OPENED_KEY = 'CES_DEFERRED_OPENED_TABS';
 
       var CES_DEFERRED_TAB_SCRIPTS = {
         management_overview:['js/modules/10-management-overview-dashboard.js','js/modules/990-runtime-system-final.js'],
@@ -636,6 +638,42 @@
         var codePromises=cesDeferredScriptsForTab(tab).map(cesDeferredItemByUrl).map(cesPrepareDeferredCode);
         return Promise.all(codePromises).then(function(){return true;}).catch(function(error){console.warn('[CES tab prepare]',tab,error);return false;});
       };
+      function cesReadDeferredOpenedTabs_(){
+        try{
+          var saved=JSON.parse(localStorage.getItem(CES_DEFERRED_OPENED_KEY)||'null');
+          if(!saved||saved.build!==window.CES_BUILD_HASH||!saved.tabs||typeof saved.tabs!=='object')return[];
+          return Object.keys(saved.tabs).sort(function(a,b){return Number(saved.tabs[b]||0)-Number(saved.tabs[a]||0);});
+        }catch(ignore){return[];}
+      }
+      function cesRememberDeferredTab_(tab){
+        tab=String(tab||'').trim();if(!tab||tab==='portal')return;
+        try{
+          var saved=JSON.parse(localStorage.getItem(CES_DEFERRED_OPENED_KEY)||'null');
+          if(!saved||saved.build!==window.CES_BUILD_HASH||!saved.tabs||typeof saved.tabs!=='object')saved={build:window.CES_BUILD_HASH,tabs:{}};
+          saved.tabs[tab]=Date.now();localStorage.setItem(CES_DEFERRED_OPENED_KEY,JSON.stringify(saved));
+        }catch(ignore){}
+      }
+      window.CES_getRememberedDeferredTabs=cesReadDeferredOpenedTabs_;
+      window.CES_warmDeferredModulesInBackground=function(activeTab){
+        if(cesDeferredBackgroundWarmPromise)return cesDeferredBackgroundWarmPromise;
+        activeTab=String(activeTab||window.CES_ACTIVE_TAB||window.currentTab||'portal').trim();
+        var allTabs=Object.keys(CES_DEFERRED_TAB_SCRIPTS),seen=Object.create(null),ordered=[];
+        cesReadDeferredOpenedTabs_().concat(allTabs).forEach(function(tab){if(tab&&tab!==activeTab&&!seen[tab]){seen[tab]=true;ordered.push(tab);}});
+        cesDeferredBackgroundWarmPromise=new Promise(function(resolve){
+          var index=0;
+          function next(){
+            if(index>=ordered.length){resolve(true);return;}
+            var tab=ordered[index++];
+            var run=function(){
+              Promise.resolve(window.CES_prepareDeferredTab(tab)).catch(function(error){console.warn('[CES background warm]',tab,error);}).finally(function(){setTimeout(next,180);});
+            };
+            if(window.CES_TASK_PRIORITY&&typeof window.CES_TASK_PRIORITY.whenIdle==='function')window.CES_TASK_PRIORITY.whenIdle(run,{timeout:5000});
+            else setTimeout(run,250);
+          }
+          next();
+        });
+        return cesDeferredBackgroundWarmPromise;
+      };
       var cesDeferredSharedTailPromise=null;
       function cesLoadDeferredSharedTailLater_(){
         if(cesDeferredSharedTailPromise)return cesDeferredSharedTailPromise;
@@ -671,6 +709,7 @@
         cesDeferredGroupPromises[focusTab]=ensureView.then(function(){
           var chain=Promise.resolve();items.forEach(function(item){chain=chain.then(function(){return cesExecuteDeferredScript(item);});});return chain;
         }).then(function(){
+          cesRememberDeferredTab_(focusTab);
           try{window.dispatchEvent(new CustomEvent('ces:deferred-ready',{detail:{tab:focusTab,report:CESBoot.getReport()}}));}catch(ignore){}
           setTimeout(function(){cesLoadDeferredSharedTailLater_();},0);
           return true;

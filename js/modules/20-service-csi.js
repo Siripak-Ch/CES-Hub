@@ -1664,7 +1664,7 @@ async function svcMapV55RestoreSaved_(force){
   if(serviceMemoMappingLoadingV55)return serviceMemoMappingRowsV55;if(!force&&serviceMemoMappingLoadedV55)return serviceMemoMappingRowsV55;if(!window.CES_API||typeof window.CES_API.callFunction!=='function')return serviceMemoMappingRowsV55;
   localStorage.setItem(CES_SERVICE_MEMO_V55_RESTORE_KEY,String(Date.now()));serviceMemoMappingLoadingV55=true;serviceMemoMappingMetaV55=Object.assign({},serviceMemoMappingMetaV55||{},{restoring:true,restoreError:''});renderServiceMemoMappingV55_();
   try{
-    const snapshot=await window.CES_API.callFunction('getServiceMemoMappingSnapshot',[],{transport:'iframe',timeoutMs:240000});if(!snapshot||!snapshot.success)throw new Error((snapshot&&snapshot.message)||'Unable to restore the saved Memo comparison.');
+    const snapshot=await window.CES_API.callFunction('getServiceMemoMappingSnapshot',[],{transport:'jsonp',timeoutMs:120000,dedupe:true,priority:'active',userAction:true,module:'service',silentLoading:true});if(!snapshot||!snapshot.success)throw new Error((snapshot&&snapshot.message)||'Unable to restore the saved Memo comparison.');
     const restoredRows=await svcMapV55SnapshotRows_(snapshot);serviceMemoMappingRowsV55=restoredRows.map(svcMapV55StoredRow_);serviceMemoMappingMetaV55=Object.assign({},snapshot,{rows:undefined,rowsPayloadChunks:undefined,restoring:false,restoreError:''});serviceMemoMappingLoadedV55=true;svcMapV55CacheSave_();renderServiceMemoMappingV55_();return serviceMemoMappingRowsV55;
   }catch(error){console.warn('[Memo V55 restore]',error);serviceMemoMappingMetaV55=Object.assign({},serviceMemoMappingMetaV55||{},{success:false,restoring:false,restoreError:error.message||String(error),targetYear:2026});serviceMemoMappingLoadedV55=true;renderServiceMemoMappingV55_();return serviceMemoMappingRowsV55;}
   finally{serviceMemoMappingLoadingV55=false;}
@@ -1767,4 +1767,3 @@ window.setServiceMemoMappingPage=setServiceMemoMappingPage;
 window.exportServiceMemoMappingV55=exportServiceMemoMappingV55;
 window.recalculateServiceMemoMappingV55=recalculateServiceMemoMappingV55;
 window.CES_SERVICE_MEMO_RECHECK=function(){const summary=svcMapV55Summary_(serviceMemoMappingRowsV55);return{success:true,version:'V55',targetYear:2026,latestFunctionNames:true,pageApiRemoved:true,monthlyMerge:true,keywordDateScoring:true,thaiAwareMatching:true,matchThreshold:'>70%',rows:summary.all,matchedRows:summary.matched,unmatchedRows:summary.unmatched,matchPercent:summary.percent,loadedFromCache:serviceMemoMappingLoadedV55,meta:serviceMemoMappingMetaV55};};
-

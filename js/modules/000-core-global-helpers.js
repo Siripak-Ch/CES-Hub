@@ -76,11 +76,15 @@
     return active === moduleName;
   }
   function cesShouldShowModuleError(moduleName) {
-    return cesIsActiveModule(moduleName) && document.visibilityState !== 'hidden';
+    var offline=false;
+    try{offline=!!(window.CES_API&&typeof window.CES_API.getConnectionState==='function'&&window.CES_API.getConnectionState().status==='offline');}catch(ignore){}
+    return !offline && cesIsActiveModule(moduleName) && document.visibilityState !== 'hidden';
   }
+  function cesIsApiNetworkError(error){return /Cannot connect to Apps Script API|Apps Script API timeout|temporarily unavailable|Failed to fetch|NetworkError|Load failed/i.test(text(error&&error.message||error));}
   window.CES_getActiveTab = cesActiveTab;
   window.CES_isActiveModule = cesIsActiveModule;
   window.CES_shouldShowModuleError = cesShouldShowModuleError;
+  window.CES_isApiNetworkError = cesIsApiNetworkError;
 
 
   // Non-blocking API connection indicator. Network errors must not open a
