@@ -4087,3 +4087,377 @@ textarea.ces-detail-input-v243{min-height:58px;resize:vertical;margin-bottom:9px
   display:flex!important;align-items:center!important;justify-content:space-between!important;gap:10px!important;
   padding:12px 0 0!important;flex-wrap:wrap!important;
 }
+
+
+/* ============================================================
+   V27.7 STOCK STABLE UI
+   Deterministic V267-style layout for Stock Dashboard / Inventory /
+   Check Stock. These rules intentionally use scoped !important values
+   because the stock runtime may inject its own legacy style after app.css.
+============================================================ */
+#view-stock_dashboard,
+#view-inventory,
+#view-check_stock{
+  width:100%!important;
+  min-width:0!important;
+}
+#view-stock_dashboard .stockpro-shell,
+#view-inventory .stockpro-shell,
+#view-check_stock .stockpro-shell{
+  width:100%!important;
+  max-width:none!important;
+  min-width:0!important;
+  margin:0!important;
+  padding:0 0 28px!important;
+  display:block!important;
+}
+#view-stock_dashboard .stockpro-header-card,
+#view-inventory .stockpro-header-card,
+#view-check_stock .stockpro-header-card{
+  width:100%!important;
+  min-height:72px!important;
+  padding:14px 16px!important;
+  margin:0 0 12px!important;
+  display:flex!important;
+  align-items:center!important;
+  justify-content:space-between!important;
+  gap:14px!important;
+  border-radius:16px!important;
+  box-sizing:border-box!important;
+}
+#view-stock_dashboard .stockpro-title-wrap,
+#view-inventory .stockpro-title-wrap,
+#view-check_stock .stockpro-title-wrap{
+  display:flex!important;
+  align-items:center!important;
+  gap:12px!important;
+  min-width:0!important;
+}
+#view-stock_dashboard .stockpro-title-wrap>div:last-child,
+#view-inventory .stockpro-title-wrap>div:last-child,
+#view-check_stock .stockpro-title-wrap>div:last-child{min-width:0!important}
+#view-stock_dashboard .stockpro-title-wrap h1,
+#view-inventory .stockpro-title-wrap h1,
+#view-check_stock .stockpro-title-wrap h1{
+  margin:0!important;
+  color:#0f172a!important;
+  font-size:17px!important;
+  line-height:1.25!important;
+  font-weight:900!important;
+}
+#view-stock_dashboard .stockpro-title-wrap p,
+#view-inventory .stockpro-title-wrap p,
+#view-check_stock .stockpro-title-wrap p,
+#view-stock_dashboard .ces-stock-header-meta,
+#view-inventory .ces-stock-header-meta{
+  margin:3px 0 0!important;
+  font-size:10px!important;
+  line-height:1.35!important;
+  font-weight:700!important;
+  color:#64748b!important;
+}
+#view-stock_dashboard .stockpro-actions,
+#view-inventory .stockpro-actions,
+#view-check_stock .stockpro-actions{
+  display:flex!important;
+  flex-wrap:wrap!important;
+  align-items:center!important;
+  justify-content:flex-end!important;
+  gap:8px!important;
+  flex:0 0 auto!important;
+}
+#view-stock_dashboard .sp-tabs,
+#view-inventory .sp-tabs{
+  margin:0 0 12px!important;
+  padding:4px!important;
+  min-height:42px!important;
+  border-radius:14px!important;
+}
+#view-stock_dashboard .sp-tab,
+#view-inventory .sp-tab{
+  min-height:34px!important;
+  padding:7px 12px!important;
+  font-size:11px!important;
+  line-height:1.2!important;
+  font-weight:800!important;
+  border-radius:10px!important;
+}
+#view-stock_dashboard .stockpro-model-grid{
+  display:grid!important;
+  grid-template-columns:repeat(3,minmax(0,1fr))!important;
+  gap:12px!important;
+  margin:0 0 12px!important;
+}
+#view-stock_dashboard .sp-model-card{
+  min-width:0!important;
+  min-height:144px!important;
+  padding:16px!important;
+  border-radius:16px!important;
+  display:flex!important;
+  flex-direction:column!important;
+  align-items:center!important;
+  justify-content:center!important;
+  text-align:center!important;
+}
+#view-stock_dashboard .sp-model-card .sp-brand,
+#view-stock_dashboard .sp-model-card .brand{
+  font-size:10px!important;
+  line-height:1.2!important;
+  font-weight:800!important;
+  color:#475569!important;
+  margin-top:6px!important;
+}
+#view-stock_dashboard .sp-model-card .sp-model,
+#view-stock_dashboard .sp-model-card .model,
+#view-stock_dashboard .sp-model-card b{
+  font-size:12px!important;
+  line-height:1.3!important;
+  font-weight:900!important;
+  color:#0f172a!important;
+}
+#view-stock_dashboard .stockpro-filter-card,
+#view-inventory .stockpro-filter-card{
+  width:100%!important;
+  display:grid!important;
+  grid-template-columns:minmax(230px,1.55fr) repeat(4,minmax(120px,1fr)) auto!important;
+  gap:8px!important;
+  align-items:center!important;
+  margin:0 0 12px!important;
+  padding:10px!important;
+  border-radius:15px!important;
+  box-sizing:border-box!important;
+}
+#view-stock_dashboard .stockpro-filter-card input,
+#view-stock_dashboard .stockpro-filter-card select,
+#view-inventory .stockpro-filter-card input,
+#view-inventory .stockpro-filter-card select,
+#view-check_stock .stockpro-filter-card input,
+#view-check_stock .stockpro-filter-card select{
+  width:100%!important;
+  min-width:0!important;
+  height:38px!important;
+  padding-top:0!important;
+  padding-bottom:0!important;
+  border:1px solid #dbe4f0!important;
+  border-radius:10px!important;
+  background:#fff!important;
+  color:#334155!important;
+  font-size:11px!important;
+  line-height:38px!important;
+  box-sizing:border-box!important;
+}
+#view-stock_dashboard .stockpro-kpi-grid,
+#view-inventory .stockpro-kpi-grid{
+  width:100%!important;
+  display:grid!important;
+  grid-template-columns:repeat(4,minmax(0,1fr))!important;
+  gap:10px!important;
+  margin:0 0 12px!important;
+}
+#view-stock_dashboard .sp-kpi,
+#view-inventory .sp-kpi{
+  min-width:0!important;
+  min-height:100px!important;
+  padding:13px!important;
+  border-radius:15px!important;
+  box-sizing:border-box!important;
+}
+#view-stock_dashboard .stockpro-card,
+#view-inventory .stockpro-card,
+#view-check_stock .stockpro-card{
+  width:100%!important;
+  min-width:0!important;
+  padding:14px!important;
+  margin:0 0 12px!important;
+  border-radius:16px!important;
+  box-sizing:border-box!important;
+}
+#view-inventory .csv5-table-wrap,
+#view-inventory .sp-table-wrap{
+  width:100%!important;
+  max-width:100%!important;
+  overflow:auto!important;
+  border-radius:12px!important;
+  -webkit-overflow-scrolling:touch!important;
+}
+#view-inventory .csv5-table,
+#view-inventory .sp-table{
+  min-width:1040px!important;
+  width:100%!important;
+  table-layout:auto!important;
+}
+#view-inventory .csv5-table th,
+#view-inventory .csv5-table td,
+#view-inventory .sp-table th,
+#view-inventory .sp-table td{
+  padding:9px 10px!important;
+  line-height:1.35!important;
+  vertical-align:middle!important;
+}
+#view-inventory .csv5-table td{
+  white-space:normal!important;
+  word-break:break-word!important;
+}
+#view-check_stock .stockpro-hero{
+  width:100%!important;
+  padding:14px!important;
+  margin:0 0 12px!important;
+  border-radius:16px!important;
+  box-sizing:border-box!important;
+}
+#view-check_stock .csv7-mode-title{
+  margin:0 0 10px!important;
+  text-align:center!important;
+  font-size:12px!important;
+  line-height:1.25!important;
+  font-weight:900!important;
+  color:#334155!important;
+}
+#view-check_stock .csv7-four-mode{
+  display:grid!important;
+  grid-template-columns:repeat(4,minmax(0,1fr))!important;
+  gap:10px!important;
+}
+#view-check_stock .csv7-four-mode .sp-mode{
+  min-width:0!important;
+  min-height:106px!important;
+  padding:13px 9px!important;
+  display:flex!important;
+  flex-direction:column!important;
+  align-items:center!important;
+  justify-content:center!important;
+  gap:6px!important;
+  border-radius:15px!important;
+  box-sizing:border-box!important;
+}
+#view-check_stock .csv212-mode-title{
+  font-size:12px!important;
+  line-height:1.25!important;
+  font-weight:900!important;
+  text-align:center!important;
+}
+#view-check_stock .csv212-mode-sub{
+  font-size:9px!important;
+  line-height:1.35!important;
+  font-weight:700!important;
+  text-align:center!important;
+}
+#view-check_stock .csv7-mode-text{
+  min-height:22px!important;
+  margin:8px 0 0!important;
+  text-align:center!important;
+  font-size:11px!important;
+  line-height:1.35!important;
+  font-weight:800!important;
+}
+#view-check_stock .sp-scan-box{
+  width:100%!important;
+  max-width:none!important;
+  padding:8px 10px!important;
+  box-sizing:border-box!important;
+}
+#view-check_stock .sp-big-btn{
+  width:100%!important;
+  min-height:42px!important;
+  margin-top:10px!important;
+  border-radius:11px!important;
+}
+#view-check_stock .sp-scan-input-row{
+  width:100%!important;
+  display:grid!important;
+  grid-template-columns:minmax(0,1fr) 42px!important;
+  gap:8px!important;
+}
+#view-check_stock #scAccessoryIssueCard{
+  padding:14px!important;
+}
+#view-check_stock #scAccessoryIssueCard .stockpro-card-head{
+  margin:0 0 10px!important;
+  display:flex!important;
+  align-items:center!important;
+  justify-content:space-between!important;
+  gap:10px!important;
+}
+#view-check_stock #scAccessoryIssueCard .stockpro-filter-card{
+  width:100%!important;
+  display:grid!important;
+  grid-template-columns:minmax(220px,2fr) minmax(110px,.8fr) minmax(180px,1.2fr) auto!important;
+  gap:8px!important;
+  align-items:center!important;
+  margin:0 0 10px!important;
+  padding:0!important;
+  border:0!important;
+  background:transparent!important;
+  box-shadow:none!important;
+}
+#view-check_stock #scAccessoryIssueCard .sp-search{
+  width:100%!important;
+  min-width:0!important;
+}
+#view-check_stock #scAccessoryIssueCard .sp-btn{
+  min-height:38px!important;
+  padding:0 13px!important;
+  white-space:nowrap!important;
+}
+#view-check_stock #scAccPreview{
+  width:100%!important;
+  min-height:34px!important;
+  padding:9px 10px!important;
+  border-radius:10px!important;
+  background:#f8fafc!important;
+  color:#475569!important;
+  font-size:11px!important;
+  line-height:1.4!important;
+  box-sizing:border-box!important;
+}
+#view-check_stock .stockpro-two-col{
+  width:100%!important;
+  display:grid!important;
+  grid-template-columns:repeat(2,minmax(0,1fr))!important;
+  gap:12px!important;
+}
+#view-check_stock .stockpro-two-col>.stockpro-card{margin-bottom:0!important}
+#view-stock_dashboard .csv5-loading,
+#view-inventory .csv5-loading,
+#view-check_stock .csv5-loading{
+  min-height:86px!important;
+  display:flex!important;
+  align-items:center!important;
+  justify-content:center!important;
+  gap:8px!important;
+  color:#64748b!important;
+}
+@media (max-width:1100px){
+  #view-stock_dashboard .stockpro-filter-card,
+  #view-inventory .stockpro-filter-card{
+    grid-template-columns:repeat(3,minmax(0,1fr))!important;
+  }
+  #view-check_stock #scAccessoryIssueCard .stockpro-filter-card{
+    grid-template-columns:repeat(2,minmax(0,1fr))!important;
+  }
+  #view-stock_dashboard .stockpro-kpi-grid,
+  #view-inventory .stockpro-kpi-grid{
+    grid-template-columns:repeat(2,minmax(0,1fr))!important;
+  }
+}
+@media (max-width:760px){
+  #view-stock_dashboard .stockpro-header-card,
+  #view-inventory .stockpro-header-card,
+  #view-check_stock .stockpro-header-card{
+    align-items:flex-start!important;
+    flex-direction:column!important;
+  }
+  #view-stock_dashboard .stockpro-actions,
+  #view-inventory .stockpro-actions,
+  #view-check_stock .stockpro-actions{width:100%!important;justify-content:flex-start!important}
+  #view-stock_dashboard .stockpro-model-grid,
+  #view-check_stock .csv7-four-mode,
+  #view-check_stock .stockpro-two-col{
+    grid-template-columns:1fr!important;
+  }
+  #view-stock_dashboard .stockpro-filter-card,
+  #view-inventory .stockpro-filter-card,
+  #view-check_stock #scAccessoryIssueCard .stockpro-filter-card{
+    grid-template-columns:1fr!important;
+  }
+}

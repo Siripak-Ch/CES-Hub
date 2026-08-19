@@ -29,7 +29,7 @@
       <select id="siModel" onchange="si_applyFilters()"><option value="all">ทุกโมเดล</option></select>
       <select id="siLocation" onchange="si_applyFilters()"><option value="all">ทุกสถานที่</option></select>
       <select id="siStatus" onchange="si_applyFilters()"><option value="all">ทุกสถานะ</option></select>
-      <button type="button" class="sp-btn ghost ces-stock-filter-reset-v226 ces-filter-reset-word-v227" onclick="si_resetMainFiltersV226()" title="Reset Filters" aria-label="Reset Filters"><i class="fas fa-rotate-left"></i><span>Reset Filter</span></button>
+      <button type="button" class="sp-btn ghost ces-stock-filter-reset-v226 ces-filter-reset-word-v227" onclick="si_resetMainFilters()" title="Reset Filters" aria-label="Reset Filters"><i class="fas fa-rotate-left"></i><span>Reset Filter</span></button>
     </div>
 
     <div class="stockpro-filter-card hidden" id="siAccFilters">
@@ -38,20 +38,20 @@
       <select id="siAccItem" onchange="si_applyFilters()"><option value="all">All Item</option></select>
       <select id="siAccStatus" onchange="si_applyFilters()"><option value="all">All Status</option><option value="STOCK">STOCK</option><option value="LOW_STOCK">LOW_STOCK</option><option value="PENDING_APPROVAL">PENDING_APPROVAL</option></select>
       <select id="siAccAction" onchange="si_applyFilters()"><option value="all">All Action</option></select>
-      <button type="button" class="sp-btn ghost ces-stock-filter-reset-v226 ces-filter-reset-word-v227" onclick="si_resetMainFiltersV226()" title="Reset Filters" aria-label="Reset Filters"><i class="fas fa-rotate-left"></i><span>Reset Filter</span></button>
+      <button type="button" class="sp-btn ghost ces-stock-filter-reset-v226 ces-filter-reset-word-v227" onclick="si_resetMainFilters()" title="Reset Filters" aria-label="Reset Filters"><i class="fas fa-rotate-left"></i><span>Reset Filter</span></button>
     </div>
 
     <div id="siEquipKpiGrid" class="stockpro-kpi-grid csv5-kpi-six"></div>
     <div id="siAccKpiGrid" class="stockpro-kpi-grid hidden"></div>
 
     <div class="stockpro-card" id="siEquipSection">
-      <div class="stockpro-card-head"><h3><i class="fas fa-microchip text-blue-500"></i> Equipment List — compact view</h3><span id="siTableCount" class="sp-pill">0 items</span></div>
-      <div id="siTable"></div>
+      <div class="stockpro-card-head"><h3><i class="fas fa-microchip text-blue-500"></i> Equipment List — compact view</h3><span id="siTableCount" class="sp-pill">—</span></div>
+      <div id="siTable"><div class="csv5-loading"><span></span>กำลังโหลดข้อมูล Inventory ที่บันทึกไว้…</div></div>
       <div id="siPagination" class="sp-pagination"></div>
     </div>
 
     <div class="stockpro-card hidden" id="siAccSection">
-      <div class="stockpro-card-head"><h3><i class="fas fa-plug text-emerald-500"></i> Accessories Inventory</h3><span id="siAccCount" class="sp-pill">0 items</span></div>
+      <div class="stockpro-card-head"><h3><i class="fas fa-plug text-emerald-500"></i> Accessories Inventory</h3><span id="siAccCount" class="sp-pill">—</span></div>
       <div id="siAccCards"></div><div id="siAccPagination" class="sp-pagination"></div>
     </div>
   </div>

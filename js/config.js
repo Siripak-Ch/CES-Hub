@@ -6,8 +6,7 @@
 
 window.CES_CONFIG = {
   // IMPORTANT: After deploying Apps Script backend, paste the latest /exec URL here.
-  GAS_API_URL: 'https://script.google.com/macros/s/AKfycbxmVuxAB63D6Kf05ttneezkEPU7SMWnRAN6nL-mZci2BbY-4wKiZiLaf3GGU_r1BdvxaA/exec
-  ',
+  GAS_API_URL: 'https://script.google.com/macros/s/AKfycbwOTIlOzoluwtDh3f0sg56fuDonMeU9TU_1Kb-SuXZzaF9Wp0rxmekO0216Gh9SFfqrfg/exec',
 
   CSI_SURVEY_URL: 'https://survey.nhealth-asia.com/s/cm1hci0mw00jf45vmps2myg1g',
 
@@ -25,7 +24,7 @@ window.CES_CONFIG = {
   },
 
   DEBUG: false,
-  RELEASE: 'CES-HUB-V27.6-LINE-ALL-JOBS-CAR-BILLS-STOCK-UI',
+  RELEASE: 'CES-HUB-V27.7-CALENDAR-SAFE-STOCK-STABLE-LINE-FAST',
 
   // External links are kept in one place. Config sheet values override these defaults at runtime.
   EXTERNAL_LINKS: {
