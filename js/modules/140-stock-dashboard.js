@@ -4,62 +4,6 @@
 let SD_DASH = { loaded:false, raw:null, statusChart:null, rentalChart:null };
 
 
-function spEnsureStyle(){
-  if(document.getElementById('stockpro-style-v3')) return;
-  const style=document.createElement('style');
-  style.id='stockpro-style-v3';
-  style.textContent=`
-    .stockpro-page{font-family:Inter,Arial,'Prompt',sans-serif;color:#1e293b;}
-    .stockpro-shell{max-width:1280px;margin:0 auto;padding:0 0 24px;}
-    .stockpro-header-card{background:#fff;border:1px solid #e8eef6;border-radius:22px;padding:24px;display:flex;align-items:center;justify-content:space-between;gap:16px;box-shadow:0 10px 28px rgba(30,58,138,.06);margin-bottom:18px;}
-    .stockpro-title-wrap{display:flex;align-items:center;gap:14px;}
-    .stockpro-title-wrap h1{font-size:24px;font-weight:900;margin:0;color:#0f172a;letter-spacing:-.02em;}
-    .stockpro-title-wrap p{font-size:11px;text-transform:uppercase;letter-spacing:.35em;color:#64748b;font-weight:800;margin:4px 0 0;}
-    .stockpro-icon{width:48px;height:48px;border-radius:16px;display:flex;align-items:center;justify-content:center;color:#fff;box-shadow:0 10px 20px rgba(15,23,42,.08);}
-    .stockpro-icon.emerald{background:#047857}.stockpro-icon.blue{background:#1d4ed8}.stockpro-icon.orange{background:#ea580c}
-    .stockpro-actions{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
-    .sp-btn{border:0;border-radius:12px;padding:10px 16px;font-weight:900;font-size:13px;cursor:pointer;transition:.18s;display:inline-flex;gap:8px;align-items:center;justify-content:center;}
-    .sp-btn:hover{transform:translateY(-1px)}
-    .sp-btn.dark{background:#0f172a;color:#fff}.sp-btn.primary{background:#2563eb;color:#fff}.sp-btn.success{background:#059669;color:#fff}.sp-btn.danger{background:#dc2626;color:#fff}
-    .sp-btn.warn{background:#d97706;color:#fff}.sp-btn.ghost{background:#fff;color:#0f172a;border:1px solid #dbe3ef}.sp-btn.soft{background:#eff6ff;color:#2563eb;border:1px solid #bfdbfe}
-    .stockpro-model-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin-bottom:14px;}
-    .sp-model-card{background:#fff;border:1px solid #e8eef6;border-radius:18px;padding:16px;text-align:center;box-shadow:0 4px 16px rgba(30,58,138,.05);}
-    .sp-model-icon{width:34px;height:34px;border-radius:12px;margin:0 auto 8px;display:flex;align-items:center;justify-content:center;}
-    .sp-model-brand{font-size:10px;font-weight:900;color:#64748b;text-transform:uppercase}.sp-model-label{font-size:12px;font-weight:700;color:#475569}
-    .sp-model-num{font-size:28px;font-weight:1000;line-height:1;margin-top:4px}.sp-model-sub{font-size:11px;font-weight:900;margin-top:4px}.sp-model-over{font-size:10px;font-weight:900;color:#ef4444}
-    .stockpro-filter-card{background:#fff;border:1px solid #e8eef6;border-radius:18px;padding:12px;display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:8px;margin-bottom:16px;box-shadow:0 4px 16px rgba(30,58,138,.05);}
-    .sp-search{position:relative}.sp-search i{position:absolute;left:12px;top:50%;transform:translateY(-50%);font-size:12px;color:#94a3b8}
-    .stockpro-filter-card input,.stockpro-filter-card select,.stockpro-control{width:100%;border:1px solid #dbe3ef;border-radius:12px;background:#f8fbff;padding:10px 12px;font-size:13px;outline:none;color:#334155;}
-    .stockpro-filter-card input{padding-left:36px}.stockpro-filter-card input:focus,.stockpro-filter-card select:focus,.stockpro-control:focus{border-color:#2563eb;box-shadow:0 0 0 3px rgba(37,99,235,.12)}
-    .stockpro-kpi-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin-bottom:16px;}
-    .sp-kpi{background:#fff;border:1px solid #e8eef6;border-radius:18px;padding:18px;text-align:center;box-shadow:0 4px 16px rgba(30,58,138,.05);}
-    .sp-kpi .ico{width:34px;height:34px;border-radius:12px;margin:0 auto 8px;display:flex;align-items:center;justify-content:center}.sp-kpi .label{font-size:11px;font-weight:900;color:#64748b;text-transform:uppercase}.sp-kpi .val{font-size:28px;font-weight:1000;line-height:1.1}
-    .stockpro-two-col{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px;}
-    .stockpro-card{background:#fff;border:1px solid #e8eef6;border-radius:18px;padding:16px;box-shadow:0 4px 16px rgba(30,58,138,.05);overflow:hidden;}
-    .stockpro-card h3{font-size:15px;font-weight:900;color:#0f172a;margin:0 0 12px;display:flex;align-items:center;gap:8px}
-    .stockpro-card-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:8px}.stockpro-card-head h3{margin:0}
-    .stockpro-chart-box{height:260px;position:relative}.stockpro-chart-box canvas{max-height:100%}
-    .sp-table-wrap{overflow:auto;border:1px solid #edf2f7;border-radius:14px;max-height:560px}
-    .sp-table{width:100%;border-collapse:separate;border-spacing:0;font-size:12px;white-space:nowrap}
-    .sp-table th{position:sticky;top:0;background:#f8fafc;color:#64748b;text-transform:uppercase;font-size:11px;font-weight:1000;padding:12px;border-bottom:1px solid #e5e7eb;z-index:1}
-    .sp-table td{padding:12px;border-bottom:1px solid #f1f5f9;color:#334155;vertical-align:top}.sp-table tbody tr:hover td{background:#f8fbff}
-    .sp-id{font-weight:1000;color:#0f172a}.sp-sub{display:block;font-size:10px;color:#64748b;margin-top:2px}.sp-muted{color:#94a3b8;font-size:12px}
-    .sp-badge{display:inline-flex;align-items:center;gap:4px;border-radius:999px;padding:4px 9px;font-size:11px;font-weight:1000}
-    .sp-badge.Stock{background:#d1fae5;color:#065f46}.sp-badge.In-Use{background:#fef3c7;color:#92400e}.sp-badge.Overdue{background:#ef4444;color:#fff}.sp-badge.Missing{background:#fef9c3;color:#854d0e}.sp-badge.Broken{background:#e2e8f0;color:#475569}.sp-badge.Recheck{background:#ede9fe;color:#6d28d9}
-    .sp-pill{background:#f1f5f9;color:#475569;border-radius:999px;padding:5px 10px;font-size:11px;font-weight:900}
-    .sp-pagination{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 0 0;flex-wrap:wrap}
-    .sp-page-buttons{display:flex;gap:6px;align-items:center}.sp-page-buttons button{border:1px solid #dbe3ef;background:#fff;color:#334155;border-radius:10px;padding:7px 11px;font-weight:900;cursor:pointer}.sp-page-buttons button.active{background:#2563eb;color:#fff;border-color:#2563eb}.sp-page-buttons button:disabled{opacity:.45;cursor:not-allowed}
-    .sp-tabs{display:flex;gap:8px;margin-bottom:12px}.sp-tab{border:1px solid #dbe3ef;background:#f1f5f9;color:#475569;border-radius:12px;padding:9px 16px;font-size:13px;font-weight:900;cursor:pointer}.sp-tab.active{background:#2563eb;color:#fff;border-color:#2563eb}
-    .stockpro-hero{background:#fff;border:1px solid #e8eef6;border-radius:18px;padding:18px;box-shadow:0 4px 16px rgba(30,58,138,.05);margin-bottom:16px}
-    .sp-mode-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}.sp-mode{padding:18px;border:1px solid #dbe3ef;background:#f8fafc;border-radius:14px;text-align:center;font-weight:900;cursor:pointer}.sp-mode.active.in{background:#059669;color:#fff}.sp-mode.active.out{background:#dc2626;color:#fff}
-    .sp-scan-box{max-width:560px;margin:0 auto;text-align:center}.sp-scan-input-row{display:grid;grid-template-columns:1fr auto;gap:8px;margin-top:12px}.sp-big-btn{width:100%;padding:15px;border-radius:14px;border:0;background:#2563eb;color:#fff;font-weight:1000;cursor:pointer}
-    .sp-result-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:12px}.sp-field{background:#f8fafc;border:1px solid #edf2f7;border-radius:12px;padding:10px}.sp-field .k{font-size:10px;color:#64748b;text-transform:uppercase;font-weight:900}.sp-field .v{font-size:13px;color:#0f172a;font-weight:800;margin-top:2px}
-    .sp-action-group{display:flex;gap:6px;align-items:center;justify-content:center;flex-wrap:wrap}.sp-icon-btn{width:34px;height:34px;border-radius:10px;border:1px solid #dbeafe;background:#eff6ff;color:#2563eb;display:inline-flex;align-items:center;justify-content:center;cursor:pointer;font-weight:900}.sp-icon-btn.green{background:#ecfdf5;border-color:#a7f3d0;color:#059669}.sp-icon-btn.red{background:#fef2f2;border-color:#fecaca;color:#dc2626}.sp-icon-btn.gray{background:#f8fafc;border-color:#e2e8f0;color:#475569}.sp-icon-btn.orange{background:#fff7ed;border-color:#fed7aa;color:#ea580c}.sp-icon-btn:hover{transform:translateY(-1px);box-shadow:0 4px 12px rgba(30,58,138,.12)}
-    .sp-acc-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:12px}.sp-acc-card{background:#fff;border:1px solid #e8eef6;border-radius:18px;padding:16px;box-shadow:0 4px 16px rgba(30,58,138,.05);transition:.18s}.sp-acc-card:hover{transform:translateY(-2px);box-shadow:0 8px 22px rgba(30,58,138,.10)}.sp-acc-icon{width:42px;height:42px;border-radius:14px;background:#d1fae5;color:#059669;display:flex;align-items:center;justify-content:center;margin-bottom:10px}.sp-acc-name{font-weight:1000;color:#0f172a}.sp-acc-meta{font-size:11px;color:#64748b;margin-top:2px}.sp-acc-qty{font-size:28px;font-weight:1000;color:#059669;line-height:1.1}.sp-acc-controls{display:grid;grid-template-columns:74px 1fr;gap:8px;margin-top:12px}.sp-acc-controls input{border:1px solid #dbe3ef;border-radius:10px;padding:8px;font-weight:900;text-align:center}.sp-chip{display:inline-flex;align-items:center;gap:4px;border-radius:999px;padding:4px 8px;font-size:10px;font-weight:900;background:#f1f5f9;color:#475569}.sp-chip.low{background:#ffedd5;color:#c2410c}.sp-chip.ok{background:#dcfce7;color:#166534}
-    @media(max-width:1100px){.stockpro-kpi-grid{grid-template-columns:repeat(2,1fr)}.stockpro-two-col,.stockpro-model-grid{grid-template-columns:1fr}.stockpro-filter-card{grid-template-columns:1fr}.stockpro-header-card{align-items:flex-start;flex-direction:column}.stockpro-actions{width:100%}.stockpro-actions .sp-btn{flex:1}.sp-result-grid{grid-template-columns:1fr}}
-  `;
-  document.head.appendChild(style);
-}
 function spEsc(v){return String(v==null?'':v).replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));}
 function spVal(id, fallback=''){const el=document.getElementById(id);return el&&typeof el.value!=='undefined'?String(el.value):fallback;}
 function spSetHtml(id,html){const el=document.getElementById(id);if(el)el.innerHTML=html;}

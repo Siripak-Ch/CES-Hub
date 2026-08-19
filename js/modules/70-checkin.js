@@ -19,6 +19,55 @@ function checkinEmptyData_() {
     return { dailyJobs: [], recentActivity: [], activityLogs: [], kpi: {}, serviceShare: {}, diagnostics: {} };
 }
 
+function checkinFormatDate_(date) {
+    const d = date instanceof Date ? date : new Date(date);
+    if (!(d instanceof Date) || Number.isNaN(d.getTime())) return '';
+    return `${String(d.getDate()).padStart(2,'0')}/${String(d.getMonth()+1).padStart(2,'0')}/${d.getFullYear()}`;
+}
+
+function checkinSelectedDate_() {
+    const input = document.getElementById('checkin-datepicker');
+    if (input && input._flatpickr && input._flatpickr.selectedDates && input._flatpickr.selectedDates.length) {
+        return checkinFormatDate_(input._flatpickr.selectedDates[0]);
+    }
+    const raw = input && String(input.value || '').trim();
+    if (/^\d{1,2}\/\d{1,2}\/\d{4}$/.test(raw || '')) {
+        const parts = raw.split('/');
+        return `${String(Number(parts[0])).padStart(2,'0')}/${String(Number(parts[1])).padStart(2,'0')}/${parts[2]}`;
+    }
+    return checkinFormatDate_(new Date());
+}
+
+function checkinUpdateDateDisplay_() {
+    const dateStr = checkinSelectedDate_();
+    const display = document.getElementById('display-date-text');
+    if (display) display.innerText = dateStr;
+    return dateStr;
+}
+
+function checkinCallFunction_(fnName, args, options) {
+    args = Array.isArray(args) ? args : [];
+    options = Object.assign({
+        transport:'jsonp',
+        timeoutMs:45000,
+        dedupe:true,
+        priority:'active',
+        userAction:true,
+        module:'checkin'
+    }, options || {});
+    if (window.CES_API && typeof window.CES_API.callFunction === 'function') {
+        return window.CES_API.callFunction(fnName, args, options);
+    }
+    return new Promise((resolve, reject) => {
+        try {
+            const runner = google.script.run.withSuccessHandler(resolve).withFailureHandler(reject);
+            runner[fnName].apply(runner, args);
+        } catch (error) {
+            reject(error);
+        }
+    });
+}
+
 function checkinApplyData_(data, dateStr) {
     currentCheckinData = data && typeof data === 'object' ? data : checkinEmptyData_();
     if (dateStr) checkinDateCache[dateStr] = currentCheckinData;
@@ -27,14 +76,14 @@ function checkinApplyData_(data, dateStr) {
 }
 
 function checkinApiCall_(dateStr, userCtx) {
-    if (window.CES_API && typeof window.CES_API.callFunction === 'function') {
-        return window.CES_API.callFunction('getCheckinDashboardData', [dateStr, userCtx], {
-            transport:'jsonp', timeoutMs:45000, dedupe:true,
-            priority:'active', userAction:true, module:'checkin', loadingLabel:'Loading Daily Jobs…'
-        });
-    }
-    return new Promise((resolve, reject) => {
-        google.script.run.withSuccessHandler(resolve).withFailureHandler(reject).getCheckinDashboardData(dateStr, userCtx);
+    return checkinCallFunction_('getCheckinDashboardData', [dateStr, userCtx], {
+        transport:'jsonp',
+        timeoutMs:45000,
+        dedupe:true,
+        priority:'active',
+        userAction:true,
+        module:'checkin',
+        loadingLabel:'Loading Daily Jobs…'
     });
 }
 
@@ -56,18 +105,30 @@ function initCheckin() {
     const input = document.querySelector('#checkin-datepicker');
     const trigger = document.getElementById('btn-date-trigger');
     if (input && !input._flatpickr) {
-        flatpickr(input, { dateFormat: 'd/m/Y', defaultDate: new Date(), disableMobile: true, position: 'auto center', static: true, onChange: (d, value) => { const display=document.getElementById('display-date-text'); if(display)display.innerText=value; loadCheckinData(); } });
+        flatpickr(input, {
+            dateFormat: 'd/m/Y',
+            defaultDate: new Date(),
+            disableMobile: true,
+            position: 'auto center',
+            static: true,
+            onReady: () => { checkinUpdateDateDisplay_(); },
+            onChange: () => {
+                checkinUpdateDateDisplay_();
+                loadCheckinData();
+            }
+        });
+    } else {
+        checkinUpdateDateDisplay_();
     }
     if (trigger && trigger.dataset.cesCheckinBound !== '1') {
         trigger.dataset.cesCheckinBound = '1';
         trigger.addEventListener('click', () => { if(input && input._flatpickr) input._flatpickr.open(); });
     }
-    const today = new Date();
-    const display=document.getElementById('display-date-text');
-    if(display && (!input || !input._flatpickr || !input._flatpickr.selectedDates.length)) display.innerText = `${String(today.getDate()).padStart(2,'0')}/${String(today.getMonth()+1).padStart(2,'0')}/${today.getFullYear()}`;
+    checkinUpdateDateDisplay_();
+
     const role=String(currentUser&&currentUser.role||'').toUpperCase();
     const viewerTeam=String(currentUser&&currentUser.team||'').toUpperCase();
-    if (role === 'ADMIN' || role === 'MANAGER' || role === 'MNG' || viewerTeam === 'MNG' || viewerTeam === 'MGT') {
+    if (role === 'ADMIN' || role === 'MANAGER' || role === 'MNG' || role.includes('EXECUTIVE') || viewerTeam === 'MNG' || viewerTeam === 'MGT') {
         const filter=document.getElementById('ck-admin-filter'); if(filter)filter.classList.remove('hidden');
         if(role==='ADMIN'){const reset=document.getElementById('btn-checkin-reset');if(reset)reset.classList.remove('hidden');}
     }
@@ -75,15 +136,18 @@ function initCheckin() {
 }
 
 function changeCheckinDate(days) {
-    const fp = document.querySelector("#checkin-datepicker")._flatpickr;
-    const currentDate = fp.selectedDates[0] || new Date();
-    currentDate.setDate(currentDate.getDate() + days);
-    fp.setDate(currentDate, true);
+    const input = document.querySelector("#checkin-datepicker");
+    const fp = input && input._flatpickr;
+    if (!fp) return;
+    const base = fp.selectedDates && fp.selectedDates[0] ? new Date(fp.selectedDates[0]) : new Date();
+    base.setDate(base.getDate() + Number(days || 0));
+    fp.setDate(base, true);
+    checkinUpdateDateDisplay_();
 }
 
 function loadCheckinData(forceRefresh) {
     window.scrollTo({ top: 0, behavior: 'smooth' });
-    const dateStr = document.getElementById('display-date-text').innerText;
+    const dateStr = checkinUpdateDateDisplay_();
     const cached = !forceRefresh && checkinDateCache[dateStr];
     if (cached) checkinApplyData_(cached, dateStr);
     else document.getElementById('job-list-container').innerHTML = `<div class="col-span-full flex flex-col items-center justify-center py-12 text-gray-300"><i class="fas fa-circle-notch fa-spin text-3xl mb-3"></i><span class="text-xs font-bold">Loading Daily Jobs...</span></div>`;
@@ -133,7 +197,7 @@ function renderJobList() {
     
     const viewerRole=String(currentUser&&currentUser.role||'').toUpperCase();
     const viewerTeamCode=String(currentUser&&currentUser.team||'').toUpperCase();
-    if ((['ADMIN','MANAGER','MNG'].includes(viewerRole) || ['MNG','MGT'].includes(viewerTeamCode)) && teamFilter !== 'All') jobs = jobs.filter(j => j.team === teamFilter);
+    if ((['ADMIN','MANAGER','MNG'].includes(viewerRole) || viewerRole.includes('EXECUTIVE') || ['MNG','MGT'].includes(viewerTeamCode)) && teamFilter !== 'All') jobs = jobs.filter(j => j.team === teamFilter);
     if (statusFilter !== 'All') jobs = jobs.filter(j => j.status === statusFilter);
     if (jobs.length === 0) { container.innerHTML = `<div class="col-span-full text-center py-10 bg-gray-50 rounded-2xl border border-dashed border-gray-200"><i class="far fa-calendar-times text-gray-300 text-3xl mb-2"></i><p class="text-gray-400 font-bold text-xs">No Jobs Found</p></div>`; return; }
     
@@ -326,11 +390,19 @@ function processValidPosition(p, txt, ind, btn) {
     
     txt.innerHTML = `<i class="fas fa-circle-notch fa-spin text-[#003DA5]"></i> Found (+/-${acc}m). Getting Address...`;
     
-    google.script.run.withSuccessHandler(res => {
-        if(res.success) {
+    checkinCallFunction_('convertLatLngToAddress', [lat, lng], {
+        transport:'jsonp',
+        timeoutMs:20000,
+        dedupe:true,
+        priority:'active',
+        userAction:true,
+        module:'checkin',
+        silentLoading:true
+    }).then(res => {
+        if(res && res.success) {
             currentLocationName = res.address;
             const accText = acc <= 100 ? `<span class="text-[#003DA5]">High (${acc}m)</span>` : `<span class="text-[#003DA5]">Avg (${acc}m)</span>`;
-            
+
             txt.innerHTML = `
                 <div class="flex items-center gap-2">
                     <span class="truncate">${res.address}</span>
@@ -338,7 +410,7 @@ function processValidPosition(p, txt, ind, btn) {
                 </div>
                 <span class="text-[9px] font-normal text-gray-400">Accuracy: ${accText}</span>
             `;
-            
+
             ind.innerHTML = '<i class="fas fa-map-marker-alt text-[#003DA5]"></i>';
             ind.className = 'w-10 h-10 rounded-full bg-emerald-100 flex items-center justify-center text-emerald-600 shrink-0 shadow-sm border border-[#003DA5]';
             btn.disabled = false;
@@ -351,19 +423,18 @@ function processValidPosition(p, txt, ind, btn) {
 
         if(gpsAttempts >= MAX_GPS_ATTEMPTS && acc > ACCEPTABLE_ACCURACY) {
             document.getElementById('manual-loc-container').classList.remove('hidden');
-            document.getElementById('manual-loc-input').value = currentLocationName; 
+            document.getElementById('manual-loc-input').value = currentLocationName;
         } else {
             document.getElementById('btn-manual-toggle').classList.remove('hidden');
         }
-
-    }).withFailureHandler(function(){
+    }).catch(function(){
         currentLocationName = `${lat.toFixed(5)}, ${lng.toFixed(5)}`;
         txt.innerHTML = `${currentLocationName} <a href="${currentLocationLink}" target="_blank" class="ml-1 text-blue-500"><i class="fas fa-external-link-alt"></i></a>`;
         ind.innerHTML = '<i class="fas fa-check text-blue-500"></i>';
         btn.disabled = false;
         const manual=document.getElementById('manual-loc-container'); if(manual) manual.classList.remove('hidden');
         const manualInput=document.getElementById('manual-loc-input'); if(manualInput&&!manualInput.value) manualInput.value=currentLocationName;
-    }).convertLatLngToAddress(lat, lng);
+    });
 }
 
 function toggleManualInput() {
@@ -401,10 +472,10 @@ function submitAction() {
         locationName: currentLocationName,
         manualLocation: manualInput, 
         photoBase64: photoBase64Data, 
-        location: selectedActionJob.location, dateRef: document.getElementById('display-date-text').innerText 
+        location: selectedActionJob.location, dateRef: checkinSelectedDate_() 
     };
 
-    google.script.run.withSuccessHandler(res => {
+    checkinCallFunction_('saveCheckinTransaction', [req], { transport:'iframe', timeoutMs:90000, dedupe:false, priority:'active', userAction:true, module:'checkin', loadingLabel:'Saving Check-in…' }).then(res => {
         document.getElementById('actionModal').classList.add('hidden');
         if(res.success) {
             Swal.close();
@@ -456,13 +527,14 @@ function submitAction() {
 
                 document.getElementById('summaryModal').classList.remove('hidden');
             }
-            loadCheckinData();
+            delete checkinDateCache[checkinSelectedDate_()];
+            loadCheckinData(true);
         } else { Swal.fire('Error', res.message, 'error'); btn.innerHTML = oldTxt; btn.disabled = false; }
-    }).withFailureHandler(err => {
-        Swal.fire('Error', err.message, 'error');
-        btn.innerHTML = oldTxt; 
+    }).catch(err => {
+        Swal.fire('Error', (err && err.message) ? err.message : String(err), 'error');
+        btn.innerHTML = oldTxt;
         btn.disabled = false;
-    }).saveCheckinTransaction(req);
+    });
 }
 
 function closeActionModal() { 
@@ -505,7 +577,19 @@ function clearPhoto() {
     photoBase64Data=null; 
 }
 
-function resetCheckinDB() { Swal.fire({ title: 'Confirm Reset?', text: "Clear 'Checkinout' sheet?", icon: 'warning', showCancelButton: true, confirmButtonColor: '#E4002B', confirmButtonText: 'Yes, Reset' }).then((result) => { if (result.isConfirmed) { google.script.run.withSuccessHandler(() => { Swal.fire('Reset Complete', '', 'success'); loadCheckinData(); }).clearCheckinData(); } }); }
+function resetCheckinDB() {
+    Swal.fire({ title:'Confirm Reset?', text:"Clear 'Checkinout' sheet?", icon:'warning', showCancelButton:true, confirmButtonColor:'#E4002B', confirmButtonText:'Yes, Reset' })
+        .then((result) => {
+            if (!result.isConfirmed) return;
+            return checkinCallFunction_('clearCheckinData', [], { transport:'jsonp', timeoutMs:30000, dedupe:false, priority:'active', userAction:true, module:'checkin' })
+                .then(() => {
+                    Object.keys(checkinDateCache).forEach(k => delete checkinDateCache[k]);
+                    Swal.fire('Reset Complete', '', 'success');
+                    return loadCheckinData(true);
+                })
+                .catch(err => Swal.fire('Reset Error', (err && err.message) ? err.message : String(err), 'error'));
+        });
+}
 
 function openLogDetail(data) {
     document.getElementById('ld-user').innerText = data.user || data.name; document.getElementById('ld-team').innerText = data.team; document.getElementById('ld-job').innerText = data.job || data.title; document.getElementById('ld-time').innerText = data.ts || data.timestamp;
@@ -534,6 +618,14 @@ function getGPS() {
   attemptGetPosition(txt, ind, btn);
 }
 
-window.CES_CHECKIN_UI_RECHECK=function(){return{version:'V41',teams:['MED','LAB','EHS','ENV','TES'],checkin:'#0057B8',checkout:'#E4002B'};};
-
-window.CES_CHECKIN_UI_V40_RECHECK=window.CES_CHECKIN_UI_RECHECK;
+window.CES_CHECKIN_UI_RECHECK=function(){
+  return {
+    success:true,
+    version:'CURRENT',
+    selectedDate:checkinSelectedDate_(),
+    teams:['MED','LAB','EHS','ENV','TES'],
+    checkin:'#0057B8',
+    checkout:'#E4002B',
+    api:!!(window.CES_API&&typeof window.CES_API.callFunction==='function')
+  };
+};
