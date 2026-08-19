@@ -846,7 +846,7 @@
 (function () {
   'use strict';
 
-  var PATCH_VERSION = 'V27.9-API-RECOVERY-STOCK-OCR-FAST';
+  var PATCH_VERSION = 'V28.0-API-STABLE-CHECKIN-UI';
   var MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
   var TEAMS = ['MED','LAB','EHS'];
   var STOCK_STATUSES = ['พร้อมส่ง','รอสอบเทียบ','เช่ายืม','ใช้งานไม่ได้','ไม่พบในรายการ'];

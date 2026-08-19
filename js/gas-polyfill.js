@@ -422,11 +422,12 @@
       if (window.CES_CONFIG && window.CES_CONFIG.DEBUG) console.log('[CES API] JSONP', fnName, 'attempt', retryIndex, 'endpoint', candidateIndex+1+'/'+candidates.length);
       return jsonpByUrl(url, options).then(function(result){emitApiState_('online');return result;}).catch(function (err) {
         if(!isApiNetworkError_(err))throw err;
-        emitApiState_('offline',err);
-        // Try an explicitly configured alternate /exec URL before repeating the same endpoint.
+        // Do not flip the whole application to OFFLINE while a transparent retry
+        // is still in progress. One slow module must not make every tab display
+        // API RECONNECTING. The outer call marks offline only after retries fail.
         if(candidateIndex+1<candidates.length){return new Promise(function(resolve){setTimeout(resolve,120);}).then(function(){return attempt(1,candidateIndex+1);});}
         if (retryIndex < 2) {
-          return new Promise(function(resolve){setTimeout(resolve,450);}).then(function(){return attempt(retryIndex+1,startIndex);});
+          return new Promise(function(resolve){setTimeout(resolve,300);}).then(function(){return attempt(retryIndex+1,startIndex);});
         }
         throw err;
       });
@@ -845,6 +846,18 @@
       }
     } catch (ignore) {}
   }, 2500);
+
+  window.CES_API_RECHECK_ALL_MODULES = function () {
+    return window.CES_API.callFunction('CES_API_RECHECK', [], {
+      transport:'jsonp', timeoutMs:30000, dedupe:false,
+      priority:'active', userAction:true, module:getActiveTab_() || 'portal', silentLoading:true
+    }).then(function(result){
+      var failed=(result&&result.failedModules)||[];
+      if(failed.length) console.error('[CES API MODULE RECHECK] failed modules',failed,result);
+      else console.log('[CES API MODULE RECHECK] all modules resolved',result);
+      return result;
+    });
+  };
 
   console.log('[CES Hub] gas-polyfill.js loaded: API recovery + active-page-first scheduler');
 })();

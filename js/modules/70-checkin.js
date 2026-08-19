@@ -29,7 +29,7 @@ function checkinApplyData_(data, dateStr) {
 function checkinApiCall_(dateStr, userCtx) {
     if (window.CES_API && typeof window.CES_API.callFunction === 'function') {
         return window.CES_API.callFunction('getCheckinDashboardData', [dateStr, userCtx], {
-            transport:'jsonp', timeoutMs:60000, dedupe:true,
+            transport:'jsonp', timeoutMs:45000, dedupe:true,
             priority:'active', userAction:true, module:'checkin', loadingLabel:'Loading Daily Jobs…'
         });
     }
@@ -53,12 +53,24 @@ const ACCEPTABLE_ACCURACY = 500; // meters
 
 function initCheckin() {
     window.scrollTo({ top: 0, behavior: 'smooth' });
-    
-    flatpickr("#checkin-datepicker", { dateFormat: "d/m/Y", defaultDate: new Date(), disableMobile: "true", position: "auto center", static: true, onChange: (d, s) => { document.getElementById('display-date-text').innerText = s; loadCheckinData(); } });
-    document.getElementById('btn-date-trigger').addEventListener('click', () => { document.querySelector("#checkin-datepicker")._flatpickr.open(); });
+    const input = document.querySelector('#checkin-datepicker');
+    const trigger = document.getElementById('btn-date-trigger');
+    if (input && !input._flatpickr) {
+        flatpickr(input, { dateFormat: 'd/m/Y', defaultDate: new Date(), disableMobile: true, position: 'auto center', static: true, onChange: (d, value) => { const display=document.getElementById('display-date-text'); if(display)display.innerText=value; loadCheckinData(); } });
+    }
+    if (trigger && trigger.dataset.cesCheckinBound !== '1') {
+        trigger.dataset.cesCheckinBound = '1';
+        trigger.addEventListener('click', () => { if(input && input._flatpickr) input._flatpickr.open(); });
+    }
     const today = new Date();
-    document.getElementById('display-date-text').innerText = `${String(today.getDate()).padStart(2,'0')}/${String(today.getMonth()+1).padStart(2,'0')}/${today.getFullYear()}`;
-    if (currentUser && currentUser.role === 'ADMIN') { document.getElementById('ck-admin-filter').classList.remove('hidden'); document.getElementById('btn-checkin-reset').classList.remove('hidden'); }
+    const display=document.getElementById('display-date-text');
+    if(display && (!input || !input._flatpickr || !input._flatpickr.selectedDates.length)) display.innerText = `${String(today.getDate()).padStart(2,'0')}/${String(today.getMonth()+1).padStart(2,'0')}/${today.getFullYear()}`;
+    const role=String(currentUser&&currentUser.role||'').toUpperCase();
+    const viewerTeam=String(currentUser&&currentUser.team||'').toUpperCase();
+    if (role === 'ADMIN' || role === 'MANAGER' || role === 'MNG' || viewerTeam === 'MNG' || viewerTeam === 'MGT') {
+        const filter=document.getElementById('ck-admin-filter'); if(filter)filter.classList.remove('hidden');
+        if(role==='ADMIN'){const reset=document.getElementById('btn-checkin-reset');if(reset)reset.classList.remove('hidden');}
+    }
     loadCheckinData();
 }
 
@@ -84,8 +96,14 @@ function loadCheckinData(forceRefresh) {
         return checkinApplyData_(data, dateStr);
     }).catch(error => {
         if (serial !== checkinLoadSerial) return currentCheckinData;
-        if (!cached) checkinApplyData_(checkinEmptyData_(), dateStr);
-        if (window.Swal) Swal.fire({icon:'error',title:'Check-in data unavailable',text:(error && error.message) ? error.message : String(error || 'Unable to load Check-in data.'),confirmButtonColor:'#003DA5'});
+        const message=(error && error.message) ? error.message : String(error || 'Unable to load Check-in data.');
+        if (!cached) {
+            currentCheckinData=checkinEmptyData_();
+            renderKPIs(); renderRecentActivity(); filterActivityTable();
+            const box=document.getElementById('job-list-container');
+            if(box) box.innerHTML=`<div class="col-span-full ces-checkin-inline-error"><i class="fas fa-wifi"></i><div><b>Check-in data temporarily unavailable</b><span>${checkinSafe_(message)}</span></div><button type="button" onclick="loadCheckinData(true)"><i class="fas fa-rotate-right"></i> Retry</button></div>`;
+        }
+        console.warn('[Check-in] load failed', error);
         return currentCheckinData;
     }).finally(() => {
         if (serial === checkinLoadSerial) checkinLoadPromise = null;
@@ -113,7 +131,9 @@ function renderJobList() {
     // ✅ แก้ไขเงื่อนไขให้รวมคำว่า 'MGT' เข้าไปด้วย
     jobs = jobs.filter(j => !['MANAGEMENT', 'MNG', 'MGT'].includes((j.team || '').toString().trim().toUpperCase()));
     
-    if (currentUser && currentUser.role === 'ADMIN' && teamFilter !== 'All') jobs = jobs.filter(j => j.team === teamFilter);
+    const viewerRole=String(currentUser&&currentUser.role||'').toUpperCase();
+    const viewerTeamCode=String(currentUser&&currentUser.team||'').toUpperCase();
+    if ((['ADMIN','MANAGER','MNG'].includes(viewerRole) || ['MNG','MGT'].includes(viewerTeamCode)) && teamFilter !== 'All') jobs = jobs.filter(j => j.team === teamFilter);
     if (statusFilter !== 'All') jobs = jobs.filter(j => j.status === statusFilter);
     if (jobs.length === 0) { container.innerHTML = `<div class="col-span-full text-center py-10 bg-gray-50 rounded-2xl border border-dashed border-gray-200"><i class="far fa-calendar-times text-gray-300 text-3xl mb-2"></i><p class="text-gray-400 font-bold text-xs">No Jobs Found</p></div>`; return; }
     

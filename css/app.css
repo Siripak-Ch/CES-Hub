@@ -4588,3 +4588,100 @@ textarea.ces-detail-input-v243{min-height:58px;resize:vertical;margin-bottom:9px
   #view-stock_dashboard .stockpro-filter-card,#view-inventory .stockpro-filter-card,#view-check_stock #scAccessoryIssueCard .stockpro-filter-card{grid-template-columns:1fr!important}
   #view-stock_dashboard .stockpro-kpi-grid,#view-inventory .stockpro-kpi-grid{grid-template-columns:repeat(2,minmax(0,1fr))!important}
 }
+
+/* ============================================================
+   CES Hub V28.0 — API stable UI fixes
+   ============================================================ */
+/* Notification bell: opaque yellow button, white bell, red outlined count ring. */
+.ces-notification-icon-btn,
+.ces-kpi-notification-btn,
+#view-kpi #kpi-late-alert-button,
+#view-stock_dashboard .stockpro-actions .ces-ready-stock-alert-v263,
+#view-stock_dashboard .stockpro-actions .ces-ready-stock-alert-v263.has-alert,
+#view-inventory .ces-notification-icon-btn{
+  background:#f59e0b!important;
+  border:1px solid #d97706!important;
+  color:#fff!important;
+  opacity:1!important;
+}
+.ces-notification-icon-btn>i,
+.ces-kpi-notification-btn>i,
+#view-kpi #kpi-late-alert-button>i,
+#view-stock_dashboard .stockpro-actions .ces-ready-stock-alert-v263>i{color:#fff!important}
+.ces-notification-count,
+.ces-kpi-notification-badge,
+#view-stock_dashboard .ces-ready-stock-alert-v263 .sp-alert-badge{
+  background:#fff!important;
+  color:#dc2626!important;
+  border:2px solid #dc2626!important;
+  box-shadow:0 1px 4px rgba(220,38,38,.18)!important;
+}
+
+/* Inventory: keep a readable desktop table instead of squeezing eleven columns. */
+#view-inventory #siTable{min-width:0}
+#view-inventory #siTable .sp-table-wrap{
+  width:100%!important;overflow-x:auto!important;overflow-y:visible!important;
+  border:1px solid #e7edf5!important;border-radius:14px!important;background:#fff!important;
+}
+#view-inventory #siTable .sp-table{
+  width:100%!important;min-width:1320px!important;table-layout:auto!important;border-collapse:separate!important;border-spacing:0!important;
+}
+#view-inventory #siTable .sp-table th{font-size:9.5px!important;padding:9px 9px!important;white-space:nowrap!important}
+#view-inventory #siTable .sp-table td{font-size:10.5px!important;padding:9px 9px!important;vertical-align:middle!important}
+#view-inventory #siTable .sp-table th:nth-child(1),#view-inventory #siTable .sp-table td:nth-child(1){width:42px;min-width:42px;text-align:center}
+#view-inventory #siTable .sp-table th:nth-child(2),#view-inventory #siTable .sp-table td:nth-child(2){width:80px;min-width:80px}
+#view-inventory #siTable .sp-table th:nth-child(3),#view-inventory #siTable .sp-table td:nth-child(3){width:88px;min-width:88px}
+#view-inventory #siTable .sp-table th:nth-child(4),#view-inventory #siTable .sp-table td:nth-child(4){width:190px;min-width:190px;white-space:normal!important}
+#view-inventory #siTable .sp-table th:nth-child(5),#view-inventory #siTable .sp-table td:nth-child(5){width:92px;min-width:92px}
+#view-inventory #siTable .sp-table th:nth-child(6),#view-inventory #siTable .sp-table td:nth-child(6){width:150px;min-width:150px;white-space:normal!important}
+#view-inventory #siTable .sp-table th:nth-child(7),#view-inventory #siTable .sp-table td:nth-child(7){width:160px;min-width:160px;white-space:normal!important}
+#view-inventory #siTable .sp-table th:nth-child(8),#view-inventory #siTable .sp-table td:nth-child(8){width:105px;min-width:105px}
+#view-inventory #siTable .sp-table th:nth-child(9),#view-inventory #siTable .sp-table td:nth-child(9){width:230px;min-width:230px;white-space:normal!important;line-height:1.35!important}
+#view-inventory #siTable .sp-table th:nth-child(10),#view-inventory #siTable .sp-table td:nth-child(10){width:96px;min-width:96px;text-align:center}
+#view-inventory #siTable .sp-table th:nth-child(11),#view-inventory #siTable .sp-table td:nth-child(11){width:142px;min-width:142px;text-align:center}
+#view-inventory #siTable .sp-action-group{display:inline-flex!important;align-items:center!important;justify-content:center!important;gap:5px!important;flex-wrap:nowrap!important}
+#view-inventory #siTable .sp-icon-btn{width:32px!important;height:32px!important;min-width:32px!important;border-radius:9px!important}
+#view-inventory #siTable .sp-icon-btn.red{background:#dc2626!important;border-color:#dc2626!important;color:#fff!important}
+#view-inventory #siTable .sp-icon-btn.red i{color:#fff!important}
+#view-inventory #siTable .sp-icon-btn.red:hover{background:#b91c1c!important;border-color:#b91c1c!important}
+
+/* Check-in: readable proportions, stable wrapping and aligned action columns. */
+#view-checkin{font-size:13px!important;line-height:1.4!important}
+#view-checkin>div:first-child{padding:18px 20px!important;border-radius:20px!important;gap:14px!important}
+#view-checkin>div:first-child h2{font-size:18px!important;line-height:1.2!important;font-weight:900!important}
+#view-checkin>div:first-child p{font-size:10.5px!important;line-height:1.25!important}
+#view-checkin .ces-checkin-team-grid-v40{gap:12px!important}
+#view-checkin .ces-checkin-kpi-v40{min-height:112px!important;padding:14px!important;border-radius:18px!important}
+#view-checkin .ces-checkin-kpi-v40 .kpi-label{font-size:10px!important;line-height:1.2!important;white-space:normal!important}
+#view-checkin .ces-checkin-kpi-v40 .kpi-value{font-size:28px!important;line-height:1!important;margin-top:6px!important}
+#view-checkin #job-list-container{gap:12px!important}
+#view-checkin #job-list-container>div{min-width:0}
+#view-checkin #recent-activity-list{padding-right:2px}
+#view-checkin #team-activity-section{padding:20px!important;border-radius:20px!important}
+#view-checkin #team-activity-section>div:first-child{margin-bottom:14px!important;align-items:center!important}
+#view-checkin #team-activity-section h3{font-size:16px!important;line-height:1.2!important}
+#view-checkin .checkin-log-table{min-width:1080px!important;table-layout:fixed!important}
+#view-checkin .checkin-log-table th,#view-checkin .checkin-log-row td{padding:10px 12px!important}
+#view-checkin .checkin-log-table th:nth-child(1){width:112px!important}
+#view-checkin .checkin-log-table th:nth-child(2){width:82px!important}
+#view-checkin .checkin-log-table th:nth-child(3){width:190px!important}
+#view-checkin .checkin-log-table th:nth-child(4){width:80px!important}
+#view-checkin .checkin-log-table th:nth-child(5){width:auto!important;min-width:330px!important}
+#view-checkin .checkin-log-table th:nth-child(6),#view-checkin .checkin-log-table th:nth-child(7){width:74px!important}
+#view-checkin .checkin-log-name,#view-checkin .checkin-log-job{white-space:normal!important;overflow-wrap:anywhere!important;word-break:normal!important}
+#view-checkin .checkin-log-icon{width:34px!important;height:34px!important;min-width:34px!important}
+#view-checkin .ces-checkin-inline-error{display:flex;align-items:center;justify-content:center;gap:12px;min-height:150px;padding:20px;border:1px dashed #fca5a5;border-radius:16px;background:#fff7f7;color:#64748b;text-align:left}
+#view-checkin .ces-checkin-inline-error>i{font-size:24px;color:#ef4444}
+#view-checkin .ces-checkin-inline-error b{display:block;color:#0f172a;font-size:12px}
+#view-checkin .ces-checkin-inline-error span{display:block;margin-top:3px;font-size:10px;color:#94a3b8;max-width:460px;overflow-wrap:anywhere}
+#view-checkin .ces-checkin-inline-error button{border:0;border-radius:10px;background:#0057b8;color:#fff;padding:8px 12px;font-size:10px;font-weight:900;white-space:nowrap}
+@media(max-width:900px){
+  #view-checkin .ces-checkin-team-grid-v40{grid-template-columns:repeat(2,minmax(0,1fr))!important}
+  #view-checkin .checkin-log-table{min-width:980px!important}
+  #view-inventory #siTable .sp-table{min-width:1260px!important}
+}
+#view-stock_dashboard .ces-ready-stock-badge-v263{
+  position:absolute!important;top:-7px!important;right:-7px!important;min-width:20px!important;height:20px!important;padding:0 5px!important;
+  border-radius:999px!important;background:#fff!important;color:#dc2626!important;border:2px solid #dc2626!important;
+  display:flex!important;align-items:center!important;justify-content:center!important;font-size:9px!important;font-weight:950!important;line-height:1!important;
+}
