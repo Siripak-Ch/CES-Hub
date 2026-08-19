@@ -87,7 +87,7 @@
 
 
 
-    <link rel="stylesheet" href="css/app.css?v=20260819-v277-calendar-stock-line">
+    <link rel="stylesheet" href="css/app.css?v=20260819-v279-api-recovery-stock-ocr">
     <link rel="stylesheet" href="css/ai-local-assistant.css?v=20260818-v268-priority-concurrency">
 
 
@@ -114,7 +114,7 @@
 
 
 
-    <script src="js/config.js?v=20260818-v276-line-all-jobs-car-bills-stock-ui"></script>
+    <script src="js/config.js?v=20260819-v279-api-recovery-stock-ocr"></script>
 
     <!-- LINE LIFF SDK V2 edge. Required for Rich Menu -> LINE identity auto-login. -->
     <script defer src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
@@ -122,7 +122,7 @@
 
 
 
-    <script src="js/gas-polyfill.js?v=20260818-v275-monthly-stock-line"></script>
+    <script src="js/gas-polyfill.js?v=20260819-v279-api-recovery-stock-ocr"></script>
 
 
 
@@ -291,8 +291,8 @@
 
 
 
-      window.CES_BUILD_HASH = 'CES-HUB-V27.7-CALENDAR-SAFE-STOCK-STABLE-LINE-FAST-20260819-0927';
-      window.CES_BUILD_VERSION = 'V27.7-CALENDAR-SAFE-STOCK-STABLE-LINE-FAST';
+      window.CES_BUILD_HASH = 'CES-HUB-V27.9-API-RECOVERY-STOCK-OCR-FAST-20260819-1020';
+      window.CES_BUILD_VERSION = 'V27.9-API-RECOVERY-STOCK-OCR-FAST';
 
       // CES_V221_CACHE_MIGRATION: force fresh shell/config/permissions after a release.
       try {
@@ -628,8 +628,13 @@
       }
       window.CES_prepareDeferredTab=function(tab){
         tab=String(tab||'').trim();if(!tab||tab==='portal')return Promise.resolve(true);
+        // Intent prefetch must NEVER insert another module view into the DOM.
+        // Several legacy runtimes use DOM presence as a compatibility signal;
+        // inserting off-tab HTML can therefore start unrelated APIs.  Warm only
+        // the selected tab's JavaScript source. The HTML is inserted on the
+        // actual click by CES_loadDeferredModules(tab).
         var codePromises=cesDeferredScriptsForTab(tab).map(cesDeferredItemByUrl).map(cesPrepareDeferredCode);
-        return Promise.all([cesEnsureDeferredView(tab)].concat(codePromises)).then(function(){return true;}).catch(function(error){console.warn('[CES tab prepare]',tab,error);return false;});
+        return Promise.all(codePromises).then(function(){return true;}).catch(function(error){console.warn('[CES tab prepare]',tab,error);return false;});
       };
       var cesDeferredSharedTailPromise=null;
       function cesLoadDeferredSharedTailLater_(){
@@ -678,23 +683,14 @@
         .then(function(){
           if(window.CES_BOOT_WATCHDOG)clearTimeout(window.CES_BOOT_WATCHDOG);CES_hideSplash();
           try{window.dispatchEvent(new CustomEvent('ces:app-ready',{detail:CESBoot.getReport()}));}catch(ignore){}
-          // Warm static page markup immediately after the shell is ready. HTML has
-          // no business API side effects, so tab switches can reveal the real page
-          // instantly while only the selected tab's JS executes on demand.
-          setTimeout(function(){if(window.CES_preloadDeferredViews)window.CES_preloadDeferredViews().catch(function(error){console.warn('[CES deferred HTML]',error);});},180);
-          // Stock pages have the largest client bundles. Warm only their source
-          // text during browser idle time (no script execution / no API calls),
-          // so opening Inventory / Infusion Pump / Check Stock feels immediate.
-          setTimeout(function(){
-            var warmStock=function(){
-              if(!window.CES_prepareDeferredTab)return;
-              ['stock_dashboard','inventory','check_stock'].forEach(function(tab){
-                window.CES_prepareDeferredTab(tab).catch(function(error){console.warn('[CES stock code warm]',tab,error);});
-              });
-            };
-            if(typeof requestIdleCallback==='function')requestIdleCallback(warmStock,{timeout:3500});
-            else setTimeout(warmStock,0);
-          },1500);
+          // V27.9: no automatic off-tab HTML warmup at all.  Off-tab DOM was the
+          // remaining trigger for legacy Revenue / Service / OT runtimes to call
+          // Apps Script while the user was on Check Stock or another page.
+          // The active page is demand-loaded; pointer/focus intent warms source
+          // code only (without DOM insertion or API execution).
+          // Stock source is no longer preloaded as three whole tabs. Pointer/focus
+          // intent below prepares only the tab the user is actually approaching.
+          // This keeps first API slots free for the active page.
           if(!window.CES_TAB_INTENT_PREFETCH_BOUND){
             window.CES_TAB_INTENT_PREFETCH_BOUND=true;
             var prepareIntent=function(event){var node=event.target&&event.target.closest?event.target.closest('[data-ces-tab]'):null;if(node&&window.CES_prepareDeferredTab)window.CES_prepareDeferredTab(node.getAttribute('data-ces-tab'));};

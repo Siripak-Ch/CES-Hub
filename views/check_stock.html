@@ -28,8 +28,10 @@
     </div>
 
     <div class="stockpro-card"><div class="sp-scan-box"><h3 style="justify-content:center"><i class="fas fa-barcode text-blue-500"></i> ค้นหาอุปกรณ์</h3><div class="sp-muted">ถ่ายรูปป้าย CESR / SN หรือพิมพ์รหัสเอง</div>
-      <input id="scImageInput" type="file" accept="image/*" class="hidden" onchange="sc_ocrImage(this)"><button class="sp-big-btn" onclick="document.getElementById('scImageInput').click()"><i class="fas fa-camera"></i> ถ่ายรูป / อัปโหลดป้าย</button>
-      <div style="display:flex;align-items:center;gap:12px;margin:14px 0;color:#94a3b8;font-size:12px;"><div style="height:1px;background:#e2e8f0;flex:1"></div>หรือพิมพ์รหัส<div style="height:1px;background:#e2e8f0;flex:1"></div></div>
+      <input id="scImageInput" type="file" accept="image/*" class="hidden" onchange="sc_ocrImage(this)">
+      <button type="button" class="sp-big-btn sc-image-picker-btn" onclick="document.getElementById('scImageInput').click()"><i class="fas fa-camera"></i><span>ถ่ายรูป / อัปโหลดป้าย</span></button>
+      <div id="scImagePreview" class="sc-image-preview hidden" aria-live="polite"></div>
+      <div class="sc-scan-divider"><div></div><span>หรือพิมพ์รหัส</span><div></div></div>
       <div class="sp-scan-input-row"><input id="scKeyword" class="stockpro-control" placeholder="ID Code หรือ Serial Number" onkeydown="if(event.key==='Enter')sc_lookup()"><button class="sp-btn primary" onclick="sc_lookup()"><i class="fas fa-search"></i></button></div>
     </div></div>
 

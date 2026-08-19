@@ -72,9 +72,12 @@
     function cesScheduleDeferredModules_(){
         if(CES_DEFERRED_IDLE_SCHEDULED)return;
         CES_DEFERRED_IDLE_SCHEDULED=true;
-        cesRunWhenForegroundIdle_(function(){
-            if(typeof window.CES_loadDeferredModules==='function')window.CES_loadDeferredModules().catch(function(error){console.warn('[CES deferred modules]',error);});
-        },3200,6500);
+        // Do not preload all deferred views/modules after login.  Besides wasting
+        // network/main-thread time, legacy compatibility runtimes can interpret an
+        // off-tab #view-* node as an instruction to start its API.  The navigation
+        // path now demand-loads only the active tab; hover/focus prefetch warms code
+        // without inserting HTML.
+        return;
     }
     function cesScheduleCalendarBackgroundSync_(){
         if(CES_CALENDAR_IDLE_SCHEDULED)return;
@@ -805,7 +808,7 @@
         let fn = '';
         if (currentTab === 'service')  fn = 'clearServiceData';
         else if (currentTab === 'report')   fn = 'clearReportData';
-        else if (currentTab === 'calendar') fn = 'clearCalendarData';
+        else if (currentTab === 'calendar') fn = 'syncCalendarToSheet';
 
         if (fn) {
             google.script.run

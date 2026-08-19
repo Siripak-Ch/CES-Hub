@@ -445,7 +445,7 @@
       const msg = err && err.message ? err.message : String(err || 'Unknown error');
       console.error('[Service CSI] load failed', err);
       if (cachedRows.length) { initService(cachedRows); if (force && window.Swal) Swal.fire({icon:'warning',title:'Using cached Service CSI',text:msg,timer:2200,showConfirmButton:false}); return cachedRows; }
-      if (window.Swal) Swal.fire('Service CSI Load Error', msg, 'error');
+      if ((!window.CES_shouldShowModuleError || window.CES_shouldShowModuleError('service')) && window.Swal) Swal.fire('Service CSI Load Error', msg, 'error');
       return [];
     }).finally(() => {
       serviceLoadBusy = false;
@@ -846,7 +846,7 @@
 (function () {
   'use strict';
 
-  var PATCH_VERSION = '20260708-frontend-final';
+  var PATCH_VERSION = 'V27.9-API-RECOVERY-STOCK-OCR-FAST';
   var MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
   var TEAMS = ['MED','LAB','EHS'];
   var STOCK_STATUSES = ['พร้อมส่ง','รอสอบเทียบ','เช่ายืม','ใช้งานไม่ได้','ไม่พบในรายการ'];
@@ -910,10 +910,23 @@
 
   function callAny(candidates) {
     var i = 0;
+    function canTryCompatibilityFallback_(err) {
+      var msg = String(err && err.message ? err.message : err || '');
+      // A transport/deployment failure affects every alias equally. Retrying five
+      // legacy names multiplies JSONP retries and was a major source of the
+      // "SYNCING 4+ REQUESTS" / cross-module lag. Only try the next name when
+      // the backend is reachable and explicitly says that this function name is
+      // unavailable.
+      if (/Cannot connect to Apps Script API|Apps Script API timeout|temporarily unavailable|Failed to fetch|NetworkError|Load failed/i.test(msg)) return false;
+      return /Function not allowed or not found|not found|is not defined|Unknown function|No backend function/i.test(msg);
+    }
     function next(lastErr) {
       if (i >= candidates.length) return Promise.reject(lastErr || new Error('No backend function succeeded'));
       var c = candidates[i++];
-      return callBackend(c.fn, c.args || [], c.options || {}).catch(next);
+      return callBackend(c.fn, c.args || [], c.options || {}).catch(function(err){
+        if (!canTryCompatibilityFallback_(err)) return Promise.reject(err);
+        return next(err);
+      });
     }
     return next();
   }
@@ -1195,7 +1208,7 @@
       box.innerHTML = 'Revenue load failed. ตรวจสอบ backend ให้มี function <b>getRevenueDashboardData(year)</b> และ sheet <b>Revenue_Data_' + esc(year) + '</b><br><small>' + esc(err && err.message ? err.message : err) + '</small>';
       var view = $('#view-revenue');
       if (view && !box.parentNode) view.insertBefore(box, view.children[1] || null);
-      if (window.Swal) window.Swal.fire('Revenue Error', err && err.message ? err.message : String(err), 'error');
+      if ((!window.CES_shouldShowModuleError || window.CES_shouldShowModuleError('revenue')) && window.Swal) window.Swal.fire('Revenue Error', err && err.message ? err.message : String(err), 'error');
       throw err;
     });
   }
@@ -1506,9 +1519,12 @@
   function patchApiHelpers() {
     window.CES_FRONTEND_FINAL_VERSION = PATCH_VERSION;
     window.CES_API_RECHECK = function () {
-      var out = { frontend: PATCH_VERSION, gasUrl: (window.CES_CONFIG && window.CES_CONFIG.GAS_API_URL) || '', checks: {} };
-      return callAny([{ fn: 'cesHubHealthCheck', args: [] }, { fn: 'CES_RECHECK_ALL', args: [] }])
-        .then(function (res) { out.checks.api = { ok:true, result:res }; console.log('[CES_API_RECHECK]', out); return out; })
+      var out = { frontend: PATCH_VERSION, gasUrl: (window.CES_API&&typeof window.CES_API.getEndpoint==='function'?window.CES_API.getEndpoint():((window.CES_CONFIG && window.CES_CONFIG.GAS_API_URL) || '')), checks: {} };
+      var check=(window.CES_API&&typeof window.CES_API.callFunction==='function')
+        ? window.CES_API.callFunction('CES_API_RECHECK',[],{transport:'jsonp',timeoutMs:30000,dedupe:false,priority:'active',userAction:true,module:'portal',silentLoading:true})
+        : callAny([{ fn: 'CES_API_RECHECK', args: [] }, { fn: 'cesHubHealthCheck', args: [] }, { fn: 'CES_RECHECK_ALL', args: [] }]);
+      return check
+        .then(function (res) { out.checks.api = { ok:true, result:res }; if(res&&res.runtimeUrl)out.runtimeUrl=res.runtimeUrl; out.endpointMatchesRuntime=!out.runtimeUrl||out.runtimeUrl===out.gasUrl; console.log('[CES_API_RECHECK]', out); return out; })
         .catch(function (err) { out.checks.api = { ok:false, error: err && err.message ? err.message : String(err) }; console.error('[CES_API_RECHECK]', out); return out; });
     };
     window.CES_FRONTEND_RECHECK_ALL = function () {
@@ -1534,7 +1550,7 @@
     setTimeout(function () {
       patchPdfExports();
       var tab = window.currentTab || (document.body.dataset && document.body.dataset.cesTab) || '';
-      if (tab === 'revenue' || !$('#view-revenue.hidden')) refreshRevenue(false).catch(function () {});
+      if (tab === 'revenue' || (window.CES_isActiveModule && window.CES_isActiveModule('revenue'))) refreshRevenue(false).catch(function () {});
     }, 250);
   }
 

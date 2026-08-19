@@ -70,16 +70,49 @@ function sc_checkoutPrompt(idCode,brand,model,sn){
     sc_record(idCode,'CHECK-OUT',Object.assign(v,{brand,model,serialNumber:sn}));
   });
 }
+function sc_renderImagePreview_(file,status){
+  const box=document.getElementById('scImagePreview'); if(!box)return;
+  if(!file){box.classList.add('hidden');box.innerHTML='';return;}
+  try{
+    const url=URL.createObjectURL(file);
+    box.classList.remove('hidden');
+    box.innerHTML=`<img src="${url}" alt="CESR / SN label preview" onload="try{URL.revokeObjectURL(this.src)}catch(e){}"><div><b>${spEsc(file.name||'Captured image')}</b><span>${spEsc(status||'กำลังเตรียมอ่านรหัส...')}</span></div>`;
+  }catch(e){box.classList.remove('hidden');box.innerHTML=`<div><b>${spEsc(file.name||'Image')}</b><span>${spEsc(status||'กำลังอ่านรหัส...')}</span></div>`;}
+}
+function sc_setImagePreviewStatus_(status){
+  const box=document.getElementById('scImagePreview'); if(!box)return;
+  const span=box.querySelector('span'); if(span)span.textContent=String(status||'');
+}
+function sc_ensureOcrLib_(){
+  if(typeof Tesseract!=='undefined')return Promise.resolve(Tesseract);
+  const url=(window.CES_LIBS&&window.CES_LIBS.tesseract)||'https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js';
+  if(typeof window.CES_loadLib!=='function')return Promise.reject(new Error('OCR library loader is unavailable'));
+  return window.CES_loadLib(url).then(function(){if(typeof Tesseract==='undefined')throw new Error('Tesseract.js failed to initialize');return Tesseract;});
+}
 function sc_ocrImage(input){
-  const file=input.files&&input.files[0]; if(!file)return;
-  if(typeof Tesseract==='undefined'){Swal.fire('OCR Error','Tesseract.js not loaded','error');return;}
-  Swal.fire({title:'กำลังอ่านภาพ...',allowOutsideClick:false,didOpen:()=>Swal.showLoading()});
-  Tesseract.recognize(file,'eng').then(({data:{text}})=>{
-    Swal.close();
+  const file=input&&input.files&&input.files[0]; if(!file)return;
+  sc_renderImagePreview_(file,'กำลังโหลด OCR...');
+  if(window.Swal)Swal.fire({title:'กำลังอ่านป้าย CESR / SN...',allowOutsideClick:false,didOpen:()=>Swal.showLoading()});
+  sc_ensureOcrLib_().then(function(lib){
+    sc_setImagePreviewStatus_('กำลังอ่านข้อความจากภาพ...');
+    return lib.recognize(file,'eng');
+  }).then(function(result){
+    if(window.Swal)Swal.close();
+    const text=result&&result.data?result.data.text:'';
     const code=sc_extractCode(text);
-    if(code){document.getElementById('scKeyword').value=code;sc_lookup();}
-    else Swal.fire('ไม่พบรหัสในภาพ',text.slice(0,300),'warning');
-  }).catch(err=>Swal.fire('OCR Error',err.message||String(err),'error'));
+    if(code){
+      const keyword=document.getElementById('scKeyword');if(keyword)keyword.value=code;
+      sc_setImagePreviewStatus_('พบรหัส '+code+' — กำลังค้นหา...');
+      sc_lookup();
+    }else{
+      sc_setImagePreviewStatus_('ไม่พบ CESR / SN ชัดเจน กรุณาพิมพ์รหัสเอง');
+      if(window.Swal)Swal.fire('ไม่พบรหัสในภาพ','ลองถ่ายใหม่ให้ป้ายตรงและชัด หรือพิมพ์ ID / Serial Number ด้านล่าง','warning');
+    }
+  }).catch(function(err){
+    if(window.Swal)Swal.close();
+    sc_setImagePreviewStatus_('อ่านภาพไม่สำเร็จ — ยังสามารถพิมพ์รหัสเองได้');
+    if(window.Swal)Swal.fire('OCR Error',err&&err.message?err.message:String(err),'error');
+  }).finally(function(){try{input.value='';}catch(e){}});
 }
 function sc_extractCode(text){
   const t=String(text||'').toUpperCase().replace(/\s+/g,' ');

@@ -13,15 +13,17 @@ let revenueLoading = false;
 let currentEditTeam = '';
 
 (function initRevenueSystem() {
-  // Start after modular views are loaded. This cache is also used by Home Dashboard.
+  // Deferred HTML is pre-created/warmed independently from business code.
+  // Never start Revenue merely because #view-revenue exists in the DOM.
   setTimeout(function () {
-    if (document.getElementById('view-revenue')) fetchRevenueDataBackground(false);
-  }, 1000);
+    if (window.CES_isActiveModule && window.CES_isActiveModule('revenue')) fetchRevenueDataBackground(false);
+  }, 250);
 })();
 
 function revenueNotifyError(message) {
   const msg = String(message || 'Revenue API error');
   console.error('[Revenue]', msg);
+  if (window.CES_shouldShowModuleError && !window.CES_shouldShowModuleError('revenue')) return;
   if (window.Swal) Swal.fire({ icon: 'error', title: 'Revenue Error', text: msg });
   else alert('Revenue Error: ' + msg);
 }

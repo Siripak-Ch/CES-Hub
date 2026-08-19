@@ -40,11 +40,11 @@
   const activeWriteQueue = [];
   const normalQueue = [];
   const backgroundQueue = [];
-  const MAX_ACTIVE_READS = 3;
+  const MAX_ACTIVE_READS = 2;
   const MAX_ACTIVE_WRITES = 1;
   const MAX_NORMAL_REQUESTS = 1;
   const MAX_BACKGROUND_REQUESTS = 1;
-  const MAX_TOTAL_REQUESTS = 5;
+  const MAX_TOTAL_REQUESTS = 3;
   const idleWaiters = [];
   const BACKGROUND_INTERACTION_GRACE_MS = 1400;
   const DIRECT_INTERACTION_PRIORITY_MS = 350;
@@ -130,7 +130,7 @@
       progressed=false;
       if(activeWriteQueue.length&&taskState.activeWrites<MAX_ACTIVE_WRITES){startJob_(activeWriteQueue.shift(),'activeWrites');progressed=true;continue;}
       if(activeReadQueue.length&&taskState.activeReads<MAX_ACTIVE_READS){startJob_(activeReadQueue.pop(),'activeReads');progressed=true;continue;}
-      if(!activeWriteQueue.length&&!activeReadQueue.length&&normalQueue.length&&taskState.normal<MAX_NORMAL_REQUESTS){startJob_(normalQueue.shift(),'normal');progressed=true;continue;}
+      if(!activeWriteQueue.length&&!activeReadQueue.length&&taskState.activeReads===0&&taskState.activeWrites===0&&normalQueue.length&&taskState.normal<MAX_NORMAL_REQUESTS){startJob_(normalQueue.shift(),'normal');progressed=true;continue;}
       if(!foregroundBusy_()&&taskState.background<MAX_BACKGROUND_REQUESTS&&backgroundQueue.length&&backgroundGraceRemaining_()===0){startJob_(backgroundQueue.shift(),'background');progressed=true;continue;}
       if(backgroundQueue.length&&backgroundGraceRemaining_()>0)scheduleBackgroundWake_();
     }
@@ -252,16 +252,68 @@
     }
   }
 
-  function getGasApiUrl() {
-    if (!window.CES_CONFIG || !window.CES_CONFIG.GAS_API_URL) {
-      throw new Error('Missing window.CES_CONFIG.GAS_API_URL in js/config.js');
-    }
-    const url = String(window.CES_CONFIG.GAS_API_URL || '').trim();
-    if (!url || url.includes('PASTE_')) {
-      throw new Error('GAS_API_URL is not configured correctly in js/config.js');
-    }
-    return url;
+  const CES_API_URL_OVERRIDE_KEY = 'CES_GAS_API_URL_OVERRIDE';
+  const apiConnectionState = {
+    activeUrl:'', lastSuccessAt:0, lastFailureAt:0, consecutiveFailures:0,
+    status:'unknown', lastError:''
+  };
+
+  function normalizeGasUrl_(value) {
+    const url=String(value||'').trim();
+    if(!url || url.includes('PASTE_')) return '';
+    if(!/^https:\/\/script\.google\.com\/macros\/s\/[A-Za-z0-9_-]+\/exec(?:\?.*)?$/i.test(url)) return '';
+    return url.replace(/\?.*$/,'');
   }
+  function getConfiguredGasCandidates_() {
+    const out=[];
+    function add(value){const u=normalizeGasUrl_(value);if(u&&out.indexOf(u)<0)out.push(u);}
+    try {
+      const qs=new URLSearchParams(location.search||'');
+      const queryOverride=qs.get('gasApiUrl')||qs.get('apiUrl')||'';
+      if(queryOverride){
+        add(queryOverride);
+        const normalized=normalizeGasUrl_(queryOverride);
+        if(normalized)localStorage.setItem(CES_API_URL_OVERRIDE_KEY,normalized);
+      }
+    } catch(ignoreQuery) {}
+    try { add(localStorage.getItem(CES_API_URL_OVERRIDE_KEY)||''); } catch(ignoreLocal) {}
+    if(window.CES_CONFIG){
+      add(window.CES_CONFIG.GAS_API_URL);
+      const extra=Array.isArray(window.CES_CONFIG.GAS_API_URL_FALLBACKS)?window.CES_CONFIG.GAS_API_URL_FALLBACKS:[];
+      extra.forEach(add);
+    }
+    return out;
+  }
+  function setActiveGasUrl_(url) {
+    const normalized=normalizeGasUrl_(url);
+    if(normalized)apiConnectionState.activeUrl=normalized;
+    return apiConnectionState.activeUrl;
+  }
+  function getGasApiUrl() {
+    const candidates=getConfiguredGasCandidates_();
+    if(!candidates.length)throw new Error('GAS_API_URL is not configured correctly in js/config.js');
+    if(apiConnectionState.activeUrl && candidates.indexOf(apiConnectionState.activeUrl)>=0)return apiConnectionState.activeUrl;
+    return setActiveGasUrl_(candidates[0]);
+  }
+  function isApiNetworkError_(err) {
+    const msg=String(err&&err.message||err||'');
+    return /Cannot connect to Apps Script API|Apps Script API timeout|Failed to fetch|NetworkError|Load failed/i.test(msg);
+  }
+  function emitApiState_(status,err) {
+    apiConnectionState.status=status;
+    if(status==='online'){
+      apiConnectionState.lastSuccessAt=Date.now();apiConnectionState.consecutiveFailures=0;apiConnectionState.lastError='';
+    }else if(status==='offline'){
+      apiConnectionState.lastFailureAt=Date.now();apiConnectionState.consecutiveFailures+=1;apiConnectionState.lastError=String(err&&err.message||err||'');
+    }
+    try{window.dispatchEvent(new CustomEvent('ces:api-connection',{detail:Object.assign({},apiConnectionState)}));}catch(ignore){}
+  }
+  function setGasApiUrlOverride_(url) {
+    const normalized=normalizeGasUrl_(url);if(!normalized)throw new Error('Use a valid Apps Script /exec URL');
+    try{localStorage.setItem(CES_API_URL_OVERRIDE_KEY,normalized);}catch(ignore){}
+    setActiveGasUrl_(normalized);apiConnectionState.status='unknown';return normalized;
+  }
+  function clearGasApiUrlOverride_(){try{localStorage.removeItem(CES_API_URL_OVERRIDE_KEY);}catch(ignore){}apiConnectionState.activeUrl='';apiConnectionState.status='unknown';return getGasApiUrl();}
 
   function nextId(prefix) {
     seq += 1;
@@ -359,19 +411,27 @@
 
   function jsonpCall(fnName, args, options) {
     options = options || {};
-    function attempt(n) {
+    const candidates=getConfiguredGasCandidates_();
+    if(!candidates.length)return Promise.reject(normalizeError(new Error('GAS_API_URL is not configured correctly in js/config.js')));
+    let startIndex=Math.max(0,candidates.indexOf(getGasApiUrl()));
+    function attempt(retryIndex,candidateIndex) {
+      candidateIndex=Math.min(candidateIndex,candidates.length-1);
+      setActiveGasUrl_(candidates[candidateIndex]);
       const callbackName = nextId('JSONP_CB');
       const url = buildJsonpUrl(fnName, args || [], callbackName);
-      if (window.CES_CONFIG && window.CES_CONFIG.DEBUG) console.log('[CES API] JSONP', fnName, args || [], 'attempt', n);
-      return jsonpByUrl(url, options).catch(function (err) {
-        const msg = String(err && err.message || err || '');
-        if (n < 2 && /Cannot connect to Apps Script API|Apps Script API timeout/i.test(msg)) {
-          return new Promise(function(resolve){setTimeout(resolve,350);}).then(function(){return attempt(n+1);});
+      if (window.CES_CONFIG && window.CES_CONFIG.DEBUG) console.log('[CES API] JSONP', fnName, 'attempt', retryIndex, 'endpoint', candidateIndex+1+'/'+candidates.length);
+      return jsonpByUrl(url, options).then(function(result){emitApiState_('online');return result;}).catch(function (err) {
+        if(!isApiNetworkError_(err))throw err;
+        emitApiState_('offline',err);
+        // Try an explicitly configured alternate /exec URL before repeating the same endpoint.
+        if(candidateIndex+1<candidates.length){return new Promise(function(resolve){setTimeout(resolve,120);}).then(function(){return attempt(1,candidateIndex+1);});}
+        if (retryIndex < 2) {
+          return new Promise(function(resolve){setTimeout(resolve,450);}).then(function(){return attempt(retryIndex+1,startIndex);});
         }
         throw err;
       });
     }
-    return attempt(1);
+    return attempt(1,startIndex);
   }
 
   function iframePostCall(fnName, args, options) {
@@ -570,9 +630,15 @@
     const effectiveOptions = Object.assign({}, options);
     if (lane === 'background' && typeof effectiveOptions.silentLoading === 'undefined') effectiveOptions.silentLoading = true;
     const requestFactory = function(){
+      // When the deployment endpoint is temporarily unreachable, do not let
+      // unrelated background modules each start their own retry storm. The
+      // active page is always allowed to probe/recover immediately.
+      if(lane !== 'active' && apiConnectionState.status === 'offline' && Date.now()-Number(apiConnectionState.lastFailureAt||0) < 5000){
+        return Promise.reject(normalizeError(new Error('Apps Script API temporarily unavailable')));
+      }
       const loadingTicket = beginWriteLoading(fnName, Object.assign({}, effectiveOptions, { loadingLabel:(effectiveOptions&&effectiveOptions.loadingLabel)||(writeLike?undefined:'Loading data…') }));
       const actual = transport === 'iframe' ? iframePostCall(fnName, args, effectiveOptions) : jsonpCall(fnName, args, effectiveOptions);
-      return Promise.resolve(actual).finally(function(){ endWriteLoading(loadingTicket); });
+      return Promise.resolve(actual).then(function(result){emitApiState_('online');return result;},function(err){if(isApiNetworkError_(err))emitApiState_('offline',err);throw err;}).finally(function(){ endWriteLoading(loadingTicket); });
     };
     const wrapped = createScheduledRequest_(requestFactory, {lane:lane,writeLike:schedulerWriteLike,module:moduleName,fnName:fnName});
     if (!key) return wrapped;
@@ -669,7 +735,11 @@
       options.raw = true;
       return callFunction(fnName, Array.isArray(args) ? args : [], options);
     },
-    health: function () { return jsonpCall('health', [], { raw: true }); },
+    health: function () { return jsonpCall('health', [], { raw: true, timeoutMs:30000 }); },
+    getEndpoint: function () { return getGasApiUrl(); },
+    getConnectionState: function () { return Object.assign({}, apiConnectionState); },
+    setEndpoint: function (url) { return setGasApiUrlOverride_(url); },
+    clearEndpointOverride: function () { return clearGasApiUrlOverride_(); },
     login: function (employeeId) { return callFunction('checkLogin', [employeeId], {}); },
     getAllData: function () { return callFunction('getAllData', [], {}); },
     chunkedRows: function (fnName, rows, meta, options) { return chunkedRowsCall(fnName, rows, meta || {}, options || {}); }
@@ -740,9 +810,21 @@
 
 
   window.CES_API_RECHECK_GAS_POLYFILL = function () {
-    return window.CES_API.health()
-      .then(function (res) { console.log('[CES_API_RECHECK_GAS_POLYFILL] connected', res); return { ok: true, result: res }; })
-      .catch(function (err) { console.error('[CES_API_RECHECK_GAS_POLYFILL] failed', err); return { ok: false, error: err && err.message ? err.message : String(err) }; });
+    var endpoint='';try{endpoint=window.CES_API.getEndpoint();}catch(e){}
+    return window.CES_API.health().then(function (health) {
+      return window.CES_API.callFunction('CES_API_RECHECK', [], {transport:'jsonp',timeoutMs:30000,dedupe:false,priority:'active',userAction:true,module:'portal',silentLoading:true})
+        .then(function (backend) {
+          var runtime=backend&&backend.runtimeUrl?String(backend.runtimeUrl):'';
+          var out={ok:true,endpoint:endpoint,runtimeUrl:runtime,endpointMatchesRuntime:!runtime||runtime===endpoint,health:health,backend:backend,state:window.CES_API.getConnectionState()};
+          if(runtime&&runtime!==endpoint) console.warn('[CES API] frontend endpoint differs from deployed runtime URL',out);
+          else console.log('[CES_API_RECHECK_GAS_POLYFILL] connected',out);
+          return out;
+        });
+    }).catch(function (err) {
+      var out={ok:false,endpoint:endpoint,error:err&&err.message?err.message:String(err),state:window.CES_API.getConnectionState()};
+      console.error('[CES_API_RECHECK_GAS_POLYFILL] failed',out);
+      return out;
+    });
   };
 
 
@@ -764,5 +846,5 @@
     } catch (ignore) {}
   }, 2500);
 
-  console.log('[CES Hub] gas-polyfill.js loaded: active-page-first scheduler + adaptive transport');
+  console.log('[CES Hub] gas-polyfill.js loaded: API recovery + active-page-first scheduler');
 })();

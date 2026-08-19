@@ -80,7 +80,7 @@ function fetchOTData(forceRefresh) {
     ensureOTYears_(rawOTData);
     setOTDataState_('error', 'OT data unavailable');
     applyOTFilters();
-    if (window.Swal) Swal.fire({ icon:'warning', title:'OT data unavailable', text:otErrorMessage_(error), confirmButtonColor:'#003DA5' });
+    if ((!window.CES_shouldShowModuleError || window.CES_shouldShowModuleError('ot')) && window.Swal) Swal.fire({ icon:'warning', title:'OT data unavailable', text:otErrorMessage_(error), confirmButtonColor:'#003DA5' });
     return rawOTData;
   }).finally(function() {
     if (loadingToken && window.CES_UI) window.CES_UI.end(loadingToken);
