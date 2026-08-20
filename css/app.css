@@ -4592,7 +4592,7 @@ textarea.ces-detail-input-v243{min-height:58px;resize:vertical;margin-bottom:9px
 /* ============================================================
    CES Hub V28.0 — API stable UI fixes
    ============================================================ */
-/* Notification bell: opaque yellow button, white bell, red outlined count ring. */
+/* Notification bell: opaque yellow button, white bell, red count with white number. */
 .ces-notification-icon-btn,
 .ces-kpi-notification-btn,
 #view-kpi #kpi-late-alert-button,
@@ -4610,11 +4610,12 @@ textarea.ces-detail-input-v243{min-height:58px;resize:vertical;margin-bottom:9px
 #view-stock_dashboard .stockpro-actions .ces-ready-stock-alert-v263>i{color:#fff!important}
 .ces-notification-count,
 .ces-kpi-notification-badge,
-#view-stock_dashboard .ces-ready-stock-alert-v263 .sp-alert-badge{
-  background:#fff!important;
-  color:#dc2626!important;
-  border:2px solid #dc2626!important;
-  box-shadow:0 1px 4px rgba(220,38,38,.18)!important;
+#view-stock_dashboard .ces-ready-stock-alert-v263 .sp-alert-badge,
+#view-stock_dashboard .ces-ready-stock-badge-v263{
+  background:#dc2626!important;
+  color:#fff!important;
+  border:2px solid #fff!important;
+  box-shadow:0 2px 8px rgba(220,38,38,.28)!important;
 }
 
 /* Inventory: keep a readable desktop table instead of squeezing eleven columns. */
@@ -4655,7 +4656,12 @@ textarea.ces-detail-input-v243{min-height:58px;resize:vertical;margin-bottom:9px
 #view-checkin .ces-checkin-kpi-v40 .kpi-label{font-size:10px!important;line-height:1.2!important;white-space:normal!important}
 #view-checkin .ces-checkin-kpi-v40 .kpi-value{font-size:28px!important;line-height:1!important;margin-top:6px!important}
 #view-checkin #job-list-container{gap:12px!important}
+#view-checkin #job-list-container{display:grid!important;grid-template-columns:repeat(3,minmax(0,1fr))!important;align-content:start!important;max-height:540px!important;padding-right:6px!important}
 #view-checkin #job-list-container>div{min-width:0}
+#view-checkin .ces-checkin-job-card{min-height:178px!important;padding:13px!important}
+#view-checkin .ces-checkin-job-card h4{min-height:45px!important;display:-webkit-box!important;-webkit-box-orient:vertical!important;-webkit-line-clamp:3!important;overflow:hidden!important;overflow-wrap:anywhere!important}
+#view-checkin .ces-checkin-job-location{min-height:27px!important;line-height:1.35!important}
+#view-checkin .ces-checkin-job-location span{display:-webkit-box!important;-webkit-box-orient:vertical!important;-webkit-line-clamp:2!important;overflow:hidden!important;overflow-wrap:anywhere!important}
 #view-checkin #recent-activity-list{padding-right:2px}
 #view-checkin #team-activity-section{padding:20px!important;border-radius:20px!important}
 #view-checkin #team-activity-section>div:first-child{margin-bottom:14px!important;align-items:center!important}
@@ -4677,12 +4683,14 @@ textarea.ces-detail-input-v243{min-height:58px;resize:vertical;margin-bottom:9px
 #view-checkin .ces-checkin-inline-error button{border:0;border-radius:10px;background:#0057b8;color:#fff;padding:8px 12px;font-size:10px;font-weight:900;white-space:nowrap}
 @media(max-width:900px){
   #view-checkin .ces-checkin-team-grid-v40{grid-template-columns:repeat(2,minmax(0,1fr))!important}
+  #view-checkin #job-list-container{grid-template-columns:repeat(2,minmax(0,1fr))!important}
   #view-checkin .checkin-log-table{min-width:980px!important}
   #view-inventory #siTable .sp-table{min-width:1260px!important}
 }
+@media(max-width:620px){#view-checkin #job-list-container{grid-template-columns:1fr!important;max-height:none!important;padding-right:0!important}}
 #view-stock_dashboard .ces-ready-stock-badge-v263{
   position:absolute!important;top:-7px!important;right:-7px!important;min-width:20px!important;height:20px!important;padding:0 5px!important;
-  border-radius:999px!important;background:#fff!important;color:#dc2626!important;border:2px solid #dc2626!important;
+  border-radius:999px!important;background:#dc2626!important;color:#fff!important;border:2px solid #fff!important;
   display:flex!important;align-items:center!important;justify-content:center!important;font-size:9px!important;font-weight:950!important;line-height:1!important;
 }
 
@@ -4717,3 +4725,21 @@ textarea.ces-detail-input-v243{min-height:58px;resize:vertical;margin-bottom:9px
 #view-check_stock .sp-scan-input-row>input{height:42px!important;min-height:42px!important;font-size:12px!important;line-height:1.35!important}
 #view-check_stock .sp-scan-input-row>.sp-btn{width:46px!important;height:42px!important;min-width:46px!important;min-height:42px!important}
 #view-check_stock .sp-scan-input-row>.sp-btn>i{font-size:13px!important;line-height:1!important}
+
+/* Service CSI critical styles must live in the global stylesheet. Previously
+   these rules were declared inside Management Overview, so opening Service CSI
+   first could render KPI values as unboxed text until another view loaded. */
+#view-service .s-kpi-card{
+  min-width:0!important;height:105px!important;min-height:105px!important;
+  padding:14px 16px!important;background:#fff!important;border:1px solid #e2e8f0!important;
+  border-radius:16px!important;box-shadow:0 1px 3px rgba(15,23,42,.06)!important;
+  display:flex!important;flex-direction:column!important;justify-content:space-between!important;
+  overflow:hidden!important;box-sizing:border-box!important;
+}
+#view-service .s-kpi-top{display:flex!important;align-items:flex-start!important;justify-content:space-between!important;gap:8px!important;min-width:0!important}
+#view-service .s-kpi-label{min-width:0!important;font-size:11px!important;line-height:1.25!important;font-weight:700!important;text-transform:uppercase!important;letter-spacing:.025em!important;color:#64748b;overflow-wrap:anywhere}
+#view-service .s-kpi-icon{width:32px!important;height:32px!important;flex:0 0 32px!important;border-radius:8px!important;display:flex!important;align-items:center!important;justify-content:center!important;font-size:14px!important}
+#view-service .s-kpi-value{font-size:24px!important;line-height:1.15!important;font-weight:800!important;color:#1e293b}
+#view-service .s-kpi-sub{display:flex!important;align-items:center!important;gap:4px!important;font-size:10px!important;line-height:1.2!important;font-weight:600!important}
+#view-service #serviceDashboardPanelV266>.grid{min-width:0}
+@media(max-width:640px){#view-service .s-kpi-card{height:98px!important;min-height:98px!important;padding:12px!important}}

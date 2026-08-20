@@ -413,24 +413,32 @@ function siCurrentLayoutStyle(){
     #view-inventory .si-icon-only{width:38px!important;height:38px!important;min-width:38px!important;padding:0!important;font-size:0!important;border-radius:12px!important;position:relative!important}
     #view-inventory .si-icon-only i{font-size:14px!important}
     #view-inventory #siLowStockHeaderCount,#view-inventory #siCartCount{position:absolute;top:-7px;right:-7px;min-width:20px;height:20px;border-radius:999px;background:#ef4444;color:#fff;font-size:10px!important;font-weight:900;display:flex;align-items:center;justify-content:center;border:2px solid #fff;padding:0 5px}
-    #view-inventory .sp-table td{padding:10px 12px!important;font-size:12px!important;vertical-align:middle!important;line-height:1.25!important}
-    #view-inventory .sp-table th{padding:10px 12px!important;font-size:11px!important}
+    #view-inventory #siTable,#view-inventory #siAccCards{max-width:100%;overflow-x:auto;overscroll-behavior-inline:contain;scrollbar-gutter:stable;padding-bottom:6px}
+    #view-inventory .sp-table-wrap{max-width:100%;overflow:auto!important}
+    #view-inventory .sp-table{min-width:1120px!important}
+    #view-inventory .sp-table td{padding:9px 10px!important;font-size:11px!important;vertical-align:middle!important;line-height:1.3!important;white-space:normal!important;overflow-wrap:anywhere}
+    #view-inventory .sp-table th{padding:9px 10px!important;font-size:10px!important;white-space:nowrap!important}
+    #view-inventory .sp-table th:last-child,#view-inventory .sp-table td:last-child{min-width:145px}
+    #view-inventory .sp-compact-table .sp-action-group{display:flex!important;gap:4px!important;flex-wrap:nowrap!important;white-space:nowrap!important}
+    #view-inventory .sp-pagination{display:flex!important;align-items:center!important;justify-content:space-between!important;gap:12px!important;max-width:100%;overflow-x:auto;padding:8px 2px;white-space:nowrap}
+    #view-inventory .sp-page-buttons{display:flex!important;align-items:center!important;gap:4px!important;flex-wrap:nowrap!important;white-space:nowrap}
+    #view-inventory .sp-page-buttons button{flex:0 0 auto;min-width:30px;height:30px;padding:0 8px}
     #view-inventory .sp-icon-btn{width:30px!important;height:30px!important;border-radius:9px!important;font-size:12px!important}
-    #view-inventory .sp-acc-list-v17{display:flex;flex-direction:column;gap:10px}
-    #view-inventory .sp-acc-row-v17{display:grid;grid-template-columns:42px minmax(180px,1.65fr) .65fr .65fr .85fr 1.1fr minmax(270px,auto);gap:12px;align-items:center;border:1px solid #e2e8f0;background:#fff;border-radius:16px;padding:12px 14px;box-shadow:0 3px 12px rgba(15,23,42,.04)}
+    #view-inventory .sp-acc-list-v17{display:flex;flex-direction:column;gap:8px;min-width:1080px}
+    #view-inventory .sp-acc-row-v17{display:grid;grid-template-columns:36px minmax(190px,1.55fr) 58px 58px 82px minmax(145px,1fr) 306px;gap:9px;align-items:center;min-width:1080px;border:1px solid #e2e8f0;background:#fff;border-radius:14px;padding:9px 11px;box-shadow:0 3px 12px rgba(15,23,42,.04)}
     #view-inventory .sp-acc-row-v17.low{border-color:#fdba74;background:#fff7ed}
-    #view-inventory .acc-ico{width:38px;height:38px;border-radius:12px;display:flex;align-items:center;justify-content:center;background:#dbeafe;color:#2563eb}
+    #view-inventory .acc-ico{width:34px;height:34px;border-radius:10px;display:flex;align-items:center;justify-content:center;background:#dbeafe;color:#2563eb}
     #view-inventory .acc-ico.med{background:#dbeafe;color:#1d4ed8}#view-inventory .acc-ico.lab{background:#ede9fe;color:#6d28d9}#view-inventory .acc-ico.ehs{background:#d1fae5;color:#047857}#view-inventory .acc-ico.tes{background:#fef3c7;color:#d97706}
-    #view-inventory .acc-title{font-weight:1000;color:#0f172a;font-size:14px;line-height:1.2}
-    #view-inventory .acc-sub{font-size:11px;color:#64748b;margin-top:2px}
-    #view-inventory .acc-stock{font-size:20px;font-weight:1000;line-height:1}
-    #view-inventory .acc-actions{display:flex;gap:6px;align-items:center;justify-content:flex-end;flex-wrap:wrap}
-    #view-inventory .acc-actions input{width:48px;height:32px;border:1px solid #dbe3ef;border-radius:10px;text-align:center;font-weight:900}
-    #view-inventory .acc-mini{width:32px;height:32px;border-radius:10px;border:1px solid #dbe3ef;background:#fff;display:inline-flex;align-items:center;justify-content:center;cursor:pointer;font-size:12px;font-weight:900}
+    #view-inventory .acc-title{font-weight:1000;color:#0f172a;font-size:12px;line-height:1.25;overflow-wrap:anywhere}
+    #view-inventory .acc-sub{font-size:9px;color:#64748b;margin-top:2px;line-height:1.25;overflow-wrap:anywhere}
+    #view-inventory .acc-stock{font-size:18px;font-weight:1000;line-height:1}
+    #view-inventory .sp-acc-row-v17 .acc-actions{display:flex;gap:4px;align-items:center;justify-content:flex-end;flex-wrap:nowrap;white-space:nowrap}
+    #view-inventory .sp-acc-row-v17 .acc-actions input{width:40px;height:29px;border:1px solid #dbe3ef;border-radius:8px;text-align:center;font-weight:900;font-size:11px;padding:0}
+    #view-inventory .sp-acc-row-v17 .acc-mini{width:29px;height:29px;flex:0 0 29px;border-radius:8px;border:1px solid #dbe3ef;background:#fff;display:inline-flex;align-items:center;justify-content:center;cursor:pointer;font-size:10px;font-weight:900;padding:0}
     #view-inventory .acc-mini.green{background:#059669;color:#fff;border-color:#059669}.acc-mini.orange{background:#fff7ed;color:#ea580c;border-color:#fed7aa}.acc-mini.blue{background:#eff6ff;color:#2563eb;border-color:#bfdbfe}.acc-mini.red{background:#fee2e2;color:#b91c1c;border-color:#fecaca}.acc-mini.info{background:#f8fafc;color:#334155;border-color:#cbd5e1}.acc-mini:disabled{opacity:.45;cursor:not-allowed}
     #view-inventory .ces-accessory-head-actions{display:flex;align-items:center;gap:8px}
     .si-accessory-form{display:grid;grid-template-columns:1fr 1fr;gap:8px;text-align:left}.si-accessory-form .wide{grid-column:1/-1}.si-accessory-form label{font-size:11px;font-weight:800;color:#475569}.si-accessory-form .swal2-input,.si-accessory-form .swal2-select{width:100%!important;margin:4px 0 0!important;height:42px!important}
-    @media(max-width:980px){#view-inventory .sp-acc-row-v17{grid-template-columns:42px 1fr;align-items:start}#view-inventory .acc-actions{grid-column:1/-1;justify-content:flex-start}#siCartFab{right:16px!important;bottom:18px!important}}
+    @media(max-width:980px){#view-inventory #siTable,#view-inventory #siAccCards{margin-right:0}#siCartFab{right:16px!important;bottom:18px!important}}
   `;
   document.head.appendChild(st);
 }
