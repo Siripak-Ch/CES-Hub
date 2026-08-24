@@ -11,6 +11,7 @@
         <button class="sp-btn ghost csv5-icon-btn ces-action-neutral" onclick="si_openInventoryHistory()" title="Activity History"><i class="fas fa-history"></i></button>
         <button class="sp-btn warn csv5-icon-btn ces-action-warning ces-notification-icon-btn" onclick="si_openAccessoryLowStockAlerts()" title="Accessory Alerts"><i class="fas fa-bell"></i><span id="siLowStockHeaderCount" class="sp-mini-badge ces-notification-count">0</span></button>
         <button class="sp-btn primary csv5-icon-btn ces-action-primary" onclick="si_toggleCart()" title="Checkout Cart"><i class="fas fa-shopping-cart"></i><span id="siCartCount" class="sp-mini-badge">0</span></button>
+        <button class="ces-standard-icon-btn ces-action-excel" onclick="si_downloadBulkTemplate()" title="Download Bulk Upload Excel Template" aria-label="Download Bulk Upload Excel Template"><i class="fas fa-file-arrow-down"></i></button>
         <button class="ces-standard-icon-btn ces-upload-icon-btn" onclick="si_triggerBulkUpload()" title="Bulk Upload CSV / XLSX" aria-label="Bulk Upload CSV / XLSX"><i class="fas fa-arrow-up-from-bracket"></i></button>
         <input id="siBulkEquipmentFile" type="file" class="hidden" accept=".csv,.xlsx,.xls" onchange="si_handleBulkUpload(this.files && this.files[0]);this.value=''">
         <button class="ces-standard-icon-btn ces-excel-icon-btn" onclick="si_exportCurrent()" title="Export Excel (.xlsx)" aria-label="Export Excel"><i class="fas fa-file-excel"></i></button>

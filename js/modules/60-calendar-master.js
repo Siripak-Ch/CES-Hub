@@ -51,20 +51,24 @@
         const monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
         if(monthSelect) {
             monthSelect.innerHTML = "";
+            monthSelect.appendChild(new Option('All Months', 'ALL'));
             monthNames.forEach((m, index) => {
                 let option = document.createElement("option");
                 option.value = index; option.text = m;
                 monthSelect.appendChild(option);
             });
+            monthSelect.value = String(currentDisplayDate.getMonth());
         }
         if(yearSelect) {
             yearSelect.innerHTML = "";
-            const currentYear = new Date().getFullYear();
-            for(let y = currentYear - 2; y <= currentYear + 5; y++) {
+            yearSelect.appendChild(new Option('All Years', 'ALL'));
+            const available = new Set((window.globalCalData || []).map(row => Number(row.year)).filter(y => y === 2025 || y === 2026));
+            [2025, 2026].filter(y => available.has(y)).forEach(y => {
                 let option = document.createElement("option");
                 option.value = y; option.text = y;
                 yearSelect.appendChild(option);
-            }
+            });
+            yearSelect.value = available.has(currentDisplayDate.getFullYear()) ? String(currentDisplayDate.getFullYear()) : 'ALL';
         }
     }
 
@@ -88,42 +92,38 @@
     }
     window.refreshVisibleCalendarMonth = refreshVisibleCalendarMonth;
 
-    async function fullSyncMasterCalendar() {
+    async function sendCalendarWorkplanAlertTest() {
         if (!window.CES_API || typeof window.CES_API.callFunction !== 'function') throw new Error('CES API bridge is not ready.');
         const confirmation = await Swal.fire({
-            icon:'warning',
-            title:'Full Sync Calendar?',
-            html:'ระบบจะดึงข้อมูลทั้งหมดจาก Calendar ที่ตั้งค่าไว้สำหรับปี 2025–2026 และแทนที่ข้อมูลใน <b>Calendar_Summary</b> ใหม่ทั้งหมด',
+            icon:'question',
+            title:'Send Work Plan Test?',
+            html:'ส่งสรุปแผนงานล่วงหน้า 2 เดือน โดยเทียบแผนปีก่อน ไปยัง <b>ADMIN เท่านั้น</b>',
             showCancelButton:true,
-            confirmButtonText:'Full Sync',
+            confirmButtonText:'Send test',
             cancelButtonText:'Cancel',
             confirmButtonColor:'#003DA5'
         });
         if (!confirmation.isConfirmed) return null;
-        Swal.fire({title:'Full Sync Calendar…',text:'กำลังอ่านทุกทีมและสร้าง Calendar_Summary ใหม่',allowOutsideClick:false,showConfirmButton:false,didOpen:()=>Swal.showLoading()});
+        Swal.fire({title:'Sending work-plan test…',allowOutsideClick:false,showConfirmButton:false,didOpen:()=>Swal.showLoading()});
         try {
-            const result = await window.CES_API.callFunction('forceFullSyncCalendar2025_2026', [], {transport:'iframe',timeoutMs:360000,dedupe:false,priority:'active',userAction:true,module:'calendar',loadingLabel:'Full Sync Calendar 2025–2026…'});
-            const rows = await window.CES_API.callFunction('getCalendarData', [true], {transport:'jsonp',timeoutMs:60000,dedupe:false,priority:'active',userAction:true,module:'calendar'});
-            if (Array.isArray(rows)) {
-                if (typeof globalCalData !== 'undefined') globalCalData = rows;
-                if (typeof initCalendar === 'function') initCalendar(rows);
-            }
-            await Swal.fire({icon:'success',title:'Full Sync Complete',text:typeof result === 'string' ? result : 'Calendar_Summary was replaced successfully.',confirmButtonColor:'#003DA5'});
-            return rows;
+            const result = await window.CES_API.callFunction('CES_CALENDAR_WORKPLAN_ALERT_TEST', [], {transport:'iframe',timeoutMs:120000,dedupe:false,priority:'active',userAction:true,module:'calendar'});
+            await Swal.fire({icon:'success',title:'Test sent',text:'ส่งไปยัง ADMIN แล้ว '+Number(result && result.results && result.results.length || 0)+' ทีม',confirmButtonColor:'#003DA5'});
+            return result;
         } catch (error) {
-            await Swal.fire({icon:'error',title:'Full Sync Error',text:error && error.message ? error.message : String(error),confirmButtonColor:'#003DA5'});
+            await Swal.fire({icon:'error',title:'Work Plan Alert Error',text:error && error.message ? error.message : String(error),confirmButtonColor:'#003DA5'});
             return null;
         }
     }
-    window.fullSyncMasterCalendar = fullSyncMasterCalendar;
+    window.sendCalendarWorkplanAlertTest = sendCalendarWorkplanAlertTest;
 
     function jumpToDateFromFilter() {
-        const m = parseInt(document.getElementById('cal-filter-month').value);
-        const y = parseInt(document.getElementById('cal-filter-year').value);
-        currentDisplayDate.setMonth(m);
-        currentDisplayDate.setFullYear(y);
+        const monthValue = document.getElementById('cal-filter-month').value;
+        const yearValue = document.getElementById('cal-filter-year').value;
+        const m = parseInt(monthValue, 10), y = parseInt(yearValue, 10);
+        if (Number.isFinite(m)) currentDisplayDate.setMonth(m);
+        if (Number.isFinite(y)) currentDisplayDate.setFullYear(y);
         updateCalendarUI();
-        calendarRequestVisibleMonthSync_(false);
+        if (monthValue !== 'ALL' && yearValue !== 'ALL') calendarRequestVisibleMonthSync_(false);
     }
 
     function changeCalendarMonth(offset) {
@@ -267,19 +267,23 @@
         const monthIndex = currentDisplayDate.getMonth();
         const monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
         
+        const monthFilter = document.getElementById('cal-filter-month');
+        const yearFilter = document.getElementById('cal-filter-year');
+        const selectedMonth = monthFilter && monthFilter.value === 'ALL' ? null : month;
+        const selectedYear = yearFilter && yearFilter.value === 'ALL' ? null : year;
         const titleEl = document.getElementById('calendar-dynamic-title');
         // เปลี่ยนสีตัวอักษรของเดือนให้เป็นโทนส้ม
-        if(titleEl) titleEl.innerHTML = `<span class="text-[#003DA5]">${monthNames[monthIndex]}</span> <span class="text-gray-400 font-light">|</span> ${year}`;
+        if(titleEl) titleEl.innerHTML = selectedMonth === null || selectedYear === null ? '<span class="text-[#003DA5]">ALL CALENDAR DATA</span>' : `<span class="text-[#003DA5]">${monthNames[monthIndex]}</span> <span class="text-gray-400 font-light">|</span> ${year}`;
 
         const mSel = document.getElementById('cal-filter-month');
         const ySel = document.getElementById('cal-filter-year');
-        if(mSel) mSel.value = monthIndex;
-        if(ySel) ySel.value = year;
+        if(mSel && mSel.value !== 'ALL') mSel.value = monthIndex;
+        if(ySel && ySel.value !== 'ALL') ySel.value = year;
 
         renderSolidCalendar_(year, month);
 
         if (window.globalCalData) {
-            processCalendarData(window.globalCalData, month, year);
+            processCalendarData(window.globalCalData, selectedMonth, selectedYear);
         }
     }
 
@@ -375,7 +379,8 @@
         (data || []).forEach(item => {
             const itemM = parseInt(item.month);
             const itemY = parseInt(item.year);
-            if (itemM !== targetM || itemY !== targetY) return;
+            if (targetM !== null && itemM !== targetM) return;
+            if (targetY !== null && itemY !== targetY) return;
 
             const title = (item.title || '').trim();
             const sourceTeam = calendarSourceTeam(item);
@@ -402,7 +407,7 @@
 
         calendarCapacityDetail = capacityDetails;
         window.calendarCapacityDetail = capacityDetails;
-        calendarCapacityMeta = { month:targetM, year:targetY, weekdays:getWeekdaysInMonth(targetM,targetY), manDays:teamManDays };
+        calendarCapacityMeta = { month:targetM, year:targetY, weekdays:(targetM && targetY ? getWeekdaysInMonth(targetM,targetY) : 0), manDays:teamManDays };
 
         const totalUnique = ['MED','LAB','EHS','ENV','TES'].reduce((total, team) => total + teamJobUniqueSet[team].size, 0);
         const values = { total:totalUnique, med:teamJobUniqueSet.MED.size, lab:teamJobUniqueSet.LAB.size, ehs:teamJobUniqueSet.EHS.size, env:teamJobUniqueSet.ENV.size, tes:teamJobUniqueSet.TES.size };
@@ -410,8 +415,9 @@
 
         const weekdays = calendarCapacityMeta.weekdays;
         const days = document.getElementById('capacity-days-display');
-        if (days) days.innerText = `${weekdays} Weekdays`;
-        renderCapacityBars(teamManDays, weekdays);
+        if (days) days.innerText = targetM && targetY ? `${weekdays} Weekdays` : 'All selected data';
+        if (targetM && targetY) renderCapacityBars(teamManDays, weekdays);
+        else { const grid=document.getElementById('capacity-dashboard-grid'); if(grid) grid.innerHTML='<div class="col-span-full text-sm text-slate-500">Capacity utilization is available when one month and one year are selected.</div>'; }
         renderJobTable(jobListForTable);
         renderLeaveList(leaveListForTable);
     }
@@ -554,53 +560,53 @@
         ul.innerHTML = html;
     }
 
-    // ฟังก์ชัน Export ข้อมูล Master Calendar
+    // Export every Calendar_Summary column; All/Month/Year/Team follow the UI.
     function exportMasterCalendarToCSV() {
         if (!window.globalCalData || window.globalCalData.length === 0) {
             Swal.fire('No Data', 'ไม่มีข้อมูลสำหรับ Export', 'info');
             return;
         }
 
-        const targetM = currentDisplayDate.getMonth() + 1;
-        const targetY = currentDisplayDate.getFullYear();
+        const monthValue = (document.getElementById('cal-filter-month') || {}).value || 'ALL';
+        const yearValue = (document.getElementById('cal-filter-year') || {}).value || 'ALL';
+        const targetM = monthValue === 'ALL' ? null : Number(monthValue) + 1;
+        const targetY = yearValue === 'ALL' ? null : Number(yearValue);
 
         let filteredData = window.globalCalData.filter(item => {
             const itemM = parseInt(item.month);
             const itemY = parseInt(item.year);
-            if (itemM !== targetM || itemY !== targetY) return false;
+            if (targetM !== null && itemM !== targetM) return false;
+            if (targetY !== null && itemY !== targetY) return false;
             if (currentService !== 'ALL' && calendarSourceTeam(item) !== currentService) return false;
             return true;
         });
 
         if (filteredData.length === 0) {
-            Swal.fire('No Data', `ไม่มีข้อมูลในเดือน ${targetM}/${targetY} สำหรับทีมที่เลือก`, 'info');
+            Swal.fire('No Data', 'ไม่มีข้อมูลตาม Filter ที่เลือก', 'info');
             return;
         }
-
-        let csvContent = "\uFEFF"; 
-        csvContent += "Date,Team,Type,Activity Title,Location\n";
-
         filteredData.sort((a, b) => {
             const dateA = new Date(a.date.split('/').reverse().join('-'));
             const dateB = new Date(b.date.split('/').reverse().join('-'));
             return dateA - dateB;
-        }).forEach(item => {
-            const isLeave = checkIsLeaveEvent(item.title);
-            const type = isLeave ? "Leave/Off" : "Job";
-            let safeTitle = `"${(item.title || "").replace(/"/g, '""')}"`;
-            let safeLocation = `"${(item.location || "-").replace(/"/g, '""')}"`;
-            csvContent += `${item.date},${calendarSourceTeam(item)},${type},${safeTitle},${safeLocation}\n`;
         });
-
-        let blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-        let link = document.createElement("a");
-        let url = URL.createObjectURL(blob);
-        link.setAttribute("href", url);
-        link.setAttribute("download", `MasterCalendar_${currentService}_${targetM}_${targetY}.csv`);
-        link.style.visibility = 'hidden';
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
+        const rows = filteredData.map(item => ({
+            Team:calendarSourceTeam(item), Date:item.date || '', 'Event Title':item.title || '', Location:item.location || '',
+            Month:Number(item.month || 0), Year:Number(item.year || 0), UniqueKey:item.uniqueKey || '',
+            'Calendar ID':item.calendarId || '', 'Event Color':item.eventColor || '', 'Capacity Team':item.capacityTeam || '',
+            Type:checkIsLeaveEvent(item.title) ? 'Leave/Off' : 'Job'
+        }));
+        const suffix = `${currentService}_${targetM === null ? 'AllMonths' : String(targetM).padStart(2,'0')}_${targetY === null ? 'AllYears' : targetY}`;
+        if (window.XLSX) {
+            const wb=XLSX.utils.book_new(), ws=XLSX.utils.json_to_sheet(rows);
+            ws['!cols']=[{wch:10},{wch:13},{wch:42},{wch:30},{wch:8},{wch:8},{wch:42},{wch:34},{wch:12},{wch:14},{wch:12}];
+            XLSX.utils.book_append_sheet(wb,ws,'Calendar_Summary');
+            XLSX.writeFile(wb,`Calendar_${suffix}.xlsx`);
+            return;
+        }
+        const header=Object.keys(rows[0]);
+        const csv='\uFEFF'+[header].concat(rows.map(row=>header.map(k=>String(row[k] == null ? '' : row[k])))).map(cols=>cols.map(v=>'"'+v.replace(/"/g,'""')+'"').join(',')).join('\n');
+        const link=document.createElement('a');link.href=URL.createObjectURL(new Blob([csv],{type:'text/csv;charset=utf-8;'}));link.download=`Calendar_${suffix}.csv`;link.click();URL.revokeObjectURL(link.href);
     }
 
 
@@ -858,10 +864,6 @@
             if (input) input.value = '';
         }
     }
-    window.handleTesPlanFile = handleTesPlanFile;
-    window.handleTesPlanFile = handleTesPlanFile;
-    window.handleTesPlanFile = handleTesPlanFile;
-    window.handleTesPlanFile = handleTesPlanFile;
     window.handleTesPlanFile = handleTesPlanFile;
 
 

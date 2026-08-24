@@ -18,7 +18,8 @@
     openUpdateModal: window.openUpdateModal,
     saveJobStatus: window.saveJobStatus,
     kpiResetFilters: window.kpiResetFilters,
-    triggerLateEmail: window.triggerLateEmail
+    triggerLateEmail: window.triggerLateEmail,
+    kpiExportData: window.kpiExportData
   };
 
   var uiDefaults = null;
@@ -117,8 +118,7 @@
       summaryDesc: desc ? desc.innerHTML : '',
       detailHint: detailHint ? detailHint.innerHTML : '',
       modalTitle: modalTitle ? modalTitle.innerHTML : '',
-      perfEarlyText: performanceText('kpi-perf-early'),
-      perfOnText: performanceText('kpi-perf-on'),
+      perfWithinText: performanceText('kpi-perf-within'),
       perfLateText: performanceText('kpi-perf-late')
     };
   }
@@ -141,6 +141,8 @@
 
     var teamFilter = byId('kpi-filter-team');
     if (teamFilter) teamFilter.title = 'Filter by LAB current workflow status';
+    var summaryTeam = byId('kpi-summary-team');
+    if (summaryTeam) { summaryTeam.value = 'All'; summaryTeam.disabled = true; }
 
     setTableHeaders([
       'Equipment Information',
@@ -169,6 +171,8 @@
 
     var team = byId('kpi-filter-team');
     if (team) { team.innerHTML = uiDefaults.teamHtml; team.title = uiDefaults.teamTitle; team.value = 'All'; }
+    var summaryTeam = byId('kpi-summary-team');
+    if (summaryTeam) summaryTeam.disabled = false;
 
     var search = byId('kpi-filter-search');
     if (search) search.placeholder = uiDefaults.searchPlaceholder;
@@ -189,8 +193,7 @@
     var modalTitle = document.querySelector('#modal-kpi-update h3');
     if (modalTitle) modalTitle.innerHTML = uiDefaults.modalTitle;
 
-    setPerformanceSubtext('kpi-perf-early', uiDefaults.perfEarlyText || 'เสร็จก่อนกำหนด หรือยังไม่ถึงกำหนด');
-    setPerformanceSubtext('kpi-perf-on', uiDefaults.perfOnText || 'เสร็จวันครบกำหนด หรือครบกำหนดวันนี้');
+    setPerformanceSubtext('kpi-perf-within', uiDefaults.perfWithinText || 'ก่อน KPI และตรง KPI');
     setPerformanceSubtext('kpi-perf-late', uiDefaults.perfLateText || 'เลยกำหนด หรือเสร็จหลังกำหนด');
   }
 
@@ -404,6 +407,7 @@
   }
 
   function labRenderTable() {
+    try { if (typeof kpiSyncSummaryFilters_ === 'function') kpiSyncSummaryFilters_(); } catch (ignoreSummarySync) {}
     labRenderExecutiveSummary();
     var tbody = byId('kpi-table-body');
     if (!tbody) return;
@@ -447,24 +451,22 @@
 
   function labRenderPerformance(rows) {
     rows = Array.isArray(rows) ? rows : labFilteredRows();
-    var counts = { early:0, on:0, late:0 };
-    var units = { early:0, on:0, late:0 };
+    var counts = { within:0, late:0 };
+    var units = { within:0, late:0 };
     rows.forEach(function (r) {
       var p = String(r.kpiPerformance || '');
-      if (counts[p] === undefined) return;
-      counts[p]++;
-      units[p] += Number(r.unit || 0);
+      var bucket=p==='late'?'late':'within';
+      counts[bucket]++;units[bucket]+=Number(r.unit||0);
     });
 
-    var early = byId('kpi-perf-early');
-    var on = byId('kpi-perf-on');
+    var within = byId('kpi-perf-within');
     var late = byId('kpi-perf-late');
-    if (early) early.textContent = num(counts.early);
-    if (on) on.textContent = num(counts.on);
+    var total=counts.within+counts.late,withinPct=total?counts.within*100/total:0,latePct=total?counts.late*100/total:0;
+    if (within) within.textContent = num(counts.within);
     if (late) late.textContent = num(counts.late);
-
-    setPerformanceSubtext('kpi-perf-early', num(units.early) + ' Units • Final Complete ก่อนกำหนด');
-    setPerformanceSubtext('kpi-perf-on', num(units.on) + ' Units • Final Complete ตรงกำหนด');
+    if(byId('kpi-perf-within-pct'))byId('kpi-perf-within-pct').textContent=withinPct.toFixed(1)+'%';
+    if(byId('kpi-perf-late-pct'))byId('kpi-perf-late-pct').textContent=latePct.toFixed(1)+'%';
+    setPerformanceSubtext('kpi-perf-within', num(units.within) + ' Units • ก่อน KPI และตรง KPI');
     setPerformanceSubtext('kpi-perf-late', num(units.late) + ' Units • Final Complete เกินกำหนด');
 
     var note = byId('kpi-performance-note');
@@ -476,13 +478,13 @@
     var canvas = byId('kpi-performance-pie');
     var fallback = byId('kpi-performance-pie-fallback');
     if (!canvas) return;
-    var chartData = [counts.early, counts.on, counts.late];
+    var chartData = [counts.within, counts.late];
 
     if (typeof window.Chart === 'undefined') {
       canvas.classList.add('hidden');
       if (fallback) {
         fallback.classList.remove('hidden');
-        fallback.innerHTML = 'ก่อน KPI: ' + counts.early + '<br>ตรง KPI: ' + counts.on + '<br>เกิน KPI: ' + counts.late;
+        fallback.innerHTML = 'อยู่ใน KPI: ' + counts.within + ' ('+withinPct.toFixed(1)+'%)<br>เกิน KPI: ' + counts.late + ' ('+latePct.toFixed(1)+'%)';
       }
       return;
     }
@@ -493,8 +495,8 @@
     KPI_PERFORMANCE_CHART = new window.Chart(canvas.getContext('2d'), {
       type: 'pie',
       data: {
-        labels: ['ก่อน KPI', 'ตรง KPI', 'เกิน KPI'],
-        datasets: [{ data: chartData, backgroundColor: ['#16a34a', '#16a34a', '#E4002B'], borderColor: '#ffffff', borderWidth: 3 }]
+        labels: ['อยู่ใน KPI '+withinPct.toFixed(1)+'%', 'เกิน KPI '+latePct.toFixed(1)+'%'],
+        datasets: [{ data: chartData, backgroundColor: ['#16a34a', '#E4002B'], borderColor: '#ffffff', borderWidth: 3 }]
       },
       options: {
         responsive: true,
@@ -505,6 +507,13 @@
         }
       }
     });
+    labRenderMonthlyPerformance_(rows);
+  }
+
+  function labRenderMonthlyPerformance_(rows){
+    var host=byId('kpi-monthly-performance-summary');if(!host)return;var map={};
+    (rows||[]).forEach(function(r){var s=String(r.receivedDate||r.calDate||''),m=s.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/),key=m?(m[3]+'-'+('0'+m[2]).slice(-2)):'Unknown';if(!map[key])map[key]={within:0,late:0};map[key][String(r.kpiPerformance)==='late'?'late':'within']++;});
+    var keys=Object.keys(map).sort();host.innerHTML='<table class="w-full text-xs"><thead><tr class="bg-slate-50"><th class="p-2 text-left">Month</th><th class="p-2 text-right">Total</th><th class="p-2 text-right text-green-700">อยู่ใน KPI</th><th class="p-2 text-right text-green-700">อยู่ใน KPI %</th><th class="p-2 text-right text-red-600">เกิน KPI</th><th class="p-2 text-right text-red-600">เกิน KPI %</th></tr></thead><tbody>'+keys.map(function(k){var x=map[k],t=x.within+x.late,wp=t?x.within*100/t:0,lp=t?x.late*100/t:0;return '<tr class="border-t"><td class="p-2 font-bold">'+esc(k)+'</td><td class="p-2 text-right">'+t+'</td><td class="p-2 text-right font-bold text-green-700">'+x.within+'</td><td class="p-2 text-right">'+wp.toFixed(1)+'%</td><td class="p-2 text-right font-bold text-red-600">'+x.late+'</td><td class="p-2 text-right">'+lp.toFixed(1)+'%</td></tr>';}).join('')+'</tbody></table>';
   }
 
   function setPerformanceSubtext(valueId, text) {
@@ -731,6 +740,55 @@
       .getKPIDashboardByTeam('LAB', { forceRefresh:!!forceRefresh || !!keepOpenRowId });
   }
 
+  function labExportData(scope) {
+    var source = scope === 'all' ? (globalKpiData || []) : labFilteredRows();
+    var rows = source.map(function (row) {
+      var isLate = String(row.kpiPerformance || '').toLowerCase() === 'late';
+      return {
+        Team: 'LAB',
+        Received_Date: row.receivedDate || '',
+        CAL_Date: row.calDate || '',
+        Customer: row.customerId || '',
+        Equipment: row.equipment || '',
+        Provider: row.provider || '',
+        Engineer: row.engineer || '',
+        Unit: Number(row.unit || 0),
+        Current_Status: row.currentStatus || '',
+        Customer_Status: row.customerStatus || '',
+        Target_Date: row.targetDate || '',
+        Complete_Date: row.actualDate || '',
+        KPI_Group: isLate ? 'เกิน KPI' : 'อยู่ใน KPI',
+        KPI_Detail: row.kpiResultLabel || '',
+        Remark: row.remark || ''
+      };
+    });
+    if (!rows.length) {
+      if (window.Swal) window.Swal.fire('No Data', 'ไม่มีข้อมูล LAB สำหรับ Export', 'info');
+      return;
+    }
+    var stamp = new Date().toISOString().slice(0, 10);
+    var name = 'KPI_Tracking_LAB_' + (scope === 'all' ? 'All' : 'Filtered') + '_' + stamp;
+    if (window.XLSX) {
+      var wb = XLSX.utils.book_new();
+      var ws = XLSX.utils.json_to_sheet(rows);
+      ws['!cols'] = Object.keys(rows[0]).map(function (key) { return { wch:Math.min(40, Math.max(12, key.length + 2)) }; });
+      XLSX.utils.book_append_sheet(wb, ws, 'LAB KPI');
+      XLSX.writeFile(wb, name + '.xlsx');
+      return;
+    }
+    var headers = Object.keys(rows[0]);
+    var csv = '\uFEFF' + [headers].concat(rows.map(function (row) {
+      return headers.map(function (key) { return row[key]; });
+    })).map(function (values) {
+      return values.map(function (value) { return '"' + String(value == null ? '' : value).replace(/"/g, '""') + '"'; }).join(',');
+    }).join('\n');
+    var link = document.createElement('a');
+    link.href = URL.createObjectURL(new Blob([csv], { type:'text/csv;charset=utf-8' }));
+    link.download = name + '.csv';
+    link.click();
+    URL.revokeObjectURL(link.href);
+  }
+
   // ---------------- Public wrappers ----------------
 
   window.switchKpiTab = function (team) {
@@ -764,6 +822,11 @@
   window.renderKpiPerformanceSummary = function (rows) {
     if (!isLabTeam()) return typeof original.renderKpiPerformanceSummary === 'function' ? original.renderKpiPerformanceSummary.apply(this, arguments) : undefined;
     return labRenderPerformance(rows);
+  };
+
+  window.kpiExportData = function (scope) {
+    if (!isLabTeam()) return typeof original.kpiExportData === 'function' ? original.kpiExportData.apply(this, arguments) : undefined;
+    return labExportData(scope || 'filtered');
   };
 
   window.openUpdateModal = function (row) {

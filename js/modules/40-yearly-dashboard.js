@@ -278,37 +278,6 @@
         }
     }
 
-    async function syncCalendarToSheet() {
-        Swal.fire({
-            title: 'Synchronizing full calendar…',
-            html: '<div style="font-size:12px;color:#64748b">Fetching MED, LAB, EHS, ENV, TES and MGT Calendar events for 2025–2026, then replacing Calendar_Summary.<br>Please keep this page open.</div>',
-            allowOutsideClick: false,
-            showConfirmButton: false,
-            didOpen: () => Swal.showLoading()
-        });
-        try {
-            if (!window.CES_API || typeof window.CES_API.callFunction !== 'function') throw new Error('CES API bridge is not ready.');
-            const result = await window.CES_API.callFunction('forceFullSyncCalendar2025_2026', [], { transport:'iframe', timeoutMs:360000, dedupe:false, priority:'active', userAction:true, module:'calendar', loadingLabel:'Full Sync Calendar 2025–2026…' });
-            Swal.close();
-            await Swal.fire({
-                icon: 'success',
-                title: 'Calendar synchronized',
-                text: typeof result === 'string' ? result : 'Calendar_Summary and Job_Stats were rebuilt successfully.',
-                confirmButtonColor: '#003DA5'
-            });
-            if (typeof loadAllData === 'function') loadAllData();
-            else if (typeof loadYearlyDashboard === 'function') loadYearlyDashboard();
-        } catch (error) {
-            Swal.close();
-            await Swal.fire({
-                icon: 'error',
-                title: 'Calendar Sync Error',
-                text: error && error.message ? error.message : String(error),
-                confirmButtonColor: '#003DA5'
-            });
-        }
-    }
-
     function animateValue(id, start, end, duration) {
         // v7: Job Dashboard KPI cards must show the final value immediately.
         // The old count-up animation made the first-open state look unfinished.

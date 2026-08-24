@@ -229,6 +229,11 @@ window.CES_STOCK_BOOTSTRAP_V6=null; // V35: live Google Sheet is the only source
     .ces-stock-v5-page .csv5-table th{position:sticky;top:0;background:#f8fafc;color:#64748b;font-size:10px;text-transform:uppercase;letter-spacing:.03em;padding:10px;border-bottom:1px solid #dfe7f1;z-index:2;text-align:left}
     .ces-stock-v5-page .csv5-table td{padding:9px 10px;border-bottom:1px solid #edf2f7;vertical-align:middle;color:#334155}
     .ces-stock-v5-page .csv5-table tbody tr:hover td{background:#f8fbff}
+    .ces-stock-v5-page #sdContractTable .csv5-table{min-width:920px;table-layout:auto}
+    .ces-stock-v5-page #sdContractTable .csv5-table th,.ces-stock-v5-page #sdContractTable .csv5-table td{padding:10px 12px;line-height:1.4}
+    .ces-stock-v5-page #sdContractTable .csv7-contract-location{min-width:220px;white-space:normal;overflow-wrap:anywhere}
+    .ces-stock-v5-page #sdContractTable .csv7-contract-status{min-width:240px;display:flex;gap:5px;flex-wrap:nowrap}
+    .ces-stock-v5-page #sdContractTable .csv7-contract-actions{min-width:132px;display:flex;gap:6px;flex-wrap:nowrap}
     .ces-stock-v5-page .csv5-actions{display:flex;gap:5px;align-items:center;flex-wrap:wrap}
     .ces-stock-v5-page .csv5-action{width:30px;height:30px;border-radius:9px;border:1px solid #dbeafe;background:#eff6ff;color:#2563eb;display:inline-flex;align-items:center;justify-content:center;cursor:pointer}
     .ces-stock-v5-page .csv5-action.green{background:#ecfdf5;color:#059669;border-color:#a7f3d0}.ces-stock-v5-page .csv5-action.orange{background:#fff7ed;color:#ea580c;border-color:#fed7aa}.ces-stock-v5-page .csv5-action.red{background:#fef2f2;color:#dc2626;border-color:#fecaca}.ces-stock-v5-page .csv5-action.gray{background:#f8fafc;color:#64748b;border-color:#e2e8f0}.ces-stock-v5-page .csv5-action.purple{background:#f5f3ff;color:#7c3aed;border-color:#ddd6fe}
@@ -418,6 +423,7 @@ window.CES_STOCK_BOOTSTRAP_V6=null; // V35: live Google Sheet is the only source
       .ces-stock-v7-page .csv7-contract-location{display:flex;gap:8px;align-items:flex-start}.ces-stock-v7-page .csv7-contract-dot{width:10px;height:10px;border-radius:50%;margin-top:4px;flex:none;background:#10b981;box-shadow:0 0 0 4px #d1fae5}.ces-stock-v7-page .csv7-contract-dot.overdue{background:#ef4444;box-shadow:0 0 0 4px #fee2e2}
       .ces-stock-v7-page .csv7-contract-status{display:flex;gap:5px;flex-wrap:wrap}.ces-stock-v7-page .csv7-chip{display:inline-flex;align-items:center;border-radius:999px;padding:4px 8px;font-size:10px;font-weight:900}.ces-stock-v7-page .csv7-chip.active{background:#d1fae5;color:#047857}.ces-stock-v7-page .csv7-chip.overdue{background:#fee2e2;color:#b91c1c}.ces-stock-v7-page .csv7-chip.done{background:#e2e8f0;color:#475569}
       .ces-stock-v7-page .csv7-contract-actions{display:flex;gap:6px}.ces-stock-v7-page .csv7-contract-actions button{width:34px;height:34px;border-radius:10px;border:1px solid #bfdbfe;background:#eff6ff;color:#2563eb;cursor:pointer}.ces-stock-v7-page .csv7-contract-actions button.extend{border-color:#cbd5e1;background:#f8fafc;color:#475569}.ces-stock-v7-page .csv7-contract-actions button.return{border-color:#a7f3d0;background:#ecfdf5;color:#047857}.ces-stock-v7-page .csv7-contract-actions button:hover{transform:translateY(-1px);box-shadow:0 5px 12px rgba(30,58,138,.12)}
+      .ces-stock-v7-page #sdContractTable .csv5-table{min-width:920px;table-layout:auto}.ces-stock-v7-page #sdContractTable .csv5-table th,.ces-stock-v7-page #sdContractTable .csv5-table td{padding:10px 12px;line-height:1.4}.ces-stock-v7-page #sdContractTable .csv7-contract-location{min-width:220px;white-space:normal;overflow-wrap:anywhere}.ces-stock-v7-page #sdContractTable .csv7-contract-status{min-width:240px;flex-wrap:nowrap}.ces-stock-v7-page #sdContractTable .csv7-contract-actions{min-width:132px;flex-wrap:nowrap}
       .ces-stock-v7-page .csv7-summary-grid{margin-top:16px}.ces-stock-v7-page .csv7-summary-table{max-height:420px}
       .ces-stock-v7-page .csv7-three-mode{display:grid!important;grid-template-columns:repeat(3,minmax(0,1fr))!important;gap:12px!important;overflow:visible!important}
       .ces-stock-v7-page .csv7-mode-panel{padding:16px!important}.ces-stock-v7-page .csv7-mode-title{text-align:center;font-weight:900;margin:0 0 12px;color:#475569}
@@ -564,6 +570,12 @@ window.si_exportCurrent=function(){
   XLSX.writeFile(wb,name.replace(/\s+/g,'_')+'_'+(new Date().toISOString().slice(0,10))+'.xlsx');
 };
 window.si_triggerBulkUpload=function(){var input=document.getElementById('siBulkEquipmentFile');if(input)input.click();};
+window.si_downloadBulkTemplate=function(){
+  if(!window.XLSX){if(window.Swal)Swal.fire('Bulk Template','SheetJS is not available. Refresh and try again.','error');return;}
+  var rows=[{id_code:'PUMP-0001',serial_number:'SN-EXAMPLE-001',brand:'B.Braun',model:'Infusomat Space',location:'Warehouse',status:'รอสอบเทียบ',borrower:'',due_date:'',action_required:'รอสอบเทียบ',category:'Infusion Pump',team:'MED',note:'Replace this example row'}];
+  var ws=XLSX.utils.json_to_sheet(rows),wb=XLSX.utils.book_new();ws['!cols']=[{wch:16},{wch:20},{wch:14},{wch:22},{wch:20},{wch:16},{wch:18},{wch:14},{wch:24},{wch:18},{wch:10},{wch:30}];
+  XLSX.utils.book_append_sheet(wb,ws,'Equipment Template');XLSX.writeFile(wb,'CES_Inventory_Bulk_Upload_Template.xlsx');
+};
 window.si_handleBulkUpload=async function(file){
   if(!file)return;
   if(!window.XLSX){Swal.fire('Bulk Upload','SheetJS is not available.','error');return;}
@@ -577,8 +589,8 @@ window.si_handleBulkUpload=async function(file){
     if(!confirm.isConfirmed)return;
     Swal.fire({title:'Importing equipment...',html:'กรุณารอสักครู่',allowOutsideClick:false,didOpen:function(){Swal.showLoading();}});
     var total={inserted:0,updated:0,skipped:0,errors:[]};
-    for(var i=0;i<normalized.length;i+=140){
-      var chunk=normalized.slice(i,i+140);
+    for(var i=0;i<normalized.length;i+=250){
+      var chunk=normalized.slice(i,i+250);
       var res=await window.CES_API.callFunction('si_bulkImportEquipment',[{rows:chunk,sourceFile:file.name,user:(window.CES_CURRENT_USER&&window.CES_CURRENT_USER.id)||''}],{transport:'iframe',timeoutMs:180000,dedupe:false});
       if(!res||res.success===false)throw new Error((res&&res.message)||'Import failed');
       total.inserted+=Number(res.inserted||0);total.updated+=Number(res.updated||0);total.skipped+=Number(res.skipped||0);total.errors=total.errors.concat(res.errors||[]);

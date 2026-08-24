@@ -5,7 +5,7 @@
 <i class="fas fa-calendar-alt text-2xl"></i>
 </div>
 <div>
-<h2 class="text-xl font-extrabold text-gray-800 tracking-tight">Master Calendar</h2>
+<h2 class="text-xl font-extrabold text-gray-800 tracking-tight">Calendar</h2>
 <p class="text-sm text-gray-400 font-medium">Job Schedule & Planning</p>
 </div>
 </div>
@@ -15,8 +15,8 @@
 <button type="button" class="ces-calendar-header-icon-btn ces-action-neutral" onclick="refreshVisibleCalendarMonth()" title="Sync visible month">
 <i class="fas fa-sync-alt"></i>
 </button>
-<button type="button" class="h-10 px-3 inline-flex items-center justify-center gap-2 rounded-xl bg-[#003DA5] text-white text-xs font-black shadow-sm hover:bg-[#002D7A]" onclick="fullSyncMasterCalendar()" title="Replace Calendar_Summary with all configured Calendar data for 2025–2026">
-<i class="fas fa-arrows-rotate"></i><span>Full Sync</span>
+<button type="button" class="h-10 px-3 inline-flex items-center justify-center gap-2 rounded-xl bg-amber-500 text-white text-xs font-black shadow-sm hover:bg-amber-600" onclick="sendCalendarWorkplanAlertTest()" title="Send the two-month work-plan reminder test to ADMIN">
+<i class="fas fa-bell"></i><span>Alert Workplan</span>
 </button>
 <button class="ces-calendar-header-icon-btn ces-action-excel" onclick="exportMasterCalendarToCSV()" title="Export Current Month">
 <i class="fas fa-file-excel"></i>
@@ -31,7 +31,7 @@
 </button>
 </div>
 </div>
-<div class="ces-calendar-workspace-tabs ces-compact-subtabs" role="tablist" aria-label="Master Calendar workspace">
+<div class="ces-calendar-workspace-tabs ces-compact-subtabs" role="tablist" aria-label="Calendar workspace">
 <button id="calendar-workspace-tab-calendar" class="active" type="button" onclick="switchCalendarWorkspace('calendar')"><i class="fas fa-calendar-days"></i><span>Calendar</span></button>
 <button id="calendar-workspace-tab-plan" type="button" onclick="switchCalendarWorkspace('plan')"><i class="fas fa-list-check"></i><span>Plan Tracker</span></button>
 </div>

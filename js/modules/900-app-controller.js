@@ -602,7 +602,7 @@
     window.cesCanAccessTab = cesCanAccessTab_;
 
     function cesTabLabel_(tab){
-        var labels={portal:'Home',management_overview:'Management Overview',service:'Service CSI',report:'Report CSI',memo_workorder:'Memo & Work Order',yearly:'Job Dashboard',revenue:'Revenue Dashboard',calendar:'Master Calendar',checkin:'Check-in',car_booking:'Car Booking',van_booking:'Van Booking',team_information:'Team Information',team_plan:'Team Plan',monthly_report:'Monthly Report',users:'User Management',ces_evaluation:'CES Hub Evaluation',ces_ai_knowledge:'CES AI Knowledge',setting:'Setting',health:'System Health Check',ot:'OT Dashboard',weekly:'Weekly Report',report_manage:'Report Management',kpi:'KPI Tracking',stock_dashboard:'Infusion Pump Dashboard',inventory:'Inventory',check_stock:'Check Stock'};
+        var labels={portal:'Home',management_overview:'Management Overview',service:'Service CSI',report:'Report CSI',memo_workorder:'Memo & Work Order',yearly:'Job Dashboard',revenue:'Revenue Dashboard',calendar:'Calendar',checkin:'Check-in',car_booking:'Car Booking',van_booking:'Van Booking',team_information:'Team Information',team_plan:'Team Plan',monthly_report:'Monthly Report',users:'User Management',ces_evaluation:'CES Hub Evaluation',ces_ai_knowledge:'CES AI Knowledge',setting:'Setting',health:'System Health Check',ot:'OT Dashboard',weekly:'Weekly Report',report_manage:'Report Management',kpi:'KPI Tracking',stock_dashboard:'Infusion Pump Dashboard',inventory:'Inventory',check_stock:'Check Stock'};
         return labels[tab] || String(tab||'Dashboard').replace(/_/g,' ').replace(/\b\w/g,function(ch){return ch.toUpperCase();});
     }
     function cesRevealDeferredViewShell_(tab){
@@ -679,7 +679,7 @@
         const titles = {
             portal: 'Home', management_overview: 'Management Overview', service: 'Service CSI', report: 'Report CSI', memo_workorder:'Memo & Work Order',
             yearly: 'Job Dashboard', revenue: 'Revenue Dashboard',
-            calendar: 'Master Calendar', checkin: 'Check-in',
+            calendar: 'Calendar', checkin: 'Check-in',
             car_booking: 'Car Booking', van_booking: 'Van Booking', team_information: 'Team Information', team_plan:'Team Plan', monthly_report:'Monthly Report',
             users: 'User Management', ces_evaluation:'CES Hub Evaluation', ces_ai_knowledge:'CES AI Knowledge', setting: 'Setting', health: 'System Health Check',
             ot: 'OT Dashboard', weekly: 'Weekly Report',
@@ -969,7 +969,7 @@
         if (loadingText) {
             const titleMap = {
                 portal:'Home', management_overview:'Management Overview', yearly:'Job Dashboard', revenue:'Revenue Dashboard', ot:'OT Dashboard',
-                service:'Service CSI', report:'Report CSI', calendar:'Master Calendar', checkin:'Check-in',
+                service:'Service CSI', report:'Report CSI', calendar:'Calendar', checkin:'Check-in',
                 car_booking:'Car Booking', van_booking:'Van Booking', weekly:'Weekly Report',
                 report_manage:'Report Management', kpi:'KPI Tracking', stock_dashboard:'Infusion Pump Dashboard',
                 inventory:'Inventory', check_stock:'Check Stock', team_information:'Team Information', team_plan:'Team Plan', monthly_report:'Monthly Report', ces_evaluation:'CES Hub Evaluation', ces_ai_knowledge:'CES AI Knowledge',

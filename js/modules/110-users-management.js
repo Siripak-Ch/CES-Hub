@@ -14,7 +14,7 @@ let _userCache = null;
         { id:'service',name:'Service CSI',group:'Performance',icon:'fa-clipboard-check' },
         { id:'report',name:'Report CSI',group:'Performance',icon:'fa-chart-bar' },
         { id:'memo_workorder',name:'Memo & Work Order',group:'Performance',icon:'fa-file-circle-check' },
-        { id:'calendar',name:'Master Calendar',group:'Operation',icon:'fa-calendar-alt' },
+        { id:'calendar',name:'Calendar',group:'Operation',icon:'fa-calendar-alt' },
         { id:'checkin',name:'Check-in',group:'Operation',icon:'fa-map-marker-alt' },
         { id:'car_booking',name:'Car Booking',group:'Operation',icon:'fa-car-side' },
         { id:'van_booking',name:'Van Booking',group:'Operation',icon:'fa-van-shuttle' },

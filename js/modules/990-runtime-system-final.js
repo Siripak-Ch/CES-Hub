@@ -533,7 +533,7 @@
     service: 'Service CSI',
     report: 'Report CSI',
     memo_workorder: 'Memo & Work Order',
-    calendar: 'Master Calendar',
+    calendar: 'Calendar',
     checkin: 'Check-in',
     car_booking: 'Car Booking',
     van_booking: 'Van Booking',
@@ -2915,6 +2915,26 @@
     });
   }
 
+  function servicePdfCollectPageBreaks(root, fullHeight){
+    var rootRect = root.getBoundingClientRect();
+    var values = [0, fullHeight];
+    var nodes = root.querySelectorAll(
+      '#serviceDashboardPanelV266 > *, #serviceMemoPanelV266 > *, '+
+      '#customer-list-body > tr, #growth-table-body > tr'
+    );
+    for(var i=0; i<nodes.length; i++){
+      var rect = nodes[i].getBoundingClientRect();
+      var top = Math.round(rect.top-rootRect.top);
+      var bottom = Math.round(rect.bottom-rootRect.top);
+      if(top > 0 && top < fullHeight) values.push(top);
+      if(bottom > 0 && bottom < fullHeight) values.push(bottom);
+    }
+    values.sort(function(a,b){ return a-b; });
+    return values.filter(function(value,index){
+      return index === 0 || Math.abs(value-values[index-1]) > 3;
+    });
+  }
+
   async function servicePdfCreateCaptureDocument(sourceRoot){
     var logicalWidth = Math.ceil(sourceRoot.offsetWidth || sourceRoot.scrollWidth || 1400);
     logicalWidth = Math.max(1180, logicalWidth);
@@ -2966,47 +2986,113 @@
     var fullHeight = Math.ceil(cloneRoot.scrollHeight || cloneRoot.offsetHeight || 1);
     frame.style.height = Math.min(Math.max(1200, fullHeight + 20), 60000)+'px';
     await servicePdfNextPaint(frame.contentWindow);
+    fullHeight = Math.ceil(cloneRoot.scrollHeight || fullHeight);
 
     return {
       frame: frame,
       root: cloneRoot,
       width: logicalWidth,
-      height: Math.ceil(cloneRoot.scrollHeight || fullHeight),
+      height: fullHeight,
+      pageBreaks: servicePdfCollectPageBreaks(cloneRoot, fullHeight),
       cleanup: function(){ try{ frame.remove(); }catch(ignore){} }
     };
   }
 
-  function servicePdfReadFilterLabel(){
-    var filters = window.sFilters || {};
+  function servicePdfReadActiveFilters(){
+    var filters = {};
+    try{
+      if(typeof sFilters !== 'undefined' && sFilters){
+        Object.keys(sFilters).forEach(function(key){ filters[key] = sFilters[key]; });
+      }
+    }catch(ignore){}
+
+    var activeTeam = document.querySelector('#view-service .ces-segmented-control .ces-segmented-btn.active');
+    if(activeTeam){
+      var teamText = String(activeTeam.textContent || activeTeam.value || '').trim().toUpperCase();
+      filters.team = teamText === 'ALL' ? 'All' : teamText;
+    }
+
+    var fieldMap = {
+      year:'s-filter-year',
+      month:'s-filter-month',
+      customer:'s-filter-customer',
+      status:'s-filter-status'
+    };
+    Object.keys(fieldMap).forEach(function(key){
+      var field = document.getElementById(fieldMap[key]);
+      if(field && field.value !== '') filters[key] = field.value;
+    });
+
+    return {
+      team: filters.team || 'All',
+      year: filters.year || String(new Date().getFullYear()),
+      month: filters.month || 'All',
+      customer: filters.customer || 'All',
+      status: filters.status || 'All'
+    };
+  }
+
+  function servicePdfReadFilterLabel(filters){
+    filters = filters || servicePdfReadActiveFilters();
     return [
       'Team: '+(filters.team || 'All'),
       'Year: '+(filters.year || new Date().getFullYear()),
       'Month: '+(filters.month || 'All'),
-      'Customer: '+(filters.customer || 'All')
+      'Customer: '+(filters.customer || 'All'),
+      'Status: '+(filters.status || 'All')
     ].join('  |  ');
   }
 
-  function servicePdfReadFilename(){
-    var filters = window.sFilters || {};
-    return 'Service_CSI_'+(filters.team || 'All')+'_'+(filters.month || 'All')+'_'+(filters.year || new Date().getFullYear())+'.pdf';
+  function servicePdfSafeFilePart(value, fallback){
+    var part = String(value == null || value === '' ? fallback : value).trim();
+    if(/^all$/i.test(part)) part = 'ALL';
+    return part.replace(/[\\/:*?"<>|]+/g,'-').replace(/\s+/g,'_');
   }
 
-  function servicePdfBuildClassicPdf(canvas){
+  function servicePdfReadFilename(filters){
+    filters = filters || servicePdfReadActiveFilters();
+    return 'Service_CSI_'+
+      servicePdfSafeFilePart(filters.team,'ALL')+'_'+
+      servicePdfSafeFilePart(filters.month,'ALL')+'_'+
+      servicePdfSafeFilePart(filters.year,new Date().getFullYear())+'.pdf';
+  }
+
+  function servicePdfBuildClassicPdf(canvas, filters, pageBreaks, captureHeight){
     var jsPDF = window.jspdf.jsPDF;
     var pdf = new jsPDF({orientation:'landscape', unit:'mm', format:'a4', compress:true});
     var PDF_W=297, PDF_H=210, HEADER=8, FOOTER=7, MARGIN=10;
     var CONTENT_W=PDF_W-(MARGIN*2), CONTENT_H=PDF_H-HEADER-FOOTER-MARGIN;
     var ratio = CONTENT_W / canvas.width;
     var pxPerPage = Math.max(1, Math.floor(CONTENT_H / ratio));
-    var totalPages = Math.max(1, Math.ceil(canvas.height / pxPerPage));
-    var filterLabel = servicePdfReadFilterLabel();
+    var scaleY = captureHeight > 0 ? canvas.height/captureHeight : 1;
+    var safeBreaks = (pageBreaks || []).map(function(value){ return Math.round(value*scaleY); })
+      .filter(function(value){ return value > 0 && value < canvas.height; })
+      .sort(function(a,b){ return a-b; });
+    var slices = [];
+    var startY = 0;
+    while(startY < canvas.height){
+      var naturalEnd = Math.min(canvas.height, startY+pxPerPage);
+      var endY = naturalEnd;
+      if(naturalEnd < canvas.height){
+        var minimumUsefulEnd = startY + Math.round(pxPerPage*0.28);
+        for(var b=0; b<safeBreaks.length; b++){
+          if(safeBreaks[b] > naturalEnd) break;
+          if(safeBreaks[b] >= minimumUsefulEnd) endY = safeBreaks[b];
+        }
+      }
+      if(endY <= startY) endY = naturalEnd;
+      slices.push({start:startY,height:endY-startY});
+      startY = endY;
+    }
+    var totalPages = Math.max(1, slices.length);
+    var filterLabel = servicePdfReadFilterLabel(filters);
     var exportDate = new Date().toLocaleString('en-GB', {day:'2-digit',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'});
     var previews = [];
 
     for(var page=0; page<totalPages; page++){
       if(page>0) pdf.addPage();
-      var srcY = page * pxPerPage;
-      var srcH = Math.min(pxPerPage, canvas.height-srcY);
+      var srcY = slices[page].start;
+      var srcH = slices[page].height;
       var slice = document.createElement('canvas');
       slice.width = canvas.width;
       slice.height = Math.max(1, Math.ceil(srcH));
@@ -3024,7 +3110,9 @@
       pdf.setFont('helvetica','bold');
       pdf.text('Service CSI Dashboard',MARGIN,5.2);
       pdf.setFont('helvetica','normal');
+      pdf.setFontSize(6.5);
       pdf.text(filterLabel,PDF_W/2,5.2,{align:'center'});
+      pdf.setFontSize(8);
       pdf.text(exportDate,PDF_W-MARGIN,5.2,{align:'right'});
 
       pdf.addImage(image,'JPEG',MARGIN,HEADER+2,CONTENT_W,srcH*ratio,'','FAST');
@@ -3044,11 +3132,12 @@
     try{
       var sourceRoot = document.getElementById('view-service');
       if(!sourceRoot || sourceRoot.classList.contains('hidden')) throw new Error('Service CSI view is not currently visible.');
+      var exportFilters = servicePdfReadActiveFilters();
 
       if(window.Swal){
         window.Swal.fire({
           title:'กำลังเตรียม PDF...',
-          html:'กำลังสร้างเอกสารรูปแบบเดิม โดยไม่ย่อ ไม่เลื่อน และไม่แก้ไขหน้าจอจริง',
+          html:'กำลังสร้างเอกสารตาม Filter และข้อมูลที่แสดงอยู่ใน Service CSI',
           allowOutsideClick:false,
           allowEscapeKey:false,
           didOpen:function(){ window.Swal.showLoading(); }
@@ -3078,12 +3167,12 @@
         removeContainer:true
       });
 
-      captureDoc.cleanup();
-      captureDoc = null;
       if(!canvas || canvas.width < 100 || canvas.height < 100) throw new Error('PDF capture returned an empty image.');
 
-      var output = servicePdfBuildClassicPdf(canvas);
-      var previewHtml = '<p style="margin:0 0 10px;color:#64748b;font-weight:700;font-size:13px">รูปแบบ Preview เดิม · '+output.totalPages+' หน้า</p>'+
+      var output = servicePdfBuildClassicPdf(canvas, exportFilters, captureDoc.pageBreaks, captureDoc.height);
+      captureDoc.cleanup();
+      captureDoc = null;
+      var previewHtml = '<p style="margin:0 0 10px;color:#64748b;font-weight:700;font-size:13px">Preview ตามหน้า Service CSI ปัจจุบัน · '+output.totalPages+' หน้า</p>'+
         '<div style="height:560px;overflow:auto;background:#f1f5f9;border:1px solid #dbe7f6;border-radius:12px;padding:18px">'+
         output.previews.map(function(src,index){
           return '<div style="font-size:11px;font-weight:900;color:#003DA5;margin:0 0 7px">Page '+(index+1)+' of '+output.totalPages+'</div><img src="'+src+'" style="display:block;width:100%;height:auto;margin:0 auto 18px;background:#fff;border:1px solid #dbe7f6;border-radius:8px;box-shadow:0 8px 22px rgba(15,23,42,.12)">';
@@ -3101,7 +3190,7 @@
         confirmButtonColor:'#004aad'
       });
       if(result && result.isConfirmed){
-        output.pdf.save(servicePdfReadFilename());
+        output.pdf.save(servicePdfReadFilename(exportFilters));
         window.Swal.fire({icon:'success',title:'บันทึกสำเร็จ',timer:1600,showConfirmButton:false});
       }
       return true;
@@ -3116,7 +3205,7 @@
 
   window.exportServiceToPDF = servicePdfExportServiceToPDF;
   try{ exportServiceToPDF = servicePdfExportServiceToPDF; }catch(ignore){}
-  window.CES_SERVICE_CSI_PDF_VERSION = 'V13-KPI-LAYOUT-FIX';
+  window.CES_SERVICE_CSI_PDF_VERSION = 'V28.9-ACTIVE-FILTER-PAGE-BREAKS';
 })(window, document);
 
 // CES Hub V20.9 — critical module static/runtime smoke check.

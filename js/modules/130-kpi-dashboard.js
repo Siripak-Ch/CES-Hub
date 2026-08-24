@@ -1051,18 +1051,21 @@ function getKpiTimelineHtml(row) {
 
 function renderKpiPerformanceSummary(rows) {
     const list = Array.isArray(rows) ? rows : getKpiFilteredRows();
-    const counts = { early:0, on:0, late:0 };
+    const counts = { within:0, late:0 };
     list.forEach(row => {
         const result = kpiGetPerformanceResult(row);
-        // The summary pie keeps three business buckets. "ใกล้ KPI" is still before KPI.
-        const bucket = result.key === 'near' ? 'early' : result.key;
-        if (Object.prototype.hasOwnProperty.call(counts, bucket)) counts[bucket]++;
+        if (result.key === 'late') counts.late++;
+        else counts.within++; // ก่อน KPI + ตรง KPI + ใกล้ KPI = อยู่ใน KPI
     });
 
     const setText = (id, val) => { const el = document.getElementById(id); if (el) el.innerText = kpiNum(val); };
-    setText('kpi-perf-early', counts.early);
-    setText('kpi-perf-on', counts.on);
+    const total = counts.within + counts.late;
+    const withinPct = total ? (counts.within * 100 / total) : 0;
+    const latePct = total ? (counts.late * 100 / total) : 0;
+    setText('kpi-perf-within', counts.within);
+    setText('kpi-perf-within-pct', withinPct.toFixed(1) + '%');
     setText('kpi-perf-late', counts.late);
+    setText('kpi-perf-late-pct', latePct.toFixed(1) + '%');
 
     const note = document.getElementById('kpi-performance-note');
     if (note) note.innerText = `Filtered records: ${list.length}`;
@@ -1071,13 +1074,13 @@ function renderKpiPerformanceSummary(rows) {
     const fallback = document.getElementById('kpi-performance-pie-fallback');
     if (!canvas) return;
 
-    const chartData = [counts.early, counts.on, counts.late];
+    const chartData = [counts.within, counts.late];
 
     if (typeof Chart === 'undefined') {
         canvas.classList.add('hidden');
         if (fallback) {
             fallback.classList.remove('hidden');
-            fallback.innerHTML = `ก่อน KPI: ${counts.early}<br>ตรง KPI: ${counts.on}<br>เกิน KPI: ${counts.late}`;
+            fallback.innerHTML = `อยู่ใน KPI: ${counts.within} (${withinPct.toFixed(1)}%)<br>เกิน KPI: ${counts.late} (${latePct.toFixed(1)}%)`;
         }
         return;
     }
@@ -1089,10 +1092,10 @@ function renderKpiPerformanceSummary(rows) {
     KPI_PERFORMANCE_CHART = new Chart(canvas.getContext('2d'), {
         type: 'pie',
         data: {
-            labels: ['ก่อน KPI', 'ตรง KPI', 'เกิน KPI'],
+            labels: [`อยู่ใน KPI ${withinPct.toFixed(1)}%`, `เกิน KPI ${latePct.toFixed(1)}%`],
             datasets: [{
                 data: chartData,
-                backgroundColor: ['#16a34a', '#16a34a', '#E4002B'],
+                backgroundColor: ['#16a34a', '#E4002B'],
                 borderColor: '#ffffff',
                 borderWidth: 3
             }]
@@ -1110,9 +1113,55 @@ function renderKpiPerformanceSummary(rows) {
             }
         }
     });
+    renderKpiMonthlyPerformanceSummary(list);
+}
+
+function kpiSummaryFilterChanged() {
+    const links = [['kpi-summary-year','kpi-filter-year'],['kpi-summary-month','kpi-filter-month']];
+    if (currentKpiTeam === 'EHS') links.push(['kpi-summary-team','kpi-filter-team']);
+    links.forEach(pair => { const from=document.getElementById(pair[0]), to=document.getElementById(pair[1]); if(from&&to) to.value=from.value; });
+    KPI_TABLE_PAGE_V36=1;
+    renderKPITable();
+}
+
+function kpiSyncSummaryFilters_() {
+    const links=[['kpi-filter-year','kpi-summary-year'],['kpi-filter-month','kpi-summary-month']];
+    if(currentKpiTeam==='EHS')links.push(['kpi-filter-team','kpi-summary-team']);
+    links.forEach(pair=>{
+        const from=document.getElementById(pair[0]),to=document.getElementById(pair[1]);if(from&&to)to.value=from.value;
+    });
+    const team=document.getElementById('kpi-summary-team');
+    if(team){team.disabled=currentKpiTeam!=='EHS';if(currentKpiTeam!=='EHS')team.value='All';}
+}
+
+function renderKpiMonthlyPerformanceSummary(rows) {
+    const host=document.getElementById('kpi-monthly-performance-summary');
+    if(!host)return;
+    const map={};
+    (rows||[]).forEach(row=>{
+        const p=parseKpiDateParts(row.calDate);if(!p.year||!p.month)return;
+        const key=String(p.year)+'-'+String(p.month).padStart(2,'0');
+        if(!map[key])map[key]={within:0,late:0};
+        if(kpiGetPerformanceResult(row).key==='late')map[key].late++;else map[key].within++;
+    });
+    const keys=Object.keys(map).sort();
+    if(!keys.length){host.innerHTML='<div class="text-xs text-slate-400">No monthly data.</div>';return;}
+    host.innerHTML='<table class="w-full text-xs"><thead><tr class="bg-slate-50"><th class="p-2 text-left">Month</th><th class="p-2 text-right">Total</th><th class="p-2 text-right text-green-700">อยู่ใน KPI</th><th class="p-2 text-right text-green-700">อยู่ใน KPI %</th><th class="p-2 text-right text-red-600">เกิน KPI</th><th class="p-2 text-right text-red-600">เกิน KPI %</th></tr></thead><tbody>'+keys.map(key=>{const x=map[key],t=x.within+x.late,wp=t?x.within*100/t:0,lp=t?x.late*100/t:0;return `<tr class="border-t"><td class="p-2 font-bold">${key}</td><td class="p-2 text-right">${t}</td><td class="p-2 text-right font-bold text-green-700">${x.within}</td><td class="p-2 text-right">${wp.toFixed(1)}%</td><td class="p-2 text-right font-bold text-red-600">${x.late}</td><td class="p-2 text-right">${lp.toFixed(1)}%</td></tr>`;}).join('')+'</tbody></table>';
+}
+
+function kpiExportData(scope) {
+    const rows=(scope==='all' ? (globalKpiData||[]) : getKpiFilteredRows()).map(row=>{
+        const result=kpiGetPerformanceResult(row);
+        return {Team:kpiRowServiceTeam(row),Source:row.sourceSheet||'',CAL_Date:row.calDate||'',Job_No:row.jobNo||'',Customer:row.customerId||'',Work_Type:row.workType||'',Total:row.totalAmount||'',Requester:row.requester||'',Current_Status:row.currentStatus||'',Overall_KPI_Date:kpiFormatDateShort(row.overallDeadline||row.overallKpiDate||row.deadline),Finish_Date:kpiFormatDateShort(kpiGetFinishDate(row)),KPI_Group:result.key==='late'?'เกิน KPI':'อยู่ใน KPI',KPI_Detail:result.label,KPI_Days:Number(result.days||0)};
+    });
+    if(!rows.length){if(window.Swal)Swal.fire('No Data','ไม่มีข้อมูลสำหรับ Export','info');return;}
+    const stamp=new Date().toISOString().slice(0,10),name=`KPI_Tracking_${scope==='all'?'All':'Filtered'}_${stamp}`;
+    if(window.XLSX){const wb=XLSX.utils.book_new(),ws=XLSX.utils.json_to_sheet(rows);ws['!cols']=Object.keys(rows[0]).map(k=>({wch:Math.min(40,Math.max(12,k.length+2))}));XLSX.utils.book_append_sheet(wb,ws,'KPI');XLSX.writeFile(wb,name+'.xlsx');return;}
+    const h=Object.keys(rows[0]),csv='\uFEFF'+[h].concat(rows.map(r=>h.map(k=>r[k]))).map(a=>a.map(v=>'"'+String(v==null?'':v).replace(/"/g,'""')+'"').join(',')).join('\n');const link=document.createElement('a');link.href=URL.createObjectURL(new Blob([csv],{type:'text/csv;charset=utf-8'}));link.download=name+'.csv';link.click();URL.revokeObjectURL(link.href);
 }
 
 function renderKPITable() {
+    kpiSyncSummaryFilters_();
     renderKpiExecutiveSummary();
     const tbody = document.getElementById('kpi-table-body');
     if (!tbody) return;
