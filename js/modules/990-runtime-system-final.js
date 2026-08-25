@@ -538,7 +538,7 @@
     car_booking: 'Car Booking',
     van_booking: 'Van Booking',
     weekly: 'Weekly Report',
-    report_manage: 'Report Management',
+    report_manage: 'OT Generate',
     kpi: 'KPI Tracking',
     stock_dashboard: 'Infusion Pump Dashboard',
     inventory: 'Inventory',
@@ -1407,7 +1407,6 @@
           if (!res || !res.success) {
             var msg = (res && res.message) || 'Cannot load inventory';
             inlineError('siTable', 'Inventory Error', msg, 'initStockInventoryModule(true)');
-            if (window.Swal) window.Swal.fire('Inventory Error', msg, 'error');
             return;
           }
           try {
@@ -1424,13 +1423,11 @@
           } catch (err) {
             var emsg = err && err.message ? err.message : String(err);
             inlineError('siTable', 'Inventory Render Error', emsg, 'initStockInventoryModule(true)');
-            if (window.Swal) window.Swal.fire('Inventory Render Error', emsg, 'error');
           }
         })
         .withFailureHandler(function(err){
           var msg = err && err.message ? err.message : String(err);
           inlineError('siTable', 'Inventory Error', msg, 'initStockInventoryModule(true)');
-          if (window.Swal) window.Swal.fire('Inventory Error', msg, 'error');
         })
         .si_getStockInventoryData(force === true);
     };
@@ -2481,7 +2478,7 @@
     var teamKeys = ['MED','LAB','EHS','ENV','TES','MGT'];
     var sets = {}, man = {};
     teamKeys.forEach(function(t){ sets[t]=new Set(); man[t]=0; });
-    var jobs = [], leave = [];
+    var jobs = [], leave = [], other = [];
     data.forEach(function(item){
       var itemM = parseInt(item.month,10), itemY = parseInt(item.year,10);
       if(itemM !== targetM || itemY !== targetY) return;
@@ -2491,6 +2488,8 @@
       var capacityTeam = calendarCapacityTeam_(item, sourceTeam);
       var isLeave = (typeof checkIsLeaveEvent === 'function') ? checkIsLeaveEvent(title) : /leave|off|ลา|หยุด|ป่วย/i.test(title);
       if(isLeave){ if(calendarUiMatches_(current, sourceTeam)) leave.push(Object.assign({}, item, {team:sourceTeam})); return; }
+      var isOther = (typeof checkIsOtherCalendarActivity === 'function') ? checkIsOtherCalendarActivity(title) : /ส่ง\s*cal|ส่งสอบเทียบ|ส่งเครื่อง|ยืมเครื่อง|(?:^|\s)ยืม(?:\s|$)/i.test(title);
+      if(isOther){ if(calendarUiMatches_(current, sourceTeam)) other.push(Object.assign({}, item, {team:sourceTeam})); return; }
       if(!title) return;
       // Count every scheduled non-leave work day, including weekend work.
       if(man.hasOwnProperty(capacityTeam)) man[capacityTeam] += 1;
@@ -2507,6 +2506,7 @@
     renderCapacityBarsFinal(man, weekdays);
     if(typeof renderJobTable === 'function') renderJobTable(jobs);
     if(typeof renderLeaveList === 'function') renderLeaveList(leave);
+    if(typeof renderCalendarOtherList === 'function') renderCalendarOtherList(other);
   }
   function renderCapacityBarsFinal(manDays, weekdays){
     var container = qs('#capacity-dashboard-grid'); if(!container) return;

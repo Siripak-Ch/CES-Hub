@@ -168,6 +168,7 @@
 
 
     <script defer src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script defer src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.4/jspdf.plugin.autotable.min.js"></script>
 
 
 
@@ -291,8 +292,8 @@
 
 
 
-      window.CES_BUILD_HASH = 'CES-HUB-V29.1-DIRECT-EXEC-FAST-20260820';
-      window.CES_BUILD_VERSION = 'V29.1-DIRECT-EXEC-FAST';
+      window.CES_BUILD_HASH = 'CES-HUB-V30.0-CLOUDFLARE-ONLY-20260820';
+      window.CES_BUILD_VERSION = 'V30.0-CLOUDFLARE-ONLY';
 
       // CES_V221_CACHE_MIGRATION: force fresh shell/config/permissions after a release.
       try {
@@ -463,6 +464,7 @@
           { target:'#app-main-content', url:'views/ot.html', viewId:'view-ot', optional:true },
           { target:'#app-main-content', url:'views/team_information.html', viewId:'view-team_information', optional:true },
           { target:'#app-main-content', url:'views/team_plan.html', viewId:'view-team_plan', optional:true },
+          { target:'#app-main-content', url:'views/master_cal_pm_plan.html', viewId:'view-master_cal_pm_plan', optional:true },
           { target:'#app-main-content', url:'views/monthly_report.html', viewId:'view-monthly_report', optional:true },
           { target:'#app-main-content', url:'views/users.html', viewId:'view-users', optional:true },
           { target:'#app-main-content', url:'views/ces_evaluation.html', viewId:'view-ces_evaluation', optional:true },
@@ -506,6 +508,7 @@
           { url:'js/modules/180-team-information.js', optional:true },
           { url:'js/modules/185-memo-workorder.js', optional:true },
           { url:'js/modules/186-monthly-report.js', optional:true },
+          { url:'js/modules/187-master-cal-pm-plan.js', optional:true },
           { url:'js/modules/190-system-health.js', optional:true },
           { url:'js/modules/195-ces-hub-evaluation.js', optional:true },
           { url:'js/modules/196-ces-ai-knowledge.js', optional:true },
@@ -558,6 +561,7 @@
         ot:['js/modules/100-ot-dashboard.js','js/modules/990-runtime-system-final.js'],
         team_information:['js/modules/180-team-information.js','js/modules/990-runtime-system-final.js'],
         team_plan:['js/modules/180-team-information.js','js/modules/990-runtime-system-final.js'],
+        master_cal_pm_plan:['js/modules/187-master-cal-pm-plan.js'],
         monthly_report:['js/modules/186-monthly-report.js','js/modules/990-runtime-system-final.js'],
         users:['js/modules/110-users-management.js','js/modules/990-runtime-system-final.js'],
         ces_evaluation:['js/modules/195-ces-hub-evaluation.js','js/modules/990-runtime-system-final.js'],

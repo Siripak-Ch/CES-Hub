@@ -470,3 +470,7 @@ function fillUserInfoRM() {
             }
         });
     }
+
+    /** Canonical user-facing entry point; keeps report_manage internals compatible. */
+    function initOTGenerate(force) { return initReportManage(force); }
+    window.initOTGenerate = initOTGenerate;

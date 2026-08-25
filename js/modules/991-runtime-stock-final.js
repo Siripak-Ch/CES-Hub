@@ -424,6 +424,7 @@ window.CES_STOCK_BOOTSTRAP_V6=null; // V35: live Google Sheet is the only source
       .ces-stock-v7-page .csv7-contract-status{display:flex;gap:5px;flex-wrap:wrap}.ces-stock-v7-page .csv7-chip{display:inline-flex;align-items:center;border-radius:999px;padding:4px 8px;font-size:10px;font-weight:900}.ces-stock-v7-page .csv7-chip.active{background:#d1fae5;color:#047857}.ces-stock-v7-page .csv7-chip.overdue{background:#fee2e2;color:#b91c1c}.ces-stock-v7-page .csv7-chip.done{background:#e2e8f0;color:#475569}
       .ces-stock-v7-page .csv7-contract-actions{display:flex;gap:6px}.ces-stock-v7-page .csv7-contract-actions button{width:34px;height:34px;border-radius:10px;border:1px solid #bfdbfe;background:#eff6ff;color:#2563eb;cursor:pointer}.ces-stock-v7-page .csv7-contract-actions button.extend{border-color:#cbd5e1;background:#f8fafc;color:#475569}.ces-stock-v7-page .csv7-contract-actions button.return{border-color:#a7f3d0;background:#ecfdf5;color:#047857}.ces-stock-v7-page .csv7-contract-actions button:hover{transform:translateY(-1px);box-shadow:0 5px 12px rgba(30,58,138,.12)}
       .ces-stock-v7-page #sdContractTable .csv5-table{min-width:920px;table-layout:auto}.ces-stock-v7-page #sdContractTable .csv5-table th,.ces-stock-v7-page #sdContractTable .csv5-table td{padding:10px 12px;line-height:1.4}.ces-stock-v7-page #sdContractTable .csv7-contract-location{min-width:220px;white-space:normal;overflow-wrap:anywhere}.ces-stock-v7-page #sdContractTable .csv7-contract-status{min-width:240px;flex-wrap:nowrap}.ces-stock-v7-page #sdContractTable .csv7-contract-actions{min-width:132px;flex-wrap:nowrap}
+      .ces-stock-v7-page #sdContractTable .csv5-table-wrap,#view-inventory #siTable{overflow-x:auto!important;-webkit-overflow-scrolling:touch}.ces-stock-v7-page #sdContractTable .csv5-table{min-width:860px}.ces-stock-v7-page #sdContractTable th,.ces-stock-v7-page #sdContractTable td,#view-inventory #siTable th,#view-inventory #siTable td{font-size:10px!important;padding:7px 8px!important;line-height:1.25!important}.ces-stock-v7-page .csv7-contract-actions button,#view-inventory #siTable .sp-icon-btn{width:28px!important;height:28px!important;border-radius:8px!important;font-size:10px!important}.ces-stock-v7-page #sdContractTable .csv7-contract-location{min-width:185px}.ces-stock-v7-page #sdContractTable .csv7-contract-status{min-width:205px}.ces-stock-v7-page #sdContractTable .csv7-contract-actions{min-width:100px}
       .ces-stock-v7-page .csv7-summary-grid{margin-top:16px}.ces-stock-v7-page .csv7-summary-table{max-height:420px}
       .ces-stock-v7-page .csv7-three-mode{display:grid!important;grid-template-columns:repeat(3,minmax(0,1fr))!important;gap:12px!important;overflow:visible!important}
       .ces-stock-v7-page .csv7-mode-panel{padding:16px!important}.ces-stock-v7-page .csv7-mode-title{text-align:center;font-weight:900;margin:0 0 12px;color:#475569}
@@ -522,18 +523,17 @@ window.CES_STOCK_BOOTSTRAP_V6=null; // V35: live Google Sheet is the only source
   window.sd_renderAll=window.sd_renderFiltered;
   window.sd_openAlertPopup=function(){var rows=window.CES_STOCK_V7_ALERTS||[];if(!window.Swal)return;var body=rows.length?detailTable(rows):'<div class="sp-muted">ไม่มีสัญญาเกินกำหนด</div>';Swal.fire({title:'Rental Alerts',width:1080,html:body,confirmButtonText:'ปิด'});};
 
-  /* Confirm mode selection and every status-changing Check Stock action. */
+  /* Mode selection is immediate; a blocking confirmation caused orphaned
+     SweetAlert backdrops and made Check Stock appear frozen. */
   var baseSetMode=window.sc_setMode;
   var baseAction=window.sc_action;
   window.sc_requestMode=function(mode){
     if(window.CES_TASK_PRIORITY&&typeof window.CES_TASK_PRIORITY.noteInteraction==='function')window.CES_TASK_PRIORITY.noteInteraction('check_stock');
-    var cfg={
-      'CHECK-IN':{title:'เลือก Return / Check-In?',text:'ใช้สำหรับรับคืนเครื่องเช่ายืม และเปลี่ยนเป็น รอสอบเทียบ',color:'#059669'},
-      'CAL/PM':{title:'เลือก Scan CAL/PM?',text:'ใช้ยืนยันการสอบเทียบ รอสอบเทียบ → พร้อมส่ง',color:'#475569'},
-      'CHECK-OUT':{title:'เลือก Check-Out?',text:'ใช้เบิกเครื่องที่ผ่าน CAL/PM แล้ว พร้อมส่ง → เช่ายืม',color:'#2563eb'}
-    }[mode];
-    if(!cfg||!window.Swal){if(typeof baseSetMode==='function')baseSetMode(mode);return;}
-    Swal.fire({title:cfg.title,text:cfg.text,icon:'question',showCancelButton:true,confirmButtonText:'ยืนยันเลือกโหมด',cancelButtonText:'ยกเลิก',confirmButtonColor:cfg.color}).then(function(r){if(!r.isConfirmed){releaseOrphanStockBackdrop_();return;}try{Swal.close();}catch(ignore){}if(typeof baseSetMode==='function')baseSetMode(mode);setHtml('scResult','');var k=el('scKeyword');if(k){k.value='';setTimeout(function(){k.focus();},50);}releaseOrphanStockBackdrop_();});
+    if(typeof baseSetMode==='function')baseSetMode(mode);
+    setHtml('scResult','');
+    var k=el('scKeyword');if(k){k.value='';setTimeout(function(){k.focus();},50);}
+    releaseOrphanStockBackdrop_();
+    if(window.Swal)Swal.fire({toast:true,position:'top-end',icon:'success',title:'เลือกโหมด '+mode+' แล้ว',timer:1100,showConfirmButton:false});
   };
   if(typeof baseAction==='function'){
     window.sc_action=function(action,idCode,payload){

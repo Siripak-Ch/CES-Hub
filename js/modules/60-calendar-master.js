@@ -365,6 +365,11 @@
         return calendarNormalizeTeam(sourceTeam || calendarSourceTeam(item) || (item && item.capacityTeam));
     }
 
+    function checkIsOtherCalendarActivity(title) {
+        const text = String(title || '').trim().toLowerCase();
+        return /ส่ง\s*cal|ส่งสอบเทียบ|ส่งเครื่อง|ยืมเครื่อง|(?:^|\s)ยืม(?:\s|$)/i.test(text);
+    }
+
     function processCalendarData(data, targetM, targetY) {
         const teamNames = ['MED', 'LAB', 'EHS', 'ENV', 'TES', 'MGT'];
         const capacityTeams = ['MED', 'LAB', 'EHS', 'ENV', 'TES'];
@@ -375,6 +380,7 @@
         capacityTeams.forEach(team => { capacityDetails[team] = []; });
         let jobListForTable = [];
         let leaveListForTable = [];
+        let otherListForTable = [];
 
         (data || []).forEach(item => {
             const itemM = parseInt(item.month);
@@ -391,6 +397,10 @@
 
             if (checkIsLeaveEvent(title)) {
                 if (calendarServiceMatches(sourceTeam)) leaveListForTable.push(normalizedItem);
+                return;
+            }
+            if (checkIsOtherCalendarActivity(title)) {
+                if (calendarServiceMatches(sourceTeam)) otherListForTable.push(normalizedItem);
                 return;
             }
             if (!title) return;
@@ -420,6 +430,7 @@
         else { const grid=document.getElementById('capacity-dashboard-grid'); if(grid) grid.innerHTML='<div class="col-span-full text-sm text-slate-500">Capacity utilization is available when one month and one year are selected.</div>'; }
         renderJobTable(jobListForTable);
         renderLeaveList(leaveListForTable);
+        renderCalendarOtherList(otherListForTable);
     }
 
     function calendarCapacityConfig_(manDays, weekdays) {
@@ -560,6 +571,25 @@
         ul.innerHTML = html;
     }
 
+    function renderCalendarOtherList(list) {
+        const ul = document.getElementById('list-calendar-other');
+        if (!ul) return;
+        if (!list.length) {
+            ul.innerHTML = `<li class="text-center text-sm text-gray-400 py-8 italic bg-white/50 rounded-xl border border-dashed border-gray-200">No other movements.</li>`;
+            return;
+        }
+        list.sort((a,b) => String(a.date||'').localeCompare(String(b.date||'')) || String(a.title||'').localeCompare(String(b.title||'')));
+        ul.innerHTML = list.map(item => {
+            const jobTeam = item.displayTeam || item.capacityTeam || item.team;
+            const teamStyle = calendarTeamStyle_(jobTeam);
+            return `<li class="bg-white p-3 rounded-xl border border-amber-100 shadow-sm">
+                <div class="flex justify-between items-center gap-2 mb-1"><span class="text-[10px] font-black px-1.5 py-0.5 rounded" style="color:${teamStyle.color};background:${teamStyle.soft};border:1px solid ${teamStyle.border}">${calendarEsc_(jobTeam)}</span><span class="text-xs text-gray-400 font-mono">${calendarEsc_(item.date||'-')}</span></div>
+                <p class="text-xs font-bold text-slate-700 line-clamp-2">${calendarEsc_(item.title||'-')}</p>
+            </li>`;
+        }).join('');
+    }
+    window.renderCalendarOtherList = renderCalendarOtherList;
+
     // Export every Calendar_Summary column; All/Month/Year/Team follow the UI.
     function exportMasterCalendarToCSV() {
         if (!window.globalCalData || window.globalCalData.length === 0) {
@@ -594,7 +624,7 @@
             Team:calendarSourceTeam(item), Date:item.date || '', 'Event Title':item.title || '', Location:item.location || '',
             Month:Number(item.month || 0), Year:Number(item.year || 0), UniqueKey:item.uniqueKey || '',
             'Calendar ID':item.calendarId || '', 'Event Color':item.eventColor || '', 'Capacity Team':item.capacityTeam || '',
-            Type:checkIsLeaveEvent(item.title) ? 'Leave/Off' : 'Job'
+            Type:checkIsLeaveEvent(item.title) ? 'Leave/Off' : (checkIsOtherCalendarActivity(item.title) ? 'Other' : 'Job')
         }));
         const suffix = `${currentService}_${targetM === null ? 'AllMonths' : String(targetM).padStart(2,'0')}_${targetY === null ? 'AllYears' : targetY}`;
         if (window.XLSX) {
@@ -947,7 +977,7 @@
             return;
         }
 
-        const filteredGlobalData = globalCalData.filter(item => !checkIsLeaveEvent(item.title));
+        const filteredGlobalData = globalCalData.filter(item => !checkIsLeaveEvent(item.title) && !checkIsOtherCalendarActivity(item.title));
         const raw2025 = filteredGlobalData.filter(item => item.year == "2025");
         const raw2026 = filteredGlobalData.filter(item => item.year == "2026");
         

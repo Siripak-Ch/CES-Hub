@@ -842,7 +842,7 @@ function renderKpiExecutiveSummary() {
     const actionRisk = overdue + dueToday + waitingEdit;
     const fTeam = kpiGetTeamFilterValue();
     const scopeNote = fTeam === 'All' ? 'EHS + ENV' : fTeam;
-    const neutral = { color:'text-slate-600', bg:'bg-slate-50', border:'border-slate-200' };
+    const neutral = { color:'text-slate-900', bg:'bg-slate-50', border:'border-slate-200' };
     const cards = [
         { label:'Active Jobs', value:active, note:scopeNote + ' • ยังไม่ส่ง Report เสร็จ', icon:'fa-briefcase', action:'' },
         { label:'Action Required / Risk', value:actionRisk, note:'Overdue / Due today / รอแก้ไข', icon:'fa-triangle-exclamation', action:'' },
@@ -855,7 +855,7 @@ function renderKpiExecutiveSummary() {
                 <p class="text-[10px] font-black uppercase tracking-widest text-slate-500">${kpiEsc(c.label)}</p>
                 <h3 class="text-2xl font-black ${neutral.color} mt-1">${kpiNum(c.value)}</h3>
                 <p class="text-[10px] font-bold text-slate-500 mt-1 leading-tight">${kpiEsc(c.note || '')}</p>
-            </div><div class="w-10 h-10 rounded-xl bg-white flex items-center justify-center ${neutral.color} border border-slate-200 shadow-sm"><i class="fas ${c.icon || 'fa-chart-simple'}"></i></div></div>
+            </div><div class="w-10 h-10 rounded-xl bg-white flex items-center justify-center text-[#003DA5] border border-blue-100 shadow-sm"><i class="fas ${c.icon || 'fa-chart-simple'}"></i></div></div>
         </button>`).join('');
 
     const stageCards = [
@@ -865,8 +865,8 @@ function renderKpiExecutiveSummary() {
     ];
     statusWrap.innerHTML = stageCards.map(s => {
         const selected = KPI_STAGE_FILTER === s.key;
-        return `<button onclick="kpiApplyStageFilter('${s.key}')" title="คลิกเพื่อกรอง / คลิกซ้ำเพื่อยกเลิก" class="kpi-ehs-neutral-card flex items-center justify-between gap-3 rounded-2xl border border-slate-200 bg-slate-50 text-slate-600 px-4 py-3 text-left hover:shadow-sm transition ${selected ? 'ring-2 ring-slate-400 shadow-md' : ''}">
-            <div class="flex items-center gap-3 min-w-0"><div class="w-9 h-9 rounded-xl bg-white border border-slate-200 flex items-center justify-center shadow-sm"><i class="fas ${s.icon}"></i></div>
+        return `<button onclick="kpiApplyStageFilter('${s.key}')" title="คลิกเพื่อกรอง / คลิกซ้ำเพื่อยกเลิก" class="kpi-ehs-neutral-card flex items-center justify-between gap-3 rounded-2xl border border-slate-200 bg-slate-50 text-slate-900 px-4 py-3 text-left hover:shadow-sm transition ${selected ? 'ring-2 ring-blue-400 shadow-md' : ''}">
+            <div class="flex items-center gap-3 min-w-0"><div class="w-9 h-9 rounded-xl bg-white border border-blue-100 text-[#003DA5] flex items-center justify-center shadow-sm"><i class="fas ${s.icon}"></i></div>
             <div class="min-w-0"><p class="text-xs font-black leading-tight">${kpiEsc(s.label)} ${selected ? '<span class="ml-1 text-[9px] opacity-70">ACTIVE</span>' : ''}</p><p class="text-[10px] font-bold opacity-70 truncate">${kpiEsc(s.sub)}</p></div></div>
             <span class="text-xl font-black">${kpiNum(s.value)}</span></button>`;
     }).join('');
@@ -1146,7 +1146,8 @@ function renderKpiMonthlyPerformanceSummary(rows) {
     });
     const keys=Object.keys(map).sort();
     if(!keys.length){host.innerHTML='<div class="text-xs text-slate-400">No monthly data.</div>';return;}
-    host.innerHTML='<table class="w-full text-xs"><thead><tr class="bg-slate-50"><th class="p-2 text-left">Month</th><th class="p-2 text-right">Total</th><th class="p-2 text-right text-green-700">อยู่ใน KPI</th><th class="p-2 text-right text-green-700">อยู่ใน KPI %</th><th class="p-2 text-right text-red-600">เกิน KPI</th><th class="p-2 text-right text-red-600">เกิน KPI %</th></tr></thead><tbody>'+keys.map(key=>{const x=map[key],t=x.within+x.late,wp=t?x.within*100/t:0,lp=t?x.late*100/t:0;return `<tr class="border-t"><td class="p-2 font-bold">${key}</td><td class="p-2 text-right">${t}</td><td class="p-2 text-right font-bold text-green-700">${x.within}</td><td class="p-2 text-right">${wp.toFixed(1)}%</td><td class="p-2 text-right font-bold text-red-600">${x.late}</td><td class="p-2 text-right">${lp.toFixed(1)}%</td></tr>`;}).join('')+'</tbody></table>';
+    const monthNames=['January','February','March','April','May','June','July','August','September','October','November','December'];
+    host.innerHTML='<table class="w-full text-xs"><thead><tr class="bg-slate-50"><th class="p-2 text-left">Month</th><th class="p-2 text-right">Total</th><th class="p-2 text-right text-green-700">อยู่ใน KPI</th><th class="p-2 text-right text-green-700">อยู่ใน KPI %</th><th class="p-2 text-right text-red-600">เกิน KPI</th><th class="p-2 text-right text-red-600">เกิน KPI %</th></tr></thead><tbody>'+keys.map(key=>{const x=map[key],t=x.within+x.late,wp=t?x.within*100/t:0,lp=t?x.late*100/t:0,parts=key.split('-'),label=monthNames[Math.max(0,Number(parts[1])-1)]+' '+parts[0];return `<tr class="border-t"><td class="p-2 font-bold">${label}</td><td class="p-2 text-right">${t}</td><td class="p-2 text-right font-bold text-green-700">${x.within}</td><td class="p-2 text-right">${wp.toFixed(1)}%</td><td class="p-2 text-right font-bold text-red-600">${x.late}</td><td class="p-2 text-right">${lp.toFixed(1)}%</td></tr>`;}).join('')+'</tbody></table>';
 }
 
 function kpiExportData(scope) {

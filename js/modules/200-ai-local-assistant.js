@@ -540,7 +540,7 @@
     return parts;
   }
   function friendlyTabNameV208(tab) {
-    var names={portal:'หน้า Home',management_overview:'Management Overview',yearly:'Job Dashboard',revenue:'Revenue Dashboard',ot:'OT Dashboard',service:'แบบประเมินการใช้บริการ',report:'แบบประเมินรายงานผล',calendar:'Master Calendar',checkin:'Check-in',car_booking:'Car Booking',van_booking:'Van Booking',weekly:'Weekly Report',kpi:'KPI Tracking',report_manage:'Report Management',stock_dashboard:'Infusion Pump Dashboard',inventory:'Inventory',check_stock:'Check Stock',team_information:'Team Information',team_plan:'Team Plan',monthly_report:'Monthly Report',users:'User Management',ces_evaluation:'CES Hub Evaluation',ces_ai_knowledge:'CES AI Knowledge',health:'System Health',setting:'Setting'};
+    var names={portal:'หน้า Home',management_overview:'Management Overview',yearly:'Job Dashboard',revenue:'Revenue Dashboard',ot:'OT Dashboard',service:'แบบประเมินการใช้บริการ',report:'แบบประเมินรายงานผล',calendar:'Master Calendar',checkin:'Check-in',car_booking:'Car Booking',van_booking:'Van Booking',weekly:'Weekly Report',kpi:'KPI Tracking',report_manage:'OT Generate',stock_dashboard:'Infusion Pump Dashboard',inventory:'Inventory',check_stock:'Check Stock',team_information:'Team Information',team_plan:'Team Plan',master_cal_pm_plan:'Master CAL/PM Plan',monthly_report:'Monthly Report',users:'User Management',ces_evaluation:'CES Hub Evaluation',ces_ai_knowledge:'CES AI Knowledge',health:'System Health',setting:'Setting'};
     return names[String(tab||'')] || String(tab||'ฟังก์ชันที่เกี่ยวข้อง').replace(/_/g,' ');
   }
   function renderStructuredAnswerV208(bubble, text, result) {
