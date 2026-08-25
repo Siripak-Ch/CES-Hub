@@ -4298,6 +4298,17 @@ textarea.ces-detail-input-v243{min-height:58px;resize:vertical;margin-bottom:9px
   white-space:normal!important;
   word-break:break-word!important;
 }
+#view-stock_dashboard #sdContractTable .sp-table-wrap{
+  max-width:100%!important;
+  overflow-x:auto!important;
+  -webkit-overflow-scrolling:touch!important;
+}
+#view-stock_dashboard #sdContractTable .sp-table{min-width:980px!important}
+#view-stock_dashboard .ces-contract-location{display:flex;align-items:flex-start;gap:8px;min-width:220px;max-width:290px}
+#view-stock_dashboard .ces-contract-location>div{min-width:0}
+#view-stock_dashboard .ces-contract-location b,
+#view-stock_dashboard .ces-contract-location span{display:block;white-space:normal;overflow-wrap:anywhere;word-break:break-word;line-height:1.3}
+#view-stock_dashboard .ces-contract-location span{margin-top:3px;color:#64748b;font-size:10px}
 #view-check_stock .stockpro-hero{
   width:100%!important;
   padding:14px!important;

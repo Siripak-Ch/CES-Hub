@@ -97,7 +97,7 @@
         const confirmation = await Swal.fire({
             icon:'question',
             title:'Send Work Plan Test?',
-            html:'ส่งสรุปแผนงานล่วงหน้า 2 เดือน โดยเทียบแผนปีก่อน ไปยัง <b>ADMIN เท่านั้น</b>',
+            html:'ส่งสรุปแผนงานล่วงหน้า 1 เดือน โดยเทียบแผนปีก่อน ไปยัง <b>ADMIN เท่านั้น</b>',
             showCancelButton:true,
             confirmButtonText:'Send test',
             cancelButtonText:'Cancel',
@@ -106,11 +106,15 @@
         if (!confirmation.isConfirmed) return null;
         Swal.fire({title:'Sending work-plan test…',allowOutsideClick:false,showConfirmButton:false,didOpen:()=>Swal.showLoading()});
         try {
-            const result = await window.CES_API.callFunction('CES_CALENDAR_WORKPLAN_ALERT_TEST', [], {transport:'iframe',timeoutMs:120000,dedupe:false,priority:'active',userAction:true,module:'calendar'});
+            const result = await window.CES_API.callFunction('CES_CALENDAR_WORKPLAN_ALERT_TEST', [], {timeoutMs:180000,dedupe:false,priority:'active',userAction:true,module:'calendar'});
             await Swal.fire({icon:'success',title:'Test sent',text:'ส่งไปยัง ADMIN แล้ว '+Number(result && result.results && result.results.length || 0)+' ทีม',confirmButtonColor:'#003DA5'});
             return result;
         } catch (error) {
-            await Swal.fire({icon:'error',title:'Work Plan Alert Error',text:error && error.message ? error.message : String(error),confirmButtonColor:'#003DA5'});
+            const raw = error && error.message ? error.message : String(error);
+            const message = /Function not allowed or not found/i.test(raw)
+                ? raw+' — Replace backend/Calendar.js, Deploy Web App as a New version, then refresh CES Hub.'
+                : raw;
+            await Swal.fire({icon:'error',title:'Work Plan Alert Error',text:message,confirmButtonColor:'#003DA5'});
             return null;
         }
     }

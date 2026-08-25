@@ -94,7 +94,9 @@ function siTabStyle(){
     #view-inventory .sp-tab-hidden{display:none!important}
     #view-inventory .sp-compact-table .sp-table{font-size:11px!important;table-layout:auto}
     #view-inventory .sp-compact-table .sp-table th{padding:7px 8px!important;font-size:10px!important;white-space:nowrap}
-    #view-inventory .sp-compact-table .sp-table td{padding:7px 8px!important;line-height:1.25!important;vertical-align:middle!important;white-space:nowrap}
+    #view-inventory .sp-compact-table .sp-table td{padding:7px 8px!important;line-height:1.25!important;vertical-align:middle!important;white-space:normal;overflow-wrap:anywhere}
+    #view-inventory .ces-inventory-brand-model b,#view-inventory .ces-inventory-brand-model span{display:block;white-space:normal;overflow-wrap:anywhere;word-break:break-word}
+    #view-inventory .ces-inventory-brand-model span{margin-top:3px;color:#64748b;font-size:10px}
     #view-inventory .sp-compact-table .sp-id{font-size:12px!important;line-height:1!important}
     #view-inventory .sp-compact-table .sp-sub{font-size:9.5px!important;line-height:1.15!important;margin-top:1px!important}
     #view-inventory .sp-compact-table .sp-badge{font-size:10px!important;padding:3px 7px!important}
@@ -135,7 +137,7 @@ function si_applyFilters(){
 function si_renderTable(){
   siBaseStyle();siTabStyle();const start=(SI.page-1)*SI.pageSize,rows=SI.filtered.slice(start,start+SI.pageSize);spSetHtml('siTableCount',`${SI.filtered.length} items`);
   if(!rows.length){spSetHtml('siTable','<div class="sp-muted">No equipment found</div>');spSetHtml('siPagination','');return;}
-  spSetHtml('siTable',`<div class="sp-table-wrap sp-compact-table"><table class="sp-table"><thead><tr><th>#</th><th>ID Code</th><th>SN</th><th>Brand / Model</th><th>Status</th><th>Borrower</th><th>Location</th><th>Due Date</th><th>Action Required</th><th>Rent Action</th><th>Equipment Action</th></tr></thead><tbody>${rows.map((d,i)=>`<tr><td>${start+i+1}</td><td><span class="sp-id">${spEsc(d.idCode)}</span></td><td>${spEsc(d.sn||'-')}</td><td><b>${spEsc(d.brand||'-')}</b><span class="sp-sub">${spEsc(d.model||d.itemName||'-')}</span></td><td>${spBadge(d.status)}</td><td>${spEsc(d.borrower||'-')}</td><td>${spEsc(d.location||'-')}</td><td>${spFmtDate(d.expectedReturn||d.expectedReturnDate)}</td><td>${spEsc(d.actionRequired||d.recheckNote||'-')}</td><td>${si_rentButtons(d)}</td><td>${si_equipmentButtons(d)}</td></tr>`).join('')}</tbody></table></div>`);
+  spSetHtml('siTable',`<div class="sp-table-wrap sp-compact-table"><table class="sp-table"><thead><tr><th>#</th><th>ID Code</th><th>SN</th><th>Brand / Model</th><th>Status</th><th>Borrower</th><th>Location</th><th>Due Date</th><th>Action Required</th><th>Rent Action</th><th>Equipment Action</th></tr></thead><tbody>${rows.map((d,i)=>`<tr><td>${start+i+1}</td><td><span class="sp-id">${spEsc(d.idCode)}</span></td><td>${spEsc(d.sn||'-')}</td><td><div class="ces-inventory-brand-model"><b>${spEsc(d.brand||'-')}</b><span>${spEsc(d.model||d.itemName||'-')}</span></div></td><td>${spBadge(d.status)}</td><td>${spEsc(d.borrower||'-')}</td><td>${spEsc(d.location||'-')}</td><td>${spFmtDate(d.expectedReturn||d.expectedReturnDate)}</td><td>${spEsc(d.actionRequired||d.recheckNote||'-')}</td><td>${si_rentButtons(d)}</td><td>${si_equipmentButtons(d)}</td></tr>`).join('')}</tbody></table></div>`);
   si_renderPagination();
 }
 function si_accQtyChange(inputId,delta,max){
