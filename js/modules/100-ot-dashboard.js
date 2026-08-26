@@ -54,8 +54,7 @@ function setOTDataState_(mode, text) {
 function fetchOTData(forceRefresh) {
   if (otRequestInFlight && !forceRefresh) return otRequestInFlight;
   const requestVersion = ++otRequestVersion;
-  const loadingToken = window.CES_UI && typeof window.CES_UI.begin === 'function'
-    ? window.CES_UI.begin({ target:'#view-ot', mode:'section', owner:'ot', message:'Loading OT data…' }) : '';
+  const loadingToken = '';
   setOTDataState_('', forceRefresh ? 'Refreshing OT data' : 'Loading OT data');
 
   const request = (window.CES_API && typeof window.CES_API.callFunction === 'function')
@@ -65,6 +64,7 @@ function fetchOTData(forceRefresh) {
   otRequestInFlight = Promise.resolve(request).then(function(data) {
     if (requestVersion !== otRequestVersion) return rawOTData;
     rawOTData = normalizeOTRecords_(data && data.records ? data.records : data);
+    window.CES_OT_DASHBOARD_ROWS = rawOTData.slice();
     ensureOTYears_(rawOTData);
     selectLatestAvailableOTPeriod_(rawOTData, true);
     setOTDataState_(rawOTData.length ? 'live' : 'empty', rawOTData.length ? `${rawOTData.length} live records` : 'No calculated OT records');
@@ -77,6 +77,7 @@ function fetchOTData(forceRefresh) {
     if (requestVersion !== otRequestVersion) return rawOTData;
     rawOTData = [];
     currentFilteredOTData = [];
+    window.CES_OT_DASHBOARD_ROWS = [];
     ensureOTYears_(rawOTData);
     setOTDataState_('error', 'OT data unavailable');
     applyOTFilters();

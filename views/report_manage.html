@@ -29,10 +29,11 @@
 <label class="text-xs font-bold text-gray-500 uppercase tracking-wide">Cost Center <span class="text-red-500">*</span></label>
 <input class="w-full bg-white border border-gray-200 text-gray-800 text-sm rounded-xl focus:ring-2 focus:ring-indigo-500 block p-3 outline-none transition-all" id="rm-costCenter" list="rm-costCenterList" oninput="this.classList.remove('border-red-500', 'bg-red-50')" placeholder="Select or Type" required="" type="text"/>
 <datalist id="rm-costCenterList">
-<option value="6206"></option>
-<option value="6207"></option>
-<option value="6154"></option>
-<option value="6067"></option>
+<option value="106130"></option>
+<option value="106067"></option>
+<option value="106206"></option>
+<option value="106207"></option>
+<option value="106154"></option>
 </datalist>
 </div>
 <div class="space-y-2">
@@ -73,6 +74,9 @@
 <td class="p-3" colspan="4">
 <button class="flex items-center gap-2 text-indigo-600 font-bold text-xs bg-indigo-50 px-4 py-2 rounded-xl hover:bg-indigo-100 transition-colors" onclick="addRowRM()">
 <i class="fas fa-plus-circle"></i> ADD ROW
+                            </button>
+<button class="ml-2 inline-flex items-center gap-2 text-[#003DA5] font-bold text-xs bg-blue-50 px-4 py-2 rounded-xl hover:bg-blue-100 transition-colors" onclick="loadRowsFromOTDashboardRM()" title="Load dates and hours from OT Dashboard">
+<i class="fas fa-clock-rotate-left"></i> LOAD OT DASHBOARD
                             </button>
 </td>
 <td class="p-3 text-right font-black text-gray-600 text-xs">TOTAL</td>

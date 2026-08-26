@@ -19,6 +19,9 @@ const thaiHolidays = [
 
     let lastRMResult = null;
     let lastRMFormData = null;
+    const RM_ALLOWED_COST_CENTERS_V3015 = ['106130','106067','106206','106207','106154'];
+    const RM_TEAM_COST_CENTER_V3015 = { MED:'106130', LAB:'106067', EHS:'106206', ENV:'106207', MNG:'106154', MANAGEMENT:'106154', OTHER:'106154' };
+    const RM_OLD_COST_CENTER_MAP_V3015 = { '6130':'106130', '6067':'106067', '6206':'106206', '6207':'106207', '6154':'106154' };
 
 
     function rmErrorMessageV209(value) {
@@ -122,7 +125,7 @@ const thaiHolidays = [
  * ฟังก์ชันดึงข้อมูลพนักงานและเลือกทีมอัตโนมัติ (รองรับ MANAGEMENT)
  */
 function fillUserInfoRM() {
-    let empName = "", empId = "", dept = "", staffTeam = "";
+    let empName = "", empId = "", dept = "", staffTeam = "", costCenterValue = "";
     let userObj = {};
     
     try {
@@ -138,12 +141,16 @@ function fillUserInfoRM() {
     empId = userObj.id || userObj.empId || userObj['ID'] || "";
     dept = userObj.department || userObj.dept || userObj['Department'] || "Clinical Engineering Service";
     staffTeam = userObj.team || userObj.Team || userObj['Team'] || "";
+    costCenterValue = String(userObj.costCenter || userObj.cost_center || userObj['Cost Center'] || userObj['CostCenter'] || '').trim();
 
     document.getElementById('rm-empName').value = empName;
     document.getElementById('rm-empId').value = empId;
     document.getElementById('rm-dept').value = dept;
+    const ccList = document.getElementById('rm-costCenterList');
+    if (ccList) ccList.innerHTML = RM_ALLOWED_COST_CENTERS_V3015.map(v => `<option value="${v}"></option>`).join('');
 
     const teamSelect = document.getElementById('rm-mainTeam');
+    let targetCode = "";
     if(teamSelect && staffTeam) {
         const teamVal = staffTeam.toString().toUpperCase().trim();
         const mapping = {
@@ -155,11 +162,16 @@ function fillUserInfoRM() {
             'MED': 'MED', 'LAB': 'LAB', 'EHS': 'EHS'
         };
         
-        const targetCode = mapping[teamVal] || teamVal;
+        targetCode = mapping[teamVal] || teamVal;
         const exists = Array.from(teamSelect.options).some(opt => opt.value === targetCode);
         if(exists) {
             teamSelect.value = targetCode;
         }
+    }
+    const ccInput = document.getElementById('rm-costCenter');
+    if (ccInput && !ccInput.value) {
+        const raw = costCenterValue.replace(/\D/g,'');
+        ccInput.value = RM_ALLOWED_COST_CENTERS_V3015.includes(raw) ? raw : (RM_OLD_COST_CENTER_MAP_V3015[raw] || RM_TEAM_COST_CENTER_V3015[String(targetCode || staffTeam || '').toUpperCase()] || '');
     }
 }
     function initReportManage() {
@@ -265,9 +277,9 @@ function fillUserInfoRM() {
         const newRow = currentRow.cloneNode(true);
         newRow.querySelector('.rm-date').value = '';
         newRow.querySelector('.rm-date').classList.remove('border-red-500', 'bg-red-50');
-        newRow.querySelector('.rm-hrs10').value = '';
-        newRow.querySelector('.rm-hrs15').value = '';
         tbody.appendChild(newRow);
+        calcRM(newRow.querySelector('.rm-start'));
+        updateSummaryRM();
     }
 
     function deleteRowRM(btn) {
@@ -299,6 +311,39 @@ function fillUserInfoRM() {
             holCheck.checked = (day === 0 || day === 6 || isThaiHoliday);
         }
         calcRM(element); 
+    }
+
+    function setRMRowValues_(tr, data) {
+        if (!tr) return;
+        const set = (selector, value) => { const node = tr.querySelector(selector); if (node && value != null) node.value = value; };
+        set('.rm-date', data.date || '');
+        set('.rm-location', data.location || data.team || 'OT');
+        set('.rm-start', data.start || '08:00');
+        set('.rm-end', data.end || '17:00');
+        const hol = tr.querySelector('.rm-holiday');
+        if (hol) hol.checked = !!data.isHoliday;
+        calcRM(tr.querySelector('.rm-start'));
+        if (data.hrs10 != null) set('.rm-hrs10', data.hrs10 || '');
+        if (data.hrs15 != null) set('.rm-hrs15', data.hrs15 || '');
+    }
+
+    function loadRowsFromOTDashboardRM() {
+        const tbody = document.getElementById('rm-rowBody');
+        if (!tbody) return;
+        const userId = String((document.getElementById('rm-empId') || {}).value || '').trim();
+        const rows = Array.isArray(window.CES_OT_DASHBOARD_ROWS) ? window.CES_OT_DASHBOARD_ROWS : [];
+        const selected = rows.filter(r => (!userId || String(r.userId || r.empId || '') === userId) && ((Number(r.otHours || 0) > 0) || (Number(r.workHours || 0) > 0)));
+        if (!selected.length) {
+            if (window.Swal) Swal.fire('OT Dashboard', 'ไม่พบ OT Dashboard data สำหรับพนักงานนี้ ให้เปิด OT Dashboard หรือกด refresh OT ก่อน', 'info');
+            return;
+        }
+        tbody.innerHTML = '';
+        selected.slice(0, 31).forEach(r => {
+            addRowRM();
+            const tr = tbody.lastElementChild;
+            setRMRowValues_(tr, { date:r.date || '', location:r.location || r.team || 'OT', start:r.start || '08:00', end:r.end || '17:00', hrs10:r.workHours || r.hrs10 || '', hrs15:r.otHours || r.hrs15 || '', isHoliday:!!r.isHoliday });
+        });
+        updateSummaryRM();
     }
 
     function calcRM(element) {

@@ -258,14 +258,19 @@ function fetchKPIData(keepOpenRowId = null, forceRefresh = false) {
         </td></tr>`;
     }
 
-    google.script.run
-        .withFailureHandler(err => {
-            Swal.fire('Error', err.message || String(err), 'error');
-            if (!keepOpenRowId && tbody) {
-                tbody.innerHTML = `<tr><td colspan="8" class="text-center text-red-500 py-10 font-bold">${kpiEsc(err.message || String(err))}</td></tr>`;
-            }
-        })
-        .withSuccessHandler(res => {
+    const onFailure = err => {
+        const message = err && err.message ? err.message : String(err || 'Cannot load KPI data');
+        if ((globalKpiData || []).length) {
+            const updated = document.getElementById('kpi-summary-updated');
+            if (updated) updated.title = 'Last refresh failed: ' + message;
+        } else if (window.Swal) {
+            Swal.fire('Error', message, 'error');
+        }
+        if (!keepOpenRowId && tbody && !(globalKpiData || []).length) {
+            tbody.innerHTML = `<tr><td colspan="8" class="text-center text-red-500 py-10 font-bold">${kpiEsc(message)}</td></tr>`;
+        }
+    };
+    const onSuccess = res => {
             if (res && res.success) {
                 cesKpiWriteCacheV36(requestedTeam, res);
                 if (String(currentKpiTeam || '').toUpperCase() === requestedTeam) {
@@ -277,8 +282,20 @@ function fetchKPIData(keepOpenRowId = null, forceRefresh = false) {
                     tbody.innerHTML = `<tr><td colspan="8" class="text-center py-10">${kpiEsc((res && res.message) || 'Cannot load data')}</td></tr>`;
                 }
             }
-        })
-        .getKPIDashboardData(requestedTeam, !!forceRefresh || !!keepOpenRowId);
+    };
+    if (window.CES_API && typeof window.CES_API.callFunction === 'function') {
+        window.CES_API.callFunction('getKPIDashboardData', [requestedTeam, !!forceRefresh || !!keepOpenRowId], {
+            transport: 'jsonp',
+            timeoutMs: 180000,
+            dedupe: false,
+            priority: 'active',
+            userAction: !!forceRefresh,
+            module: 'kpi_tracking'
+        }).then(onSuccess).catch(onFailure);
+    } else {
+        google.script.run.withFailureHandler(onFailure).withSuccessHandler(onSuccess)
+            .getKPIDashboardData(requestedTeam, !!forceRefresh || !!keepOpenRowId);
+    }
 }
 
 function populateKpiStatusFilter(options) {

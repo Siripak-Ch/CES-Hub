@@ -6,7 +6,7 @@
 
 window.CES_CONFIG = {
   // IMPORTANT: After deploying Apps Script backend, paste the latest /exec URL here.
-  GAS_API_URL: 'https://script.google.com/macros/s/AKfycbwh1xZO0QE17imO5kbFkc5_Lz0SOneQyuOU7NnZUnPHOff4uU57ViJPk5AOeZeTg9mzUQ/exec',
+  GAS_API_URL: 'https://script.google.com/macros/s/AKfycbyMIEZmPysQQSJ4H7_Wrc9OogIJVkHOA-ossvBC41IOBj6TYhokrhnb1Q0f8cPGQIQIOQ/exec',
   // Optional extra /exec endpoints. The polyfill also accepts ?gasApiUrl=<url>
   // and persists that override, so a deployment URL can be corrected without
   // allowing every module to fail independently.
@@ -40,7 +40,7 @@ window.CES_CONFIG = {
     REVENUE_DASHBOARD: 'https://nsmartplusdashboard.nhealth-asia.com/#/signin?externalRedirect=%2Ft%2FCustomerExperience%2Fviews%2FCES-HQFinancialPerformance%2FCES-HQ%3F%3Aiid%3D1%26&site=CustomerExperience',
     KPI_EHS_SHEET: 'https://docs.google.com/spreadsheets/d/1vNt7qUenxteIV3A0TnQ2QYf0esyOu3NvEjZG8zme5Gk/edit?usp=sharing',
     KPI_LAB_SHEET: 'https://docs.google.com/spreadsheets/d/1cdiwOpRZzU-MNLALEtcfpn-8HReLfz9tJkKhJzA0lKw/edit?usp=sharing',
-    MEMO_WORKORDER_SOURCE: 'https://bdmsgroup.sharepoint.com/:x:/r/sites/Dataanalysis908/_layouts/15/Doc.aspx?sourcedoc=%7B6DB9AC4E-AFF2-441A-ACAD-DD1ED7FD3C37%7D&file=Memo%20Form%20%20Work%20Order%20Form.xlsx&action=default&mobileredirect=true&ovuser=325c40be-6d2b-4006-b2c5-078947c856d2%2CSiripak.Ch%40BDMS.CO.TH&clickparams=eyJBcHBOYW1lIjoiVGVhbXMtRGVza3RvcCIsIkFwcFZlcnNpb24iOiI0OS8yNjA3MTYxNjAxNCIsIkhhc0ZlZGVyYXRlZFVzZXIiOmZhbHNlfQ%3D%3D',
+    MEMO_WORKORDER_SOURCE: 'https://bdmsgroup.sharepoint.com/:x:/r/sites/Dataanalysis908/Shared%20Documents/Project/2025/Memo%20+%20Work%20Order/Memo%20Form+%20Work%20Order%20Form.xlsx?d=w6db9ac4eaff2441aacaddd1ed7fd3c37&csf=1&web=1&e=jovCn8',
     TRAINING_PLAN_2026: 'https://docs.google.com/spreadsheets/d/1qBR-KQ5cxVWw6iGWIxmYI9aXr3oTlhcu51JaQeBnxcw/edit?usp=sharing',
     VAN_BOOKING_FORM: 'https://forms.gle/Tra5UBHtbMWpXvhr7'
   },

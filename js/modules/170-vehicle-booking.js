@@ -206,9 +206,9 @@ function cesBookingInjectStyles_() {
     '#view-car_booking .vehicle-mode-btn{padding:8px 10px;font-size:10px}',
     '#view-car_booking .vehicle-workspace-grid{display:grid;grid-template-columns:1fr;gap:.85rem}',
     '#view-van_booking .van-detail-grid{display:grid;grid-template-columns:1fr;gap:.85rem}',
-    '#view-van_booking .van-calendar-shell{height:min(68vh,720px);min-height:500px}',
-    '#view-van_booking .van-calendar-toolbar{height:46px}',
-    '#view-van_booking .van-calendar-frame{position:absolute;inset:0;width:100%;height:100%}',
+    '#view-van_booking .van-calendar-shell{height:min(82vh,900px);min-height:680px;border-radius:24px;box-shadow:0 18px 45px rgba(15,23,42,.08)}',
+    '#view-van_booking .van-calendar-toolbar{height:54px}',
+    '#view-van_booking .van-calendar-frame{position:absolute;left:0;right:0;top:54px;bottom:0;width:100%;height:calc(100% - 54px)}',
     '@media (min-width:1100px){#view-car_booking .vehicle-summary-grid{grid-template-columns:minmax(160px,1.25fr) repeat(5,minmax(105px,1fr))}#view-car_booking .vehicle-workspace-grid{grid-template-columns:minmax(360px,410px) minmax(0,1fr)}#view-van_booking .van-summary-grid{grid-template-columns:repeat(7,minmax(0,1fr))}#view-van_booking .van-detail-grid{grid-template-columns:minmax(0,1.35fr) minmax(280px,.65fr)}}',
     '@media (max-width:1099px){#view-car_booking .vehicle-summary-grid{grid-template-columns:repeat(3,minmax(0,1fr))}#view-van_booking .van-summary-grid{grid-template-columns:repeat(4,minmax(0,1fr))}}',
     '@media (max-width:767px){#view-car_booking,#view-van_booking{padding:.25rem!important}#view-car_booking .vehicle-summary-grid,#view-van_booking .van-summary-grid{grid-template-columns:repeat(2,minmax(0,1fr))}#view-car_booking .vehicle-form-two-col{grid-template-columns:1fr}#view-car_booking .vehicle-form-two-col>*{grid-column:span 1/span 1}}'

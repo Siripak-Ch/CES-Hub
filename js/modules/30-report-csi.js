@@ -646,7 +646,7 @@ function loadReportCSIOnly(showLoading) {
   if (showLoading && loader) loader.classList.remove('hidden');
   if (showLoading && loadingText) loadingText.innerText = 'Loading Report CSI...';
   var request=(window.CES_API&&typeof window.CES_API.callFunction==='function')
-    ? window.CES_API.callFunction('getReportDataOnly',[],{transport:'jsonp',timeoutMs:60000,dedupe:false,priority:'active',userAction:true,module:'report_csi'})
+    ? window.CES_API.callFunction('getReportDataOnly',[],{transport:'jsonp',timeoutMs:120000,dedupe:false,priority:showLoading?'active':'background',userAction:!!showLoading,module:'report_csi'})
     : new Promise(function(resolve,reject){google.script.run.withSuccessHandler(resolve).withFailureHandler(reject).getReportDataOnly();});
   request.then(function(data){
       if (loader) loader.classList.add('hidden');
@@ -656,7 +656,7 @@ function loadReportCSIOnly(showLoading) {
       if (showLoading && window.Swal) Swal.fire({ icon:'success', title:'Report CSI Loaded', text: `${(data.report || []).length} records`, timer:1200, showConfirmButton:false });
     }).catch(function(err){
       if (loader) loader.classList.add('hidden');
-      if (window.Swal) Swal.fire('Report CSI Load Error', (err && err.message) ? err.message : String(err), 'error');
+      if (window.Swal && showLoading) Swal.fire('Report CSI Load Error', (err && err.message) ? err.message : String(err), 'error');
     });
 }
 

@@ -1068,7 +1068,7 @@ body{background:var(--ces-bg)!important;color:var(--ces-text)!important}
   }
 
   /* Stable third-party calendar canvases after the one global scale. */
-  #view-van_booking .van-calendar-shell{height:min(calc(78vh * var(--ces-desktop-inverse)),1028px)!important;min-height:714px!important}
+  #view-van_booking .van-calendar-shell{height:min(calc(86vh * var(--ces-desktop-inverse)),1120px)!important;min-height:760px!important}
   #view-calendar .ces-master-calendar-stage{height:clamp(886px,calc(80vh * var(--ces-desktop-inverse)),1286px)!important;min-height:886px!important}
   #view-calendar .ces-solid-calendar-v40,
   #view-calendar .ces-solid-calendar-v40 .fc{height:100%!important}
