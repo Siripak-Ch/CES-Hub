@@ -556,11 +556,14 @@ body {
 
 /* ===== Revenue Dashboard Card Themes ===== */
 .r-card { background: #fff; border: 1px solid #e2e8f0; border-radius: 18px; padding: 16px; }
-.r-card.theme-total { border-color: #003DA5; border-left: 4px solid #003DA5; }
+.r-card.theme-total, .r-card-static.theme-total { border-color: #003DA5; border-left: 4px solid #003DA5; }
+.r-card-static { border-radius: 18px; padding: 16px; min-width: 0; box-sizing: border-box; overflow: hidden; }
 .r-card.theme-med { border-color: #e2e8f0; }
 .r-card.theme-lab { border-color: #e2e8f0; }
 .r-card.theme-ehs { border-color: #e2e8f0; }
 .r-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+.r-card-static .r-head,.r-card-static .r-body,.r-card-static .r-footer { min-width:0; }
+.r-card-static .r-label,.r-card-static .r-value,.r-card-static .r-footer span { overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
 .r-label { font-size: 10px; font-weight: 900; text-transform: uppercase; letter-spacing: 0.05em; color: #64748b; }
 .r-pct-badge { font-size: 10px; font-weight: 900; padding: 2px 8px; border-radius: 999px; }
 .r-body { }

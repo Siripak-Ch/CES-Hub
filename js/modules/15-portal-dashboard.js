@@ -3,7 +3,7 @@
 'use strict';
 var state={loaded:false,loadedAt:0,loadingPromise:null,linkLoadingPromise:null,priorityPromise:null,data:null,clock:null,bar:null,pie:null,filterReady:false,usageAt:0,portalLinks:null,firstReady:false,overlayStartedAt:0};
 var PORTAL_CACHE_KEY_V19='CES_PORTAL_CACHE_V206_';
-var PORTAL_LINKS_CACHE_KEY_V203='CES_HOME_LINKS_CACHE_V3010';
+var PORTAL_LINKS_CACHE_KEY_V203='CES_HOME_LINKS_CACHE_V3012';
 var PORTAL_LINKS_FALLBACK_V203={success:true,source:'FRONTEND_FALLBACK',
 applications:[
 {id:'PL-N-SMART',section:'APPLICATION',titleTh:'N Smart Plus',titleEn:'N Smart Plus',descriptionTh:'ระบบบริหารทรัพย์สินและงานซ่อมบำรุงโรงพยาบาล',descriptionEn:'Hospital asset and repair management',url:'https://nsmartplus.nhealth-asia.com/login?redirect=',icon:'fa-wand-magic-sparkles',theme:'blue',featured:false,sortOrder:1},
@@ -90,10 +90,17 @@ function renderPortalLinksV20(data){
   data=normalizePortalLinksV205_(data);
   var apps=document.getElementById('portal-app-grid'),services=document.getElementById('portal-services-grid'),innovations=document.getElementById('portal-innovation-grid');
   var lang=(window.CES_LANGUAGE&&window.CES_LANGUAGE.get&&window.CES_LANGUAGE.get())||'EN';
-  var canonical=['PL-N-SMART','PL-N-CERT','PL-IHB','PL-STEP','PL-FORMBRICKS','PL-EBOOK','PL-CES-CSI'];
+  var canonical=['PL-N-SMART','PL-N-CERT','PL-CALPM','PL-IHB','PL-E-MEMO','PL-STEP','PL-FORMBRICKS','PL-EBOOK','PL-CES-CSI'];
   var rank={};canonical.forEach(function(id,index){rank[id]=index;});
   function title(x){return lang==='TH'?(x.titleTh||x.titleEn):(x.titleEn||x.titleTh);}function desc(x){return lang==='TH'?(x.descriptionTh||x.descriptionEn):(x.descriptionEn||x.descriptionTh);}
-  function sortApps(rows){return rows.sort(function(a,b){return Number(a.sortOrder||999)-Number(b.sortOrder||999)||String(a.titleEn||a.titleTh||'').localeCompare(String(b.titleEn||b.titleTh||''));});}
+  function portalIdentity_(x){var t=String(x&&((x.titleEn||x.titleTh)||'')).trim().toLowerCase().replace(/[^a-z0-9ก-๙]+/g,' ');var u=String(x&&x.url||'').trim().toLowerCase().replace(/[?#].*$/,'');return t+'|'+u;}
+  function sortApps(rows){
+    var seen={},unique=[];
+    rows.forEach(function(x){var key=portalIdentity_(x);if(!key||seen[key])return;seen[key]=1;unique.push(x);});
+    var canonicalRows=[];canonical.forEach(function(id){var found=unique.find(function(x){return String(x&&x.id||'')===id;});if(found){canonicalRows.push(found);unique=unique.filter(function(x){return x!==found;});}});
+    unique.sort(function(a,b){return Number(a.sortOrder||999)-Number(b.sortOrder||999)||String(a.titleEn||a.titleTh||'').localeCompare(String(b.titleEn||b.titleTh||''));});
+    return canonicalRows.concat(unique);
+  }
   if(apps){var rows=sortApps((data.applications.length?data.applications:PORTAL_LINKS_FALLBACK_V203.applications).slice());apps.innerHTML=rows.map(function(x){var isVpn=/\(VPN\)/i.test(String(x.titleEn||x.titleTh||''));return '<a class="ces-portal-app-card '+(x.featured?'featured ':'')+(isVpn?'vpn-card':'')+'" href="'+esc(x.url||'#')+'" target="_blank" rel="noopener"><div class="ces-portal-app-icon '+esc(x.theme||'blue')+'"><i class="fas '+esc(x.icon||'fa-link')+'"></i></div><div><h4>'+esc(title(x))+(isVpn?'<span class="ces-portal-vpn-badge">VPN</span>':'')+'</h4><p>'+esc(desc(x))+'</p></div><i class="fas fa-arrow-up-right-from-square open"></i></a>';}).join('');apps.dataset.portalFallback=String(!data.applications.length);}
   if(services){var serviceRows=(data.nhealthServices.length?data.nhealthServices:PORTAL_LINKS_FALLBACK_V203.nhealthServices).slice().sort(function(a,b){return Number(a.sortOrder||999)-Number(b.sortOrder||999);});services.innerHTML=serviceRows.map(function(x){var isVpn=/VPN|IT Support|Intranet/i.test(String(x.titleEn||x.titleTh||''));return '<a class="ces-portal-app-card '+(x.featured?'featured ':'')+(isVpn?'vpn-card':'')+'" href="'+esc(x.url||'#')+'" target="_blank" rel="noopener"><div class="ces-portal-app-icon '+esc(x.theme||'blue')+'"><i class="fas '+esc(x.icon||'fa-link')+'"></i></div><div><h4>'+esc(title(x))+(isVpn?'<span class="ces-portal-vpn-badge">VPN</span>':'')+'</h4><p>'+esc(desc(x))+'</p></div><i class="fas fa-arrow-up-right-from-square open"></i></a>';}).join('');services.dataset.portalFallback=String(!data.nhealthServices.length);}
   if(innovations){var items=(data.innovations.length?data.innovations:PORTAL_LINKS_FALLBACK_V203.innovations).slice().sort(function(a,b){return Number(a.sortOrder||999)-Number(b.sortOrder||999);});innovations.innerHTML=items.map(function(x){var theme=String(x.theme||'').toLowerCase();if(theme==='teal')theme='smart';if(theme==='slate')theme='promed';return '<a class="ces-portal-innovation '+esc(theme||'smart')+'" href="'+esc(x.url||'#')+'" target="_blank" rel="noopener"><div class="ces-portal-tool-icon"><i class="fas '+esc(x.icon||'fa-screwdriver-wrench')+'"></i></div><div class="ces-portal-tool-copy"><span>'+esc(lang==='TH'?'เครื่องมือ CES':'CES Tool')+'</span><h4>'+esc(title(x))+'</h4><p>'+esc(desc(x))+'</p></div><i class="fas fa-arrow-right"></i></a>';}).join('');innovations.dataset.portalFallback=String(!data.innovations.length);}

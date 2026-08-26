@@ -17,6 +17,21 @@ let csiSortCol = 0, csiSortDir = -1;
 const R_TEAM_MAP = { 'Medical Equipment': 'MED', 'Lab & Testing': 'LAB', 'Environmental Health': 'EHS' };
 const R_COLORS = new Proxy({}, {get:(_t,k)=>typeof cesGetTeamColor==='function'?cesGetTeamColor(String(k||'').toUpperCase()):({MED:'#004aad',LAB:'#19a7ce',EHS:'#0fc1a1'})[k]||'#64748b'});
 
+function reportDateParts_(row){
+  var year=Number(row&&row.year||0);if(year>2400)year-=543;
+  var month=String(row&&row.month||'').trim();
+  var names=['JAN','FEB','MAR','APR','MAY','JUN','JUL','AUG','SEP','OCT','NOV','DEC'];
+  var mi=-1;if(/^\d{1,2}$/.test(month))mi=Number(month)-1;else {var up=month.slice(0,3).toUpperCase();mi=names.indexOf(up);}
+  if(!(year>=1900&&year<=2100)||mi<0||mi>11){
+    var dt=new Date(row&&row.timestamp);
+    if(!isNaN(dt.getTime())){if(!(year>=1900&&year<=2100))year=dt.getFullYear();if(mi<0||mi>11)mi=dt.getMonth();}
+  }
+  return {year:year,monthIndex:mi};
+}
+function reportResizeCharts_(){
+  try{Object.keys(reportCharts||{}).forEach(function(k){if(reportCharts[k]&&typeof reportCharts[k].resize==='function')reportCharts[k].resize();});}catch(ignore){}
+}
+
 function initReport(data, tickets) {
   reportRawData = data || [];
   reportTickets = tickets || [];
@@ -97,9 +112,9 @@ const setTxt = (id, val) => { const el = document.getElementById(id); if (el) el
 
 function applyReportFilters() {
   reportFilteredData = reportRawData.filter(d => {
-    const dt = new Date(d.timestamp);
-    const y = isNaN(dt.getTime()) ? 'Unknown' : String(dt.getFullYear());
-    const m = isNaN(dt.getTime()) ? 'Unknown' : (typeof S_MONTHS !== 'undefined' ? S_MONTHS[dt.getMonth()] : dt.getMonth()+1);
+    const parts = reportDateParts_(d);
+    const y = parts.year ? String(parts.year) : 'Unknown';
+    const m = parts.monthIndex >= 0 ? (typeof S_MONTHS !== 'undefined' ? S_MONTHS[parts.monthIndex] : parts.monthIndex+1) : 'Unknown';
     const team = R_TEAM_MAP[d.team] || d.team;
     return (rFilters.team === 'All' || team === rFilters.team) &&
            (rFilters.year === 'All' || y === rFilters.year) &&
@@ -201,7 +216,7 @@ function renderReportCharts(data) {
         data: {
           labels: mLabels,
           datasets: teams.map(t => ({
-            label: t, data: mLabels.map(m => data.filter(d => (R_TEAM_MAP[d.team]||d.team) === t && (typeof S_MONTHS !== 'undefined' ? S_MONTHS[new Date(d.timestamp).getMonth()] : new Date(d.timestamp).getMonth()+1) === m).length),
+            label: t, data: mLabels.map(function(m,mi){ return data.filter(function(d){ var p=reportDateParts_(d); var label=typeof S_MONTHS !== 'undefined' ? S_MONTHS[p.monthIndex] : p.monthIndex+1; return (R_TEAM_MAP[d.team]||d.team) === t && (label === m || String(p.monthIndex+1) === String(m)); }).length; }),
             backgroundColor: R_COLORS[t], borderRadius: 4
           }))
         },
@@ -209,6 +224,7 @@ function renderReportCharts(data) {
         plugins: [ChartDataLabels]
       });
   }
+  requestAnimationFrame(function(){requestAnimationFrame(reportResizeCharts_);});
 }
 
 function renderCRMTable() {
@@ -629,16 +645,17 @@ function loadReportCSIOnly(showLoading) {
   const loadingText = document.getElementById('loadingText');
   if (showLoading && loader) loader.classList.remove('hidden');
   if (showLoading && loadingText) loadingText.innerText = 'Loading Report CSI...';
-  google.script.run
-    .withSuccessHandler(data => {
+  var request=(window.CES_API&&typeof window.CES_API.callFunction==='function')
+    ? window.CES_API.callFunction('getReportDataOnly',[],{transport:'jsonp',timeoutMs:60000,dedupe:false,priority:'active',userAction:true,module:'report_csi'})
+    : new Promise(function(resolve,reject){google.script.run.withSuccessHandler(resolve).withFailureHandler(reject).getReportDataOnly();});
+  request.then(function(data){
       if (loader) loader.classList.add('hidden');
       data = data || { report: [], tickets: [] };
       if (typeof initReport === 'function') initReport(data.report || [], data.tickets || []);
+      requestAnimationFrame(function(){requestAnimationFrame(reportResizeCharts_);});
       if (showLoading && window.Swal) Swal.fire({ icon:'success', title:'Report CSI Loaded', text: `${(data.report || []).length} records`, timer:1200, showConfirmButton:false });
-    })
-    .withFailureHandler(err => {
+    }).catch(function(err){
       if (loader) loader.classList.add('hidden');
       if (window.Swal) Swal.fire('Report CSI Load Error', (err && err.message) ? err.message : String(err), 'error');
-    })
-    .getReportDataOnly();
+    });
 }

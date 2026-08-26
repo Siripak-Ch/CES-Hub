@@ -627,13 +627,13 @@
         const rows = filteredData.map(item => ({
             Team:calendarSourceTeam(item), Date:item.date || '', 'Event Title':item.title || '', Location:item.location || '',
             Month:Number(item.month || 0), Year:Number(item.year || 0), UniqueKey:item.uniqueKey || '',
-            'Calendar ID':item.calendarId || '', 'Event Color':item.eventColor || '', 'Capacity Team':item.capacityTeam || '',
+            'Calendar ID':item.calendarId || '', 'Event Color':item.eventColor || '', 'Capacity Team':item.capacityTeam || '', 'SO/PO':item.soPo || '', 'Work Order':item.workOrder || '',
             Type:checkIsLeaveEvent(item.title) ? 'Leave/Off' : (checkIsOtherCalendarActivity(item.title) ? 'Other' : 'Job')
         }));
         const suffix = `${currentService}_${targetM === null ? 'AllMonths' : String(targetM).padStart(2,'0')}_${targetY === null ? 'AllYears' : targetY}`;
         if (window.XLSX) {
             const wb=XLSX.utils.book_new(), ws=XLSX.utils.json_to_sheet(rows);
-            ws['!cols']=[{wch:10},{wch:13},{wch:42},{wch:30},{wch:8},{wch:8},{wch:42},{wch:34},{wch:12},{wch:14},{wch:12}];
+            ws['!cols']=[{wch:10},{wch:13},{wch:42},{wch:30},{wch:8},{wch:8},{wch:42},{wch:34},{wch:12},{wch:14},{wch:24},{wch:24}];
             XLSX.utils.book_append_sheet(wb,ws,'Calendar_Summary');
             XLSX.writeFile(wb,`Calendar_${suffix}.xlsx`);
             return;
