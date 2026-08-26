@@ -20,15 +20,10 @@
 <button class="ces-standard-icon-btn ces-external-link-btn" type="button" onclick="cesOpenExternalLink('SERVICE_CSI_CES_SUMMARY')" title="Open CES CSI Formbricks Summary"><i class="fas fa-link"></i><span class="sr-only">CES CSI</span></button>
 <button class="ces-standard-icon-btn ces-external-link-btn" type="button" onclick="cesOpenExternalLink('SERVICE_CSI_TES_SUMMARY')" title="Open TES CSI Formbricks Summary"><i class="fas fa-link"></i><span class="sr-only">TES CSI</span></button>
 <button class="ces-header-action-btn ces-action-neutral" onclick="loadServiceCSIOnly(true)" title="Reload Service CSI"><i class="fas fa-sync-alt"></i></button>
-<input accept=".xlsx" class="hidden" id="serviceMemoMappingInput" onchange="handleServiceMemoMapping(event)" type="file"/>
 <label class="ces-standard-icon-btn ces-upload-icon-btn cursor-pointer" title="Upload Excel"><i class="fas fa-arrow-up-from-bracket"></i><input accept=".xlsx" class="hidden" id="serviceFileInput" onchange="handleServiceUpload(event)" type="file"/></label>
 <button class="ces-header-action-btn ces-action-excel" onclick="exportServiceToExcel()" title="Export to Excel"><i class="fas fa-file-excel"></i></button>
 <button class="ces-header-action-btn ces-action-pdf" onclick="exportServiceToPDF()" title="Export Page to PDF"><i class="fas fa-file-pdf"></i></button>
 </div>
-</div>
-<div id="serviceTabsV266" class="ces-service-tabs-v266" role="tablist" aria-label="Service CSI sections">
-  <button id="serviceTabDashboardV266" type="button" class="active" onclick="switchServiceTabV266('dashboard')"><i class="fas fa-chart-line"></i><span>Dashboard</span></button>
-  <button id="serviceTabMemoV266" type="button" onclick="switchServiceTabV266('memo')"><i class="fas fa-code-compare"></i><span>Memo Mapping</span></button>
 </div>
 <div id="serviceDashboardPanelV266" class="space-y-6">
 <div class="bg-white p-4 rounded-2xl shadow-sm border border-gray-100 grid grid-cols-2 md:grid-cols-4 gap-3">
@@ -204,7 +199,7 @@
 </div>
 </div>
 </div>
-<div class="bg-white rounded-2xl shadow-sm border border-blue-100 bg-blue-50/10 p-6">
+<div class="bg-white rounded-2xl shadow-sm border border-blue-100 p-6 ces-service-yearly-analysis-card">
 <div class="flex justify-between items-center mb-6 border-b border-blue-100 pb-4">
 <h3 class="text-xl font-bold text-blue-800 flex items-center"><i class="fas fa-calendar-alt text-blue-600 mr-2"></i>Yearly Analysis (%)</h3>
 </div>
@@ -249,15 +244,6 @@
 </div>
 </div>
 </div>
-</div>
-<div id="serviceMemoPanelV266" class="hidden">
-  <div class="bg-white rounded-3xl shadow-sm border border-gray-100 p-5">
-    <div class="flex flex-wrap items-center justify-between gap-3 mb-4">
-      <div><h3 class="text-lg font-black text-[#003DA5]"><i class="fas fa-code-compare mr-2"></i>Memo / Work Order ↔ Service CSI 2026</h3><p class="text-xs text-slate-400 font-semibold">Shows the last saved mapping immediately. Shared data refreshes only after a new upload or manual refresh.</p></div>
-      <button class="ces-header-action-btn ces-action-neutral ces-action-text" onclick="refreshServiceMemoMappingV55()" title="Refresh saved Memo Mapping"><i class="fas fa-rotate-right"></i><span>Refresh Saved</span></button>
-    </div>
-    <div id="serviceMemoMappingInlineV266"><div class="text-center text-slate-400 py-12">Open Memo Mapping to load saved data.</div></div>
-  </div>
 </div>
 <style>
     #view-report { font-family: 'Prompt', sans-serif; }

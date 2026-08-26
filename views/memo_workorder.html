@@ -10,6 +10,11 @@
     </div>
   </div>
 
+  <div id="mwoTabsV3010" class="ces-mwo-tabs" role="tablist" aria-label="Memo & Work Order sections">
+    <button id="mwoTabDashboardV3010" type="button" class="active" onclick="switchMemoWorkOrderTab('dashboard')"><i class="fas fa-list"></i><span>Memo & Work Order</span></button>
+    <button id="mwoTabMappingV3010" type="button" onclick="switchMemoWorkOrderTab('mapping')"><i class="fas fa-code-compare"></i><span>Service CSI 2026 Mapping</span></button>
+  </div>
+  <div id="mwoDashboardPanelV3010">
   <div id="mwoKpi" class="ces-mwo-kpi-grid"></div>
   <div id="mwoTeamSummary" class="ces-mwo-team-summary"></div>
 
@@ -25,5 +30,18 @@
     <div class="ces-mwo-card-head"><h3><i class="fas fa-list"></i> Memo & Work Order List</h3><span id="mwoCount">0 records</span></div>
     <div class="ces-mwo-table-wrap"><table><thead><tr><th>Date</th><th>Team</th><th>Type</th><th>Document No.</th><th>Customer</th><th>File</th></tr></thead><tbody id="mwoTable"></tbody></table></div>
     <div id="mwoPagination" class="ces-mwo-pagination"></div>
+  </div>
+  </div>
+  <div id="mwoMappingPanelV3010" class="hidden">
+    <div class="ces-mwo-card ces-mwo-mapping-card">
+      <div class="ces-mwo-card-head">
+        <div><h3><i class="fas fa-code-compare"></i> Memo / Work Order ↔ Service CSI 2026</h3><span>Saved comparison · import only the latest 3 months</span></div>
+        <div class="ces-mwo-mapping-actions">
+          <button type="button" class="ces-mwo-small-action" onclick="refreshServiceMemoMappingV55()" title="Refresh saved mapping"><i class="fas fa-rotate-right"></i> Refresh</button>
+          <label class="ces-mwo-small-action ces-mwo-small-primary" title="Import Memo / Work Order for mapping"><i class="fas fa-arrow-up-from-bracket"></i> Import 3 Months<input id="serviceMemoMappingInput" type="file" class="hidden" accept=".xlsx" onchange="handleServiceMemoMapping(event)"></label>
+        </div>
+      </div>
+      <div id="mwoMappingInlineV3010" class="ces-mwo-mapping-inline"><div class="text-center text-slate-400 py-12">Open this tab to load the saved Service CSI 2026 mapping.</div></div>
+    </div>
   </div>
 </section>

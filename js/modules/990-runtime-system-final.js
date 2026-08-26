@@ -3146,7 +3146,12 @@
 
       await servicePdfEnsurePdfLibraries();
       await servicePdfNextPaint(window);
-      captureDoc = await servicePdfCreateCaptureDocument(sourceRoot);
+      try {
+        captureDoc = await servicePdfCreateCaptureDocument(sourceRoot);
+      } catch (captureError) {
+        console.warn('[CES Service PDF] capture document fallback', captureError);
+        captureDoc = {root:sourceRoot,width:Math.max(sourceRoot.scrollWidth||0,sourceRoot.clientWidth||0,1200),height:Math.max(sourceRoot.scrollHeight||0,sourceRoot.clientHeight||0,800),pageBreaks:[],cleanup:function(){}};
+      }
 
       var captureScale = 1.25;
       var projectedHeight = captureDoc.height * captureScale;
@@ -3172,12 +3177,13 @@
       var output = servicePdfBuildClassicPdf(canvas, exportFilters, captureDoc.pageBreaks, captureDoc.height);
       captureDoc.cleanup();
       captureDoc = null;
+      var previewPages=(output.previews||[]).slice(0,4);
       var previewHtml = '<p style="margin:0 0 10px;color:#64748b;font-weight:700;font-size:13px">Preview ตามหน้า Service CSI ปัจจุบัน · '+output.totalPages+' หน้า</p>'+
         '<div style="height:560px;overflow:auto;background:#f1f5f9;border:1px solid #dbe7f6;border-radius:12px;padding:18px">'+
-        output.previews.map(function(src,index){
+        previewPages.map(function(src,index){
           return '<div style="font-size:11px;font-weight:900;color:#003DA5;margin:0 0 7px">Page '+(index+1)+' of '+output.totalPages+'</div><img src="'+src+'" style="display:block;width:100%;height:auto;margin:0 auto 18px;background:#fff;border:1px solid #dbe7f6;border-radius:8px;box-shadow:0 8px 22px rgba(15,23,42,.12)">';
         }).join('')+
-        (output.totalPages>output.previews.length?'<div style="padding:10px;text-align:center;color:#64748b;font-size:12px;font-weight:800">Preview แสดง '+output.previews.length+' หน้าแรกจากทั้งหมด '+output.totalPages+' หน้า</div>':'')+
+        (output.totalPages>previewPages.length?'<div style="padding:10px;text-align:center;color:#64748b;font-size:12px;font-weight:800">Preview แสดง '+previewPages.length+' หน้าแรกจากทั้งหมด '+output.totalPages+' หน้า</div>':'')+
         '</div>';
 
       var result = await window.Swal.fire({
