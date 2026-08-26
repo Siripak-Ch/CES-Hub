@@ -659,3 +659,5 @@ function loadReportCSIOnly(showLoading) {
       if (window.Swal) Swal.fire('Report CSI Load Error', (err && err.message) ? err.message : String(err), 'error');
     });
 }
+
+window.reportResizeCharts_=reportResizeCharts_;

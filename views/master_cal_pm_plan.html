@@ -10,6 +10,7 @@
       <button class="ces-standard-icon-btn ces-action-pdf" onclick="mcpExportPdf()" title="Export PDF"><i class="fas fa-file-pdf"></i></button>
     </div>
   </div>
+  <div class="bg-white p-3 rounded-2xl border border-slate-100"><div class="mcp-team-tabs" role="tablist" aria-label="Master CAL PM Team"><button type="button" class="mcp-team-tab med active" data-team="MED" onclick="mcpSelectTeam('MED')">MED</button><button type="button" class="mcp-team-tab ehs" data-team="EHS" onclick="mcpSelectTeam('EHS')">EHS</button><button type="button" class="mcp-team-tab env" data-team="ENV" onclick="mcpSelectTeam('ENV')">ENV</button><button type="button" class="mcp-team-tab lab" data-team="LAB" onclick="mcpSelectTeam('LAB')">LAB</button></div></div>
   <div class="bg-white p-4 rounded-2xl border border-slate-100 grid grid-cols-1 md:grid-cols-6 gap-3">
     <div class="sp-search md:col-span-2"><i class="fas fa-search"></i><input id="mcp-search" oninput="mcpFilterChanged()" placeholder="Search code / team / model / serial"></div>
     <select id="mcp-source" onchange="mcpFilterChanged()"><option value="ALL">All Source Tabs</option></select>

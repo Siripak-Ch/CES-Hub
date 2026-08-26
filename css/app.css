@@ -4781,3 +4781,16 @@ textarea.ces-detail-input-v243{min-height:58px;resize:vertical;margin-bottom:9px
 #view-stock_dashboard .sp-pill{font-size:10px!important;font-weight:900!important;}
 #view-stock_dashboard .stockpro-card-head{gap:10px!important;}
 @media(max-width:720px){#view-memo_workorder .ces-mwo-tabs{grid-template-columns:1fr;}#view-stock_dashboard .stockpro-title-wrap h1{font-size:18px!important;}}
+
+/* CES Hub V30.0.13 — Home Applications & Services */
+#view-portal .ces-portal-app-card.ces-portal-app-card-white{background:#fff!important;color:#172b48!important;border:1px solid #e3e9f2!important;box-shadow:none!important;}
+#view-portal .ces-portal-app-card.ces-portal-app-card-white:hover{transform:translateY(-2px)!important;border-color:#b8cce8!important;box-shadow:0 10px 20px rgba(31,67,111,.09)!important;}
+#view-portal .ces-home-sync-btn{border:1px solid #dbe3ee!important;}
+#view-portal .ces-home-sync-btn.is-loading i{animation:spin 1s linear infinite;}
+#view-master_cal_pm_plan .mcp-team-tabs{display:flex;gap:8px;overflow-x:auto;padding:4px 2px 2px;}
+#view-master_cal_pm_plan .mcp-team-tab{min-width:110px;padding:10px 16px;border:1px solid #dbe5f0;border-radius:12px;background:#f8fafc;color:#64748b;font-size:11px;font-weight:900;white-space:nowrap;}
+#view-master_cal_pm_plan .mcp-team-tab.active{background:#003DA5;color:#fff;border-color:#003DA5;box-shadow:0 7px 16px rgba(0,61,165,.15);}
+#view-master_cal_pm_plan .mcp-team-tab.med.active{background:#004AAD;border-color:#004AAD;}
+#view-master_cal_pm_plan .mcp-team-tab.lab.active{background:#19A7CE;border-color:#19A7CE;}
+#view-master_cal_pm_plan .mcp-team-tab.ehs.active{background:#0FC1A1;border-color:#0FC1A1;}
+#view-master_cal_pm_plan .mcp-team-tab.env.active{background:#65a30d;border-color:#65a30d;}
