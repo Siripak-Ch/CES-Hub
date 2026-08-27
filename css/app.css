@@ -4786,6 +4786,14 @@ textarea.ces-detail-input-v243{min-height:58px;resize:vertical;margin-bottom:9px
 #view-stock_dashboard .stockpro-card-head{gap:10px!important;}
 @media(max-width:720px){#view-memo_workorder .ces-mwo-tabs{grid-template-columns:1fr;}#view-stock_dashboard .stockpro-title-wrap h1{font-size:18px!important;}}
 
+/* V30.0.17 — Prompt everywhere, opaque headers and neutral Memo rows. */
+body,input,select,textarea,button,table,th,td,.swal2-container,.swal2-popup,.swal2-title,.swal2-html-container{font-family:'Prompt',Arial,sans-serif!important}
+#view-memo_workorder #mwoTable tr.ces-mwo-row,#view-memo_workorder #mwoTable tr.ces-mwo-row td{background:#fff!important}
+#view-memo_workorder #mwoTable tr.ces-mwo-row:hover,#view-memo_workorder #mwoTable tr.ces-mwo-row:hover td{background:#f8fafc!important}
+.ces-opaque-tab-header,.ces-opaque-popup-header{background:#003DA5!important;background-image:none!important;color:#fff!important}
+#profileModal>div>div:first-child{background:#003DA5!important;background-image:none!important;color:#fff!important}
+#view-report .ces-report-section-header{background-image:none!important}
+
 /* CES Hub V30.0.13 — Home Applications & Services */
 #view-portal .ces-portal-app-card.ces-portal-app-card-white{background:#fff!important;color:#172b48!important;border:1px solid #e3e9f2!important;box-shadow:none!important;}
 #view-portal .ces-portal-app-card.ces-portal-app-card-white:hover{transform:translateY(-2px)!important;border-color:#b8cce8!important;box-shadow:0 10px 20px rgba(31,67,111,.09)!important;}

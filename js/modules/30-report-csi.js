@@ -16,6 +16,7 @@ let csiSortCol = 0, csiSortDir = -1;
 
 const R_TEAM_MAP = { 'Medical Equipment': 'MED', 'Lab & Testing': 'LAB', 'Environmental Health': 'EHS' };
 const R_COLORS = new Proxy({}, {get:(_t,k)=>typeof cesGetTeamColor==='function'?cesGetTeamColor(String(k||'').toUpperCase()):({MED:'#004aad',LAB:'#19a7ce',EHS:'#0fc1a1'})[k]||'#64748b'});
+const reportDisplayDate_ = value => typeof window.CES_DATE_DDMMYYYY === 'function' ? window.CES_DATE_DDMMYYYY(value) : String(value || '');
 
 function reportDateParts_(row){
   var year=Number(row&&row.year||0);if(year>2400)year-=543;
@@ -176,7 +177,7 @@ function exportCSIToExcel() {
 
     // ปรับ Satisfaction เอาแค่ตัวเลข (Number) ไม่เอาดาว
     const excelRows = dataToExport.map(d => ({
-        'Date': String(d.timestamp).substring(0, 10),
+        'Date': reportDisplayDate_(d.timestamp),
         'Customer': d.customer,
         'Team': R_TEAM_MAP[d.team] || d.team,
         'Satisfaction': Number(d.satisfaction) || 0,
@@ -220,7 +221,7 @@ function renderReportCharts(data) {
             backgroundColor: R_COLORS[t], borderRadius: 4
           }))
         },
-        options: { responsive: true, maintainAspectRatio: false, scales: { x: { stacked: false }, y: { beginAtZero: true } }, plugins: { datalabels: { anchor: 'end', align: 'top', offset: -2, font: { weight: 'bold', size: 10 }, formatter: val => val > 0 ? val : '' }, legend: { labels: { usePointStyle: true, font: { size: 10 } } } } },
+        options: { responsive: true, maintainAspectRatio: false, scales: { x: { stacked: false }, y: { beginAtZero: true, max: 20, ticks: { stepSize: 2 } } }, plugins: { datalabels: { anchor: 'end', align: 'top', offset: -2, font: { weight: 'bold', size: 10 }, formatter: val => val > 0 ? val : '' }, legend: { labels: { usePointStyle: true, font: { size: 10 } } } } },
         plugins: [ChartDataLabels]
       });
   }
@@ -266,7 +267,7 @@ function renderCRMTable() {
     let commentHtml = fullComment.length > 30 ? `${fullComment.substring(0, 27)}... <button onclick="showFullComment('${encodeURIComponent(fullComment)}')" class="text-blue-500 font-bold hover:underline">Read more</button>` : fullComment;
     
     return `<tr class="hover:bg-gray-50 border-b">
-      <td class="p-3 text-gray-500">${String(d.timestamp).substring(0,10)}</td>
+      <td class="p-3 text-gray-500">${reportDisplayDate_(d.timestamp)}</td>
       <td class="p-3 font-bold text-gray-700">${d.customer}</td>
       <td class="p-3 text-gray-600 font-medium">${R_TEAM_MAP[d.team] || d.team}</td>
       <td class="p-3 text-center font-bold ${Number(d.satisfaction)<3?'text-red-500':''}">${d.satisfaction || '-'} ★</td>
@@ -364,7 +365,7 @@ function renderCSITable() {
 
         return `
             <tr class="hover:bg-slate-50 transition-colors border-b">
-                <td class="p-3 text-gray-400 text-xs">${String(d.timestamp).substring(0,10)}</td>
+                <td class="p-3 text-gray-400 text-xs">${reportDisplayDate_(d.timestamp)}</td>
                 <td class="p-3 font-bold text-slate-700">${d.customer || '-'}</td>
                 <td class="p-3 text-[10px] font-bold text-[#003DA5]">${R_TEAM_MAP[d.team] || d.team}</td>
                 <td class="p-3 text-center ${satStyle}">${sat} ★</td>
@@ -406,7 +407,7 @@ function viewActionNote(id) {
           <p class="font-bold text-[#003DA5] uppercase text-[10px]">Solution:</p>
           <p class="text-[#003DA5]">${t.solution}</p>
         </div>
-        <p class="text-right text-[9px] text-gray-300 italic">Resolved: ${t.lastUpdate}</p>
+        <p class="text-right text-[9px] text-gray-300 italic">Resolved: ${reportDisplayDate_(t.lastUpdate)}</p>
       </div>` 
   });
 }
@@ -435,7 +436,7 @@ function populateReportDropdowns() {
 // ============================================================== //
 // [NEW] ฟังก์ชัน Export PDF สำหรับหน้า Report CSI (แก้ตารางขาดหาย)
 // ============================================================== //
-async function exportReportToPDF() {
+async function legacyCaptureReportToPDF_() {
     if (typeof html2canvas === 'undefined' || typeof window.jspdf === 'undefined') {
         Swal.fire('Missing Library', 'ไม่พบไลบรารี html2canvas หรือ jsPDF กรุณาตรวจสอบ Script CDN', 'error');
         return;
@@ -637,6 +638,34 @@ async function exportReportToPDF() {
             if (s.action === 'height-class') { s.el.classList.remove('h-auto'); s.el.classList.add('h-80'); }
         });
     }
+}
+
+// Print-ready export: avoids html2canvas/jsPDF long-canvas capture, which can
+// freeze the dashboard and distort fonts/tables. Browser Print keeps vectors,
+// pagination and Prompt font; users can choose Save as PDF in the print dialog.
+function exportReportToPDF() {
+  const esc = value => String(value == null ? '' : value).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  const rows = [...reportFilteredData];
+  if (!rows.length) return Swal.fire('No Data', 'ไม่พบข้อมูลสำหรับ Filter ปัจจุบัน', 'warning');
+  const finished = rows.filter(d => String(d.finished).toLowerCase() === 'yes');
+  const avg = finished.length ? (finished.reduce((sum,d) => sum + (Number(d.satisfaction)||0), 0) / finished.length).toFixed(2) : '0.00';
+  const incidentRows = finished.filter(d => String(d.isOnTime).includes('ไม่ใช่') || (Number(d.satisfaction)>0 && Number(d.satisfaction)<3));
+  const trendImg = document.getElementById('reportTrendChart')?.toDataURL('image/png') || '';
+  const shareImg = document.getElementById('reportShareChart')?.toDataURL('image/png') || '';
+  const printWindow = window.open('', '_blank');
+  if (!printWindow) return Swal.fire('Popup blocked', 'กรุณาอนุญาต Pop-up แล้วกด Export อีกครั้ง', 'info');
+  const bodyRows = rows.map(d => `<tr><td>${esc(reportDisplayDate_(d.timestamp))}</td><td>${esc(d.customer)}</td><td>${esc(R_TEAM_MAP[d.team]||d.team)}</td><td>${esc(d.finished)}</td><td>${esc(d.satisfaction||'-')}</td><td>${esc(d.issue||d.comment||'')}</td></tr>`).join('');
+  const incidentHtml = incidentRows.map(d => `<tr><td>${esc(reportDisplayDate_(d.timestamp))}</td><td>${esc(d.customer)}</td><td>${esc(R_TEAM_MAP[d.team]||d.team)}</td><td>${esc(d.satisfaction||'-')}</td><td>${esc(d.issue||d.comment||'')}</td></tr>`).join('') || '<tr><td colspan="5">No incidents</td></tr>';
+  printWindow.document.write(`<!doctype html><html><head><meta charset="utf-8"><title>Report CSI</title><link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Prompt:wght@400;500;600;700&display=swap" rel="stylesheet"><style>
+    @page{size:A4 landscape;margin:10mm}*{box-sizing:border-box}body{font-family:Prompt,Arial,sans-serif;color:#172033;margin:0;font-size:9px}h1{font-size:20px;margin:0;color:#003DA5}.meta{color:#64748b;margin:3px 0 12px}.cards{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:12px}.card{border:1px solid #dbe7f6;border-radius:8px;padding:9px}.card b{display:block;font-size:17px;color:#003DA5}.charts{display:grid;grid-template-columns:2fr 1fr;gap:10px;page-break-inside:avoid;margin-bottom:12px}.chart{border:1px solid #dbe7f6;border-radius:8px;padding:8px;text-align:center}.chart img{max-width:100%;height:210px;object-fit:contain}h2{font-size:12px;color:#003DA5;margin:12px 0 5px}table{width:100%;border-collapse:collapse;table-layout:fixed}thead{display:table-header-group}th{background:#003DA5;color:white}th,td{border:1px solid #dbe7f6;padding:5px;vertical-align:top;overflow-wrap:anywhere}tr{page-break-inside:avoid}.footer{margin-top:8px;color:#64748b;font-size:8px}@media print{.no-print{display:none}}
+  </style></head><body><h1>Report CSI</h1><div class="meta">Team: ${esc(rFilters.team)} · Year: ${esc(rFilters.year)} · Month: ${esc(rFilters.month)} · Printed: ${esc(reportDisplayDate_(new Date()))}</div>
+  <div class="cards"><div class="card">Total<b>${rows.length}</b></div><div class="card">Finished<b>${finished.length}</b></div><div class="card">Incidents<b>${incidentRows.length}</b></div><div class="card">Average<b>${avg}</b></div></div>
+  <div class="charts"><div class="chart"><b>Monthly Trend (Response)</b>${trendImg?`<img src="${trendImg}">`:''}</div><div class="chart"><b>Service Share</b>${shareImg?`<img src="${shareImg}">`:''}</div></div>
+  <h2>Incident Tracker</h2><table><thead><tr><th>Date</th><th>Customer</th><th>Team</th><th>Score</th><th>Issue</th></tr></thead><tbody>${incidentHtml}</tbody></table>
+  <h2>Customer Records</h2><table><thead><tr><th>Date</th><th>Customer</th><th>Team</th><th>Status</th><th>Score</th><th>Issue / Comment</th></tr></thead><tbody>${bodyRows}</tbody></table><div class="footer">CES Hub · Print / Save as PDF</div></body></html>`);
+  printWindow.document.close();
+  printWindow.focus();
+  setTimeout(() => printWindow.print(), 500);
 }
 
 // Lightweight reload for Report CSI after chunked upload.

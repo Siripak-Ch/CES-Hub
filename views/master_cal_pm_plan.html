@@ -10,17 +10,10 @@
       <button class="ces-standard-icon-btn ces-action-pdf" onclick="mcpExportPdf()" title="Export PDF"><i class="fas fa-file-pdf"></i></button>
     </div>
   </div>
-  <div class="bg-white p-3 rounded-2xl border border-slate-100"><div class="mcp-team-tabs" role="tablist" aria-label="Master CAL PM Team"><button type="button" class="mcp-team-tab med active" data-team="MED" onclick="mcpSelectTeam('MED')">MED</button><button type="button" class="mcp-team-tab ehs" data-team="EHS" onclick="mcpSelectTeam('EHS')">EHS</button><button type="button" class="mcp-team-tab env" data-team="ENV" onclick="mcpSelectTeam('ENV')">ENV</button><button type="button" class="mcp-team-tab lab" data-team="LAB" onclick="mcpSelectTeam('LAB')">LAB</button></div></div>
-  <div class="bg-white p-4 rounded-2xl border border-slate-100 grid grid-cols-1 md:grid-cols-6 gap-3">
-    <div class="sp-search md:col-span-2"><i class="fas fa-search"></i><input id="mcp-search" oninput="mcpFilterChanged()" placeholder="Search code / team / model / serial"></div>
-    <select id="mcp-source" onchange="mcpFilterChanged()"><option value="ALL">All Source Tabs</option></select>
-    <select id="mcp-team" onchange="mcpFilterChanged()"><option value="ALL">All Teams</option></select>
-    <select id="mcp-year" onchange="mcpFilterChanged()"><option value="ALL">All Years</option></select>
-    <select id="mcp-month" onchange="mcpFilterChanged()"><option value="ALL">All Months</option></select>
-  </div>
+  <div class="bg-white p-3 rounded-2xl border border-slate-100"><div class="mcp-team-tabs" role="tablist" aria-label="Master CAL PM Source Sheet"><button type="button" class="mcp-team-tab ehs active" data-team="EHS" onclick="mcpSelectTeam('EHS')">EHS</button><button type="button" class="mcp-team-tab env" data-team="ENV" onclick="mcpSelectTeam('ENV')">ENV</button><button type="button" class="mcp-team-tab med" data-team="MED" onclick="mcpSelectTeam('MED')">MED</button><button type="button" class="mcp-team-tab lab" data-team="LAB" onclick="mcpSelectTeam('LAB')">LAB</button></div></div>
   <div class="bg-white rounded-3xl border border-slate-100 shadow-sm p-4 min-w-0">
     <div class="flex justify-between items-center mb-3"><h3 class="font-black text-slate-800"><i class="fas fa-table text-[#003DA5] mr-2"></i>CAL/PM Plan Data</h3><span id="mcp-count" class="sp-pill">0 rows</span></div>
-    <div class="overflow-auto border border-slate-100 rounded-2xl max-h-[650px]" id="mcp-table-wrap"><table class="mcp-table min-w-[3000px] w-full text-[10px] text-left"><thead id="mcp-head" class="sticky top-0 z-10 bg-slate-50"></thead><tbody id="mcp-body"></tbody></table></div>
+    <div class="overflow-auto border border-slate-100 rounded-2xl min-h-[560px] max-h-[76vh]" id="mcp-table-wrap"><table class="mcp-table min-w-[2600px] w-full text-[10px] text-left"><thead id="mcp-head" class="sticky top-0 z-10 bg-slate-50"></thead><tbody id="mcp-body"></tbody></table></div>
     <div class="flex items-center justify-end gap-2 pt-3">
       <button id="mcp-prev" class="ces-standard-icon-btn" onclick="mcpPrevPage()" title="Previous page" aria-label="Previous page"><i class="fas fa-chevron-left"></i></button>
       <span id="mcp-page-info" class="sp-pill min-w-[92px] text-center">Page 1 / 1</span>
@@ -32,8 +25,6 @@
     #view-master_cal_pm_plan .mcp-table td{padding:4px;border-bottom:1px solid #eef2f7;vertical-align:middle}
     #view-master_cal_pm_plan .mcp-cell{width:100%;min-width:92px;border:1px solid transparent;border-radius:8px;padding:6px 7px;background:transparent;color:#0f172a}
     #view-master_cal_pm_plan .mcp-cell:hover,#view-master_cal_pm_plan .mcp-cell:focus{border-color:#93c5fd;background:#fff;outline:none}
-    #view-master_cal_pm_plan .mcp-source-cell{min-width:74px;background:#eff6ff;color:#1d4ed8;font-weight:900}
-    #view-master_cal_pm_plan .mcp-sticky-col{position:sticky;left:0;z-index:8;background:#f8fafc;box-shadow:4px 0 8px rgba(15,23,42,.04)}
     #view-master_cal_pm_plan .mcp-delete{width:30px;height:30px;border-radius:9px;background:#fff1f2;color:#e11d48;border:1px solid #fecdd3}
     #view-master_cal_pm_plan #mcp-prev:disabled,#view-master_cal_pm_plan #mcp-next:disabled{opacity:.35;cursor:not-allowed}
   </style>

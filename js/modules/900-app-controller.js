@@ -772,21 +772,27 @@
             id:       currentUser.id,
             name_eng: document.getElementById('prof-name-eng').value,
             name_th:  document.getElementById('prof-name-th').value,
-            email:    document.getElementById('prof-email').value
+            email:    document.getElementById('prof-email').value,
+            team: document.getElementById('prof-team').value,
+            position: document.getElementById('prof-position').value,
+            costCenter: document.getElementById('prof-costCenter').value,
+            tel: document.getElementById('prof-tel').value,
+            empType: document.getElementById('prof-empType').value,
+            supervisor: document.getElementById('prof-supervisor').value
         };
         const btn = document.querySelector('#profileModal button:last-child');
         const originalBtnHtml = btn.innerHTML;
         btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saving...';
         btn.disabled  = true;
 
-        google.script.run
-            .withSuccessHandler(res => {
+        const request = window.CES_API && typeof window.CES_API.callFunction === 'function'
+            ? window.CES_API.callFunction('updateUserProfile', [updates], {transport:'iframe', timeoutMs:60000, dedupe:false, priority:'active', userAction:true, module:'profile'})
+            : new Promise((resolve, reject) => google.script.run.withSuccessHandler(resolve).withFailureHandler(reject).updateUserProfile(updates));
+        request.then(res => {
                 btn.innerHTML = originalBtnHtml;
                 btn.disabled  = false;
                 if (res.success) {
-                    currentUser.name_eng = updates.name_eng;
-                    currentUser.name_th  = updates.name_th;
-                    currentUser.email    = updates.email;
+                    Object.assign(currentUser, updates, res.user || {});
                     window.CES_CURRENT_USER = currentUser;
                     window.currentUser = currentUser;
                     cesStoreCurrentUser_(currentUser);
@@ -796,13 +802,11 @@
                 } else {
                     Swal.fire('Error', res.message, 'error');
                 }
-            })
-            .withFailureHandler(err => {
+            }).catch(err => {
                 btn.innerHTML = originalBtnHtml;
                 btn.disabled  = false;
                 Swal.fire('Error', err.message, 'error');
-            })
-            .updateUserProfile(updates);
+            });
     }
 
 

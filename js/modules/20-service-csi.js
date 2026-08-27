@@ -826,7 +826,7 @@ function exportServiceToExcel() {
 
     // เตรียมข้อมูลสำหรับไฟล์ Excel
     const exportData = serviceFilteredData.map(row => ({
-        'Timestamp': row.timestamp || '',
+        'Date': typeof window.CES_DATE_DDMMYYYY === 'function' ? window.CES_DATE_DDMMYYYY(row.timestamp || row.monthFull) : (row.timestamp || row.monthFull || ''),
         'Month': row.monthOnly || '',
         'Year': row.year || '',
         'Finished': row.finished || '',
@@ -1769,4 +1769,21 @@ window.setServiceMemoMappingFilter=setServiceMemoMappingFilter;
 window.setServiceMemoMappingPage=setServiceMemoMappingPage;
 window.exportServiceMemoMappingV55=exportServiceMemoMappingV55;
 window.recalculateServiceMemoMappingV55=recalculateServiceMemoMappingV55;
+window.svcBuildMemoMappingV55_=svcBuildMemoMappingV55_;
+window.svcMapV55CompactRow_=svcMapV55CompactRow_;
 window.CES_SERVICE_MEMO_RECHECK=function(){const summary=svcMapV55Summary_(serviceMemoMappingRowsV55);return{success:true,version:'V55',targetYear:2026,latestFunctionNames:true,pageApiRemoved:true,monthlyMerge:true,keywordDateScoring:true,thaiAwareMatching:true,matchThreshold:'>70%',rows:summary.all,matchedRows:summary.matched,unmatchedRows:summary.unmatched,matchPercent:summary.percent,loadedFromCache:serviceMemoMappingLoadedV55,meta:serviceMemoMappingMetaV55};};
+
+async function sendServiceCsiCurrentMonthSummary() {
+  const button=document.querySelector('[onclick="sendServiceCsiCurrentMonthSummary()"]'),oldHtml=button?button.innerHTML:'';
+  if(button){button.disabled=true;button.innerHTML='<i class="fas fa-circle-notch fa-spin"></i>';}
+  try{
+    const result=window.CES_API&&typeof window.CES_API.callFunction==='function'
+      ?await window.CES_API.callFunction('sendServiceCsiCurrentMonthSummary',[{}],{transport:'iframe',timeoutMs:240000,dedupe:false,priority:'active',userAction:true,module:'service_csi'})
+      :await new Promise((resolve,reject)=>google.script.run.withSuccessHandler(resolve).withFailureHandler(reject).sendServiceCsiCurrentMonthSummary({}));
+    if(!result||result.success===false)throw new Error(result&&result.message||'Email summary failed.');
+    const sent=(result.teams||[]).filter(item=>item.success&&!item.skipped).map(item=>`${item.team} (${item.rows})`).join(', ');
+    Swal.fire({icon:'success',title:'Current-month summary sent',html:`${result.month||''}<br>${sent||'No team data this month'}`,confirmButtonColor:'#003DA5'});return result;
+  }catch(error){Swal.fire('Email summary error',error&&error.message?error.message:String(error),'error');return null;}
+  finally{if(button){button.disabled=false;button.innerHTML=oldHtml;}}
+}
+window.sendServiceCsiCurrentMonthSummary=sendServiceCsiCurrentMonthSummary;

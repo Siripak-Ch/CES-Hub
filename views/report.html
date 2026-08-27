@@ -18,7 +18,7 @@
 <button class="ces-header-action-btn ces-action-neutral" onclick="loadReportCSIOnly(true,true)" title="Refresh Report CSI"><i class="fas fa-sync-alt"></i></button>
 <label class="ces-standard-icon-btn ces-upload-icon-btn cursor-pointer" title="Upload CSI Data"><i class="fas fa-arrow-up-from-bracket"></i><input accept=".xlsx" class="hidden" id="reportFileInput" onchange="handleReportUpload(event)" type="file"/></label>
 <button class="ces-header-action-btn ces-action-excel" onclick="exportCSIToExcel()" title="Export to Excel"><i class="fas fa-file-excel"></i></button>
-<button class="ces-header-action-btn ces-action-pdf" onclick="exportReportToPDF()" title="Export Page to PDF"><i class="fas fa-file-pdf"></i></button>
+<button class="ces-header-action-btn ces-action-pdf" onclick="exportReportToPDF()" title="Print / Save as PDF"><i class="fas fa-print"></i></button>
 </div>
 </div>
 <div class="bg-white p-4 rounded-2xl shadow-sm border border-gray-100 grid grid-cols-2 md:grid-cols-4 gap-4 items-center">
@@ -41,7 +41,7 @@
 <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
 <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 lg:col-span-2">
 <h3 class="text-lg font-bold text-gray-800 mb-6 flex items-center gap-2"><i class="fas fa-chart-bar text-[#003DA5] mr-2"></i>Monthly Trend (Response)</h3>
-<div class="h-80 w-full relative"><canvas id="reportTrendChart"></canvas></div>
+<div class="h-[420px] w-full relative"><canvas id="reportTrendChart"></canvas></div>
 </div>
 <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
 <h3 class="text-lg font-bold text-gray-800 mb-6 text-center">Service Share (%)</h3>
@@ -49,10 +49,10 @@
 </div>
 </div>
 <div class="bg-white rounded-2xl shadow-sm border border-red-100 overflow-hidden flex flex-col">
-<div class="p-5 bg-red-50/50 border-b border-red-100 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-<h3 class="font-bold text-red-800 text-sm flex items-center"><i class="fas fa-exclamation-triangle mr-2"></i>Incident Tracker</h3>
+<div class="p-5 bg-[#B42318] border-b border-[#B42318] flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+<h3 class="font-bold text-white text-sm flex items-center"><i class="fas fa-exclamation-triangle mr-2"></i>Incident Tracker</h3>
 <div class="flex flex-wrap gap-2 items-center">
-<input class="text-[10px] pl-3 pr-3 py-2 border rounded-xl w-full md:w-48 outline-none border-red-200 focus:ring-2 focus:ring-red-100 transition-all" id="r-inc-search" onkeyup="renderCRMTable()" placeholder="Search Customer..." type="text"/>
+<input class="text-[10px] pl-3 pr-3 py-2 border rounded-xl w-full md:w-48 outline-none bg-white border-white/70 focus:ring-2 focus:ring-white/40 transition-all" id="r-inc-search" onkeyup="renderCRMTable()" placeholder="Search Customer..." type="text"/>
 </div>
 </div>
 <div class="overflow-x-auto custom-scrollbar">
@@ -71,19 +71,19 @@
 </div>
 </div>
 <div class="bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden mt-6">
-<div class="p-5 border-b border-gray-50 flex justify-between items-center bg-gradient-to-r from-white to-[#004aad]/30">
+<div class="p-5 border-b border-[#003DA5] flex justify-between items-center bg-[#003DA5]">
 <div>
-<h3 class="font-bold text-gray-800 flex items-center gap-2">
-<i class="fas fa-users text-[#003DA5]"></i> Customer List (รายละเอียดลูกค้า)
+<h3 class="font-bold text-white flex items-center gap-2">
+<i class="fas fa-users text-white"></i> Customer List (รายละเอียดลูกค้า)
                 </h3>
-<p class="text-[10px] text-gray-400 font-medium ml-6">รายการประเมิน CSI ทั้งหมดตามการกรองข้อมูล</p>
+<p class="text-[10px] text-white/80 font-medium ml-6">รายการประเมิน CSI ทั้งหมดตามการกรองข้อมูล</p>
 </div>
 <div class="flex items-center gap-3">
 <div class="relative">
 <i class="fas fa-search absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-xs"></i>
 <input class="pl-8 pr-4 py-1.5 bg-gray-50 border border-gray-200 rounded-xl text-xs focus:ring-2 focus:ring-[#003DA5] outline-none w-48 transition-all" id="csi-list-search" oninput="renderCSITable()" placeholder="ค้นหาชื่อลูกค้า/ปัญหา..." type="text"/>
 </div>
-<span class="px-3 py-1 bg-[#003DA5]/10 text-[#003DA5] text-[10px] font-bold rounded-full" id="csi-count-badge">0 Records</span>
+<span class="px-3 py-1 bg-white text-[#003DA5] text-[10px] font-bold rounded-full" id="csi-count-badge">0 Records</span>
 </div>
 </div>
 <div class="overflow-x-auto custom-scrollbar" style="max-height: 600px;">

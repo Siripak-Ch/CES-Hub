@@ -40,11 +40,11 @@
   const activeWriteQueue = [];
   const normalQueue = [];
   const backgroundQueue = [];
-  const MAX_ACTIVE_READS = 2;
+  const MAX_ACTIVE_READS = 3;
   const MAX_ACTIVE_WRITES = 1;
   const MAX_NORMAL_REQUESTS = 1;
   const MAX_BACKGROUND_REQUESTS = 1;
-  const MAX_TOTAL_REQUESTS = 3;
+  const MAX_TOTAL_REQUESTS = 4;
   const idleWaiters = [];
   const BACKGROUND_INTERACTION_GRACE_MS = 1400;
   const DIRECT_INTERACTION_PRIORITY_MS = 350;

@@ -3127,7 +3127,7 @@
     return {pdf:pdf, previews:previews, totalPages:totalPages};
   }
 
-  async function servicePdfExportServiceToPDF(){
+  async function servicePdfLegacyCanvasExport_(){
     var captureDoc = null;
     try{
       var sourceRoot = document.getElementById('view-service');
@@ -3209,9 +3209,33 @@
     }
   }
 
+  function servicePdfExportServiceToPDF(){
+    var rows=[];
+    try{ rows=Array.isArray(serviceFilteredData)?serviceFilteredData.slice():[]; }catch(ignore){}
+    if(!rows.length){
+      if(window.Swal) return window.Swal.fire('No Data','ไม่พบข้อมูลสำหรับ Filter ปัจจุบัน','warning');
+      return false;
+    }
+    var esc=function(value){return String(value==null?'':value).replace(/[&<>"']/g,function(c){return({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[c];});};
+    var dateFmt=function(value){return typeof window.CES_DATE_DDMMYYYY==='function'?window.CES_DATE_DDMMYYYY(value):String(value||'');};
+    var filters=servicePdfReadActiveFilters();
+    var finished=rows.filter(function(row){return String(row.finished||'').toLowerCase()==='yes';});
+    var avgCount=0,avgSum=0;
+    finished.forEach(function(row){[row.s1,row.s2,row.s3,row.s4,row.s5].forEach(function(value){value=Number(value)||0;if(value>0){avgCount++;avgSum+=value;}});});
+    var monthly=document.getElementById('monthlyChart');
+    var yearly=document.getElementById('yearlyChart');
+    var chartA=monthly&&typeof monthly.toDataURL==='function'?monthly.toDataURL('image/png'):'';
+    var chartB=yearly&&typeof yearly.toDataURL==='function'?yearly.toDataURL('image/png'):'';
+    var reportRows=rows.map(function(row){return '<tr><td>'+esc(dateFmt(row.timestamp||row.monthFull))+'</td><td>'+esc(row.team)+'</td><td>'+esc(row.customerName||row.customer)+'</td><td>'+esc(row.finished)+'</td><td>'+esc(row.s1||'-')+'</td><td>'+esc(row.s2||'-')+'</td><td>'+esc(row.s3||'-')+'</td><td>'+esc(row.s4||'-')+'</td><td>'+esc(row.s5||'-')+'</td><td>'+esc(row.comments||row.comment||'')+'</td></tr>';}).join('');
+    var printWindow=window.open('','_blank');
+    if(!printWindow){if(window.Swal)window.Swal.fire('Popup blocked','กรุณาอนุญาต Pop-up แล้วกด Export อีกครั้ง','info');return false;}
+    printWindow.document.write('<!doctype html><html><head><meta charset="utf-8"><title>'+esc(servicePdfReadFilename(filters).replace(/\.pdf$/i,''))+'</title><link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Prompt:wght@400;500;600;700&display=swap" rel="stylesheet"><style>@page{size:A4 landscape;margin:10mm}*{box-sizing:border-box}body{font-family:Prompt,Arial,sans-serif;color:#172033;margin:0;font-size:8.5px}h1{font-size:20px;color:#003DA5;margin:0}.meta{color:#64748b;margin:3px 0 12px}.cards{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:10px}.card{border:1px solid #dbe7f6;border-radius:8px;padding:9px}.card b{display:block;font-size:17px;color:#003DA5}.charts{display:grid;grid-template-columns:1fr 1fr;gap:10px;page-break-inside:avoid;margin-bottom:12px}.chart{border:1px solid #dbe7f6;border-radius:8px;padding:7px;text-align:center}.chart img{max-width:100%;height:200px;object-fit:contain}table{width:100%;border-collapse:collapse;table-layout:fixed}thead{display:table-header-group}th{background:#003DA5;color:#fff}th,td{border:1px solid #dbe7f6;padding:4px;vertical-align:top;overflow-wrap:anywhere}tr{page-break-inside:avoid}.footer{margin-top:8px;color:#64748b}</style></head><body><h1>Service CSI Summary</h1><div class="meta">'+esc(servicePdfReadFilterLabel(filters))+' · Printed '+esc(dateFmt(new Date()))+'</div><div class="cards"><div class="card">Total<b>'+rows.length+'</b></div><div class="card">Finished<b>'+finished.length+'</b></div><div class="card">Not Finished<b>'+(rows.length-finished.length)+'</b></div><div class="card">Average<b>'+(avgCount?(avgSum/avgCount).toFixed(2):'0.00')+'</b></div></div><div class="charts"><div class="chart"><b>Monthly Response</b>'+(chartA?'<img src="'+chartA+'">':'')+'</div><div class="chart"><b>Yearly Analysis</b>'+(chartB?'<img src="'+chartB+'">':'')+'</div></div><table><thead><tr><th>Date</th><th>Team</th><th>Customer</th><th>Status</th><th>S1</th><th>S2</th><th>S3</th><th>S4</th><th>S5</th><th>Comments</th></tr></thead><tbody>'+reportRows+'</tbody></table><div class="footer">CES Hub · Print / Save as PDF</div></body></html>');
+    printWindow.document.close();printWindow.focus();setTimeout(function(){printWindow.print();},500);return true;
+  }
+
   window.exportServiceToPDF = servicePdfExportServiceToPDF;
   try{ exportServiceToPDF = servicePdfExportServiceToPDF; }catch(ignore){}
-  window.CES_SERVICE_CSI_PDF_VERSION = 'V28.9-ACTIVE-FILTER-PAGE-BREAKS';
+  window.CES_SERVICE_CSI_PDF_VERSION = 'V30.0.17-PRINT-READY-HTML';
 })(window, document);
 
 // CES Hub V20.9 — critical module static/runtime smoke check.

@@ -24,6 +24,25 @@
     return num(v).toLocaleString('en-US', { maximumFractionDigits: digit == null ? 0 : digit });
   }
 
+  // Canonical display date. Keep native <input type="date"> values as yyyy-mm-dd,
+  // but render records, exports and printable reports as dd/mm/yyyy everywhere.
+  function dateDDMMYYYY(value) {
+    if (value === null || value === undefined || value === '') return '';
+    if (value instanceof Date && !isNaN(value.getTime())) {
+      return String(value.getDate()).padStart(2, '0') + '/' + String(value.getMonth() + 1).padStart(2, '0') + '/' + value.getFullYear();
+    }
+    if (typeof value === 'number' && isFinite(value) && value > 20000 && value < 100000) {
+      return dateDDMMYYYY(new Date(Date.UTC(1899, 11, 30) + Math.round(value * 86400000)));
+    }
+    var raw = text(value).trim();
+    var direct = raw.match(/^(\d{1,2})[\/.-](\d{1,2})[\/.-](\d{4})/);
+    if (direct) return direct[1].padStart(2, '0') + '/' + direct[2].padStart(2, '0') + '/' + direct[3];
+    var iso = raw.match(/^(\d{4})-(\d{1,2})-(\d{1,2})/);
+    if (iso) return iso[3].padStart(2, '0') + '/' + iso[2].padStart(2, '0') + '/' + iso[1];
+    var parsed = new Date(raw);
+    return isNaN(parsed.getTime()) ? raw : dateDDMMYYYY(parsed);
+  }
+
   function setHtml(id, html) {
     var el = document.getElementById(id);
     if (el) el.innerHTML = html == null ? '' : String(html);
@@ -57,7 +76,8 @@
   window.spSetText = window.spSetText || setText;
   window.spVal = window.spVal || val;
   window.spNormStatus = window.spNormStatus || normStatus;
-  window.CES_SAFE = window.CES_SAFE || { esc: esc, num: num, fmt: fmt, setHtml: setHtml, setText: setText, val: val, normStatus: normStatus };
+  window.CES_DATE_DDMMYYYY = window.CES_DATE_DDMMYYYY || dateDDMMYYYY;
+  window.CES_SAFE = window.CES_SAFE || { esc: esc, num: num, fmt: fmt, date: dateDDMMYYYY, setHtml: setHtml, setText: setText, val: val, normStatus: normStatus };
 
 
   // Active-module guard. Deferred HTML can exist in the DOM before its module
