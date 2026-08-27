@@ -68,6 +68,12 @@ const thaiHolidays = [
         html += '</tbody></table></div>';
         target.innerHTML = html;
     }
+    function rmRenderPdfPreviewV3016(targetId, artifact, label) {
+        const target=document.getElementById(targetId); if(!target)return;
+        const src=(artifact&&(artifact.preview||artifact.view||artifact.pdf))||'';
+        if(!src){target.innerHTML='<div class="rm-preview-empty"><i class="fas fa-triangle-exclamation"></i><span>Finished PDF preview is unavailable.</span></div>';return;}
+        target.innerHTML='<iframe class="rm-finished-pdf-frame-v3016" src="'+rmEscapeHtmlV22(src)+'" title="'+rmEscapeHtmlV22(label||'Finished PDF')+'" loading="eager" referrerpolicy="no-referrer"></iframe>';
+    }
     function rmSetArtifactLinkV22(id, artifact, fallback) {
         const el=document.getElementById(id); if(!el)return;
         const href=(artifact && (artifact.download||artifact.view||artifact.preview)) || fallback || '#';
@@ -245,15 +251,11 @@ function fillUserInfoRM() {
         tr.innerHTML = `
             <td class="p-2"><input type="date" class="rm-date w-full bg-white border border-gray-200 rounded-lg p-2 text-sm outline-none focus:border-indigo-500 transition-colors" onchange="checkHolidayRM(this); this.classList.remove('border-red-500', 'bg-red-50');"></td>
             <td class="p-2"><input type="text" class="rm-location w-full bg-white border border-gray-200 rounded-lg p-2 text-sm outline-none focus:border-indigo-500 transition-colors" placeholder="Location" oninput="this.classList.remove('border-red-500', 'bg-red-50');"></td>
-            <td class="p-2">
-                <select class="rm-start w-full bg-white border border-gray-200 rounded-lg p-2 text-sm text-center outline-none focus:border-indigo-500 transition-colors cursor-pointer" onchange="calcRM(this); this.classList.remove('border-red-500', 'bg-red-50');">
-                    ${getHourOptions('08:00')}
-                </select>
+            <td class="p-2 rm-time-cell-v3016">
+                <input type="time" step="3600" value="08:00" class="rm-start rm-time-select-v3016 bg-white border border-gray-200 rounded-lg p-2 text-sm text-center outline-none focus:border-indigo-500 transition-colors cursor-pointer" onchange="calcRM(this); this.classList.remove('border-red-500', 'bg-red-50');">
             </td>
-            <td class="p-2">
-                <select class="rm-end w-full bg-white border border-gray-200 rounded-lg p-2 text-sm text-center outline-none focus:border-indigo-500 transition-colors cursor-pointer" onchange="calcRM(this); this.classList.remove('border-red-500', 'bg-red-50');">
-                    ${getHourOptions('17:00')}
-                </select>
+            <td class="p-2 rm-time-cell-v3016">
+                <input type="time" step="3600" value="17:00" class="rm-end rm-time-select-v3016 bg-white border border-gray-200 rounded-lg p-2 text-sm text-center outline-none focus:border-indigo-500 transition-colors cursor-pointer" onchange="calcRM(this); this.classList.remove('border-red-500', 'bg-red-50');">
             </td>
             <td class="p-2 text-center"><input type="checkbox" class="rm-holiday w-4 h-4 text-indigo-600 rounded" onchange="calcRM(this)"></td>
             <td class="p-2"><input type="number" class="rm-hrs10 w-full bg-gray-50 border border-gray-200 rounded-lg p-2 text-sm text-center outline-none" placeholder="-" readonly></td>
@@ -275,11 +277,33 @@ function fillUserInfoRM() {
         const currentRow = btn.closest('tr');
         const tbody = document.getElementById('rm-rowBody');
         const newRow = currentRow.cloneNode(true);
+        currentRow.querySelectorAll('input,select,textarea').forEach((source,index) => {
+            const target=newRow.querySelectorAll('input,select,textarea')[index];
+            if(!target)return;
+            if(source.type==='checkbox'||source.type==='radio')target.checked=source.checked;
+            else target.value=source.value;
+        });
         newRow.querySelector('.rm-date').value = '';
         newRow.querySelector('.rm-date').classList.remove('border-red-500', 'bg-red-50');
         tbody.appendChild(newRow);
         calcRM(newRow.querySelector('.rm-start'));
         updateSummaryRM();
+    }
+
+    function duplicateLastRowRM() {
+        const rows=document.querySelectorAll('#rm-rowBody tr');
+        if(!rows.length){addRowRM();return;}
+        const button=rows[rows.length-1].querySelector('button[onclick*="duplicateRowRM"]');
+        if(button)duplicateRowRM(button);
+    }
+
+    function sortRowsByDateRM_() {
+        const tbody=document.getElementById('rm-rowBody'); if(!tbody)return;
+        Array.from(tbody.querySelectorAll('tr')).sort((a,b)=>{
+            const av=(a.querySelector('.rm-date')||{}).value||'9999-99-99';
+            const bv=(b.querySelector('.rm-date')||{}).value||'9999-99-99';
+            return av.localeCompare(bv);
+        }).forEach(row=>tbody.appendChild(row));
     }
 
     function deleteRowRM(btn) {
@@ -310,7 +334,8 @@ function fillUserInfoRM() {
             const isThaiHoliday = thaiHolidays.includes(dateVal);
             holCheck.checked = (day === 0 || day === 6 || isThaiHoliday);
         }
-        calcRM(element); 
+        calcRM(element);
+        sortRowsByDateRM_();
     }
 
     function setRMRowValues_(tr, data) {
@@ -327,6 +352,14 @@ function fillUserInfoRM() {
         if (data.hrs15 != null) set('.rm-hrs15', data.hrs15 || '');
     }
 
+    function rmInputDateV3016_(value) {
+        const s=String(value||'').trim();
+        let m=s.match(/^(\d{4})[-\/.](\d{1,2})[-\/.](\d{1,2})/);if(m)return m[1]+'-'+String(m[2]).padStart(2,'0')+'-'+String(m[3]).padStart(2,'0');
+        m=s.match(/^(\d{1,2})[-\/.](\d{1,2})[-\/.](\d{4})/);if(m)return m[3]+'-'+String(m[2]).padStart(2,'0')+'-'+String(m[1]).padStart(2,'0');
+        return '';
+    }
+    function rmAddHoursV3016_(start,hours){const a=String(start||'17:00').split(':').map(Number),minutes=((a[0]||0)*60+(a[1]||0)+Math.round(Number(hours||0)*60))%(24*60);return String(Math.floor(minutes/60)).padStart(2,'0')+':'+String(minutes%60).padStart(2,'0');}
+
     function loadRowsFromOTDashboardRM() {
         const tbody = document.getElementById('rm-rowBody');
         if (!tbody) return;
@@ -341,8 +374,10 @@ function fillUserInfoRM() {
         selected.slice(0, 31).forEach(r => {
             addRowRM();
             const tr = tbody.lastElementChild;
-            setRMRowValues_(tr, { date:r.date || '', location:r.location || r.team || 'OT', start:r.start || '08:00', end:r.end || '17:00', hrs10:r.workHours || r.hrs10 || '', hrs15:r.otHours || r.hrs15 || '', isHoliday:!!r.isHoliday });
+            const date=rmInputDateV3016_(r.date),day=date?new Date(date+'T00:00:00').getDay():-1,isHoliday=!!r.isHoliday||day===0||day===6||thaiHolidays.includes(date),ot=Number(r.otHours||r.hrs15||0),work=Number(r.workHours||r.hrs10||0),start=r.start||(isHoliday?'08:00':'17:00'),end=r.end||rmAddHoursV3016_(start,ot||work||1);
+            setRMRowValues_(tr, { date:date, location:r.location || r.team || 'OT', start:start, end:end, hrs10:work||'', hrs15:ot||'', isHoliday:isHoliday });
         });
+        sortRowsByDateRM_();
         updateSummaryRM();
     }
 
@@ -425,6 +460,7 @@ function fillUserInfoRM() {
         if (!isComplete || rowData.length === 0) {
             Swal.fire('Incomplete Data', 'Please fill in all required fields.', 'error'); return;
         }
+        rowData.sort((a,b)=>String(a.date||'').localeCompare(String(b.date||'')));
 
         const btn = document.getElementById('rm-generateBtn');
         const btnText = document.getElementById('rm-btnText');
@@ -460,12 +496,12 @@ function fillUserInfoRM() {
             lastRMFormData = formData;
 
             document.getElementById('rm-resultSection').classList.remove('hidden');
-            document.getElementById('rm-tablePreviewSection').classList.remove('hidden');
+            document.getElementById('rm-tablePreviewSection').classList.add('hidden');
             document.getElementById('rm-sendEmailSection').classList.remove('hidden');
 
-            // Exact inline preview from backend sheet values; no private Sheet iframe dependency.
-            rmRenderSheetPreviewV22('rm-tempPdfFrame', res.templatePreviewRows, {headerRows:4});
-            rmRenderSheetPreviewV22('rm-tsPdfFrame', res.timesheetPreviewRows, {headerRows:2});
+            // Show the final exported PDF pages, not a long HTML reconstruction.
+            rmRenderPdfPreviewV3016('rm-tempPdfFrame', res.templatePDF, 'Finished OT Template PDF');
+            rmRenderPdfPreviewV3016('rm-tsPdfFrame', res.timesheetPDF, 'Finished OT Timesheet PDF');
             rmSetArtifactLinkV22('rm-tempPdfView', {download:res.templatePDF.view || res.templatePDF.preview}, res.templatePDF.preview);
             rmSetArtifactLinkV22('rm-tempPdfDown', res.templatePDF, res.templatePDF.download);
             rmSetArtifactLinkV22('rm-tempExcelDown', res.templateExcel, res.excelTemplateUrl);
@@ -519,3 +555,4 @@ function fillUserInfoRM() {
     /** Canonical user-facing entry point; keeps report_manage internals compatible. */
     function initOTGenerate(force) { return initReportManage(force); }
     window.initOTGenerate = initOTGenerate;
+    window.duplicateLastRowRM = duplicateLastRowRM;

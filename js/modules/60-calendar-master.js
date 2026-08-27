@@ -311,6 +311,11 @@
     // ==========================================
     // ส่วนที่ 2: ฟังก์ชันเดิม (จัดการ Job, Leave, KPI และ Capacity)
     // ==========================================
+    function calendarExtraKeywords_(key) {
+        const cfg=(typeof globalConfig!=='undefined'&&globalConfig)||{};
+        return String(cfg[key]||'').split(/[\n,;|]+/).map(x=>x.trim().toLowerCase()).filter(Boolean);
+    }
+
     function checkIsLeaveEvent(title) {
         if (!title) return false;
         const titleLower = title.toLowerCase();
@@ -338,7 +343,8 @@
                 return true; 
             }
         }
-        return false;
+        const defaults=['wfh','work from home','ลาเดือนเกิด','birthday leave','ชดเชยวันหยุด'];
+        return defaults.concat(calendarExtraKeywords_('CALENDAR_LEAVE_KEYWORDS')).some(word=>titleLower.includes(word));
     }
 
     function calendarNormalizeTeam(team) {
@@ -371,7 +377,9 @@
 
     function checkIsOtherCalendarActivity(title) {
         const text = String(title || '').trim().toLowerCase();
-        return /ส่ง\s*cal|ส่งสอบเทียบ|ส่งเครื่อง|ยืมเครื่อง|(?:^|\s)ยืม(?:\s|$)/i.test(text);
+        if (/ส่ง\s*cal|ส่งสอบเทียบ|ส่งเครื่อง|รับเครื่อง|คืนเครื่อง|ยืมเครื่อง|(?:^|\s)ยืม(?:\s|$)/i.test(text)) return true;
+        const defaults=['ประชุม','meeting','อบรม','training','งานภายใน','internal','admin','inventory','stock','เตรียมงาน'];
+        return defaults.concat(calendarExtraKeywords_('CALENDAR_OTHER_KEYWORDS')).some(word=>text.includes(word));
     }
 
     function processCalendarData(data, targetM, targetY) {

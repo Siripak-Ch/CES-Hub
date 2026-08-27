@@ -48,6 +48,8 @@
         setVal('cfg-cap-env', data.CAPACITY_ENV);
         setVal('cfg-cap-mng', data.CAPACITY_MNG);
         setVal('cfg-cap-tes', data.CAPACITY_TES);
+        setVal('cfg-calendar-leave-keywords', data.CALENDAR_LEAVE_KEYWORDS || 'wfh, work from home, ลาเดือนเกิด, ชดเชยวันหยุด');
+        setVal('cfg-calendar-other-keywords', data.CALENDAR_OTHER_KEYWORDS || 'ประชุม, meeting, อบรม, training, งานภายใน, internal, admin, inventory, stock, เตรียมงาน, รับเครื่อง, คืนเครื่อง');
 
         // Core team colors — one Config value updates all modules.
         const colorDefaults = window.CES_TEAM_COLOR_DEFAULTS || {MED:'#004aad',LAB:'#19a7ce',EHS:'#0fc1a1',ENV:'#7ed957',TES:'#ffde59',QM:'#f97316',MNG:'#b4b4b4'};
@@ -129,7 +131,7 @@
         const getVal = (id) => document.getElementById(id) ? document.getElementById(id).value : '';
         return {
             CONFIG_SCHEMA_VERSION:'23.8',
-            CAPACITY_MED:getVal('cfg-cap-med'), CAPACITY_LAB:getVal('cfg-cap-lab'), CAPACITY_EHS:getVal('cfg-cap-ehs'), CAPACITY_ENV:getVal('cfg-cap-env'), CAPACITY_MNG:getVal('cfg-cap-mng'), CAPACITY_TES:getVal('cfg-cap-tes'),
+            CAPACITY_MED:getVal('cfg-cap-med'), CAPACITY_LAB:getVal('cfg-cap-lab'), CAPACITY_EHS:getVal('cfg-cap-ehs'), CAPACITY_ENV:getVal('cfg-cap-env'), CAPACITY_MNG:getVal('cfg-cap-mng'), CAPACITY_TES:getVal('cfg-cap-tes'), CALENDAR_LEAVE_KEYWORDS:getVal('cfg-calendar-leave-keywords'), CALENDAR_OTHER_KEYWORDS:getVal('cfg-calendar-other-keywords'),
             TEAM_COLOR_MED:getVal('cfg-color-med'), TEAM_COLOR_LAB:getVal('cfg-color-lab'), TEAM_COLOR_EHS:getVal('cfg-color-ehs'), TEAM_COLOR_ENV:getVal('cfg-color-env'), TEAM_COLOR_TES:getVal('cfg-color-tes'), TEAM_COLOR_QM:getVal('cfg-color-qm'), TEAM_COLOR_MNG:getVal('cfg-color-mng'),
             CAL_ID_MED:getVal('cfg-cal-med'), CAL_ID_LAB:getVal('cfg-cal-lab'), CAL_ID_EHS:getVal('cfg-cal-ehs'), CAL_ID_ENV:getVal('cfg-cal-env'), CAL_ID_MNG:getVal('cfg-cal-mng'), CAL_ID_TES:getVal('cfg-cal-tes'),
             TARGET_CSI:getVal('cfg-target-csi'), TARGET_SLA_HRS:getVal('cfg-target-sla'),
@@ -208,7 +210,7 @@
 
     const CES_SETTING_SECTION_KEYS_V264 = {
         announcement:['ADMIN_NOTIFY_EMAIL','ANNOUNCE_MSG','ANNOUNCE_ACTIVE'],
-        capacity:['CAPACITY_MED','CAPACITY_LAB','CAPACITY_EHS','CAPACITY_ENV','CAPACITY_MNG','CAPACITY_TES'],
+        capacity:['CAPACITY_MED','CAPACITY_LAB','CAPACITY_EHS','CAPACITY_ENV','CAPACITY_MNG','CAPACITY_TES','CALENDAR_LEAVE_KEYWORDS','CALENDAR_OTHER_KEYWORDS'],
         links:['LINK_SERVICE_CSI_CES_SUMMARY','LINK_SERVICE_CSI_TES_SUMMARY','LINK_REPORT_CSI_SUMMARY','LINK_REVENUE_DASHBOARD','LINK_KPI_EHS_SHEET','LINK_KPI_LAB_SHEET','LINK_MEMO_WORKORDER_SOURCE','LINK_TRAINING_PLAN_2026'],
         colors:['TEAM_COLOR_MED','TEAM_COLOR_LAB','TEAM_COLOR_EHS','TEAM_COLOR_ENV','TEAM_COLOR_TES','TEAM_COLOR_QM','TEAM_COLOR_MNG'],
         calendar:['CAL_ID_MED','CAL_ID_LAB','CAL_ID_EHS','CAL_ID_ENV','CAL_ID_MNG','CAL_ID_TES'],

@@ -28,7 +28,7 @@ window.CES_CONFIG = {
   },
 
   DEBUG: false,
-  RELEASE: 'CES-HUB-V30.0-CLOUDFLARE-ONLY',
+  RELEASE: 'CES-HUB-V30.0.16-STABILITY-PERFORMANCE',
 
   // External links are kept in one place. Config sheet values override these defaults at runtime.
   EXTERNAL_LINKS: {
@@ -40,7 +40,8 @@ window.CES_CONFIG = {
     REVENUE_DASHBOARD: 'https://nsmartplusdashboard.nhealth-asia.com/#/signin?externalRedirect=%2Ft%2FCustomerExperience%2Fviews%2FCES-HQFinancialPerformance%2FCES-HQ%3F%3Aiid%3D1%26&site=CustomerExperience',
     KPI_EHS_SHEET: 'https://docs.google.com/spreadsheets/d/1vNt7qUenxteIV3A0TnQ2QYf0esyOu3NvEjZG8zme5Gk/edit?usp=sharing',
     KPI_LAB_SHEET: 'https://docs.google.com/spreadsheets/d/1cdiwOpRZzU-MNLALEtcfpn-8HReLfz9tJkKhJzA0lKw/edit?usp=sharing',
-    MEMO_WORKORDER_SOURCE: 'https://bdmsgroup.sharepoint.com/:x:/r/sites/Dataanalysis908/Shared%20Documents/Project/2025/Memo%20+%20Work%20Order/Memo%20Form+%20Work%20Order%20Form.xlsx?d=w6db9ac4eaff2441aacaddd1ed7fd3c37&csf=1&web=1&e=jovCn8',
+    MEMO_WORKORDER_SOURCE: 'https://bdmsgroup.sharepoint.com/:x:/r/sites/Dataanalysis908/Shared%20Documents/Project/2025/Memo%20+%20Work%20Order/Memo%20Form+%20Work%20Order%20Form.xlsx?d=w6db9ac4eaff2441aacaddd1ed7fd3c37&csf=1&web=1&e=iQIzdW',
+    JOB_RECORD_SOURCE: 'https://bdmsgroup-my.sharepoint.com/:x:/r/personal/nhbmecallab_bdms_co_th/Documents/33.%20Job%20Record%20Mobile%20Service/Job%20Record%20Mobile%20service%202025%20Rv.1.xlsx?d=w65bc2caadef04df99f0237be2438f710&csf=1&web=1&e=C8Y1ox',
     TRAINING_PLAN_2026: 'https://docs.google.com/spreadsheets/d/1qBR-KQ5cxVWw6iGWIxmYI9aXr3oTlhcu51JaQeBnxcw/edit?usp=sharing',
     VAN_BOOKING_FORM: 'https://forms.gle/Tra5UBHtbMWpXvhr7'
   },

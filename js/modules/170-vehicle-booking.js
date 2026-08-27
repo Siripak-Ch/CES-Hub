@@ -1642,14 +1642,26 @@ async function approveCarBookingWebsiteFront(bookingId, decision) {
     });
     if (!answer.isConfirmed) return;
     note = answer.value || '';
-    Swal.fire({title:'Updating booking…',allowOutsideClick:false,didOpen:function(){Swal.showLoading();}});
+    if(typeof showToast==='function')showToast('Updating booking…','info');
   }
   try {
-    var result = await window.CES_API.callFunction('approveCarBookingFromWebsite', [{bookingId:bookingId,decision:decision,note:note,actorId:login.id}], {transport:'iframe',timeoutMs:70000,dedupe:false});
+    var result = await window.CES_API.callFunction('approveCarBookingFromWebsite', [{bookingId:bookingId,decision:decision,note:note,actorId:login.id}], {transport:'iframe',timeoutMs:45000,dedupe:false});
     if (!result || result.success === false) throw new Error((result && result.message) || 'Approval failed.');
     await loadVehicleBookingWorkspace('CAR', true);
     if (window.Swal) Swal.fire({icon:'success',title:approve?'Booking approved':'Booking rejected',timer:1400,showConfirmButton:false});
   } catch (error) {
+    // A previous deployment may finish the sheet write just after the HTTP
+    // timeout. Refresh once and trust the persisted status instead of leaving a
+    // blocking error popup on a booking that is already confirmed.
+    try {
+      await loadVehicleBookingWorkspace('CAR',true,true);
+      var saved=(CES_BOOKING_V31.state.CAR.rows||[]).find(function(row){return String(row.bookingId||row.id||'')===String(bookingId);});
+      var status=String(saved&&saved.status||'').toUpperCase();
+      if((approve&&status==='CONFIRMED')||(!approve&&status==='REJECTED')){
+        if(window.Swal)Swal.fire({icon:'success',title:approve?'Booking approved':'Booking rejected',text:'Saved status verified after refresh.',timer:1600,showConfirmButton:false});
+        return;
+      }
+    } catch(ignoreRefresh) {}
     if (window.Swal) Swal.fire({icon:'error',title:'Update failed',text:error.message || String(error)});
   }
 }

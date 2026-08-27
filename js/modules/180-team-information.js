@@ -32,7 +32,11 @@ function loadTeamInformation(force,background){
     cesTeamWriteLocal_(CES_TEAM_INFO.rows,CES_TEAM_INFO.generatedAt);renderTeamTabs_();renderTeamInformation();
   };
   const fail=err=>{if(!background&&root)root.innerHTML='<div class="text-red-500 py-12 text-center font-bold">'+cesTeamEsc_(err.message||String(err))+'</div>';};
-  google.script.run.withSuccessHandler(ok).withFailureHandler(fail).getTeamInformation(!!force);
+  if(window.CES_API&&typeof window.CES_API.callFunction==='function'){
+    window.CES_API.callFunction('getTeamInformation',[!!force],{transport:'jsonp',timeoutMs:45000,dedupe:true,priority:background?'background':'active',background:!!background,silentLoading:!!background,module:'team_information'}).then(ok).catch(fail);
+  }else if(window.google&&google.script&&google.script.run){
+    google.script.run.withSuccessHandler(ok).withFailureHandler(fail).getTeamInformation(!!force);
+  }else fail(new Error('CES API bridge is not ready.'));
 }
 function renderTeamTabs_(){
   const teams=['ALL','MED','LAB','EHS','ENV','TES','QM','MNG','SALES'],root=document.getElementById('team-info-tabs');if(!root)return;
