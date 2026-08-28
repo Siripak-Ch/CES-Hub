@@ -4808,15 +4808,5 @@ body,input,select,textarea,button,table,th,td,.swal2-container,.swal2-popup,.swa
 /* V30.0.18 — compact monthly acknowledgement cards and opaque Report CSI headers. */
 .ces-monthly-ack-team-card-v3018{min-height:82px;padding:7px 9px;border:1px solid #e2e8f0;border-left:5px solid var(--ack-team-color,#94a3b8);border-radius:11px;background:#fff;box-shadow:0 1px 3px rgba(15,23,42,.05)}
 #view-report .ces-report-opaque-header{background-image:none!important}
+#view-report .ces-report-customer-header{background:#003DA5!important;background-image:none!important}
 #view-report .ces-report-opaque-header,#view-report .ces-report-opaque-header h3,#view-report .ces-report-opaque-header h3 i,#view-report .ces-report-opaque-header p{color:#fff!important}
-
-/* Print the currently rendered Service CSI DOM. No canvas, image capture or rebuilt HTML. */
-@media print{
-  @page{size:landscape;margin:6mm}
-  body.ces-print-service-current{margin:0!important;background:#fff!important;overflow:visible!important}
-  body.ces-print-service-current *{visibility:hidden!important}
-  body.ces-print-service-current #view-service,body.ces-print-service-current #view-service *{visibility:visible!important;-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important}
-  body.ces-print-service-current #view-service{display:block!important;position:absolute!important;left:0!important;top:0!important;width:var(--ces-service-screen-width,100%)!important;max-width:none!important;margin:0!important;padding:0!important;overflow:visible!important;transform:none!important}
-  body.ces-print-service-current #view-service .overflow-x-auto,body.ces-print-service-current #view-service .overflow-y-auto,body.ces-print-service-current #view-service .custom-scrollbar,body.ces-print-service-current #view-service [style*="max-height"]{overflow:visible!important;max-height:none!important;height:auto!important}
-  body.ces-print-service-current #view-service canvas{max-width:100%!important}
-}

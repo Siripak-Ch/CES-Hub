@@ -130,7 +130,7 @@
     function collectFullSystemConfig_() {
         const getVal = (id) => document.getElementById(id) ? document.getElementById(id).value : '';
         return {
-            CONFIG_SCHEMA_VERSION:'23.8',
+            CONFIG_SCHEMA_VERSION:'30.0.19',
             CAPACITY_MED:getVal('cfg-cap-med'), CAPACITY_LAB:getVal('cfg-cap-lab'), CAPACITY_EHS:getVal('cfg-cap-ehs'), CAPACITY_ENV:getVal('cfg-cap-env'), CAPACITY_MNG:getVal('cfg-cap-mng'), CAPACITY_TES:getVal('cfg-cap-tes'), CALENDAR_LEAVE_KEYWORDS:getVal('cfg-calendar-leave-keywords'), CALENDAR_OTHER_KEYWORDS:getVal('cfg-calendar-other-keywords'),
             TEAM_COLOR_MED:getVal('cfg-color-med'), TEAM_COLOR_LAB:getVal('cfg-color-lab'), TEAM_COLOR_EHS:getVal('cfg-color-ehs'), TEAM_COLOR_ENV:getVal('cfg-color-env'), TEAM_COLOR_TES:getVal('cfg-color-tes'), TEAM_COLOR_QM:getVal('cfg-color-qm'), TEAM_COLOR_MNG:getVal('cfg-color-mng'),
             CAL_ID_MED:getVal('cfg-cal-med'), CAL_ID_LAB:getVal('cfg-cal-lab'), CAL_ID_EHS:getVal('cfg-cal-ehs'), CAL_ID_ENV:getVal('cfg-cal-env'), CAL_ID_MNG:getVal('cfg-cal-mng'), CAL_ID_TES:getVal('cfg-cal-tes'),
@@ -178,8 +178,19 @@
             throw new Error('CES API is not ready. Please refresh the page.');
         }
 
-        // Long KPI Drive URLs can exceed the JSONP URL limit. Build safe chunks first
-        // instead of waiting for one oversized request to fail or time out.
+        // Primary save uses iframe POST so long URLs/tokens are not truncated by
+        // the JSONP URL limit. Chunked JSONP remains a compatibility fallback.
+        try {
+            const direct = await window.CES_API.callFunction(
+                'saveConfigSettings', [configData || {}],
+                {transport:'iframe',timeoutMs:180000,dedupe:false,priority:'active',userAction:true,module:'settings'}
+            );
+            if (direct === 'Saved' || (direct && direct.success)) return direct;
+            throw new Error((direct && direct.message) || 'Direct Config save failed');
+        } catch (directError) {
+            console.warn('[Settings] iframe save fallback to chunked JSONP', directError);
+        }
+
         const entries = Object.entries(configData || {});
         const chunks = [];
         let current = {}, currentLength = 0;
@@ -222,7 +233,7 @@
     async function saveSettingSectionV264(section, button) {
         const keys = CES_SETTING_SECTION_KEYS_V264[String(section || '').toLowerCase()] || [];
         if (!keys.length) return;
-        const all = collectFullSystemConfig_(), patch = {CONFIG_SCHEMA_VERSION:'26.4'};
+        const all = collectFullSystemConfig_(), patch = {CONFIG_SCHEMA_VERSION:'30.0.19'};
         keys.forEach(key => { patch[key] = all[key]; });
         const btn = button || null, oldHtml = btn ? btn.innerHTML : '';
         if (btn) { btn.disabled = true; btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saving'; }

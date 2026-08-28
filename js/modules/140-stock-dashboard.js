@@ -613,7 +613,7 @@ function sd_updateReadyStockBenchmark(){
 function sd_openReadyStockBenchmark(){
   const rows=sd_updateReadyStockBenchmark();
   if(!rows.length){Swal.fire('Ready Stock Benchmark','No model data available.','info');return;}
-  const html=`<div class="ces-ready-stock-popup-v263"><div class="ces-ready-stock-note-v263"><b>Benchmark:</b> minimum <b>10 ready-to-deliver units per model</b><br><span>Email summary is scheduled to ADMIN every 2 weeks.</span></div><div class="sp-table-wrap"><table class="sp-table"><thead><tr><th>Model</th><th>Ready Stock</th><th>Minimum</th><th>Gap</th><th>Status</th></tr></thead><tbody>${rows.map(r=>`<tr><td><b>${spEsc(r.brand)}</b><span class="sp-sub">${spEsc(r.model)}</span></td><td><b>${spNum(r.readyStock)}</b></td><td>${r.minimum}</td><td>${r.gap?`<b style="color:#dc2626">-${r.gap}</b>`:'0'}</td><td>${r.low?'<span class="sp-chip low">LOW STOCK</span>':'<span class="sp-chip ok">OK</span>'}</td></tr>`).join('')}</tbody></table></div></div>`;
+  const html=`<div class="ces-ready-stock-popup-v263"><div class="ces-ready-stock-note-v263"><b>Benchmark:</b> minimum <b>10 ready-to-deliver units per model</b><br><span>HTML email summary is scheduled to ADMIN every Monday around 09:10.</span></div><div class="sp-table-wrap"><table class="sp-table"><thead><tr><th>Model</th><th>Ready Stock</th><th>Minimum</th><th>Gap</th><th>Status</th></tr></thead><tbody>${rows.map(r=>`<tr><td><b>${spEsc(r.brand)}</b><span class="sp-sub">${spEsc(r.model)}</span></td><td><b>${spNum(r.readyStock)}</b></td><td>${r.minimum}</td><td>${r.gap?`<b style="color:#dc2626">-${r.gap}</b>`:'0'}</td><td>${r.low?'<span class="sp-chip low">LOW STOCK</span>':'<span class="sp-chip ok">OK</span>'}</td></tr>`).join('')}</tbody></table></div></div>`;
   Swal.fire({title:'Ready Stock Benchmark',html,width:'min(760px,96vw)',confirmButtonText:'Close',confirmButtonColor:'#003DA5',animation:false});
 }
 window.sd_openReadyStockBenchmark=sd_openReadyStockBenchmark;
@@ -623,8 +623,8 @@ async function sd_testRentalNotification(){
   try{
     const r=await window.CES_API.callFunction('sd_sendRentalNotificationTest',[],{transport:'iframe',timeoutMs:90000,priority:'user',userAction:true,loadingLabel:'Sending rental test mail…'});
     if(!r||r.success===false)throw new Error((r&&r.message)||'Rental test mail failed.');
-    const sent=Number(r.sent||r.emailsSent||((r.test&&r.to)?1:0));const recipient=r.recipient||r.to||'';
-    Swal.fire({icon:'success',title:'Rental Test Mail',html:`Test complete.<br><b>${sent}</b> email(s) sent.${recipient?`<br>${spEsc(recipient)}`:''}`});
+    const recipients=Array.isArray(r.to)?r.to.join(', '):(r.recipient||r.to||'');
+    Swal.fire({icon:'success',title:'Weekly Rental HTML Sent',html:`Open <b>${Number(r.open||0)}</b> · Overdue <b>${Number(r.overdue||0)}</b> · Due ≤30d <b>${Number(r.due30||0)}</b>${recipients?`<br>${spEsc(recipients)}`:''}`});
   }catch(e){Swal.fire({icon:'error',title:'Rental Test Mail',text:e.message||String(e)});}
 }
 window.sd_testRentalNotification=sd_testRentalNotification;

@@ -2346,7 +2346,7 @@
     })();
   }
 
-
+  window.CES_SERVICE_CSI_FULL_SCREEN_PRINT = exportServiceToPDFFinal;
   try { window.exportServiceToPDF=exportServiceToPDFFinal; exportServiceToPDF=exportServiceToPDFFinal; } catch(e) {}
 
   function handleReportUploadFinal(event){
@@ -3210,29 +3210,14 @@
   }
 
   function servicePdfExportServiceToPDF(){
-    var target=document.getElementById('view-service');
-    if(!target||target.classList.contains('hidden')){
-      if(window.Swal)window.Swal.fire('Service CSI','กรุณาเปิดหน้า Service CSI ก่อนสั่งพิมพ์','info');
-      return false;
-    }
-    var finished=false;
-    var cleanup=function(){
-      if(finished)return;finished=true;
-      document.body.classList.remove('ces-print-service-current');
-      document.documentElement.style.removeProperty('--ces-service-screen-width');
-      window.removeEventListener('afterprint',cleanup);
-    };
-    document.documentElement.style.setProperty('--ces-service-screen-width',Math.ceil(target.getBoundingClientRect().width)+'px');
-    document.body.classList.add('ces-print-service-current');
-    window.addEventListener('afterprint',cleanup,{once:true});
-    setTimeout(cleanup,120000);
-    requestAnimationFrame(function(){requestAnimationFrame(function(){window.print();});});
-    return true;
+    if(typeof window.CES_SERVICE_CSI_FULL_SCREEN_PRINT==='function')return window.CES_SERVICE_CSI_FULL_SCREEN_PRINT();
+    if(window.Swal)return window.Swal.fire('Export Failed','Service CSI full-screen print module is unavailable. Please hard refresh.','error');
+    return false;
   }
 
   window.exportServiceToPDF = servicePdfExportServiceToPDF;
   try{ exportServiceToPDF = servicePdfExportServiceToPDF; }catch(ignore){}
-  window.CES_SERVICE_CSI_PDF_VERSION = 'V30.0.18-DIRECT-DOM-PRINT';
+  window.CES_SERVICE_CSI_PDF_VERSION = 'V30.0.19-FULL-SCREEN-IFRAME-PRINT';
 })(window, document);
 
 // CES Hub V20.9 — critical module static/runtime smoke check.
