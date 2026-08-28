@@ -4797,8 +4797,6 @@ body,input,select,textarea,button,table,th,td,.swal2-container,.swal2-popup,.swa
 /* CES Hub V30.0.13 — Home Applications & Services */
 #view-portal .ces-portal-app-card.ces-portal-app-card-white{background:#fff!important;color:#172b48!important;border:1px solid #e3e9f2!important;box-shadow:none!important;}
 #view-portal .ces-portal-app-card.ces-portal-app-card-white:hover{transform:translateY(-2px)!important;border-color:#b8cce8!important;box-shadow:0 10px 20px rgba(31,67,111,.09)!important;}
-#view-portal .ces-home-sync-btn{border:1px solid #dbe3ee!important;}
-#view-portal .ces-home-sync-btn.is-loading i{animation:spin 1s linear infinite;}
 #view-master_cal_pm_plan .mcp-team-tabs{display:flex;gap:8px;overflow-x:auto;padding:4px 2px 2px;}
 #view-master_cal_pm_plan .mcp-team-tab{min-width:110px;padding:10px 16px;border:1px solid #dbe5f0;border-radius:12px;background:#f8fafc;color:#64748b;font-size:11px;font-weight:900;white-space:nowrap;}
 #view-master_cal_pm_plan .mcp-team-tab.active{background:#003DA5;color:#fff;border-color:#003DA5;box-shadow:0 7px 16px rgba(0,61,165,.15);}
@@ -4806,3 +4804,19 @@ body,input,select,textarea,button,table,th,td,.swal2-container,.swal2-popup,.swa
 #view-master_cal_pm_plan .mcp-team-tab.lab.active{background:#19A7CE;border-color:#19A7CE;}
 #view-master_cal_pm_plan .mcp-team-tab.ehs.active{background:#0FC1A1;border-color:#0FC1A1;}
 #view-master_cal_pm_plan .mcp-team-tab.env.active{background:#65a30d;border-color:#65a30d;}
+
+/* V30.0.18 — compact monthly acknowledgement cards and opaque Report CSI headers. */
+.ces-monthly-ack-team-card-v3018{min-height:82px;padding:7px 9px;border:1px solid #e2e8f0;border-left:5px solid var(--ack-team-color,#94a3b8);border-radius:11px;background:#fff;box-shadow:0 1px 3px rgba(15,23,42,.05)}
+#view-report .ces-report-opaque-header{background-image:none!important}
+#view-report .ces-report-opaque-header,#view-report .ces-report-opaque-header h3,#view-report .ces-report-opaque-header h3 i,#view-report .ces-report-opaque-header p{color:#fff!important}
+
+/* Print the currently rendered Service CSI DOM. No canvas, image capture or rebuilt HTML. */
+@media print{
+  @page{size:landscape;margin:6mm}
+  body.ces-print-service-current{margin:0!important;background:#fff!important;overflow:visible!important}
+  body.ces-print-service-current *{visibility:hidden!important}
+  body.ces-print-service-current #view-service,body.ces-print-service-current #view-service *{visibility:visible!important;-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important}
+  body.ces-print-service-current #view-service{display:block!important;position:absolute!important;left:0!important;top:0!important;width:var(--ces-service-screen-width,100%)!important;max-width:none!important;margin:0!important;padding:0!important;overflow:visible!important;transform:none!important}
+  body.ces-print-service-current #view-service .overflow-x-auto,body.ces-print-service-current #view-service .overflow-y-auto,body.ces-print-service-current #view-service .custom-scrollbar,body.ces-print-service-current #view-service [style*="max-height"]{overflow:visible!important;max-height:none!important;height:auto!important}
+  body.ces-print-service-current #view-service canvas{max-width:100%!important}
+}

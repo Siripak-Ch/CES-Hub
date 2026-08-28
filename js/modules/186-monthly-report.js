@@ -23,10 +23,12 @@ function renderAckSummaryV230(data){
   var totals={};teams.forEach(function(t){totals[t]={ack:0,total:0};});
   order.forEach(function(key){teams.forEach(function(t){var r=periods[key].teams[t]||{acknowledged:0,totalStaff:0};totals[t].ack+=Number(r.acknowledged||0);totals[t].total+=Number(r.totalStaff||0);});});
   var byTeam={};completion.forEach(function(x){byTeam[String(x.team||'')]=x;});
+  var teamColors={MED:'#003DA5',LAB:'#06b6d4',EHS:'#10b981',MNG:'#64748b',TES:'#f59e0b',ENV:'#84cc16'};
   root.innerHTML=teams.length?teams.map(function(t){
     var x=byTeam[t]||{},fallback=totals[t]||{ack:0,total:0},staff=Number(x.totalStaff||0),reportCount=Number(x.reportCount||order.length||0),complete=Number(x.completedAllMonths||0),rate=Number(x.rate||0);
     if(!completion.length){complete=reportCount&&staff?Math.floor(Number(fallback.ack||0)/reportCount):0;rate=fallback.total?Math.round(Number(fallback.ack||0)*1000/fallback.total)/10:0;}
-    return '<div class="rounded-2xl border border-slate-100 bg-white p-3 shadow-sm"><div class="flex items-center justify-between"><span class="text-[10px] font-black text-slate-400 uppercase">'+esc(t)+'</span><span class="text-[10px] font-black text-[#003DA5]">'+rate.toFixed(1)+'%</span></div><div class="mt-1 flex items-end gap-1"><strong class="text-2xl font-black text-slate-800">'+complete+'</strong><small class="pb-1 text-[10px] font-bold text-slate-400">/ '+staff+' staff</small></div><div class="mt-2 h-1.5 rounded-full bg-slate-100 overflow-hidden"><span class="block h-full rounded-full bg-[#003DA5]" style="width:'+Math.max(0,Math.min(100,rate))+'%"></span></div><div class="mt-2 text-[10px] font-bold text-slate-400">ครบทุกเดือน '+reportCount+' report(s)</div></div>';
+    var color=teamColors[t]||'#94a3b8';
+    return '<div class="ces-monthly-ack-team-card-v3018" style="--ack-team-color:'+color+'"><div class="flex items-center justify-between"><span class="text-[9px] font-black text-slate-400 uppercase">'+esc(t)+'</span><span class="text-[9px] font-black" style="color:'+color+'">'+rate.toFixed(1)+'%</span></div><div class="mt-0.5 flex items-end gap-1"><strong class="text-xl font-black text-slate-800">'+complete+'</strong><small class="pb-0.5 text-[9px] font-bold text-slate-400">/ '+staff+' staff</small></div><div class="mt-1.5 h-1 rounded-full bg-slate-100 overflow-hidden"><span class="block h-full rounded-full" style="width:'+Math.max(0,Math.min(100,rate))+'%;background:'+color+'"></span></div><div class="mt-1.5 text-[9px] font-bold text-slate-400">ครบทุกเดือน '+reportCount+' report(s)</div></div>';
   }).join(''):'<div class="text-xs text-slate-400">No acknowledgement data.</div>';
   renderAckPieV3015_(teams,byTeam,totals,order.length);
 }

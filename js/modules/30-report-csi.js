@@ -221,7 +221,7 @@ function renderReportCharts(data) {
             backgroundColor: R_COLORS[t], borderRadius: 4
           }))
         },
-        options: { responsive: true, maintainAspectRatio: false, scales: { x: { stacked: false }, y: { beginAtZero: true, max: 20, ticks: { stepSize: 2 } } }, plugins: { datalabels: { anchor: 'end', align: 'top', offset: -2, font: { weight: 'bold', size: 10 }, formatter: val => val > 0 ? val : '' }, legend: { labels: { usePointStyle: true, font: { size: 10 } } } } },
+        options: { responsive: true, maintainAspectRatio: false, scales: { x: { stacked: false }, y: { beginAtZero: true, max: 15, ticks: { stepSize: 3 } } }, plugins: { datalabels: { anchor: 'end', align: 'top', offset: -2, font: { weight: 'bold', size: 10 }, formatter: val => val > 0 ? val : '' }, legend: { labels: { usePointStyle: true, font: { size: 10 } } } } },
         plugins: [ChartDataLabels]
       });
   }

@@ -826,13 +826,17 @@ function exportServiceToExcel() {
 
     // เตรียมข้อมูลสำหรับไฟล์ Excel
     const exportData = serviceFilteredData.map(row => ({
-        'Date': typeof window.CES_DATE_DDMMYYYY === 'function' ? window.CES_DATE_DDMMYYYY(row.timestamp || row.monthFull) : (row.timestamp || row.monthFull || ''),
+        'Start Date': typeof window.CES_DATE_DDMMYYYY === 'function' ? window.CES_DATE_DDMMYYYY(row.startDate || row.timestamp || row.monthFull) : (row.startDate || row.timestamp || row.monthFull || ''),
+        'End Date': typeof window.CES_DATE_DDMMYYYY === 'function' ? window.CES_DATE_DDMMYYYY(row.endDate || row.startDate || row.timestamp || row.monthFull) : (row.endDate || row.startDate || row.timestamp || row.monthFull || ''),
         'Month': row.monthOnly || '',
         'Year': row.year || '',
         'Finished': row.finished || '',
         'Team': row.team || '',
         'Customer Type': row.customer || '',
         'Customer Name': row.customerName || '',
+        'SO': row.so || '',
+        'PO': row.po || '',
+        'Work Order': row.workOrder || '',
         'S1 (Staff)': row.s1 || 0,
         'S2 (Process)': row.s2 || 0,
         'S3 (Quality)': row.s3 || 0,
@@ -865,7 +869,7 @@ function updateTeamButtonUI() {
     });
 }
 
-async function exportServiceToPDF() {
+async function legacyServiceCanvasExport_() {
     // --- 0. Guard: libraries must be loaded ---
     if (typeof html2canvas === 'undefined' || typeof window.jspdf === 'undefined') {
         Swal.fire('Missing Library', 'html2canvas or jsPDF did not load. Check your CDN scripts.', 'error');
@@ -1140,6 +1144,14 @@ function processServiceUpload(jsonData, meta) {
         }
         return '';
     };
+    const findExactKey = (...keywords) => {
+        for (const keyword of keywords) {
+            const needle = cleanHeader(keyword).toLowerCase();
+            const k = headers.find(h => cleanHeader(h).toLowerCase() === needle);
+            if (k) return k;
+        }
+        return '';
+    };
 
     const fileLower = lower(uploadFileName);
     const activeTeam = String((typeof sFilters !== 'undefined' && sFilters.team) ? sFilters.team : 'All').toUpperCase();
@@ -1150,11 +1162,16 @@ function processServiceUpload(jsonData, meta) {
     const K = {
         id: findKey('response id'),
         timestamp: findKey('timestamp'),
-        serviceDate: findKey('วันที่เข้ารับบริการ'),
+        serviceDate: findKey('วันที่เข้ารับบริการ', 'start date', 'วันที่เริ่ม'),
+        endDate: findKey('end date', 'วันที่สิ้นสุด', 'วันที่เสร็จ'),
         finished: findKey('finished'),
         place: findKey('สถานที่รับบริการ'),
         customerType: findKey('ประเภทลูกค้า'),
-        service: isTESFile ? '' : findKey('services ที่ใช้บริการ', 'services')
+        service: isTESFile ? '' : findKey('services ที่ใช้บริการ', 'services'),
+        detail: findKey('รายละเอียด', 'detail'),
+        so: findExactKey('SO', 'SO No.', 'SO No', 'SO Number', 'เลขที่ SO'),
+        po: findExactKey('PO', 'PO No.', 'PO No', 'PO Number', 'เลขที่ PO'),
+        workOrder: findExactKey('Work Order', 'Work Order No.', 'Work Order No', 'WO', 'เลขที่ Work Order')
     };
 
     function questionHeaders(sectionNo) {
@@ -1202,6 +1219,25 @@ function processServiceUpload(jsonData, meta) {
             if (!isNaN(d.getTime())) return d;
         }
         return null;
+    }
+
+    function formatDateDdMmYyyy(value) {
+        const d = parseExcelDate(value);
+        if (!d) return '';
+        return String(d.getDate()).padStart(2, '0') + '/' + String(d.getMonth() + 1).padStart(2, '0') + '/' + d.getFullYear();
+    }
+
+    function detailReference(detail, kind) {
+        const source = text(detail);
+        if (!source) return '';
+        const patterns = kind === 'WORK_ORDER'
+            ? [/(?:WORK\s*ORDER|W\/O|WO)\s*(?:NO\.?|NUMBER|#|:|-)?\s*([A-Z0-9][A-Z0-9._\/-]{2,})/i]
+            : [new RegExp('\\b' + kind + '\\s*(?:NO\\.?|NUMBER|#|:|-)?\\s*([A-Z0-9][A-Z0-9._\\/-]{2,})', 'i')];
+        for (const pattern of patterns) {
+            const match = source.match(pattern);
+            if (match && match[1]) return match[1].trim();
+        }
+        return '';
     }
 
     function normalizeFinished(v) {
@@ -1257,6 +1293,7 @@ function processServiceUpload(jsonData, meta) {
             team: r[5], customer: r[6], s1: Number(r[7]) || 0, s2: Number(r[8]) || 0,
             s3: Number(r[9]) || 0, s4: Number(r[10]) || 0, s5: Number(r[11]) || 0,
             comments: r[12] || '', raw: r[13] || '', customerName: r[14] || '',
+            startDate: r[15] || '', endDate: r[16] || r[15] || '', so: r[17] || '', po: r[18] || '', workOrder: r[19] || '',
             sourceSheet: r[5] === 'TES' ? 'TES_Service_Data' : 'Service_Data'
         };
     }
@@ -1312,6 +1349,7 @@ function processServiceUpload(jsonData, meta) {
         if (!hasScore && customerBad) { skippedBlank++; return; }
 
         const dateObj = parseExcelDate(row[K.serviceDate]) || parseExcelDate(row[K.timestamp]);
+        const endDateObj = parseExcelDate(row[K.endDate]) || dateObj;
         const monthOnly = dateObj ? S_MONTHS[dateObj.getMonth()] : 'Unknown';
         const monthFull = dateObj ? dateObj.toLocaleString('en-US', { month: 'long' }) : 'Unknown';
         const year = dateObj ? String(dateObj.getFullYear()) : 'Unknown';
@@ -1324,10 +1362,15 @@ function processServiceUpload(jsonData, meta) {
             }
         });
 
+        const detail = text(row[K.detail]);
+        const so = text(row[K.so]) || detailReference(detail, 'SO');
+        const po = text(row[K.po]) || detailReference(detail, 'PO');
+        const workOrder = text(row[K.workOrder]) || detailReference(detail, 'WORK_ORDER');
         mappedRows.push([
             id, monthFull, monthOnly, year, normalizeFinished(row[K.finished]), team,
             normalizeCustomerType(row[K.customerType]), scores[0], scores[1], scores[2], scores[3], scores[4],
-            comments.length ? JSON.stringify(comments) : '', rawService || team, customerName
+            comments.length ? JSON.stringify(comments) : '', rawService || team, customerName,
+            formatDateDdMmYyyy(dateObj), formatDateDdMmYyyy(endDateObj), so, po, workOrder
         ]);
     });
 
@@ -1781,8 +1824,8 @@ async function sendServiceCsiCurrentMonthSummary() {
       ?await window.CES_API.callFunction('sendServiceCsiCurrentMonthSummary',[{}],{transport:'iframe',timeoutMs:240000,dedupe:false,priority:'active',userAction:true,module:'service_csi'})
       :await new Promise((resolve,reject)=>google.script.run.withSuccessHandler(resolve).withFailureHandler(reject).sendServiceCsiCurrentMonthSummary({}));
     if(!result||result.success===false)throw new Error(result&&result.message||'Email summary failed.');
-    const sent=(result.teams||[]).filter(item=>item.success&&!item.skipped).map(item=>`${item.team} (${item.rows})`).join(', ');
-    Swal.fire({icon:'success',title:'Current-month summary sent',html:`${result.month||''}<br>${sent||'No team data this month'}`,confirmButtonColor:'#003DA5'});return result;
+    const sent=(result.teams||[]).map(item=>`${item.team} (${item.rows||0})`).join(', ');
+    Swal.fire({icon:'success',title:'All-team Excel sent',html:`${result.month||''}<br>1 email · 1 Excel workbook<br>${sent||'No team data this month'}`,confirmButtonColor:'#003DA5'});return result;
   }catch(error){Swal.fire('Email summary error',error&&error.message?error.message:String(error),'error');return null;}
   finally{if(button){button.disabled=false;button.innerHTML=oldHtml;}}
 }
