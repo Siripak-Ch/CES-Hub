@@ -20,7 +20,7 @@ const thaiHolidays = [
     let lastRMResult = null;
     let lastRMFormData = null;
     const RM_ALLOWED_COST_CENTERS_V3015 = ['106130','106067','106206','106207','106154'];
-    const RM_TEAM_COST_CENTER_V3015 = { MED:'106130', LAB:'106067', EHS:'106206', ENV:'106207', MNG:'106154', MANAGEMENT:'106154', OTHER:'106154' };
+    const RM_TEAM_COST_CENTER_V3015 = { MED:'106130', LAB:'106067', EHS:'106206', ENV:'106207', MNG:'106154', TES:'106130', MANAGEMENT:'106154', OTHER:'106154' };
     const RM_OLD_COST_CENTER_MAP_V3015 = { '6130':'106130', '6067':'106067', '6206':'106206', '6207':'106207', '6154':'106154' };
 
 
@@ -165,7 +165,9 @@ function fillUserInfoRM() {
             'ENVIRONMENTAL HEALTH': 'EHS',
             'MANAGEMENT': 'MNG', // ถ้าใน Sheet เขียนว่า Management ให้เลือก OTHER
             'OTHER': 'MNG',      // ถ้าใน Sheet เขียนว่า Other ให้เลือก OTHER
-            'MED': 'MED', 'LAB': 'LAB', 'EHS': 'EHS'
+            'TECHNICAL ENGINEERING SERVICE': 'TES',
+            'TECHNICAL ENGINEERING SERVICES': 'TES',
+            'MED': 'MED', 'LAB': 'LAB', 'EHS': 'EHS', 'TES':'TES'
         };
         
         targetCode = mapping[teamVal] || teamVal;
@@ -183,17 +185,23 @@ function fillUserInfoRM() {
     function initReportManage() {
         fillUserInfoRM();
         const select = document.getElementById('rm-sigId');
-        if (select) select.innerHTML = '<option value="none">Loading signatures…</option>';
+        const signatureCacheKey='CES_RM_SIGNATURES_V3020';
+        let cachedSignatures=null;
+        try{cachedSignatures=JSON.parse(localStorage.getItem(signatureCacheKey)||'null');}catch(ignoreCache){}
+        if (select && cachedSignatures && Array.isArray(cachedSignatures.data) && cachedSignatures.data.length) {
+            select.innerHTML = cachedSignatures.data.map(s => `<option value="${rmEscapeHtmlV22(s.id)}">${rmEscapeHtmlV22(s.name)}</option>`).join('');
+        } else if (select) select.innerHTML = '<option value="none">Blank (No Signature)</option>';
         const applySignatures = sigs => {
             sigs = Array.isArray(sigs) && sigs.length ? sigs : [{name:'Blank (No Signature)',id:'none'}];
             if (select) select.innerHTML = sigs.map(s => `<option value="${s.id}">${s.name}</option>`).join('');
+            try{localStorage.setItem(signatureCacheKey,JSON.stringify({at:Date.now(),data:sigs}));}catch(ignoreStore){}
         };
         const signatureFail = err => {
             console.warn('Signature list unavailable:', err);
             applySignatures([{name:'Blank (No Signature)',id:'none'}]);
         };
         if (window.CES_API && typeof window.CES_API.callFunction === 'function') {
-            window.CES_API.callFunction('getRMSignatures', [], {transport:'jsonp', timeoutMs:25000, dedupe:false}).then(applySignatures).catch(signatureFail);
+            window.CES_API.callFunction('getRMSignatures', [], {transport:'jsonp', timeoutMs:25000, dedupe:true,priority:'background',silentLoading:true,module:'report_manage'}).then(applySignatures).catch(signatureFail);
         } else {
             google.script.run.withSuccessHandler(applySignatures).withFailureHandler(signatureFail).getRMSignatures();
         }

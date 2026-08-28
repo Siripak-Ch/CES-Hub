@@ -4810,3 +4810,8 @@ body,input,select,textarea,button,table,th,td,.swal2-container,.swal2-popup,.swa
 #view-report .ces-report-opaque-header{background-image:none!important}
 #view-report .ces-report-customer-header{background:#003DA5!important;background-image:none!important}
 #view-report .ces-report-opaque-header,#view-report .ces-report-opaque-header h3,#view-report .ces-report-opaque-header h3 i,#view-report .ces-report-opaque-header p{color:#fff!important}
+
+/* V30.0.20 - one Home sync action with visible non-blocking progress. */
+@keyframes ces-home-sync-spin-v3020{to{transform:rotate(360deg)}}
+#ces-home-sync-btn.is-loading i{animation:ces-home-sync-spin-v3020 .8s linear infinite}
+#ces-home-sync-btn:disabled{opacity:.65;cursor:wait}

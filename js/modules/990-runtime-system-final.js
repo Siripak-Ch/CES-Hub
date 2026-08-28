@@ -2936,8 +2936,10 @@
   }
 
   async function servicePdfCreateCaptureDocument(sourceRoot){
-    var logicalWidth = Math.ceil(sourceRoot.offsetWidth || sourceRoot.scrollWidth || 1400);
-    logicalWidth = Math.max(1180, logicalWidth);
+    // Always capture with the desktop dashboard width. Capturing at the current
+    // viewport width caused responsive breakpoints to stack cards and shift the
+    // exported screen when the browser window was narrower than the dashboard.
+    var logicalWidth = Math.max(1440, Math.ceil(sourceRoot.offsetWidth || 0));
 
     var frame = document.createElement('iframe');
     frame.id = 'ces-service-pdf-frame-v13';
@@ -3051,7 +3053,7 @@
 
   function servicePdfReadFilename(filters){
     filters = filters || servicePdfReadActiveFilters();
-    return 'Service_CSI_'+
+    return 'CES_Service_CSI_'+
       servicePdfSafeFilePart(filters.team,'ALL')+'_'+
       servicePdfSafeFilePart(filters.month,'ALL')+'_'+
       servicePdfSafeFilePart(filters.year,new Date().getFullYear())+'.pdf';
@@ -3153,9 +3155,11 @@
         captureDoc = {root:sourceRoot,width:Math.max(sourceRoot.scrollWidth||0,sourceRoot.clientWidth||0,1200),height:Math.max(sourceRoot.scrollHeight||0,sourceRoot.clientHeight||0,800),pageBreaks:[],cleanup:function(){}};
       }
 
-      var captureScale = 1.25;
+      var captureScale = 1.10;
       var projectedHeight = captureDoc.height * captureScale;
-      if(projectedHeight > 52000) captureScale = Math.max(0.82, 52000 / captureDoc.height);
+      // Chromium canvases become unreliable near 32k pixels. Keep the capture
+      // below 30k while retaining enough resolution for tables and charts.
+      if(projectedHeight > 30000) captureScale = Math.max(0.55, 30000 / captureDoc.height);
 
       var canvas = await window.html2canvas(captureDoc.root, {
         scale:captureScale,
@@ -3210,14 +3214,12 @@
   }
 
   function servicePdfExportServiceToPDF(){
-    if(typeof window.CES_SERVICE_CSI_FULL_SCREEN_PRINT==='function')return window.CES_SERVICE_CSI_FULL_SCREEN_PRINT();
-    if(window.Swal)return window.Swal.fire('Export Failed','Service CSI full-screen print module is unavailable. Please hard refresh.','error');
-    return false;
+    return servicePdfLegacyCanvasExport_();
   }
 
   window.exportServiceToPDF = servicePdfExportServiceToPDF;
   try{ exportServiceToPDF = servicePdfExportServiceToPDF; }catch(ignore){}
-  window.CES_SERVICE_CSI_PDF_VERSION = 'V30.0.19-FULL-SCREEN-IFRAME-PRINT';
+  window.CES_SERVICE_CSI_PDF_VERSION = 'V30.0.20-DESKTOP-SCREEN-CANVAS';
 })(window, document);
 
 // CES Hub V20.9 — critical module static/runtime smoke check.

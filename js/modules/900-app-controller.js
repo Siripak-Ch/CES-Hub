@@ -138,7 +138,12 @@
         var forceRefresh=isLive&&wasInitialized&&!isStockTab;
         CES_TAB_RUNTIME_V20.initialized[tab]=true;CES_TAB_RUNTIME_V20.lastSync[tab]=Date.now();
         if      (tab === 'portal'        && typeof initPortalDashboard === 'function') initPortalDashboard(false);
-        else if (tab === 'management_overview' && typeof renderManagementOverviewDashboard === 'function') { cesLoadCoreDataOnDemand_().then(function(){renderManagementOverviewDashboard();}); }
+        else if (tab === 'management_overview' && typeof renderManagementOverviewDashboard === 'function') {
+            // Paint cached/read-model cards immediately. Core data refreshes in
+            // background and rerenders through cesApplyCoreData_ when ready.
+            renderManagementOverviewDashboard();
+            cesLoadCoreDataOnDemand_();
+        }
         else if (tab === 'calendar') cesRefreshCalendar_(false,typeof getCalendarSyncTarget==='function'?getCalendarSyncTarget():null);
         else if (tab === 'yearly'        && typeof renderYearlyStats === 'function') { cesLoadCoreDataOnDemand_().then(function(){renderYearlyStats(globalYearlyStats, globalConfig);}); }
         else if (tab === 'checkin'       && typeof initCheckin === 'function') initCheckin();
