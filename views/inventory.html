@@ -48,7 +48,7 @@
     <div class="stockpro-card" id="siEquipSection">
       <div class="stockpro-card-head"><h3><i class="fas fa-microchip text-blue-500"></i> Equipment List</h3><span id="siTableCount" class="sp-pill">—</span></div>
       <div id="siTable"><div class="csv5-loading"><span></span>กำลังโหลดข้อมูล Inventory ที่บันทึกไว้…</div></div>
-      <div id="siPagination" class="sp-pagination"></div>
+      <div id="siPagination" class="sp-pagination ces-inventory-pagination-v3025"></div>
     </div>
 
     <div class="stockpro-card hidden" id="siAccSection">
@@ -59,13 +59,14 @@
 
   <button id="siCartFab" class="sp-cart-fab" onclick="si_toggleCart()" title="Checkout Cart"><i class="fas fa-shopping-cart"></i><span id="siCartFabBadge">0</span></button>
   <div id="siCartOverlay" class="hidden fixed inset-0 bg-slate-900/40 z-[180]" onclick="si_closeCart()"></div>
-  <div id="siCartDrawer" class="fixed top-0 right-[-520px] w-[min(520px,100vw)] h-screen bg-white z-[181] shadow-2xl transition-all duration-300 flex flex-col">
-    <div class="bg-[#2563eb] text-white p-5 flex justify-between items-center"><div><h2 class="font-black text-xl"><i class="fas fa-shopping-cart"></i> ตะกร้า Check-Out</h2><p class="text-xs text-blue-100"><span id="siCartDrawerCount">0</span> รายการ</p></div><button onclick="si_closeCart()" class="text-white/80 hover:text-white"><i class="fas fa-times text-xl"></i></button></div>
-    <div id="siCartItems" class="flex-1 overflow-y-auto p-4"></div><div id="siCartDetailSummary" class="px-4 pb-3"></div>
-    <div class="border-t border-slate-100 p-4 space-y-3">
-      <input id="siBorrower" class="stockpro-control" placeholder="ชื่อผู้ยืม / Borrower *"><input id="siCheckoutLocation" class="stockpro-control" placeholder="สถานที่ / Location *">
-      <div class="grid grid-cols-2 gap-2"><input id="siBorrowDate" class="stockpro-control" type="date" title="วันที่เบิกออก"><input id="siDueDate" class="stockpro-control" type="date" title="วันคืน"></div>
-      <input id="siNote" class="stockpro-control" placeholder="หมายเหตุ"><button class="sp-btn primary w-full" style="width:100%" onclick="si_submitCheckout()"><i class="fas fa-paper-plane"></i> ยืนยัน Check-Out</button>
+  <div id="siCartDrawer" class="ces-checkout-drawer-v3025 fixed top-0 right-[-560px] w-[min(560px,100vw)] h-screen bg-white z-[181] shadow-2xl transition-all duration-300 flex flex-col">
+    <div class="ces-checkout-head-v3025"><div class="flex items-center gap-3"><span class="ces-checkout-head-icon-v3025"><i class="fas fa-cart-shopping"></i></span><div><h2>ตะกร้า Check-Out</h2><p><span id="siCartDrawerCount">0</span> รายการที่เลือก</p></div></div><button onclick="si_closeCart()" class="ces-checkout-close-v3025" aria-label="Close cart"><i class="fas fa-times"></i></button></div>
+    <div class="ces-checkout-scroll-v3025"><section class="ces-checkout-section-v3025"><div class="ces-checkout-section-title-v3025"><span><i class="fas fa-list-check"></i> รายการเบิก</span><small>ตรวจสอบอุปกรณ์ก่อนยืนยัน</small></div><div id="siCartItems" class="ces-checkout-items-v3025"></div></section><div id="siCartDetailSummary" class="ces-checkout-summary-v3025"></div></div>
+    <div class="ces-checkout-form-v3025">
+      <div class="ces-checkout-section-title-v3025"><span><i class="fas fa-address-card"></i> ข้อมูลการยืม</span><small><b>*</b> จำเป็น</small></div>
+      <label>ชื่อผู้ยืม / Borrower *<input id="siBorrower" class="stockpro-control" placeholder="ระบุชื่อผู้ยืม"></label><label>สถานที่ / Location *<input id="siCheckoutLocation" class="stockpro-control" placeholder="ระบุสถานที่ใช้งาน"></label>
+      <div class="grid grid-cols-2 gap-3"><label>วันที่เบิก<input id="siBorrowDate" class="stockpro-control" type="date"></label><label>กำหนดคืน *<input id="siDueDate" class="stockpro-control" type="date"></label></div>
+      <label>หมายเหตุ<input id="siNote" class="stockpro-control" placeholder="รายละเอียดเพิ่มเติม (ถ้ามี)"></label><button id="siCheckoutSubmitBtn" class="ces-checkout-submit-v3025" onclick="si_submitCheckout(this)"><i class="fas fa-paper-plane"></i><span>ยืนยัน Check-Out</span></button>
     </div>
   </div>
 </section>

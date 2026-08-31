@@ -298,7 +298,7 @@
   }
   function isApiNetworkError_(err) {
     const msg=String(err&&err.message||err||'');
-    return /Cannot connect to Apps Script API|Apps Script API timeout|Failed to fetch|NetworkError|Load failed/i.test(msg);
+    return /Cannot connect to Apps Script API|Apps Script API timeout|Apps Script API temporarily unavailable|temporarily unavailable|Failed to fetch|NetworkError|Load failed|HTTP\s*(?:429|5\d\d)/i.test(msg);
   }
   function emitApiState_(status,err) {
     apiConnectionState.status=status;
@@ -438,8 +438,9 @@
         // is still in progress. One slow module must not make every tab display
         // API RECONNECTING. The outer call marks offline only after retries fail.
         if(candidateIndex+1<candidates.length){return new Promise(function(resolve){setTimeout(resolve,120);}).then(function(){return attempt(1,candidateIndex+1);});}
-        if (retryIndex < 2) {
-          return new Promise(function(resolve){setTimeout(resolve,300);}).then(function(){return attempt(retryIndex+1,startIndex);});
+        if (retryIndex < 3) {
+          var backoff=[0,350,900,1800][retryIndex]||1800;
+          return new Promise(function(resolve){setTimeout(resolve,backoff+Math.floor(Math.random()*180));}).then(function(){return attempt(retryIndex+1,startIndex);});
         }
         throw err;
       });

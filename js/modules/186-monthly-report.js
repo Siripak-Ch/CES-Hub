@@ -17,7 +17,7 @@ function renderAckSummaryV230(data){
   var completion=Array.isArray(data&&data.acknowledgementStaffCompletion)?data.acknowledgementStaffCompletion:[];
   var teams=Array.isArray(data&&data.summaryTeams)&&data.summaryTeams.length?data.summaryTeams.slice():[];
   if(!teams.length)rows.forEach(function(r){var t=String(r.team||'').trim();if(t&&teams.indexOf(t)<0)teams.push(t);});
-  teams.sort(function(a,b){return String(a).localeCompare(String(b),'th',{numeric:true});});
+  teams=teams.filter(function(t){return String(t||'').toUpperCase()!=='ENV';});teams.sort(function(a,b){return String(a).localeCompare(String(b),'th',{numeric:true});});
   var periods={},order=[];rows.forEach(function(r){var key=String(r.year||0)+'-'+String(r.month||0).padStart(2,'0');if(!periods[key]){periods[key]={year:Number(r.year||0),month:Number(r.month||0),monthLabel:r.monthLabel||key,teams:{}};order.push(key);}periods[key].teams[String(r.team||'')]=r;});
   order.sort(function(a,b){return b.localeCompare(a);});
   var totals={};teams.forEach(function(t){totals[t]={ack:0,total:0};});

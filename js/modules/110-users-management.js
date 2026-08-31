@@ -5,6 +5,14 @@
 
 let _userCache = null; 
     let _permConfig = {};
+    const CES_USER_CACHE_V3025='CES_USER_MANAGEMENT_CACHE_V3025';
+    function userApiV3025_(fn,args,opt){
+        if(!window.CES_API||typeof window.CES_API.callFunction!=='function')return Promise.reject(new Error('CES API bridge is not ready.'));
+        const options=Object.assign({transport:'jsonp',timeoutMs:50000,dedupe:false,priority:'active',userAction:true,module:'users'},opt||{});
+        let attempt=0;function run(){attempt++;return window.CES_API.callFunction(fn,args||[],options).catch(err=>{if(attempt<3&&/temporarily unavailable|timeout|Cannot connect|Failed to fetch|NetworkError/i.test(String(err&&err.message||err)))return new Promise(resolve=>setTimeout(resolve,attempt*450)).then(run);throw err;});}return run();
+    }
+    function readUserCacheV3025_(){try{const x=JSON.parse(localStorage.getItem(CES_USER_CACHE_V3025)||'null');return x&&Array.isArray(x.rows)&&Date.now()-Number(x.at||0)<86400000?x.rows:null;}catch(e){return null;}}
+    function writeUserCacheV3025_(rows){try{localStorage.setItem(CES_USER_CACHE_V3025,JSON.stringify({at:Date.now(),rows:rows||[]}));}catch(e){}}
     const ALL_MODULES = [
         { id:'portal',name:'Home',group:'Main Dashboard',icon:'fa-house' },
         { id:'management_overview',name:'Management Overview',group:'Main Dashboard',icon:'fa-chart-line' },
@@ -30,6 +38,7 @@ let _userCache = null;
         { id:'team_plan',name:'Team Plan',group:'Information',icon:'fa-calendar-days' },
         { id:'monthly_report',name:'Monthly Report',group:'Information',icon:'fa-file-circle-check' },
         { id:'setting',name:'Setting',group:'System',icon:'fa-cogs' },
+        { id:'notification_config',name:'Notification Config',group:'System',icon:'fa-bell' },
         { id:'users',name:'User Management',group:'System',icon:'fa-users-cog' },
         { id:'ces_evaluation',name:'CES Hub Evaluation',group:'System',icon:'fa-star-half-stroke' },
         { id:'ces_ai_knowledge',name:'CES AI Knowledge',group:'System',icon:'fa-robot' },
@@ -71,14 +80,9 @@ let _userCache = null;
     function refreshUserList(force = false) {
         if(force) _userCache = null;
         const tbody = document.getElementById('user-list-tbody');
-        tbody.innerHTML = '<tr><td colspan="6" class="p-12 text-center text-gray-400 italic"><div class="flex flex-col items-center"><i class="fas fa-circle-notch fa-spin text-2xl mb-3 text-[#003DA5]"></i>Fetching user data...</div></td></tr>';
-        google.script.run.withSuccessHandler(data => {
-            _userCache = data;
-            renderApprovalSection();
-            filterUserTable();
-        }).withFailureHandler(err => {
-            tbody.innerHTML = `<tr><td colspan="6" class="p-6 text-center text-red-500">Error: ${err.message}</td></tr>`;
-        }).getAllUsers();
+        const cached=readUserCacheV3025_();if(cached&&!_userCache){_userCache=cached;renderApprovalSection();filterUserTable();}
+        if(!_userCache)tbody.innerHTML = '<tr><td colspan="6" class="p-12 text-center text-gray-400 italic"><div class="flex flex-col items-center"><i class="fas fa-circle-notch fa-spin text-2xl mb-3 text-[#003DA5]"></i>Fetching user data...</div></td></tr>';
+        userApiV3025_('getAllUsers',[!!force],{dedupe:!force}).then(data=>{_userCache=Array.isArray(data)?data:[];writeUserCacheV3025_(_userCache);renderApprovalSection();filterUserTable();}).catch(err=>{if(cached){_userCache=cached;renderApprovalSection();filterUserTable();if(typeof showToast==='function')showToast('ใช้รายชื่อผู้ใช้ล่าสุดที่บันทึกไว้ · กด Refresh เพื่อลองใหม่','warning');}else tbody.innerHTML=`<tr><td colspan="6" class="p-7 text-center text-red-500"><b>ไม่สามารถเชื่อมต่อ Apps Script ชั่วคราว</b><div class="text-xs text-slate-400 mt-2">${String(err&&err.message||err)}</div><button class="mt-3 px-4 py-2 rounded-xl bg-[#004aad] text-white font-bold" onclick="refreshUserList(true)"><i class="fas fa-rotate"></i> Retry</button></td></tr>`;});
     }
 
     function renderApprovalSection() {

@@ -104,7 +104,7 @@
         // 5. One current CES Hub OA. Secret is never returned to the browser.
         setVal('cfg-line-oa-basic-id', data.LINE_OA_BASIC_ID || '@032jntyw');
         setVal('cfg-line-gateway-url', data.LINE_GATEWAY_URL || 'https://ces-hub-line-gateway.siripak-chat.workers.dev');
-        const secretStatus = document.getElementById('cfg-line-secret-status'); if(secretStatus) secretStatus.textContent = String(data.LINE_CHANNEL_SECRET_CONFIGURED).toUpperCase()==='TRUE' ? '· configured' : '· not configured';
+        const secretStatus = document.getElementById('cfg-line-secret-status'); if(secretStatus) secretStatus.textContent = String(data.LINE_CHANNEL_SECRET_CONFIGURED).toUpperCase()==='TRUE' ? '· configured' : '· default will be applied on save';
         setVal('cfg-line-channel-secret', '');
         setVal('cfg-mail-admin', data.ADMIN_NOTIFY_EMAIL || 'Siripak.Ch@nhealth-asia.com');
         setVal('cfg-mail-admin-cc', data.SERVICE_CSI_ADMIN_CC || 'cesmanagement@bdms.co.th');
@@ -133,7 +133,7 @@
     function collectFullSystemConfig_() {
         const getVal = (id) => document.getElementById(id) ? document.getElementById(id).value : '';
         return {
-            CONFIG_SCHEMA_VERSION:'30.0.24',
+            CONFIG_SCHEMA_VERSION:'30.0.25',
             CAPACITY_MED:getVal('cfg-cap-med'), CAPACITY_LAB:getVal('cfg-cap-lab'), CAPACITY_EHS:getVal('cfg-cap-ehs'), CAPACITY_ENV:getVal('cfg-cap-env'), CAPACITY_MNG:getVal('cfg-cap-mng'), CAPACITY_TES:getVal('cfg-cap-tes'), CALENDAR_LEAVE_KEYWORDS:getVal('cfg-calendar-leave-keywords'), CALENDAR_OTHER_KEYWORDS:getVal('cfg-calendar-other-keywords'),
             TEAM_COLOR_MED:getVal('cfg-color-med'), TEAM_COLOR_LAB:getVal('cfg-color-lab'), TEAM_COLOR_EHS:getVal('cfg-color-ehs'), TEAM_COLOR_ENV:getVal('cfg-color-env'), TEAM_COLOR_TES:getVal('cfg-color-tes'), TEAM_COLOR_QM:getVal('cfg-color-qm'), TEAM_COLOR_MNG:getVal('cfg-color-mng'),
             CAL_ID_MED:getVal('cfg-cal-med'), CAL_ID_LAB:getVal('cfg-cal-lab'), CAL_ID_EHS:getVal('cfg-cal-ehs'), CAL_ID_ENV:getVal('cfg-cal-env'), CAL_ID_MNG:getVal('cfg-cal-mng'), CAL_ID_TES:getVal('cfg-cal-tes'),
@@ -242,7 +242,7 @@
     async function saveSettingSectionV264(section, button) {
         const keys = CES_SETTING_SECTION_KEYS_V264[String(section || '').toLowerCase()] || [];
         if (!keys.length) return;
-        const all = collectFullSystemConfig_(), patch = {CONFIG_SCHEMA_VERSION:'30.0.24'};
+        const all = collectFullSystemConfig_(), patch = {CONFIG_SCHEMA_VERSION:'30.0.25'};
         keys.forEach(key => { patch[key] = all[key]; });
         const btn = button || null, oldHtml = btn ? btn.innerHTML : '';
         if (btn) { btn.disabled = true; btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saving'; }
@@ -325,7 +325,7 @@ async function openPortalLinkEditorV20(row){
     <label class="ces-portal-featured-toggle"><input id="pl-featured" type="checkbox" ${row.featured?'checked':''}><span>Featured / Big card</span></label>
   </div>`,preConfirm:()=>({id:row.id||'',actorId:(window.CES_CURRENT_USER||{}).id||'',section:document.getElementById('pl-section').value,sortOrder:Number(document.getElementById('pl-sort').value||1),titleTh:document.getElementById('pl-title-th').value.trim(),titleEn:document.getElementById('pl-title-en').value.trim(),descriptionTh:document.getElementById('pl-desc-th').value.trim(),descriptionEn:document.getElementById('pl-desc-en').value.trim(),url:document.getElementById('pl-url').value.trim(),icon:document.getElementById('pl-icon').value.trim(),theme:document.getElementById('pl-theme').value.trim(),status:document.getElementById('pl-status').value,featured:document.getElementById('pl-featured').checked})});
   if(!result.isConfirmed)return;
-  try{const res=await window.CES_API.callFunction('savePortalLink',[result.value],{transport:'iframe',timeoutMs:60000});if(!res||res.success===false)throw new Error((res&&res.message)||'Save failed');await loadPortalLinksSettingV20(true);try{localStorage.removeItem('CES_PORTAL_CACHE_V19_'+String((window.CES_CURRENT_USER||{}).id||'anonymous'));}catch(e){}Swal.fire({icon:'success',title:'Portal link saved',timer:1200,showConfirmButton:false});}catch(err){Swal.fire('Save Error',err.message||String(err),'error');}
+  try{const res=await window.CES_API.callFunction('savePortalLink',[result.value],{transport:'iframe',timeoutMs:60000,dedupe:false,priority:'active',userAction:true,module:'settings'});if(!res||res.success===false)throw new Error((res&&res.message)||'Save failed');await loadPortalLinksSettingV20(true);try{Object.keys(localStorage).filter(k=>/^CES_(?:PORTAL|HOME)/.test(k)).forEach(k=>localStorage.removeItem(k));sessionStorage.removeItem('CES_HOME_LINKS_CACHE_V3012');}catch(e){}if(typeof window.CES_refreshPortalLinksAfterSettingSave==='function')await window.CES_refreshPortalLinksAfterSettingSave();Swal.fire({icon:'success',title:'Portal link saved',text:'Home card has been refreshed.',timer:1400,showConfirmButton:false});}catch(err){Swal.fire('Save Error',err.message||String(err),'error');}
 }
 async function deletePortalLinkSettingV20(id){const ok=await Swal.fire({icon:'warning',title:'Delete portal link?',showCancelButton:true,confirmButtonText:'Delete',confirmButtonColor:'#dc2626'});if(!ok.isConfirmed)return;try{const res=await window.CES_API.callFunction('deletePortalLink',[{id:id,actorId:(window.CES_CURRENT_USER||{}).id||''}],{transport:'iframe',timeoutMs:50000});if(!res||res.success===false)throw new Error((res&&res.message)||'Delete failed');await loadPortalLinksSettingV20(true);}catch(err){Swal.fire('Delete Error',err.message||String(err),'error');}}
 window.cesScrollSettingV20=cesScrollSettingV20;window.loadPortalLinksSettingV20=loadPortalLinksSettingV20;window.openPortalLinkEditorV20=openPortalLinkEditorV20;window.deletePortalLinkSettingV20=deletePortalLinkSettingV20;

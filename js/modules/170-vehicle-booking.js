@@ -164,7 +164,8 @@ function cesBookingInjectStyles_() {
     '.vehicle-calendar-weekday{padding:7px;text-align:center;font-size:10px;font-weight:900;color:#94a3b8;text-transform:uppercase}',
     '.vehicle-calendar-day{min-height:76px;border:1px solid #e2e8f0;border-radius:14px;padding:8px;background:#fff;position:relative;overflow:hidden}',
     '.vehicle-calendar-day.muted{opacity:.38}',
-    '.vehicle-calendar-day.ces-booking-past-booked{background:#fef2f2!important;border-color:#fca5a5!important;opacity:.88}',
+    '#view-car_booking .vehicle-calendar-day.ces-booking-past-v212.ces-booking-past-booked{background:#fee2e2!important;border-color:#f87171!important;color:#991b1b!important;opacity:1!important;filter:none!important}',
+    '#view-car_booking .vehicle-calendar-day.ces-booking-past-booked .vehicle-calendar-state{color:#b91c1c!important;font-weight:900}',
     '.vehicle-calendar-day.available{border-color:#e2e8f0;background:#ffffff}',
     '.vehicle-calendar-day.pending{border-color:#93c5fd;background:#eff6ff}',
     '.vehicle-calendar-day.unavailable{border-color:#fca5a5;background:#fef2f2}',
@@ -954,9 +955,9 @@ function renderVehicleCalendar_(type) {
   var weekdays=['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];var html=weekdays.map(function(day){return '<div class="vehicle-calendar-weekday">'+day+'</div>';}).join('');var first=new Date(month.getFullYear(),month.getMonth(),1),start=new Date(month.getFullYear(),month.getMonth(),1-first.getDay());
   for(var i=0;i<42;i++){
     var date=new Date(start.getFullYear(),start.getMonth(),start.getDate()+i),key=date.getFullYear()+'-'+('0'+(date.getMonth()+1)).slice(-2)+'-'+('0'+date.getDate()).slice(-2),rows=byDate[key]||[],status=cesBookingDayAvailability_(rows,key),muted=date.getMonth()!==month.getMonth()?' muted':'',isPast=key<today;
-    var tooltip=isPast?'Past date — booking is disabled':status.intervals.map(function(item){return cesBookingMinuteText_(item.start)+'–'+cesBookingMinuteText_(item.end)+' '+(item.row.jobTitle||item.row.destination||item.row.bookingId||'');}).join('\n');
+    var tooltip=isPast?(rows.length?'Past date · '+rows.length+' booking record(s)':'Past date — booking is disabled'):status.intervals.map(function(item){return cesBookingMinuteText_(item.start)+'–'+cesBookingMinuteText_(item.end)+' '+(item.row.jobTitle||item.row.destination||item.row.bookingId||'');}).join('\n');
     var clickable=type==='CAR'&&date.getMonth()===month.getMonth()&&!isPast;
-    html+='<div class="vehicle-calendar-day '+status.css+muted+(isPast?' ces-booking-past-v212':'')+(isPast&&status.intervals.length?' ces-booking-past-booked':'')+'" data-date="'+key+'" aria-disabled="'+(isPast?'true':'false')+'" title="'+cesBookEsc_(tooltip)+'" '+(clickable?'onclick="showVehicleDaySlots(\'CAR\',\''+key+'\')"':'')+'><div class="vehicle-calendar-number">'+date.getDate()+'</div>'+(status.intervals.length?'<span class="vehicle-calendar-count">'+status.intervals.length+'</span>':'')+'<div class="vehicle-calendar-state">'+(isPast?(status.intervals.length?'Booked':'Past date'):status.label)+'</div></div>';
+    html+='<div class="vehicle-calendar-day '+status.css+muted+(isPast?' ces-booking-past-v212':'')+(isPast&&rows.length?' ces-booking-past-booked':'')+'" data-date="'+key+'" aria-disabled="'+(isPast?'true':'false')+'" title="'+cesBookEsc_(tooltip)+'" '+(clickable?'onclick="showVehicleDaySlots(\'CAR\',\''+key+'\')"':'')+'><div class="vehicle-calendar-number">'+date.getDate()+'</div>'+(rows.length?'<span class="vehicle-calendar-count">'+rows.length+'</span>':'')+'<div class="vehicle-calendar-state">'+(isPast?(rows.length?'Booked':'Past date'):status.label)+'</div></div>';
   }
   root.innerHTML=html;
 }
