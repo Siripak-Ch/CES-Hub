@@ -88,6 +88,7 @@
         setVal('cfg-kpi-drive-env', data.KPI_DRIVE_ENV || window.CES_KPI_DRIVE_DEFAULTS?.ENV || data.KPI_DRIVE_EHS || '');
         setVal('cfg-kpi-drive-mng', data.KPI_DRIVE_MNG || '');
         setVal('cfg-kpi-drive-tes', data.KPI_DRIVE_TES || '');
+        ['MED','LAB','EHS','ENV','MNG','TES'].forEach(team => setVal('cfg-kpi-sheet-' + team.toLowerCase(), data['KPI_SHEET_' + team] || ''));
         const linkDefaults = (window.CES_CONFIG && window.CES_CONFIG.EXTERNAL_LINKS) || {};
         setVal('cfg-link-service-csi-ces', data.LINK_SERVICE_CSI_CES_SUMMARY || linkDefaults.SERVICE_CSI_CES_SUMMARY || '');
         setVal('cfg-link-service-csi-tes', data.LINK_SERVICE_CSI_TES_SUMMARY || linkDefaults.SERVICE_CSI_TES_SUMMARY || '');
@@ -103,11 +104,15 @@
         setVal('cfg-booking-pdf-folder', data.BOOKING_PDF_FOLDER_ID || '');
         setVal('cfg-booking-return-bill-folder', data.BOOKING_RETURN_BILL_FOLDER_ID || '');
     
-        // 5. Separate LINE tokens with legacy fallback
-        const legacyLineToken = data.LINE_TOKEN || '';
-        setVal('cfg-line-token-med', data.LINE_TOKEN_MED || legacyLineToken);
-        setVal('cfg-line-token-lab', data.LINE_TOKEN_LAB || legacyLineToken);
-        setVal('cfg-line-token-ehs', data.LINE_TOKEN_EHS || legacyLineToken);
+        // 5. One current CES Hub OA. Secret is never returned to the browser.
+        setVal('cfg-line-oa-basic-id', data.LINE_OA_BASIC_ID || '@032jntyw');
+        setVal('cfg-line-gateway-url', data.LINE_GATEWAY_URL || 'https://ces-hub-line-gateway.siripak-chat.workers.dev');
+        const secretStatus = document.getElementById('cfg-line-secret-status'); if(secretStatus) secretStatus.textContent = String(data.LINE_CHANNEL_SECRET_CONFIGURED).toUpperCase()==='TRUE' ? '· configured' : '· not configured';
+        setVal('cfg-mail-admin', data.ADMIN_NOTIFY_EMAIL || 'Siripak.Ch@nhealth-asia.com');
+        setVal('cfg-mail-admin-cc', data.SERVICE_CSI_ADMIN_CC || 'cesmanagement@bdms.co.th');
+        ['MED','LAB','EHS','ENV','TES','MNG','QM','SALES'].forEach(team => setVal('cfg-mail-' + team.toLowerCase(), data['TEAM_MAIL_CC_' + team] || ''));
+        setVal('cfg-link-ces-home', data.LINK_CES_HUB_HOME || ''); setVal('cfg-link-infusion-dashboard', data.LINK_INFUSION_PUMP_DASHBOARD || ''); setVal('cfg-link-rental-contact', data.LINK_RENTAL_CONTACT_PAGE || ''); setVal('cfg-link-master-cal-pm', data.LINK_MASTER_CAL_PM_SOURCE || '');
+        ['MED','LAB','EHS'].forEach(team => {setVal('cfg-audit-drive-' + team.toLowerCase(), data['AUDIT_DRIVE_' + team] || '');setVal('cfg-audit-excel-' + team.toLowerCase(), data['AUDIT_EXCEL_' + team] || '');});
 
         // 6. ข้อมูล Admin และการประกาศ (Admin & Announcement)[cite: 12]
         setVal('cfg-admin-email', data.ADMIN_NOTIFY_EMAIL);
@@ -130,20 +135,24 @@
     function collectFullSystemConfig_() {
         const getVal = (id) => document.getElementById(id) ? document.getElementById(id).value : '';
         return {
-            CONFIG_SCHEMA_VERSION:'30.0.19',
+            CONFIG_SCHEMA_VERSION:'30.0.21',
             CAPACITY_MED:getVal('cfg-cap-med'), CAPACITY_LAB:getVal('cfg-cap-lab'), CAPACITY_EHS:getVal('cfg-cap-ehs'), CAPACITY_ENV:getVal('cfg-cap-env'), CAPACITY_MNG:getVal('cfg-cap-mng'), CAPACITY_TES:getVal('cfg-cap-tes'), CALENDAR_LEAVE_KEYWORDS:getVal('cfg-calendar-leave-keywords'), CALENDAR_OTHER_KEYWORDS:getVal('cfg-calendar-other-keywords'),
             TEAM_COLOR_MED:getVal('cfg-color-med'), TEAM_COLOR_LAB:getVal('cfg-color-lab'), TEAM_COLOR_EHS:getVal('cfg-color-ehs'), TEAM_COLOR_ENV:getVal('cfg-color-env'), TEAM_COLOR_TES:getVal('cfg-color-tes'), TEAM_COLOR_QM:getVal('cfg-color-qm'), TEAM_COLOR_MNG:getVal('cfg-color-mng'),
             CAL_ID_MED:getVal('cfg-cal-med'), CAL_ID_LAB:getVal('cfg-cal-lab'), CAL_ID_EHS:getVal('cfg-cal-ehs'), CAL_ID_ENV:getVal('cfg-cal-env'), CAL_ID_MNG:getVal('cfg-cal-mng'), CAL_ID_TES:getVal('cfg-cal-tes'),
             TARGET_CSI:getVal('cfg-target-csi'), TARGET_SLA_HRS:getVal('cfg-target-sla'),
             TARGET_REV_MED:getVal('cfg-rev-med'), TARGET_REV_LAB:getVal('cfg-rev-lab'), TARGET_REV_EHS:getVal('cfg-rev-ehs'), TARGET_REV_ENV:getVal('cfg-rev-env'), TARGET_REV_MNG:getVal('cfg-rev-mng'), TARGET_REV_TES:getVal('cfg-rev-tes'),
             KPI_DRIVE_MED:getVal('cfg-kpi-drive-med'), KPI_DRIVE_LAB:getVal('cfg-kpi-drive-lab'), KPI_DRIVE_EHS:getVal('cfg-kpi-drive-ehs'), KPI_DRIVE_ENV:getVal('cfg-kpi-drive-env'), KPI_DRIVE_MNG:getVal('cfg-kpi-drive-mng'), KPI_DRIVE_TES:getVal('cfg-kpi-drive-tes'),
+            KPI_SHEET_MED:getVal('cfg-kpi-sheet-med'), KPI_SHEET_LAB:getVal('cfg-kpi-sheet-lab'), KPI_SHEET_EHS:getVal('cfg-kpi-sheet-ehs'), KPI_SHEET_ENV:getVal('cfg-kpi-sheet-env'), KPI_SHEET_MNG:getVal('cfg-kpi-sheet-mng'), KPI_SHEET_TES:getVal('cfg-kpi-sheet-tes'),
             LINK_SERVICE_CSI_CES_SUMMARY:getVal('cfg-link-service-csi-ces'), LINK_SERVICE_CSI_TES_SUMMARY:getVal('cfg-link-service-csi-tes'), LINK_REPORT_CSI_SUMMARY:getVal('cfg-link-report-csi'), LINK_REVENUE_DASHBOARD:getVal('cfg-link-revenue-dashboard'),
             LINK_KPI_EHS_SHEET:getVal('cfg-link-kpi-ehs'), LINK_KPI_LAB_SHEET:getVal('cfg-link-kpi-lab'), LINK_MEMO_WORKORDER_SOURCE:getVal('cfg-link-memo-workorder'), LINK_TRAINING_PLAN_2026:getVal('cfg-link-training-plan'),
             TES_IMPORT_WEBAPP_URL:getVal('cfg-tes-import-url'), TES_IMPORT_SECRET:getVal('cfg-tes-import-secret'),
             BOOKING_MEMO_FOLDER_ID:getVal('cfg-booking-memo-folder'), BOOKING_PDF_FOLDER_ID:getVal('cfg-booking-pdf-folder'), BOOKING_RETURN_BILL_FOLDER_ID:getVal('cfg-booking-return-bill-folder'),
-            LINE_TOKEN_MED:getVal('cfg-line-token-med'), LINE_TOKEN_LAB:getVal('cfg-line-token-lab'), LINE_TOKEN_EHS:getVal('cfg-line-token-ehs'),
-            LINE_TOKEN:getVal('cfg-line-token-ehs') || getVal('cfg-line-token-lab') || getVal('cfg-line-token-med'),
-            ADMIN_NOTIFY_EMAIL:getVal('cfg-admin-email'), ANNOUNCE_MSG:getVal('cfg-announce-msg'),
+            LINE_OA_BASIC_ID:getVal('cfg-line-oa-basic-id'), LINE_GATEWAY_URL:getVal('cfg-line-gateway-url'),
+            ADMIN_NOTIFY_EMAIL:getVal('cfg-mail-admin') || getVal('cfg-admin-email'), SERVICE_CSI_ADMIN_CC:getVal('cfg-mail-admin-cc'),
+            TEAM_MAIL_CC_MED:getVal('cfg-mail-med'), TEAM_MAIL_CC_LAB:getVal('cfg-mail-lab'), TEAM_MAIL_CC_EHS:getVal('cfg-mail-ehs'), TEAM_MAIL_CC_ENV:getVal('cfg-mail-env'), TEAM_MAIL_CC_TES:getVal('cfg-mail-tes'), TEAM_MAIL_CC_MNG:getVal('cfg-mail-mng'), TEAM_MAIL_CC_QM:getVal('cfg-mail-qm'), TEAM_MAIL_CC_SALES:getVal('cfg-mail-sales'),
+            LINK_CES_HUB_HOME:getVal('cfg-link-ces-home'), LINK_INFUSION_PUMP_DASHBOARD:getVal('cfg-link-infusion-dashboard'), LINK_RENTAL_CONTACT_PAGE:getVal('cfg-link-rental-contact'), LINK_MASTER_CAL_PM_SOURCE:getVal('cfg-link-master-cal-pm'),
+            AUDIT_DRIVE_MED:getVal('cfg-audit-drive-med'), AUDIT_EXCEL_MED:getVal('cfg-audit-excel-med'), AUDIT_DRIVE_LAB:getVal('cfg-audit-drive-lab'), AUDIT_EXCEL_LAB:getVal('cfg-audit-excel-lab'), AUDIT_DRIVE_EHS:getVal('cfg-audit-drive-ehs'), AUDIT_EXCEL_EHS:getVal('cfg-audit-excel-ehs'),
+            ANNOUNCE_MSG:getVal('cfg-announce-msg'),
             ANNOUNCE_ACTIVE:document.getElementById('cfg-announce-active')?.checked ? 'TRUE' : 'FALSE'
         };
     }
@@ -226,19 +235,25 @@
         colors:['TEAM_COLOR_MED','TEAM_COLOR_LAB','TEAM_COLOR_EHS','TEAM_COLOR_ENV','TEAM_COLOR_TES','TEAM_COLOR_QM','TEAM_COLOR_MNG'],
         calendar:['CAL_ID_MED','CAL_ID_LAB','CAL_ID_EHS','CAL_ID_ENV','CAL_ID_MNG','CAL_ID_TES'],
         targets:['TARGET_CSI','TARGET_SLA_HRS','TARGET_REV_MED','TARGET_REV_LAB','TARGET_REV_EHS','TARGET_REV_ENV','TARGET_REV_MNG','TARGET_REV_TES'],
-        kpi:['KPI_DRIVE_MED','KPI_DRIVE_LAB','KPI_DRIVE_EHS','KPI_DRIVE_ENV','KPI_DRIVE_MNG','KPI_DRIVE_TES'],
-        line:['LINE_TOKEN_MED','LINE_TOKEN_LAB','LINE_TOKEN_EHS','LINE_TOKEN']
+        kpi:['KPI_DRIVE_MED','KPI_DRIVE_LAB','KPI_DRIVE_EHS','KPI_DRIVE_ENV','KPI_DRIVE_MNG','KPI_DRIVE_TES','KPI_SHEET_MED','KPI_SHEET_LAB','KPI_SHEET_EHS','KPI_SHEET_ENV','KPI_SHEET_MNG','KPI_SHEET_TES'],
+        line:['LINE_OA_BASIC_ID','LINE_GATEWAY_URL'],
+        mail:['ADMIN_NOTIFY_EMAIL','SERVICE_CSI_ADMIN_CC','TEAM_MAIL_CC_MED','TEAM_MAIL_CC_LAB','TEAM_MAIL_CC_EHS','TEAM_MAIL_CC_ENV','TEAM_MAIL_CC_TES','TEAM_MAIL_CC_MNG','TEAM_MAIL_CC_QM','TEAM_MAIL_CC_SALES'],
+        modulelinks:['LINK_CES_HUB_HOME','LINK_INFUSION_PUMP_DASHBOARD','LINK_RENTAL_CONTACT_PAGE','LINK_MASTER_CAL_PM_SOURCE','AUDIT_DRIVE_MED','AUDIT_EXCEL_MED','AUDIT_DRIVE_LAB','AUDIT_EXCEL_LAB','AUDIT_DRIVE_EHS','AUDIT_EXCEL_EHS']
     };
 
     async function saveSettingSectionV264(section, button) {
         const keys = CES_SETTING_SECTION_KEYS_V264[String(section || '').toLowerCase()] || [];
         if (!keys.length) return;
-        const all = collectFullSystemConfig_(), patch = {CONFIG_SCHEMA_VERSION:'30.0.19'};
+        const all = collectFullSystemConfig_(), patch = {CONFIG_SCHEMA_VERSION:'30.0.21'};
         keys.forEach(key => { patch[key] = all[key]; });
         const btn = button || null, oldHtml = btn ? btn.innerHTML : '';
         if (btn) { btn.disabled = true; btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saving'; }
         try {
-            const res = await saveSettingsViaJsonp_(patch);
+            let res = await saveSettingsViaJsonp_(patch);
+            if (String(section).toLowerCase() === 'line') {
+                res = await window.CES_API.callFunction('saveLineOaRuntimeConfig',[{basicId:all.LINE_OA_BASIC_ID,gatewayUrl:all.LINE_GATEWAY_URL,channelSecret:(document.getElementById('cfg-line-channel-secret')||{}).value||''}],{transport:'iframe',timeoutMs:90000,dedupe:false,priority:'active',userAction:true,module:'settings'});
+                const secretInput=document.getElementById('cfg-line-channel-secret');if(secretInput)secretInput.value='';
+            }
             if (!(res === 'Saved' || (res && res.success))) throw new Error((res && res.message) || 'Save failed');
             const saved = (res && res.savedConfig && typeof res.savedConfig === 'object') ? res.savedConfig : patch;
             if (typeof globalConfig !== 'undefined') Object.assign(globalConfig, saved);

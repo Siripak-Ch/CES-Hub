@@ -188,11 +188,13 @@ function setTrainingPlanSheet(sheetName){
   loadTrainingPlan(false);
 }
 async function loadTrainingPlan(force){
-  const root=document.getElementById('training-plan-grid');if(root)root.innerHTML='<div class="py-14 text-center text-slate-400"><i class="fas fa-circle-notch fa-spin text-xl"></i><div class="mt-2 text-xs font-bold">Loading Training Plan…</div></div>';
+  const root=document.getElementById('training-plan-grid'),cacheKey='ces_training_plan_'+trainingPlanSheet_();
+  if(!force&&!CES_TRAINING_V20.planLoaded){try{const cached=JSON.parse(localStorage.getItem(cacheKey)||'null');if(cached&&cached.data){CES_TRAINING_V20.planData=cached.data;CES_TRAINING_V20.planLoaded=true;renderTrainingPlan();}}catch(ignore){}}
+  if(root&&!CES_TRAINING_V20.planLoaded)root.innerHTML='<div class="py-14 text-center text-slate-400"><i class="fas fa-circle-notch fa-spin text-xl"></i><div class="mt-2 text-xs font-bold">Loading Training Plan…</div></div>';
   try{
     const res=await window.CES_API.callFunction('getTrainingPlan',[{sheetName:trainingPlanSheet_(),force:!!force}],{transport:'jsonp',timeoutMs:60000,dedupe:false});
     if(!res||res.success===false)throw new Error((res&&res.message)||'Cannot load training plan');
-    CES_TRAINING_V20.planLoaded=true;CES_TRAINING_V20.planData=res;CES_TRAINING_V20.planDirty={};renderTrainingPlan();
+    CES_TRAINING_V20.planLoaded=true;CES_TRAINING_V20.planData=res;CES_TRAINING_V20.planDirty={};try{localStorage.setItem(cacheKey,JSON.stringify({at:Date.now(),data:res}));}catch(ignoreCache){}renderTrainingPlan();
   }catch(err){if(root)root.innerHTML='<div class="py-14 text-center text-red-500 font-bold">'+trainingPlanEscape_(err.message||String(err))+'</div>';}
 }
 function renderTrainingPlan(){
@@ -268,6 +270,7 @@ window.renderTrainingPlan=renderTrainingPlan;
 window.markTrainingPlanCell=markTrainingPlanCell;
 window.saveTrainingPlan=saveTrainingPlan;
 window.openTrainingPlanSource=openTrainingPlanSource;
+window.initTeamPlan=function(){CES_TRAINING_V20.mode='plan';return loadTrainingPlan(false);};
 
 // V22.5 standalone Information > Team Plan
 window.initTeamPlanV225=function(){try{if(typeof window.loadTrainingPlan==='function')return window.loadTrainingPlan(false);}catch(e){console.warn('[Team Plan V22.5]',e);}return null;};

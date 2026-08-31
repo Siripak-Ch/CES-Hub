@@ -2,7 +2,7 @@
   <div class="bg-white p-5 rounded-3xl shadow-sm border border-slate-100 flex flex-col lg:flex-row lg:items-center justify-between gap-4">
     <div class="flex items-center gap-4"><div class="p-3 bg-blue-50 rounded-xl text-[#003DA5]"><i class="fas fa-screwdriver-wrench text-2xl"></i></div><div><h2 class="text-xl font-black text-slate-800">Master CAL/PM Plan</h2><p class="text-xs text-slate-400 font-bold">Standard master calibration and preventive-maintenance plan</p></div></div>
     <div class="flex flex-wrap items-center gap-2">
-      <a id="mcp-source-link" class="ces-standard-icon-btn ces-external-link-btn" href="https://docs.google.com/spreadsheets/d/1nbNmtlNHffCh-hvlV9RMxmUgZJYun7VNPbqi0k7PJEc/edit" target="_blank" rel="noopener" title="Open Master CAL/PM source sheet" aria-label="Open Master CAL/PM source sheet"><i class="fas fa-arrow-up-right-from-square"></i></a>
+      <a id="mcp-source-link" class="ces-standard-icon-btn ces-external-link-btn" href="https://bdmsgroup-my.sharepoint.com/:x:/g/personal/siripak_ch_bdms_co_th/IQDrst6isjeFTofMLFyktxb_Af59VdXzAsk3Fxnn9Zu4Prs?e=nPKbnH" target="_blank" rel="noopener" title="Open Master Plan CAL-PM 2026" aria-label="Open Master Plan CAL-PM 2026"><i class="fas fa-arrow-up-right-from-square"></i></a>
       <label class="ces-header-action-btn ces-action-upload cursor-pointer" title="Import Plan cal.xlsx"><i class="fas fa-file-arrow-up"></i><input id="mcp-import-file" class="hidden" type="file" accept=".xlsx,.xls,.csv" onchange="mcpImportFile(this.files[0])"></label>
       <button class="ces-standard-icon-btn" onclick="mcpAddRow()" title="Add row"><i class="fas fa-plus"></i></button>
       <button class="ces-standard-icon-btn ces-action-save" onclick="mcpSave()" title="Save"><i class="fas fa-floppy-disk"></i></button>
@@ -21,9 +21,11 @@
     </div>
   </div>
   <style>
-    #view-master_cal_pm_plan .mcp-table th{padding:9px 8px;border-bottom:1px solid #e2e8f0;color:#475569;white-space:nowrap;font-weight:900}
+    #view-master_cal_pm_plan .mcp-table th{padding:10px 8px;border-bottom:1px solid #1d4ed8;color:#fff;background:#003DA5;white-space:nowrap;font-weight:900}
     #view-master_cal_pm_plan .mcp-table td{padding:4px;border-bottom:1px solid #eef2f7;vertical-align:middle}
-    #view-master_cal_pm_plan .mcp-cell{width:100%;min-width:92px;border:1px solid transparent;border-radius:8px;padding:6px 7px;background:transparent;color:#0f172a}
+    #view-master_cal_pm_plan .mcp-cell{width:100%;min-width:100px;border:1px solid transparent;border-radius:8px;padding:7px 8px;background:transparent;color:#0f172a}
+    #view-master_cal_pm_plan .mcp-table th:nth-child(5),#view-master_cal_pm_plan .mcp-table td:nth-child(5) .mcp-cell{min-width:260px}
+    #view-master_cal_pm_plan .mcp-table th:nth-child(7),#view-master_cal_pm_plan .mcp-table td:nth-child(7) .mcp-cell{min-width:180px}
     #view-master_cal_pm_plan .mcp-cell:hover,#view-master_cal_pm_plan .mcp-cell:focus{border-color:#93c5fd;background:#fff;outline:none}
     #view-master_cal_pm_plan .mcp-delete{width:30px;height:30px;border-radius:9px;background:#fff1f2;color:#e11d48;border:1px solid #fecdd3}
     #view-master_cal_pm_plan #mcp-prev:disabled,#view-master_cal_pm_plan #mcp-next:disabled{opacity:.35;cursor:not-allowed}

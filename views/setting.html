@@ -130,16 +130,53 @@
         <div><label class="ces-setting-label">ENV Drive</label><input class="ces-setting-input text-xs" id="cfg-kpi-drive-env" type="url"></div>
         <div><label class="ces-setting-label">MNG Drive</label><input class="ces-setting-input text-xs" id="cfg-kpi-drive-mng" type="url"></div>
         <div><label class="ces-setting-label">TES Drive</label><input class="ces-setting-input text-xs" id="cfg-kpi-drive-tes" type="url"></div>
+        <div><label class="ces-setting-label">MED KPI Sheet</label><input class="ces-setting-input text-xs" id="cfg-kpi-sheet-med" type="url"></div>
+        <div><label class="ces-setting-label">LAB KPI Sheet · Follow Report&amp;EQ 2026</label><input class="ces-setting-input text-xs" id="cfg-kpi-sheet-lab" type="url"></div>
+        <div><label class="ces-setting-label">EHS KPI Sheet</label><input class="ces-setting-input text-xs" id="cfg-kpi-sheet-ehs" type="url"></div>
+        <div><label class="ces-setting-label">ENV KPI Sheet</label><input class="ces-setting-input text-xs" id="cfg-kpi-sheet-env" type="url"></div>
+        <div><label class="ces-setting-label">MNG KPI Sheet</label><input class="ces-setting-input text-xs" id="cfg-kpi-sheet-mng" type="url"></div>
+        <div><label class="ces-setting-label">TES KPI Sheet</label><input class="ces-setting-input text-xs" id="cfg-kpi-sheet-tes" type="url"></div>
       </div>
     </div>
 
     <div class="xl:col-span-12 bg-white p-5 rounded-3xl shadow-sm border border-slate-100 space-y-4">
-      <div class="flex items-center justify-between gap-3"><h3 class="ces-setting-title"><i class="fab fa-line text-emerald-500"></i>LINE Notification Tokens</h3><button type="button" class="ces-training-btn primary" onclick="saveSettingSectionV264('line',this)"><i class="fas fa-floppy-disk"></i> Save</button></div>
-      <p class="text-xs text-slate-400">Separate tokens for MED, LAB and EHS. Values are saved in Config sheet.</p>
+      <div class="flex items-center justify-between gap-3"><h3 class="ces-setting-title"><i class="fab fa-line text-emerald-500"></i>LINE Notification · Current CES Hub OA</h3><button type="button" class="ces-training-btn primary" onclick="saveSettingSectionV264('line',this)"><i class="fas fa-floppy-disk"></i> Save Securely</button></div>
+      <p class="text-xs text-slate-400">Only CES Hub OA is active. Channel secret is stored in Apps Script Script Properties and is never written to Config Sheet.</p>
       <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <div class="ces-token-card med"><label>MED LINE Token</label><input id="cfg-line-token-med" type="text" autocomplete="off" data-lpignore="true" data-1p-ignore="true" class="ces-secret-input" placeholder="MED token"></div>
-        <div class="ces-token-card lab"><label>LAB LINE Token</label><input id="cfg-line-token-lab" type="text" autocomplete="off" data-lpignore="true" data-1p-ignore="true" class="ces-secret-input" placeholder="LAB token"></div>
-        <div class="ces-token-card ehs"><label>EHS LINE Token</label><input id="cfg-line-token-ehs" type="text" autocomplete="off" data-lpignore="true" data-1p-ignore="true" class="ces-secret-input" placeholder="EHS token"></div>
+        <div class="ces-token-card med"><label>OA Basic ID</label><input id="cfg-line-oa-basic-id" type="text" class="ces-secret-input" value="@032jntyw"></div>
+        <div class="ces-token-card lab"><label>Cloudflare Gateway URL</label><input id="cfg-line-gateway-url" type="url" class="ces-secret-input"></div>
+        <div class="ces-token-card ehs"><label>Channel Secret <span id="cfg-line-secret-status" class="text-emerald-600"></span></label><input id="cfg-line-channel-secret" type="password" autocomplete="new-password" class="ces-secret-input" placeholder="Blank = keep current secret"></div>
+      </div>
+    </div>
+
+    <div class="xl:col-span-12 bg-white p-5 rounded-3xl shadow-sm border border-slate-100 space-y-4">
+      <div class="flex items-center justify-between gap-3"><h3 class="ces-setting-title"><i class="fas fa-envelope text-[#003DA5]"></i>Mail Notification Configuration</h3><button type="button" class="ces-training-btn primary" onclick="saveSettingSectionV264('mail',this)"><i class="fas fa-floppy-disk"></i> Save</button></div>
+      <p class="text-xs text-slate-400">Central recipients used by Service CSI, CAL/PM, Infusion Pump and other automated mail.</p>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+        <div><label class="ces-setting-label">Admin</label><input class="ces-setting-input text-xs" id="cfg-mail-admin" type="text"></div>
+        <div><label class="ces-setting-label">Service CSI Admin CC</label><input class="ces-setting-input text-xs" id="cfg-mail-admin-cc" type="text"></div>
+        <div><label class="ces-setting-label">MED CC</label><textarea class="ces-setting-input text-xs" id="cfg-mail-med" rows="2"></textarea></div>
+        <div><label class="ces-setting-label">LAB CC</label><textarea class="ces-setting-input text-xs" id="cfg-mail-lab" rows="2"></textarea></div>
+        <div><label class="ces-setting-label">EHS CC</label><textarea class="ces-setting-input text-xs" id="cfg-mail-ehs" rows="2"></textarea></div>
+        <div><label class="ces-setting-label">ENV CC</label><textarea class="ces-setting-input text-xs" id="cfg-mail-env" rows="2"></textarea></div>
+        <div><label class="ces-setting-label">TES CC</label><textarea class="ces-setting-input text-xs" id="cfg-mail-tes" rows="2"></textarea></div>
+        <div><label class="ces-setting-label">MNG CC</label><textarea class="ces-setting-input text-xs" id="cfg-mail-mng" rows="2"></textarea></div>
+        <div><label class="ces-setting-label">QM CC</label><textarea class="ces-setting-input text-xs" id="cfg-mail-qm" rows="2"></textarea></div>
+        <div><label class="ces-setting-label">Sales CC</label><textarea class="ces-setting-input text-xs" id="cfg-mail-sales" rows="2"></textarea></div>
+      </div>
+    </div>
+
+    <div class="xl:col-span-12 bg-white p-5 rounded-3xl shadow-sm border border-slate-100 space-y-4">
+      <div class="flex items-center justify-between gap-3"><h3 class="ces-setting-title"><i class="fas fa-link text-[#003DA5]"></i>All Module Links</h3><button type="button" class="ces-training-btn primary" onclick="saveSettingSectionV264('modulelinks',this)"><i class="fas fa-floppy-disk"></i> Save</button></div>
+      <p class="text-xs text-slate-400">Links used by module buttons and HTML email buttons.</p>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+        <div><label class="ces-setting-label">CES Hub Home</label><input class="ces-setting-input text-xs" id="cfg-link-ces-home" type="url"></div>
+        <div><label class="ces-setting-label">Infusion Pump Dashboard</label><input class="ces-setting-input text-xs" id="cfg-link-infusion-dashboard" type="url"></div>
+        <div><label class="ces-setting-label">Rental Contact Page</label><input class="ces-setting-input text-xs" id="cfg-link-rental-contact" type="url"></div>
+        <div><label class="ces-setting-label">Master CAL/PM Source</label><input class="ces-setting-input text-xs" id="cfg-link-master-cal-pm" type="url"></div>
+        <div><label class="ces-setting-label">Audit MED Drive</label><input class="ces-setting-input text-xs" id="cfg-audit-drive-med" type="url"></div><div><label class="ces-setting-label">Audit MED Excel Link</label><input class="ces-setting-input text-xs" id="cfg-audit-excel-med" type="url"></div>
+        <div><label class="ces-setting-label">Audit LAB Drive</label><input class="ces-setting-input text-xs" id="cfg-audit-drive-lab" type="url"></div><div><label class="ces-setting-label">Audit LAB Excel Link</label><input class="ces-setting-input text-xs" id="cfg-audit-excel-lab" type="url"></div>
+        <div><label class="ces-setting-label">Audit EHS Drive</label><input class="ces-setting-input text-xs" id="cfg-audit-drive-ehs" type="url"></div><div><label class="ces-setting-label">Audit EHS Excel Link</label><input class="ces-setting-input text-xs" id="cfg-audit-excel-ehs" type="url"></div>
       </div>
     </div>
   </div>

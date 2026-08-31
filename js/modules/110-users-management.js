@@ -22,6 +22,7 @@ let _userCache = null;
         { id:'kpi',name:'KPI Tracking',group:'Operation',icon:'fa-chart-line' },
         { id:'report_manage',name:'OT Generate',group:'Operation',icon:'fa-file-invoice-dollar' },
         { id:'master_cal_pm_plan',name:'Master CAL/PM Plan',group:'Information',icon:'fa-screwdriver-wrench' },
+        { id:'audit_log',name:'Audit Log',group:'Information',icon:'fa-clipboard-list' },
         { id:'stock_dashboard',name:'Infusion Pump Dashboard',group:'Inventory',icon:'fa-chart-pie' },
         { id:'inventory',name:'Inventory',group:'Inventory',icon:'fa-boxes-stacked' },
         { id:'check_stock',name:'Check Stock',group:'Inventory',icon:'fa-qrcode' },

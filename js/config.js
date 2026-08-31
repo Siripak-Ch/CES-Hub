@@ -6,7 +6,7 @@
 
 window.CES_CONFIG = {
   // IMPORTANT: After deploying Apps Script backend, paste the latest /exec URL here.
-  GAS_API_URL: 'https://script.google.com/macros/s/AKfycbx9zT50QIW7HLimhQEZ9Ccw5pcqyUw7YEsAoSWkT2kugAMYU4K2YDXymQSsOsyA8Ug32A/exec',
+  GAS_API_URL: 'https://script.google.com/macros/s/AKfycbyUVH3SYj6e0N4_c8zG0FzPBVNQEDBk2At6ES2zj4Xcb_J2XFm5TSO2gf582w4g-9g1EQ/exec',
   // Optional extra /exec endpoints. The polyfill also accepts ?gasApiUrl=<url>
   // and persists that override, so a deployment URL can be corrected without
   // allowing every module to fail independently.
@@ -28,7 +28,7 @@ window.CES_CONFIG = {
   },
 
   DEBUG: false,
-  RELEASE: 'CES-HUB-V30.0.20-SERVICE-OT-PERFORMANCE',
+  RELEASE: 'CES-HUB-V30.0.21-AUTOMATION-AUDIT-CONFIG',
 
   // External links are kept in one place. Config sheet values override these defaults at runtime.
   EXTERNAL_LINKS: {

@@ -522,10 +522,13 @@ function renderVehiclePlanOptions_(type) {
   if (!select) return;
   var state = cesBookingState_(type);
   var current = select.value;
-  var plans = state.plans || [];
+  var now = new Date(); now.setHours(0,0,0,0);
+  var max = new Date(now.getTime() + 14 * 86400000);
+  var plans = (state.plans || []).filter(function(plan){var raw=plan.startDate||plan.date||'',d=new Date(String(raw).slice(0,10)+'T00:00:00');return !isNaN(d)&&d>=now&&d<=max;});
+  state.plans = plans;
   var html = '<option value="">— Select onsite work from team calendar —</option>';
   html += '<option value="__MANUAL__">✍️ Manual / งานไม่มีใน Calendar</option>';
-  if (!plans.length) html += '<option value="" disabled>No upcoming onsite work found — use Manual</option>';
+  if (!plans.length) html += '<option value="" disabled>No onsite work found from today to the next 14 days — use Manual</option>';
   plans.forEach(function(plan, index) {
     var label = plan.optionLabel || ('[' + (plan.startDate || plan.date || '') + '] ' + (plan.title || '') + ' @ ' + (plan.location || plan.title || ''));
     html += '<option value="' + index + '">' + cesBookEsc_(label) + '</option>';
