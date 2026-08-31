@@ -6,7 +6,7 @@
 
 window.CES_CONFIG = {
   // IMPORTANT: After deploying Apps Script backend, paste the latest /exec URL here.
-  GAS_API_URL: 'https://script.google.com/macros/s/AKfycbytSj1nBhAEe5ScLhDVy6kTIGGsAxT4IjZgli47hA9uFrUf8y4Wlg6DZ-m506Kv9issig/exec',
+  GAS_API_URL: 'https://script.google.com/macros/s/AKfycbySPojsT5uQOiBwmxpp697UE36pzE2j9_6wn3TYmdP1s-PRCQ4RS63BMYJGdDOo92MgSg/exec',
   // Optional extra /exec endpoints. The polyfill also accepts ?gasApiUrl=<url>
   // and persists that override, so a deployment URL can be corrected without
   // allowing every module to fail independently.
@@ -28,7 +28,7 @@ window.CES_CONFIG = {
   },
 
   DEBUG: false,
-  RELEASE: 'CES-HUB-V30.0.22-AUDIT-MAIL-CAR-CONFIG',
+  RELEASE: 'CES-HUB-V30.0.23-AUDIT-STOCK-MAIL-LINKS',
 
   // External links are kept in one place. Config sheet values override these defaults at runtime.
   EXTERNAL_LINKS: {

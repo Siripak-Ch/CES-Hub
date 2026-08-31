@@ -164,6 +164,7 @@ function cesBookingInjectStyles_() {
     '.vehicle-calendar-weekday{padding:7px;text-align:center;font-size:10px;font-weight:900;color:#94a3b8;text-transform:uppercase}',
     '.vehicle-calendar-day{min-height:76px;border:1px solid #e2e8f0;border-radius:14px;padding:8px;background:#fff;position:relative;overflow:hidden}',
     '.vehicle-calendar-day.muted{opacity:.38}',
+    '.vehicle-calendar-day.ces-booking-past-v212:has(.vehicle-calendar-count){background:#fef2f2;border-color:#fecaca;opacity:.78}',
     '.vehicle-calendar-day.available{border-color:#e2e8f0;background:#ffffff}',
     '.vehicle-calendar-day.pending{border-color:#93c5fd;background:#eff6ff}',
     '.vehicle-calendar-day.unavailable{border-color:#fca5a5;background:#fef2f2}',
@@ -873,7 +874,7 @@ function renderVehicleSummary_(type) {
 
 function cesBookingDateKey_(value) {
   var text = String(value || '').trim();
-  var match = text.match(/^(\d{4})-(\d{1,2})-(\d{1,2})$/);
+  var match = text.match(/^(\d{4})-(\d{1,2})-(\d{1,2})(?:[T\s].*)?$/);
   if (match) return match[1] + '-' + ('0' + match[2]).slice(-2) + '-' + ('0' + match[3]).slice(-2);
   match = text.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
   if (match) return match[3] + '-' + ('0' + match[2]).slice(-2) + '-' + ('0' + match[1]).slice(-2);

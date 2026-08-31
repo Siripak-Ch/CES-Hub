@@ -52,7 +52,7 @@
       <div class="ces-setting-field ces-admin-email-field"><label class="ces-setting-label" for="cfg-admin-email">Admin Notification Email</label><input class="ces-setting-input" id="cfg-admin-email" type="email" autocomplete="email" placeholder="admin@nhealth-asia.com"></div>
     </div>
 
-    <div class="xl:col-span-7 bg-white p-5 rounded-3xl shadow-sm border border-slate-100 space-y-4">
+    <div class="xl:col-span-7 bg-white p-5 rounded-3xl shadow-sm border border-slate-100 space-y-4" style="order:-100">
       <div class="flex items-center justify-between gap-3"><h3 class="ces-setting-title"><i class="fas fa-users-gear text-[#003DA5]"></i>Team Capacity (Man-Days)</h3><button type="button" class="ces-training-btn primary" onclick="saveSettingSectionV264('capacity',this)"><i class="fas fa-floppy-disk"></i> Save</button></div>
       <p class="text-xs text-slate-400">Limit per person/day for Calendar calculation.</p>
       <div class="grid grid-cols-2 md:grid-cols-3 gap-3">
@@ -69,8 +69,8 @@
       </div>
     </div>
 
-    <div class="xl:col-span-12 bg-white p-5 rounded-3xl shadow-sm border border-slate-100 space-y-4">
-      <div class="flex items-center justify-between gap-3"><h3 class="ces-setting-title"><i class="fas fa-link text-[#003DA5]"></i>All Module Links · Operational</h3><button type="button" class="ces-training-btn primary" onclick="saveSettingSectionV264('links',this)"><i class="fas fa-floppy-disk"></i> Save</button></div>
+    <div id="setting-all-module-links-v3023" class="xl:col-span-12 bg-white p-5 rounded-3xl shadow-sm border border-slate-100 space-y-4" style="order:-99">
+      <div class="flex items-center justify-between gap-3"><h3 class="ces-setting-title"><i class="fas fa-link text-[#003DA5]"></i>All Module Links</h3><button type="button" class="ces-training-btn primary" onclick="saveSettingSectionV264('links',this)"><i class="fas fa-floppy-disk"></i> Save Operational</button></div>
       <p class="text-xs text-slate-400">Central links used by Service CSI, Report CSI, Revenue, KPI, Memo & Work Order and Training Plan.</p>
       <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
         <div><label class="ces-setting-label">Service CSI — CES Summary</label><input class="ces-setting-input text-xs" id="cfg-link-service-csi-ces" type="url"></div>
@@ -120,8 +120,8 @@
       </div></div>
     </div>
 
-    <div class="xl:col-span-7 bg-white p-5 rounded-3xl shadow-sm border border-slate-100 space-y-4">
-      <div class="flex items-center justify-between gap-3"><h3 class="ces-setting-title"><i class="fas fa-folder-open text-[#003DA5]"></i>All Module Links · KPI</h3><button type="button" class="ces-training-btn primary" onclick="saveSettingSectionV264('kpi',this)"><i class="fas fa-floppy-disk"></i> Save</button></div>
+    <div class="xl:col-span-7 bg-white p-5 rounded-3xl shadow-sm border border-slate-100 space-y-4" style="order:-98">
+      <div class="flex items-center justify-between gap-3"><h3 class="ces-setting-title"><i class="fas fa-folder-open text-[#003DA5]"></i>All Module Links · KPI</h3><button type="button" class="ces-training-btn primary" onclick="saveSettingSectionV264('kpi',this)"><i class="fas fa-floppy-disk"></i> Save KPI</button></div>
       <p class="text-xs text-slate-400">KPI links are centrally managed for MED, LAB and EHS.</p>
       <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
         <div><label class="ces-setting-label">MED Drive</label><input class="ces-setting-input text-xs" id="cfg-kpi-drive-med" type="url"></div>
