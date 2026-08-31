@@ -70,7 +70,7 @@
     </div>
 
     <div class="xl:col-span-12 bg-white p-5 rounded-3xl shadow-sm border border-slate-100 space-y-4">
-      <div class="flex items-center justify-between gap-3"><h3 class="ces-setting-title"><i class="fas fa-link text-[#003DA5]"></i>External Links</h3><button type="button" class="ces-training-btn primary" onclick="saveSettingSectionV264('links',this)"><i class="fas fa-floppy-disk"></i> Save</button></div>
+      <div class="flex items-center justify-between gap-3"><h3 class="ces-setting-title"><i class="fas fa-link text-[#003DA5]"></i>All Module Links · Operational</h3><button type="button" class="ces-training-btn primary" onclick="saveSettingSectionV264('links',this)"><i class="fas fa-floppy-disk"></i> Save</button></div>
       <p class="text-xs text-slate-400">Central links used by Service CSI, Report CSI, Revenue, KPI, Memo & Work Order and Training Plan.</p>
       <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
         <div><label class="ces-setting-label">Service CSI — CES Summary</label><input class="ces-setting-input text-xs" id="cfg-link-service-csi-ces" type="url"></div>
@@ -121,21 +121,15 @@
     </div>
 
     <div class="xl:col-span-7 bg-white p-5 rounded-3xl shadow-sm border border-slate-100 space-y-4">
-      <div class="flex items-center justify-between gap-3"><h3 class="ces-setting-title"><i class="fas fa-folder-open text-[#003DA5]"></i>KPI Drive Links</h3><button type="button" class="ces-training-btn primary" onclick="saveSettingSectionV264('kpi',this)"><i class="fas fa-floppy-disk"></i> Save</button></div>
-      <p class="text-xs text-slate-400">EHS and ENV use separate links and separate buttons in KPI Tracking.</p>
+      <div class="flex items-center justify-between gap-3"><h3 class="ces-setting-title"><i class="fas fa-folder-open text-[#003DA5]"></i>All Module Links · KPI</h3><button type="button" class="ces-training-btn primary" onclick="saveSettingSectionV264('kpi',this)"><i class="fas fa-floppy-disk"></i> Save</button></div>
+      <p class="text-xs text-slate-400">KPI links are centrally managed for MED, LAB and EHS.</p>
       <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
         <div><label class="ces-setting-label">MED Drive</label><input class="ces-setting-input text-xs" id="cfg-kpi-drive-med" type="url"></div>
         <div><label class="ces-setting-label">LAB Drive</label><input class="ces-setting-input text-xs" id="cfg-kpi-drive-lab" type="url"></div>
         <div><label class="ces-setting-label">EHS Drive</label><input class="ces-setting-input text-xs" id="cfg-kpi-drive-ehs" type="url"></div>
-        <div><label class="ces-setting-label">ENV Drive</label><input class="ces-setting-input text-xs" id="cfg-kpi-drive-env" type="url"></div>
-        <div><label class="ces-setting-label">MNG Drive</label><input class="ces-setting-input text-xs" id="cfg-kpi-drive-mng" type="url"></div>
-        <div><label class="ces-setting-label">TES Drive</label><input class="ces-setting-input text-xs" id="cfg-kpi-drive-tes" type="url"></div>
         <div><label class="ces-setting-label">MED KPI Sheet</label><input class="ces-setting-input text-xs" id="cfg-kpi-sheet-med" type="url"></div>
         <div><label class="ces-setting-label">LAB KPI Sheet · Follow Report&amp;EQ 2026</label><input class="ces-setting-input text-xs" id="cfg-kpi-sheet-lab" type="url"></div>
         <div><label class="ces-setting-label">EHS KPI Sheet</label><input class="ces-setting-input text-xs" id="cfg-kpi-sheet-ehs" type="url"></div>
-        <div><label class="ces-setting-label">ENV KPI Sheet</label><input class="ces-setting-input text-xs" id="cfg-kpi-sheet-env" type="url"></div>
-        <div><label class="ces-setting-label">MNG KPI Sheet</label><input class="ces-setting-input text-xs" id="cfg-kpi-sheet-mng" type="url"></div>
-        <div><label class="ces-setting-label">TES KPI Sheet</label><input class="ces-setting-input text-xs" id="cfg-kpi-sheet-tes" type="url"></div>
       </div>
     </div>
 
@@ -150,7 +144,7 @@
     </div>
 
     <div class="xl:col-span-12 bg-white p-5 rounded-3xl shadow-sm border border-slate-100 space-y-4">
-      <div class="flex items-center justify-between gap-3"><h3 class="ces-setting-title"><i class="fas fa-envelope text-[#003DA5]"></i>Mail Notification Configuration</h3><button type="button" class="ces-training-btn primary" onclick="saveSettingSectionV264('mail',this)"><i class="fas fa-floppy-disk"></i> Save</button></div>
+      <div class="flex items-center justify-between gap-3"><h3 class="ces-setting-title"><i class="fas fa-envelope text-[#003DA5]"></i>Mail Notification Configuration</h3><div class="flex gap-2"><button type="button" class="ces-training-btn" onclick="testAllCesMail(this)"><i class="fas fa-paper-plane"></i> Test All Mail</button><button type="button" class="ces-training-btn primary" onclick="saveSettingSectionV264('mail',this)"><i class="fas fa-floppy-disk"></i> Save</button></div></div>
       <p class="text-xs text-slate-400">Central recipients used by Service CSI, CAL/PM, Infusion Pump and other automated mail.</p>
       <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
         <div><label class="ces-setting-label">Admin</label><input class="ces-setting-input text-xs" id="cfg-mail-admin" type="text"></div>

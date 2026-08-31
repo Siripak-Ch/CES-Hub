@@ -85,10 +85,7 @@
         setVal('cfg-kpi-drive-med', data.KPI_DRIVE_MED || '');
         setVal('cfg-kpi-drive-lab', data.KPI_DRIVE_LAB || window.CES_KPI_DRIVE_DEFAULTS?.LAB || '');
         setVal('cfg-kpi-drive-ehs', data.KPI_DRIVE_EHS || window.CES_KPI_DRIVE_DEFAULTS?.EHS || '');
-        setVal('cfg-kpi-drive-env', data.KPI_DRIVE_ENV || window.CES_KPI_DRIVE_DEFAULTS?.ENV || data.KPI_DRIVE_EHS || '');
-        setVal('cfg-kpi-drive-mng', data.KPI_DRIVE_MNG || '');
-        setVal('cfg-kpi-drive-tes', data.KPI_DRIVE_TES || '');
-        ['MED','LAB','EHS','ENV','MNG','TES'].forEach(team => setVal('cfg-kpi-sheet-' + team.toLowerCase(), data['KPI_SHEET_' + team] || ''));
+        ['MED','LAB','EHS'].forEach(team => setVal('cfg-kpi-sheet-' + team.toLowerCase(), data['KPI_SHEET_' + team] || ''));
         const linkDefaults = (window.CES_CONFIG && window.CES_CONFIG.EXTERNAL_LINKS) || {};
         setVal('cfg-link-service-csi-ces', data.LINK_SERVICE_CSI_CES_SUMMARY || linkDefaults.SERVICE_CSI_CES_SUMMARY || '');
         setVal('cfg-link-service-csi-tes', data.LINK_SERVICE_CSI_TES_SUMMARY || linkDefaults.SERVICE_CSI_TES_SUMMARY || '');
@@ -108,6 +105,7 @@
         setVal('cfg-line-oa-basic-id', data.LINE_OA_BASIC_ID || '@032jntyw');
         setVal('cfg-line-gateway-url', data.LINE_GATEWAY_URL || 'https://ces-hub-line-gateway.siripak-chat.workers.dev');
         const secretStatus = document.getElementById('cfg-line-secret-status'); if(secretStatus) secretStatus.textContent = String(data.LINE_CHANNEL_SECRET_CONFIGURED).toUpperCase()==='TRUE' ? '· configured' : '· not configured';
+        setVal('cfg-line-channel-secret', '');
         setVal('cfg-mail-admin', data.ADMIN_NOTIFY_EMAIL || 'Siripak.Ch@nhealth-asia.com');
         setVal('cfg-mail-admin-cc', data.SERVICE_CSI_ADMIN_CC || 'cesmanagement@bdms.co.th');
         ['MED','LAB','EHS','ENV','TES','MNG','QM','SALES'].forEach(team => setVal('cfg-mail-' + team.toLowerCase(), data['TEAM_MAIL_CC_' + team] || ''));
@@ -141,8 +139,8 @@
             CAL_ID_MED:getVal('cfg-cal-med'), CAL_ID_LAB:getVal('cfg-cal-lab'), CAL_ID_EHS:getVal('cfg-cal-ehs'), CAL_ID_ENV:getVal('cfg-cal-env'), CAL_ID_MNG:getVal('cfg-cal-mng'), CAL_ID_TES:getVal('cfg-cal-tes'),
             TARGET_CSI:getVal('cfg-target-csi'), TARGET_SLA_HRS:getVal('cfg-target-sla'),
             TARGET_REV_MED:getVal('cfg-rev-med'), TARGET_REV_LAB:getVal('cfg-rev-lab'), TARGET_REV_EHS:getVal('cfg-rev-ehs'), TARGET_REV_ENV:getVal('cfg-rev-env'), TARGET_REV_MNG:getVal('cfg-rev-mng'), TARGET_REV_TES:getVal('cfg-rev-tes'),
-            KPI_DRIVE_MED:getVal('cfg-kpi-drive-med'), KPI_DRIVE_LAB:getVal('cfg-kpi-drive-lab'), KPI_DRIVE_EHS:getVal('cfg-kpi-drive-ehs'), KPI_DRIVE_ENV:getVal('cfg-kpi-drive-env'), KPI_DRIVE_MNG:getVal('cfg-kpi-drive-mng'), KPI_DRIVE_TES:getVal('cfg-kpi-drive-tes'),
-            KPI_SHEET_MED:getVal('cfg-kpi-sheet-med'), KPI_SHEET_LAB:getVal('cfg-kpi-sheet-lab'), KPI_SHEET_EHS:getVal('cfg-kpi-sheet-ehs'), KPI_SHEET_ENV:getVal('cfg-kpi-sheet-env'), KPI_SHEET_MNG:getVal('cfg-kpi-sheet-mng'), KPI_SHEET_TES:getVal('cfg-kpi-sheet-tes'),
+            KPI_DRIVE_MED:getVal('cfg-kpi-drive-med'), KPI_DRIVE_LAB:getVal('cfg-kpi-drive-lab'), KPI_DRIVE_EHS:getVal('cfg-kpi-drive-ehs'),
+            KPI_SHEET_MED:getVal('cfg-kpi-sheet-med'), KPI_SHEET_LAB:getVal('cfg-kpi-sheet-lab'), KPI_SHEET_EHS:getVal('cfg-kpi-sheet-ehs'),
             LINK_SERVICE_CSI_CES_SUMMARY:getVal('cfg-link-service-csi-ces'), LINK_SERVICE_CSI_TES_SUMMARY:getVal('cfg-link-service-csi-tes'), LINK_REPORT_CSI_SUMMARY:getVal('cfg-link-report-csi'), LINK_REVENUE_DASHBOARD:getVal('cfg-link-revenue-dashboard'),
             LINK_KPI_EHS_SHEET:getVal('cfg-link-kpi-ehs'), LINK_KPI_LAB_SHEET:getVal('cfg-link-kpi-lab'), LINK_MEMO_WORKORDER_SOURCE:getVal('cfg-link-memo-workorder'), LINK_TRAINING_PLAN_2026:getVal('cfg-link-training-plan'),
             TES_IMPORT_WEBAPP_URL:getVal('cfg-tes-import-url'), TES_IMPORT_SECRET:getVal('cfg-tes-import-secret'),
@@ -235,7 +233,7 @@
         colors:['TEAM_COLOR_MED','TEAM_COLOR_LAB','TEAM_COLOR_EHS','TEAM_COLOR_ENV','TEAM_COLOR_TES','TEAM_COLOR_QM','TEAM_COLOR_MNG'],
         calendar:['CAL_ID_MED','CAL_ID_LAB','CAL_ID_EHS','CAL_ID_ENV','CAL_ID_MNG','CAL_ID_TES'],
         targets:['TARGET_CSI','TARGET_SLA_HRS','TARGET_REV_MED','TARGET_REV_LAB','TARGET_REV_EHS','TARGET_REV_ENV','TARGET_REV_MNG','TARGET_REV_TES'],
-        kpi:['KPI_DRIVE_MED','KPI_DRIVE_LAB','KPI_DRIVE_EHS','KPI_DRIVE_ENV','KPI_DRIVE_MNG','KPI_DRIVE_TES','KPI_SHEET_MED','KPI_SHEET_LAB','KPI_SHEET_EHS','KPI_SHEET_ENV','KPI_SHEET_MNG','KPI_SHEET_TES'],
+        kpi:['KPI_DRIVE_MED','KPI_DRIVE_LAB','KPI_DRIVE_EHS','KPI_SHEET_MED','KPI_SHEET_LAB','KPI_SHEET_EHS'],
         line:['LINE_OA_BASIC_ID','LINE_GATEWAY_URL'],
         mail:['ADMIN_NOTIFY_EMAIL','SERVICE_CSI_ADMIN_CC','TEAM_MAIL_CC_MED','TEAM_MAIL_CC_LAB','TEAM_MAIL_CC_EHS','TEAM_MAIL_CC_ENV','TEAM_MAIL_CC_TES','TEAM_MAIL_CC_MNG','TEAM_MAIL_CC_QM','TEAM_MAIL_CC_SALES'],
         modulelinks:['LINK_CES_HUB_HOME','LINK_INFUSION_PUMP_DASHBOARD','LINK_RENTAL_CONTACT_PAGE','LINK_MASTER_CAL_PM_SOURCE','AUDIT_DRIVE_MED','AUDIT_EXCEL_MED','AUDIT_DRIVE_LAB','AUDIT_EXCEL_LAB','AUDIT_DRIVE_EHS','AUDIT_EXCEL_EHS']
@@ -331,3 +329,4 @@ async function openPortalLinkEditorV20(row){
 }
 async function deletePortalLinkSettingV20(id){const ok=await Swal.fire({icon:'warning',title:'Delete portal link?',showCancelButton:true,confirmButtonText:'Delete',confirmButtonColor:'#dc2626'});if(!ok.isConfirmed)return;try{const res=await window.CES_API.callFunction('deletePortalLink',[{id:id,actorId:(window.CES_CURRENT_USER||{}).id||''}],{transport:'iframe',timeoutMs:50000});if(!res||res.success===false)throw new Error((res&&res.message)||'Delete failed');await loadPortalLinksSettingV20(true);}catch(err){Swal.fire('Delete Error',err.message||String(err),'error');}}
 window.cesScrollSettingV20=cesScrollSettingV20;window.loadPortalLinksSettingV20=loadPortalLinksSettingV20;window.openPortalLinkEditorV20=openPortalLinkEditorV20;window.deletePortalLinkSettingV20=deletePortalLinkSettingV20;
+window.testAllCesMail=async function(btn){if(btn)btn.disabled=true;try{const r=await window.CES_API.callFunction('CES_SEND_ALL_MAIL_TESTS',[],{transport:'iframe',timeoutMs:90000,dedupe:false,priority:'user',userAction:true,module:'settings'});if(!r||r.success===false)throw new Error(r&&r.message||'Mail test failed');Swal.fire({icon:'success',title:'Test Mail Sent',html:'HTML test sent to<br><b>'+String((r.to||[]).join(', '))+'</b>',confirmButtonColor:'#003DA5'});}catch(e){Swal.fire('Mail Test',e.message||String(e),'error');}finally{if(btn)btn.disabled=false;}};

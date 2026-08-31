@@ -46,8 +46,8 @@
   <div id="car-workspace-booking-panel" class="hidden ces-car-booking-fullwidth-v209">
     <div class="bg-white rounded-3xl border border-slate-100 shadow-sm p-5 min-w-0">
       <div class="grid grid-cols-2 gap-2 rounded-2xl bg-slate-100 p-1 mb-5">
-        <button id="car-mode-request" class="vehicle-mode-btn active" onclick="switchVehicleBookingMode('CAR','REQUEST')"><i class="fas fa-calendar-plus mr-2"></i>Booking</button>
-        <button id="car-mode-return" class="vehicle-mode-btn" onclick="switchVehicleBookingMode('CAR','RETURN')"><i class="fas fa-rotate-left mr-2"></i>Return</button>
+        <button id="car-mode-request" class="vehicle-mode-btn active !inline-flex items-center justify-center gap-2" onclick="switchVehicleBookingMode('CAR','REQUEST')"><i class="fas fa-calendar-plus shrink-0"></i><span>Booking</span></button>
+        <button id="car-mode-return" class="vehicle-mode-btn !inline-flex items-center justify-center gap-2" onclick="switchVehicleBookingMode('CAR','RETURN')"><i class="fas fa-rotate-left shrink-0"></i><span>Return</span></button>
       </div>
 
       <div id="car-request-panel" class="space-y-4 ces-car-request-v243">
@@ -134,7 +134,7 @@
         </div>
         <div class="ces-car-attachment-grid-v243">
           <div class="ces-upload-box-v262"><label class="ces-form-label">Bill / Receipt <span class="text-red-500">*</span> <span class="ces-multi-badge-v262">Multiple</span></label><input id="car-return-bill-file" type="file" multiple accept=".pdf,.jpg,.jpeg,.png,.heic,.webp" class="ces-book-input bg-white ces-multi-file-v262"><p class="text-[10px] text-slate-400 mt-1">แนบได้หลายไฟล์ · PDF / รูปภาพ · maximum 8 MB each</p></div>
-          <div class="ces-upload-box-v262"><label class="ces-form-label">Car Return Pictures <span class="text-red-500">*</span> <span class="ces-multi-badge-v262">Multiple</span></label><input id="car-return-car-photos" type="file" multiple accept=".jpg,.jpeg,.png,.heic,.webp" class="ces-book-input bg-white ces-multi-file-v262"><p class="text-[10px] text-slate-400 mt-1">แนบได้หลายรูป · maximum 10 MB each</p></div>
+          <div class="ces-upload-box-v262"><label class="ces-form-label">Car Return Pictures <span class="text-slate-400">(Optional)</span> <span class="ces-multi-badge-v262">Multiple</span></label><input id="car-return-car-photos" type="file" multiple accept=".jpg,.jpeg,.png,.heic,.webp" class="ces-book-input bg-white ces-multi-file-v262"><p class="text-[10px] text-slate-400 mt-1">Optional · แนบได้หลายรูป · maximum 10 MB each</p></div>
         </div>
         <div class="ces-car-detail-grid-v243">
           <div><label class="ces-form-label">Return Note</label><textarea id="car-return-note" rows="2" class="ces-book-input" placeholder="Optional note"></textarea></div>
