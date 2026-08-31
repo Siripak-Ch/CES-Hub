@@ -70,8 +70,8 @@
     </div>
 
     <div id="setting-all-module-links-v3023" class="xl:col-span-12 bg-white p-5 rounded-3xl shadow-sm border border-slate-100 space-y-4" style="order:-99">
-      <div class="flex items-center justify-between gap-3"><h3 class="ces-setting-title"><i class="fas fa-link text-[#003DA5]"></i>All Module Links</h3><button type="button" class="ces-training-btn primary" onclick="saveSettingSectionV264('links',this)"><i class="fas fa-floppy-disk"></i> Save Operational</button></div>
-      <p class="text-xs text-slate-400">Central links used by Service CSI, Report CSI, Revenue, KPI, Memo & Work Order and Training Plan.</p>
+      <div class="flex items-center justify-between gap-3"><h3 class="ces-setting-title"><i class="fas fa-link text-[#003DA5]"></i>All Module Links</h3><button type="button" class="ces-training-btn primary" onclick="saveSettingSectionV264('links',this)"><i class="fas fa-floppy-disk"></i> Save All Links</button></div>
+      <p class="text-xs text-slate-400">One central section for every module button, source workbook and HTML email link.</p>
       <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
         <div><label class="ces-setting-label">Service CSI — CES Summary</label><input class="ces-setting-input text-xs" id="cfg-link-service-csi-ces" type="url"></div>
         <div><label class="ces-setting-label">Service CSI — TES Summary</label><input class="ces-setting-input text-xs" id="cfg-link-service-csi-tes" type="url"></div>
@@ -81,6 +81,16 @@
         <div><label class="ces-setting-label">KPI LAB Sheet</label><input class="ces-setting-input text-xs" id="cfg-link-kpi-lab" type="url"></div>
         <div><label class="ces-setting-label">Memo & Work Order Source</label><input class="ces-setting-input text-xs" id="cfg-link-memo-workorder" type="url"></div>
         <div><label class="ces-setting-label">Training Plan 2026</label><input class="ces-setting-input text-xs" id="cfg-link-training-plan" type="url"></div>
+        <div class="md:col-span-2 pt-2 border-t border-slate-100"><h4 class="text-[10px] font-black uppercase tracking-widest text-slate-400">KPI Drive & Source Sheets</h4></div>
+        <div><label class="ces-setting-label">MED Drive</label><input class="ces-setting-input text-xs" id="cfg-kpi-drive-med" type="url"></div><div><label class="ces-setting-label">MED KPI Sheet</label><input class="ces-setting-input text-xs" id="cfg-kpi-sheet-med" type="url"></div>
+        <div><label class="ces-setting-label">LAB Drive</label><input class="ces-setting-input text-xs" id="cfg-kpi-drive-lab" type="url"></div><div><label class="ces-setting-label">LAB KPI Sheet · Follow Report&amp;EQ 2026</label><input class="ces-setting-input text-xs" id="cfg-kpi-sheet-lab" type="url"></div>
+        <div><label class="ces-setting-label">EHS Drive</label><input class="ces-setting-input text-xs" id="cfg-kpi-drive-ehs" type="url"></div><div><label class="ces-setting-label">EHS KPI Sheet</label><input class="ces-setting-input text-xs" id="cfg-kpi-sheet-ehs" type="url"></div>
+        <div class="md:col-span-2 pt-2 border-t border-slate-100"><h4 class="text-[10px] font-black uppercase tracking-widest text-slate-400">Hub, Inventory, CAL/PM & Audit</h4></div>
+        <div><label class="ces-setting-label">CES Hub Home</label><input class="ces-setting-input text-xs" id="cfg-link-ces-home" type="url"></div><div><label class="ces-setting-label">Infusion Pump Dashboard</label><input class="ces-setting-input text-xs" id="cfg-link-infusion-dashboard" type="url"></div>
+        <div><label class="ces-setting-label">Rental Contact Page</label><input class="ces-setting-input text-xs" id="cfg-link-rental-contact" type="url"></div><div><label class="ces-setting-label">Master CAL/PM Source</label><input class="ces-setting-input text-xs" id="cfg-link-master-cal-pm" type="url"></div>
+        <div><label class="ces-setting-label">Audit MED Drive</label><input class="ces-setting-input text-xs" id="cfg-audit-drive-med" type="url"></div><div><label class="ces-setting-label">Audit MED Excel Link</label><input class="ces-setting-input text-xs" id="cfg-audit-excel-med" type="url"></div>
+        <div><label class="ces-setting-label">Audit LAB Drive</label><input class="ces-setting-input text-xs" id="cfg-audit-drive-lab" type="url"></div><div><label class="ces-setting-label">Audit LAB Excel Link</label><input class="ces-setting-input text-xs" id="cfg-audit-excel-lab" type="url"></div>
+        <div><label class="ces-setting-label">Audit EHS Drive</label><input class="ces-setting-input text-xs" id="cfg-audit-drive-ehs" type="url"></div><div><label class="ces-setting-label">Audit EHS Excel Link</label><input class="ces-setting-input text-xs" id="cfg-audit-excel-ehs" type="url"></div>
       </div>
     </div>
 
@@ -120,19 +130,6 @@
       </div></div>
     </div>
 
-    <div class="xl:col-span-7 bg-white p-5 rounded-3xl shadow-sm border border-slate-100 space-y-4" style="order:-98">
-      <div class="flex items-center justify-between gap-3"><h3 class="ces-setting-title"><i class="fas fa-folder-open text-[#003DA5]"></i>All Module Links · KPI</h3><button type="button" class="ces-training-btn primary" onclick="saveSettingSectionV264('kpi',this)"><i class="fas fa-floppy-disk"></i> Save KPI</button></div>
-      <p class="text-xs text-slate-400">KPI links are centrally managed for MED, LAB and EHS.</p>
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
-        <div><label class="ces-setting-label">MED Drive</label><input class="ces-setting-input text-xs" id="cfg-kpi-drive-med" type="url"></div>
-        <div><label class="ces-setting-label">LAB Drive</label><input class="ces-setting-input text-xs" id="cfg-kpi-drive-lab" type="url"></div>
-        <div><label class="ces-setting-label">EHS Drive</label><input class="ces-setting-input text-xs" id="cfg-kpi-drive-ehs" type="url"></div>
-        <div><label class="ces-setting-label">MED KPI Sheet</label><input class="ces-setting-input text-xs" id="cfg-kpi-sheet-med" type="url"></div>
-        <div><label class="ces-setting-label">LAB KPI Sheet · Follow Report&amp;EQ 2026</label><input class="ces-setting-input text-xs" id="cfg-kpi-sheet-lab" type="url"></div>
-        <div><label class="ces-setting-label">EHS KPI Sheet</label><input class="ces-setting-input text-xs" id="cfg-kpi-sheet-ehs" type="url"></div>
-      </div>
-    </div>
-
     <div class="xl:col-span-12 bg-white p-5 rounded-3xl shadow-sm border border-slate-100 space-y-4">
       <div class="flex items-center justify-between gap-3"><h3 class="ces-setting-title"><i class="fab fa-line text-emerald-500"></i>LINE Notification · Current CES Hub OA</h3><button type="button" class="ces-training-btn primary" onclick="saveSettingSectionV264('line',this)"><i class="fas fa-floppy-disk"></i> Save Securely</button></div>
       <p class="text-xs text-slate-400">Only CES Hub OA is active. Channel secret is stored in Apps Script Script Properties and is never written to Config Sheet.</p>
@@ -160,18 +157,5 @@
       </div>
     </div>
 
-    <div class="xl:col-span-12 bg-white p-5 rounded-3xl shadow-sm border border-slate-100 space-y-4">
-      <div class="flex items-center justify-between gap-3"><h3 class="ces-setting-title"><i class="fas fa-link text-[#003DA5]"></i>All Module Links</h3><button type="button" class="ces-training-btn primary" onclick="saveSettingSectionV264('modulelinks',this)"><i class="fas fa-floppy-disk"></i> Save</button></div>
-      <p class="text-xs text-slate-400">Links used by module buttons and HTML email buttons.</p>
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
-        <div><label class="ces-setting-label">CES Hub Home</label><input class="ces-setting-input text-xs" id="cfg-link-ces-home" type="url"></div>
-        <div><label class="ces-setting-label">Infusion Pump Dashboard</label><input class="ces-setting-input text-xs" id="cfg-link-infusion-dashboard" type="url"></div>
-        <div><label class="ces-setting-label">Rental Contact Page</label><input class="ces-setting-input text-xs" id="cfg-link-rental-contact" type="url"></div>
-        <div><label class="ces-setting-label">Master CAL/PM Source</label><input class="ces-setting-input text-xs" id="cfg-link-master-cal-pm" type="url"></div>
-        <div><label class="ces-setting-label">Audit MED Drive</label><input class="ces-setting-input text-xs" id="cfg-audit-drive-med" type="url"></div><div><label class="ces-setting-label">Audit MED Excel Link</label><input class="ces-setting-input text-xs" id="cfg-audit-excel-med" type="url"></div>
-        <div><label class="ces-setting-label">Audit LAB Drive</label><input class="ces-setting-input text-xs" id="cfg-audit-drive-lab" type="url"></div><div><label class="ces-setting-label">Audit LAB Excel Link</label><input class="ces-setting-input text-xs" id="cfg-audit-excel-lab" type="url"></div>
-        <div><label class="ces-setting-label">Audit EHS Drive</label><input class="ces-setting-input text-xs" id="cfg-audit-drive-ehs" type="url"></div><div><label class="ces-setting-label">Audit EHS Excel Link</label><input class="ces-setting-input text-xs" id="cfg-audit-excel-ehs" type="url"></div>
-      </div>
-    </div>
   </div>
 </section>

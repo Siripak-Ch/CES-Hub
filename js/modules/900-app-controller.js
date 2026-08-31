@@ -624,9 +624,16 @@
     }
     function cesHideTabLoadingPreview_(){var box=document.getElementById('ces-tab-loading-preview');if(box)box.remove();}
 
-    function switchTab(tab) {
+    function switchTab(tab, requestedToken) {
         var previousTabV4 = currentTab;
         tab = cesValidTab_(tab) || cesReadActiveTab_() || 'portal';
+        if (!requestedToken) {
+            requestedToken = (Number(window.CES_NAVIGATION_TOKEN_V3024) || 0) + 1;
+            window.CES_NAVIGATION_TOKEN_V3024 = requestedToken;
+            window.CES_REQUESTED_TAB_V3024 = tab;
+        } else if (requestedToken !== window.CES_NAVIGATION_TOKEN_V3024 || window.CES_REQUESTED_TAB_V3024 !== tab) {
+            return;
+        }
         if (currentUser && !cesCanAccessTab_(tab)) {
             var role = String(currentUser.role || '').trim().toUpperCase();
             var allowed = (globalPermissions && globalPermissions[role]) || [];
@@ -642,9 +649,12 @@
             // "Preparing page" placeholder. Business code is loaded next at
             // active-tab priority, then the normal initializer runs once.
             if(!cesRevealDeferredViewShell_(tab) && typeof window.CES_ensureDeferredView==='function'){
-                window.CES_ensureDeferredView(tab).then(function(){cesRevealDeferredViewShell_(tab);}).catch(function(error){console.warn('[lazy view]',error);});
+                window.CES_ensureDeferredView(tab).then(function(){if(requestedToken===window.CES_NAVIGATION_TOKEN_V3024&&window.CES_REQUESTED_TAB_V3024===tab)cesRevealDeferredViewShell_(tab);}).catch(function(error){console.warn('[lazy view]',error);});
             }
-            window.CES_loadDeferredModules(tab).then(function(){switchTab(tab);}).catch(function(error){
+            window.CES_loadDeferredModules(tab).then(function(){
+                if(requestedToken===window.CES_NAVIGATION_TOKEN_V3024&&window.CES_REQUESTED_TAB_V3024===tab)switchTab(tab,requestedToken);
+            }).catch(function(error){
+                if(requestedToken!==window.CES_NAVIGATION_TOKEN_V3024)return;
                 console.warn('[lazy module]', error);cesHideTabLoadingPreview_();
                 var view=document.getElementById('view-'+tab);if(view){view.classList.remove('hidden');view.innerHTML='<div class="ces-standard-card ces-module-unavailable-card"><div class="ces-module-unavailable-icon"><i class="fas fa-triangle-exclamation"></i></div><h2>Page load error</h2><p>'+String(error&&error.message||error)+'</p><button class="ces-standard-icon-btn ces-action-neutral" onclick="switchTab(\''+tab+'\')"><i class="fas fa-rotate-right"></i></button></div>';}
             });

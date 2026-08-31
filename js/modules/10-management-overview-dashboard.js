@@ -116,7 +116,7 @@ function loadManagementQualitySummary_(force) {
     return homeQualityPromise;
 }
 
-function renderManagementOverviewDashboard(skipFetch = false) {
+function renderManagementOverviewDashboard(skipFetch = false, force = false) {
     // Render cached/read-model content first so opening the page never waits for CSI modules.
     const announceBox = $id('home-announcement-container');
     if (announceBox && typeof globalConfig !== 'undefined') {
@@ -128,10 +128,10 @@ function renderManagementOverviewDashboard(skipFetch = false) {
     if (skipFetch) return;
 
     // Quality is the first foreground request because it is the first card group on this page.
-    loadManagementQualitySummary_(false);
+    loadManagementQualitySummary_(!!force);
 
     // Secondary sections start just after the quality read. Re-entry within 30 s reuses current data.
-    if (Date.now() - homeSecondaryLoadAt < 30000) return;
+    if (!force && Date.now() - homeSecondaryLoadAt < 30000) return;
     homeSecondaryLoadAt = Date.now();
     setTimeout(() => {
         const d = new Date();
@@ -154,6 +154,18 @@ function renderManagementOverviewDashboard(skipFetch = false) {
             if(currentHomeTab === 'yearly') renderYearlyOTView();
         }).catch(error => console.warn('[Management OT]', error));
     }, 180);
+}
+
+function syncManagementOverview(button) {
+    const icon = button && button.querySelector('i');
+    if (button) button.disabled = true;
+    if (icon) icon.classList.add('fa-spin');
+    homeSecondaryLoadAt = 0;
+    return Promise.resolve(renderManagementOverviewDashboard(false, true)).then(function(){
+        if (window.showToast) showToast('Management Overview synced in background', 'success');
+    }).finally(function(){
+        window.setTimeout(function(){if(button)button.disabled=false;if(icon)icon.classList.remove('fa-spin');},700);
+    });
 }
 
 function renderYearlyView() {
@@ -666,3 +678,4 @@ window.CES_HOME_UI_V40_RECHECK=window.CES_HOME_UI_RECHECK;
 // V18.6 canonical name; legacy alias is retained only for cached frontends.
 window.renderManagementOverviewDashboard = renderManagementOverviewDashboard;
 window.renderHomeDashboard = renderManagementOverviewDashboard;
+window.syncManagementOverview = syncManagementOverview;
