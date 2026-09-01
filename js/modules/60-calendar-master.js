@@ -635,7 +635,7 @@
         const rows = filteredData.map(item => ({
             Team:calendarSourceTeam(item), 'Start Date':item.startDate || item.date || '', 'End Date':item.endDate || item.startDate || item.date || '',
             'Event Title':item.title || '', Location:item.location || '', Month:Number(item.month || 0), Year:Number(item.year || 0), UniqueKey:item.uniqueKey || '',
-            'Calendar ID':item.calendarId || '', r:item.eventColor || '', 'Capacity Team':item.capacityTeam || '', 'SO/PO':item.soPo || '', 'Work Order':item.workOrder || '',
+            'Calendar ID':item.calendarId || '', r:item.eventColor || '', 'Capacity Team':item.capacityTeam || '', SO:item.so || '', PO:item.po || '', 'Work Order':item.workOrder || '',
             Type:checkIsLeaveEvent(item.title) ? 'Leave/Off' : (checkIsOtherCalendarActivity(item.title) ? 'Other' : 'Job')
         }));
         const suffix = `${currentService}_${targetM === null ? 'AllMonths' : String(targetM).padStart(2,'0')}_${targetY === null ? 'AllYears' : targetY}`;
