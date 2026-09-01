@@ -1701,3 +1701,5 @@ if(!window.__siV31ApplyFilterPatch){
   style();
   setTimeout(removeIntervalFilter, 100);
 })();
+
+(function(){var a=window.si_addEquipmentToCart;if(typeof a==='function'&&!window.__siDashboardCartBridgeCurrent){window.__siDashboardCartBridgeCurrent=true;window.si_addEquipmentToCart=function(d){var r=a.apply(this,arguments);try{if(typeof sd_syncCartBadgeCurrent_==='function')sd_syncCartBadgeCurrent_();}catch(ignore){}return r;};}})();

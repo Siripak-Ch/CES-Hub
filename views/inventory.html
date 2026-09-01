@@ -4,7 +4,7 @@
     <div class="stockpro-header-card">
       <div class="stockpro-title-wrap">
         <div class="stockpro-icon blue ces-page-header-icon-v15"><i class="fas fa-boxes-stacked"></i></div>
-        <div><h1>Inventory</h1><div class="ces-stock-header-meta"><span class="ces-stock-header-scope"><i class="fas fa-layer-group"></i> Equipment + Workflow + Accessories</span><span id="siDataFreshness" class="csv6-freshness stale"><i class="fas fa-database"></i> Cached data</span></div></div>
+        <div><h1>Inventory</h1><div class="ces-stock-header-meta"><span class="ces-stock-header-scope"><i class="fas fa-layer-group"></i> Accessories & Inventory Dashboard</span><span id="siDataFreshness" class="csv6-freshness stale"><i class="fas fa-database"></i> Cached data</span></div></div>
       </div>
       <div class="stockpro-actions">
         <button class="sp-btn ghost csv5-icon-btn ces-action-neutral" onclick="initStockInventoryModule(true)" title="Refresh"><i class="fas fa-sync-alt"></i></button>
@@ -20,9 +20,10 @@
     </div>
 
     <div class="sp-tabs ces-inventory-mode-tabs">
-      <button id="siTabEquip" class="sp-tab active" onclick="si_switchTab('equip')"><i class="fas fa-microchip"></i> Equipment</button>
-      <button id="siTabAcc" class="sp-tab" onclick="si_switchTab('acc')"><i class="fas fa-plug"></i> Accessories</button>
+      <button id="siTabDashboardCurrent" class="sp-tab active" onclick="si_switchTab('dashboard')"><i class="fas fa-chart-pie"></i> Dashboard</button><button id="siTabAcc" class="sp-tab" onclick="si_switchTab('acc')"><i class="fas fa-plug"></i> Accessories</button>
     </div>
+
+    <div id="siInventoryDashboardCurrent" class="stockpro-kpi-grid csv5-kpi-six"><div class="stockpro-card"><div class="sp-muted">Total Accessories</div><div id="siDashTotalAccCurrent" class="text-3xl font-black text-blue-600">0</div></div><div class="stockpro-card"><div class="sp-muted">Low Stock</div><div id="siDashLowAccCurrent" class="text-3xl font-black text-orange-600">0</div></div><div class="stockpro-card"><div class="sp-muted">Pending Approval</div><div id="siDashPendingAccCurrent" class="text-3xl font-black text-violet-600">0</div></div><div class="stockpro-card"><div class="sp-muted">Teams</div><div id="siDashTeamsAccCurrent" class="text-3xl font-black text-emerald-600">0</div></div></div>
 
     <div class="stockpro-filter-card csv5-inventory-filters" id="siEquipFilters">
       <div class="sp-search"><i class="fas fa-search"></i><input id="siSearch" oninput="si_applyFilters()" placeholder="ค้นหา ID / SN / Brand / Model / Location"></div>
