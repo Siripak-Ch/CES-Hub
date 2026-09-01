@@ -43,7 +43,7 @@
   var priorSwitch=window.si_switchTab;
   window.si_switchTab=function(tab){
     tab=tab==='acc'?'acc':'equip';applyInventoryTab(tab);
-    try{if(typeof si_applyFilters==='function')si_applyFilters();else if(typeof priorSwitch==='function')priorSwitch(tab);}catch(e){console.warn('[Inventory V31 tab]',e);}
+    try{if(typeof si_applyFilters==='function')si_applyFilters();else if(typeof priorSwitch==='function')priorSwitch(tab);if(tab==='equip'&&typeof si_renderTable==='function')si_renderTable();if(tab==='acc'&&typeof si_renderAccCards==='function')si_renderAccCards();}catch(e){console.warn('[Inventory V31 tab]',e);}
     requestAnimationFrame(function(){applyInventoryTab(tab);});
   };
   var priorInit=window.initStockInventoryModule;

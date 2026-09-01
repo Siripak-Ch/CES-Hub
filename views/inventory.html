@@ -59,7 +59,7 @@
 
   <button id="siCartFab" class="sp-cart-fab" onclick="si_toggleCart()" title="Checkout Cart"><i class="fas fa-shopping-cart"></i><span id="siCartFabBadge">0</span></button>
   <div id="siCartOverlay" class="hidden fixed inset-0 bg-slate-900/40 z-[180]" onclick="si_closeCart()"></div>
-  <div id="siCartDrawer" class="ces-checkout-drawer-v3025 fixed top-0 right-[-560px] w-[min(560px,100vw)] h-screen bg-white z-[181] shadow-2xl transition-all duration-300 flex flex-col">
+  <div id="siCartDrawer" class="ces-checkout-drawer-v3025 hidden fixed top-0 w-[min(560px,100vw)] h-screen bg-white z-[181] shadow-2xl transition-all duration-300 flex-col" aria-hidden="true" style="right:-600px;display:none">
     <div class="ces-checkout-head-v3025"><div class="flex items-center gap-3"><span class="ces-checkout-head-icon-v3025"><i class="fas fa-cart-shopping"></i></span><div><h2>ตะกร้า Check-Out</h2><p><span id="siCartDrawerCount">0</span> รายการที่เลือก</p></div></div><button onclick="si_closeCart()" class="ces-checkout-close-v3025" aria-label="Close cart"><i class="fas fa-times"></i></button></div>
     <div class="ces-checkout-scroll-v3025"><section class="ces-checkout-section-v3025"><div class="ces-checkout-section-title-v3025"><span><i class="fas fa-list-check"></i> รายการเบิก</span><small>ตรวจสอบอุปกรณ์ก่อนยืนยัน</small></div><div id="siCartItems" class="ces-checkout-items-v3025"></div></section><div id="siCartDetailSummary" class="ces-checkout-summary-v3025"></div></div>
     <div class="ces-checkout-form-v3025">
