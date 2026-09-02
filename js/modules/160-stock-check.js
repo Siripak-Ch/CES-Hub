@@ -33,10 +33,21 @@ function sc_renderResult(rows){
     <div class="stockpro-card-head"><h3>${spEsc(d.idCode)} ${spBadge(d.status)}</h3><span class="sp-pill">${spEsc(d.brand||'-')}</span></div>
     <div class="sp-result-grid">
       ${sc_field('Serial Number',d.sn)}
+      ${sc_field('Equipment Status',d.equipmentStatus||d.status)}
       ${sc_field('Model',d.model||d.itemName)}
       ${sc_field('Location',d.location)}
+      ${sc_field('Rental Status',d.rentalStatus||'-')}
       ${sc_field('Borrower',d.borrower||'-')}
+      ${sc_field('Contract / Duration',d.contractDetail||'-')}
+      ${sc_field('Coordinator',d.coordinator||'-')}
+      ${sc_field('Coordinator Email',d.borrowerEmail||'-')}
+      ${sc_field('CAL/PM Contract',d.calPm||'-')}
+      ${sc_field('PLAN CAL/PM',d.planCalPm||d.plaCalPm||'-')}
+      ${sc_field('PLAN PM',d.planPm||'-')}
+      ${sc_field('Borrow Date',spFmtDate(d.borrowDate))}
       ${sc_field('Due Date',spFmtDate(d.expectedReturn||d.expectedReturnDate))}
+      ${sc_field('AC Plug SN',d.acPlugSn||'-')}
+      ${sc_field('Clamp SN',d.clampSn||'-')}
       ${sc_field('Action Required',d.actionRequired||d.recheckNote||'-')}
     </div>
     <div style="display:flex;gap:8px;margin-top:14px;flex-wrap:wrap">
@@ -56,13 +67,23 @@ function sc_record(idCode,action,payload={}){
 function sc_checkoutPrompt(idCode,brand,model,sn){
   Swal.fire({
     title:'Check-Out',
-    html:`<input id="swBorrower" class="swal2-input" placeholder="ผู้ยืม / Borrower">
-          <input id="swLocation" class="swal2-input" placeholder="สถานที่ / Location">
-          <input id="swDue" class="swal2-input" type="date">
-          <input id="swNote" class="swal2-input" placeholder="หมายเหตุ">`,
+    width:820,
+    html:`<div class="sc-checkout-grid-v3029"><label>ผู้ยืม / Borrower *<input id="swBorrower" class="swal2-input" placeholder="Borrower"></label>
+          <label>สถานที่ / Location *<input id="swLocation" class="swal2-input" placeholder="Location"></label>
+          <label>Borrow Date *<input id="swBorrowDate" class="swal2-input" type="date" value="${new Date().toISOString().slice(0,10)}"></label>
+          <label>Expected Return *<input id="swDue" class="swal2-input" type="date"></label>
+          <label>รายละเอียดสัญญาเช่า/ระยะ<input id="swContractDetail" class="swal2-input" placeholder="Contract / duration"></label>
+          <label>ผู้ประสานงาน<input id="swCoordinator" class="swal2-input" placeholder="Coordinator"></label>
+          <label>Email ผู้ประสานงาน<input id="swCoordinatorEmail" class="swal2-input" type="email" placeholder="name@company.com"></label>
+          <label>สัญญา CAL,PM<input id="swCalPm" class="swal2-input" placeholder="เช่น CAL1,PM2"></label>
+          <label>PLAN CAL,PM<input id="swPlanCalPm" class="swal2-input" placeholder="Month / plan"></label>
+          <label>PLAN PM<input id="swPlanPm" class="swal2-input" placeholder="Month / plan"></label>
+          <label>AC Plug SN<input id="swAcPlug" class="swal2-input" placeholder="AC Plug serial"></label>
+          <label>Clamp SN<input id="swClamp" class="swal2-input" placeholder="Clamp serial"></label>
+          <label class="full">หมายเหตุ<input id="swNote" class="swal2-input" placeholder="Recheck note"></label></div>`,
     showCancelButton:true,
     confirmButtonText:'ยืนยัน',
-    preConfirm:()=>({borrower:document.getElementById('swBorrower').value,location:document.getElementById('swLocation').value,expectedReturnDate:document.getElementById('swDue').value,note:document.getElementById('swNote').value})
+    preConfirm:()=>({borrower:document.getElementById('swBorrower').value,location:document.getElementById('swLocation').value,borrowDate:document.getElementById('swBorrowDate').value,expectedReturnDate:document.getElementById('swDue').value,contractDetail:document.getElementById('swContractDetail').value,coordinator:document.getElementById('swCoordinator').value,coordinatorEmail:document.getElementById('swCoordinatorEmail').value,calPm:document.getElementById('swCalPm').value,planCalPm:document.getElementById('swPlanCalPm').value,planPm:document.getElementById('swPlanPm').value,acPlugSn:document.getElementById('swAcPlug').value,clampSn:document.getElementById('swClamp').value,note:document.getElementById('swNote').value})
   }).then(r=>{
     if(!r.isConfirmed)return;
     const v=r.value;

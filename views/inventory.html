@@ -29,15 +29,6 @@
       <div class="stockpro-card"><div class="stockpro-card-head"><h3><i class="fas fa-layer-group text-emerald-500"></i> Summary by Team / Accessories Type</h3><button class="sp-btn ghost" onclick="si_openInventoryHistory()"><i class="fas fa-clock-rotate-left"></i> History</button></div><div id="siAccessoriesSummaryV3028"></div></div>
     </div>
 
-    <div class="stockpro-filter-card csv5-inventory-filters" id="siEquipFilters">
-      <div class="sp-search"><i class="fas fa-search"></i><input id="siSearch" oninput="si_applyFilters()" placeholder="ค้นหา ID / SN / Brand / Model / Location"></div>
-      <select id="siBrand" onchange="si_onBrandChange()"><option value="all">ทุกแบรนด์</option></select>
-      <select id="siModel" onchange="si_applyFilters()"><option value="all">ทุกโมเดล</option></select>
-      <select id="siLocation" onchange="si_applyFilters()"><option value="all">ทุกสถานที่</option></select>
-      <select id="siStatus" onchange="si_applyFilters()"><option value="all">ทุกสถานะ</option></select>
-      <button type="button" class="sp-btn ghost ces-stock-filter-reset-v226 ces-filter-reset-word-v227" onclick="si_resetMainFilters()" title="Reset Filters" aria-label="Reset Filters"><i class="fas fa-rotate-left"></i><span>Reset Filter</span></button>
-    </div>
-
     <div class="stockpro-filter-card hidden" id="siAccFilters">
       <div class="sp-search"><i class="fas fa-search"></i><input id="siAccSearch" oninput="si_applyFilters()" placeholder="ค้นหา accessories"></div>
       <select id="siAccTeam" onchange="si_applyFilters()"><option value="all">All Team</option></select>
@@ -45,15 +36,6 @@
       <select id="siAccStatus" onchange="si_applyFilters()"><option value="all">All Status</option><option value="STOCK">STOCK</option><option value="LOW_STOCK">LOW_STOCK</option><option value="PENDING_APPROVAL">PENDING_APPROVAL</option></select>
       <select id="siAccAction" onchange="si_applyFilters()"><option value="all">All Action</option></select>
       <button type="button" class="sp-btn ghost ces-stock-filter-reset-v226 ces-filter-reset-word-v227" onclick="si_resetMainFilters()" title="Reset Filters" aria-label="Reset Filters"><i class="fas fa-rotate-left"></i><span>Reset Filter</span></button>
-    </div>
-
-    <div id="siEquipKpiGrid" class="stockpro-kpi-grid csv5-kpi-six"></div>
-    <div id="siAccKpiGrid" class="stockpro-kpi-grid hidden"></div>
-
-    <div class="stockpro-card" id="siEquipSection">
-      <div class="stockpro-card-head"><h3><i class="fas fa-microchip text-blue-500"></i> Equipment List</h3><span id="siTableCount" class="sp-pill">—</span></div>
-      <div id="siTable"><div class="csv5-loading"><span></span>กำลังโหลดข้อมูล Inventory ที่บันทึกไว้…</div></div>
-      <div id="siPagination" class="sp-pagination ces-inventory-pagination-v3025"></div>
     </div>
 
     <div class="stockpro-card hidden" id="siAccSection">

@@ -6,7 +6,7 @@
 
 window.CES_CONFIG = {
   // IMPORTANT: After deploying Apps Script backend, paste the latest /exec URL here.
-  GAS_API_URL: 'https://script.google.com/macros/s/AKfycbzRIwMZXZuWVCOpdlVlbJWnw-nYBZSX6y_fjor4C4H6VTPEvbyJs8jWmgH4mcpwpJvAdA/exec',
+  GAS_API_URL: 'https://script.google.com/macros/s/AKfycbwg67AZ1AvTmGTWYYM55wIIvAWhNoWWLjwedzARd1M0CD8ZrGjcTATq6jGk7Cd3D7gCsw/exec',
   // Optional extra /exec endpoints. The polyfill also accepts ?gasApiUrl=<url>
   // and persists that override, so a deployment URL can be corrected without
   // allowing every module to fail independently.
@@ -28,7 +28,7 @@ window.CES_CONFIG = {
   },
 
   DEBUG: false,
-  RELEASE: 'CES-HUB-V30.0.28-CLEAN-INVENTORY-AUDIT-WRITEBACK',
+  RELEASE: 'CES-HUB-V30.0.29-INFUSION-RENTAL-AUDIT-SYNC',
 
   // External links are kept in one place. Config sheet values override these defaults at runtime.
   EXTERNAL_LINKS: {

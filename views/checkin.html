@@ -20,7 +20,7 @@
 <button class="w-8 h-8 flex items-center justify-center text-gray-400 hover:text-[#003DA5] transition-colors" onclick="changeCheckinDate(1)"><i class="fas fa-chevron-right"></i></button>
 </div>
 <div class="ces-checkin-action-group-v227 flex items-center justify-end gap-2 shrink-0">
-<button class="ces-header-action-btn ces-action-neutral" onclick="loadCheckinData()" title="Refresh Check-in" aria-label="Refresh Check-in"><i class="fas fa-sync-alt"></i></button>
+<button type="button" class="ces-header-action-btn ces-action-neutral" onclick="loadCheckinData(true)" title="Refresh Check-in and recheck Calendar" aria-label="Refresh Check-in and recheck Calendar"><i class="fas fa-sync-alt"></i></button>
 <a class="ces-header-action-btn ces-action-neutral" href="https://drive.google.com/drive/folders/1Prd1Kt9sYrcik55e3i045VZI3hFshDRx" target="_blank" title="Open Check-in Drive" aria-label="Open Check-in Drive"><i class="fab fa-google-drive"></i></a>
 <button class="hidden ces-header-action-btn ces-action-delete" id="btn-checkin-reset" onclick="resetCheckinDB()" title="Reset Check-in database" aria-label="Reset Check-in database"><i class="fas fa-trash-alt"></i></button>
 </div>

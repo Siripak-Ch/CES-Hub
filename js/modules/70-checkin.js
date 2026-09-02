@@ -75,11 +75,11 @@ function checkinApplyData_(data, dateStr) {
     return currentCheckinData;
 }
 
-function checkinApiCall_(dateStr, userCtx) {
+function checkinApiCall_(dateStr, userCtx, forceRefresh) {
     return checkinCallFunction_('getCheckinDashboardData', [dateStr, userCtx], {
         transport:'jsonp',
         timeoutMs:45000,
-        dedupe:true,
+        dedupe:!forceRefresh,
         priority:'active',
         userAction:true,
         module:'checkin',
@@ -152,9 +152,9 @@ function loadCheckinData(forceRefresh) {
     if (cached) checkinApplyData_(cached, dateStr);
     else document.getElementById('job-list-container').innerHTML = `<div class="col-span-full flex flex-col items-center justify-center py-12 text-gray-300"><i class="fas fa-circle-notch fa-spin text-3xl mb-3"></i><span class="text-xs font-bold">Loading Daily Jobs...</span></div>`;
 
-    const userCtx = { role: currentUser ? currentUser.role : 'USER', team: currentUser ? (currentUser.team || 'General') : 'General' };
+    const userCtx = { role: currentUser ? currentUser.role : 'USER', team: currentUser ? (currentUser.team || 'General') : 'General', forceRefresh:forceRefresh === true };
     const serial = ++checkinLoadSerial;
-    const request = checkinApiCall_(dateStr, userCtx);
+    const request = checkinApiCall_(dateStr, userCtx, forceRefresh === true);
     checkinLoadPromise = Promise.resolve(request).then(data => {
         if (serial !== checkinLoadSerial) return currentCheckinData;
         return checkinApplyData_(data, dateStr);
@@ -205,6 +205,11 @@ function renderJobList() {
         const teamStyle = checkinTeamStyle_(job.team);
         const teamColor = ''; 
         const count = job.totalPeople || 0;
+        const encodedKey = encodeURIComponent(String(job.uniqueKey || '')).replace(/'/g,'%27');
+        const encodedPeople = encodeURIComponent(JSON.stringify(Array.isArray(job.people) ? job.people : [])).replace(/'/g,'%27');
+        const safeTeam = checkinSafe_(job.team || '-');
+        const safeTitle = checkinSafe_(job.title || '-');
+        const safeLocation = checkinSafe_(job.location || 'Unknown');
         
         let statusText = job.status || 'Wait';
         let statusBadge = '';
@@ -219,22 +224,22 @@ function renderJobList() {
         let hasIN = (statusText === 'On-going' || statusText === 'Finished');
         let outBtn = '';
         if (hasIN) {
-            outBtn = `<button onclick="openActionModal('${job.uniqueKey}', 'OUT')" class="py-2 bg-[#E4002B] hover:bg-[#B91C1C] text-white rounded-lg text-[9px] font-bold shadow transition-transform active:scale-95 flex items-center justify-center gap-1"><i class="fas fa-sign-out-alt"></i> OUT</button>`;
+            outBtn = `<button type="button" onclick="openActionModal(decodeURIComponent('${encodedKey}'), 'OUT')" class="py-2 bg-[#E4002B] hover:bg-[#B91C1C] text-white rounded-lg text-[9px] font-bold shadow transition-transform active:scale-95 flex items-center justify-center gap-1"><i class="fas fa-sign-out-alt"></i> OUT</button>`;
         } else {
-            outBtn = `<button onclick="Swal.fire('Notice', 'กรุณากด Check-in ก่อนทำการ Check-out นะครับ', 'warning')" class="py-2 bg-gray-200 hover:bg-gray-300 text-gray-400 cursor-not-allowed rounded-lg text-[9px] font-bold shadow flex items-center justify-center gap-1"><i class="fas fa-sign-out-alt"></i> OUT</button>`;
+            outBtn = `<button type="button" onclick="Swal.fire('Notice', 'กรุณากด Check-in ก่อนทำการ Check-out นะครับ', 'warning')" class="py-2 bg-gray-200 hover:bg-gray-300 text-gray-400 cursor-not-allowed rounded-lg text-[9px] font-bold shadow flex items-center justify-center gap-1"><i class="fas fa-sign-out-alt"></i> OUT</button>`;
         }
 
-        return `<div class="bg-white p-3 rounded-2xl shadow-sm border border-gray-100 hover:shadow-md transition-all group flex flex-col h-full">
-            <div class="flex justify-between items-start mb-2"><span class="text-white text-[9px] font-bold px-2 py-0.5 rounded-full shadow-sm" style="background:${teamStyle.bg}">${job.team}</span>${statusBadge}</div>
-            <h4 class="font-bold text-gray-800 text-xs leading-tight mb-1 line-clamp-2 min-h-[32px]" title="${job.title}">${job.title}</h4>
-            <p class="text-[9px] text-gray-400 flex items-center gap-1 mb-2 truncate"><i class="fas fa-map-marker-alt text-[#003DA5]"></i> ${job.location || 'Unknown'}</p>
+        return `<div class="ces-checkin-job-card bg-white p-3 rounded-2xl shadow-sm border border-gray-100 hover:shadow-md transition-all group flex flex-col h-full">
+            <div class="flex justify-between items-start mb-2"><span class="text-white text-[9px] font-bold px-2 py-0.5 rounded-full shadow-sm" style="background:${teamStyle.bg}">${safeTeam}</span>${statusBadge}</div>
+            <h4 class="font-bold text-gray-800 text-xs leading-tight mb-1" title="${safeTitle}">${safeTitle}</h4>
+            <p class="ces-checkin-job-location text-[9px] text-gray-400 flex items-start gap-1 mb-2"><i class="fas fa-map-marker-alt text-[#003DA5] mt-0.5"></i><span>${safeLocation}</span></p>
             <div class="flex-1"></div>
             <div class="flex items-center justify-between bg-gray-50 p-1.5 rounded-xl border border-gray-100 mb-2">
                 <div class="flex items-center gap-1"><div class="w-4 h-4 rounded-full bg-white border border-gray-200 flex items-center justify-center text-[9px] font-bold text-gray-600 shadow-sm">${count}</div><span class="text-[8px] text-gray-500 font-bold">Staff</span></div>
-                <button onclick='showDetailModal(${JSON.stringify(job.people).replace(/'/g, "\\'")})' class="text-[9px] text-indigo-500 font-bold hover:bg-indigo-50 px-2 py-0.5 rounded transition-colors">View</button>
+                <button type="button" onclick="showDetailModal(JSON.parse(decodeURIComponent('${encodedPeople}')))" class="text-[9px] text-indigo-500 font-bold hover:bg-indigo-50 px-2 py-0.5 rounded transition-colors">View</button>
             </div>
             <div class="grid grid-cols-2 gap-1.5 pt-2 border-t border-gray-50">
-                <button onclick="openActionModal('${job.uniqueKey}', 'IN')" class="py-2 bg-[#0057B8] hover:bg-[#003DA5] text-white rounded-lg text-[9px] font-bold shadow transition-transform active:scale-95 flex items-center justify-center gap-1"><i class="fas fa-sign-in-alt"></i> IN</button>
+                <button type="button" onclick="openActionModal(decodeURIComponent('${encodedKey}'), 'IN')" class="py-2 bg-[#0057B8] hover:bg-[#003DA5] text-white rounded-lg text-[9px] font-bold shadow transition-transform active:scale-95 flex items-center justify-center gap-1"><i class="fas fa-sign-in-alt"></i> IN</button>
                 ${outBtn}
             </div>
         </div>`;
@@ -261,8 +266,9 @@ function renderRecentActivity() {
     const recent = currentCheckinData.recentActivity || [];
     if (recent.length === 0) { list.innerHTML = `<p class="text-center text-gray-300 text-xs italic py-4">No recent activity.</p>`; return; }
     list.innerHTML = recent.map(r => {
-        const isIN = r.type === 'IN'; const colorClass = isIN ? 'bg-blue-100 text-[#0057B8]' : 'bg-rose-100 text-[#E4002B]'; const timeParts = r.timestamp.split(' ')[1] || '-';
-        return `<div onclick='openLogDetail(${JSON.stringify(r).replace(/'/g, "\\'")})' class="flex gap-3 items-start p-2 rounded-xl hover:bg-gray-50 transition-colors border-b border-gray-50 last:border-0 cursor-pointer group"><div class="w-8 h-8 rounded-full ${colorClass} flex items-center justify-center shrink-0 font-bold text-[9px] shadow-sm group-hover:scale-110 transition-transform">${r.type}</div><div class="min-w-0 flex-1"><div class="flex justify-between"><p class="text-xs font-bold text-gray-700 truncate group-hover:text-indigo-600 transition-colors">${r.user}</p><span class="text-[9px] font-bold text-gray-400 bg-gray-100 px-1.5 rounded">${timeParts}</span></div><p class="text-[10px] text-gray-400 truncate">${r.title}</p></div></div>`;
+        const isIN = r.type === 'IN'; const colorClass = isIN ? 'bg-blue-100 text-[#0057B8]' : 'bg-rose-100 text-[#E4002B]'; const timeParts = String(r.timestamp || '').split(' ')[1] || '-';
+        const encodedRow = encodeURIComponent(JSON.stringify(r)).replace(/'/g,'%27');
+        return `<div onclick="openLogDetail(JSON.parse(decodeURIComponent('${encodedRow}')))" class="flex gap-3 items-start p-2 rounded-xl hover:bg-gray-50 transition-colors border-b border-gray-50 last:border-0 cursor-pointer group"><div class="w-8 h-8 rounded-full ${colorClass} flex items-center justify-center shrink-0 font-bold text-[9px] shadow-sm group-hover:scale-110 transition-transform">${checkinSafe_(r.type)}</div><div class="min-w-0 flex-1"><div class="flex justify-between gap-2"><p class="text-xs font-bold text-gray-700 truncate group-hover:text-indigo-600 transition-colors">${checkinSafe_(r.user)}</p><span class="text-[9px] font-bold text-gray-400 bg-gray-100 px-1.5 rounded shrink-0">${checkinSafe_(timeParts)}</span></div><p class="text-[10px] text-gray-400 line-clamp-2">${checkinSafe_(r.title)}</p></div></div>`;
     }).join('');
 }
 
@@ -299,8 +305,8 @@ function filterActivityTable() {
         const gpsHtml = isMapLink
             ? `<a href="${checkinSafe_(row.gps)}" target="_blank" rel="noopener" class="checkin-log-icon map" title="Open map" onclick="event.stopPropagation()"><i class="fas fa-map-location-dot"></i></a>`
             : `<span class="checkin-log-icon disabled" title="No location"><i class="fas fa-location-dot"></i></span>`;
-        const rowJson = JSON.stringify(row).replace(/'/g, "\\'");
-        return `<tr onclick='openLogDetail(${rowJson})' class="checkin-log-row hover:bg-gray-50 transition-colors border-b last:border-0 border-gray-100 cursor-pointer">
+        const rowJson = encodeURIComponent(JSON.stringify(row)).replace(/'/g,'%27');
+        return `<tr onclick="openLogDetail(JSON.parse(decodeURIComponent('${rowJson}')))" class="checkin-log-row hover:bg-gray-50 transition-colors border-b last:border-0 border-gray-100 cursor-pointer">
             <td class="checkin-log-time"><strong>${checkinSafe_(time)}</strong><small>${checkinSafe_(date)}</small></td>
             <td><span class="checkin-log-team" style="color:${checkinTeamStyle_(row.team).text}">${checkinSafe_(row.team || '-')}</span></td>
             <td class="checkin-log-name">${checkinSafe_(row.user || '-')}</td>
