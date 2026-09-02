@@ -580,7 +580,7 @@ window.si_downloadBulkTemplate=function(){
   var ws=XLSX.utils.json_to_sheet(rows),wb=XLSX.utils.book_new();ws['!cols']=[{wch:16},{wch:20},{wch:14},{wch:22},{wch:20},{wch:16},{wch:18},{wch:14},{wch:24},{wch:18},{wch:10},{wch:30}];
   XLSX.utils.book_append_sheet(wb,ws,'Equipment Template');XLSX.writeFile(wb,'CES_Inventory_Bulk_Upload_Template.xlsx');
 };
-window.si_handleBulkUpload=async function(file){
+async function si_handleBulkUploadLegacyV3030_(file){
   if(!file)return;
   if(!window.XLSX){Swal.fire('Bulk Upload','SheetJS is not available.','error');return;}
   try{
@@ -603,6 +603,48 @@ window.si_handleBulkUpload=async function(file){
     if(typeof initStockDashboardModule==='function')initStockDashboardModule(true);
     Swal.fire({title:'Import completed',html:'เพิ่มใหม่ <b>'+total.inserted+'</b> · อัปเดต <b>'+total.updated+'</b> · ข้าม <b>'+total.skipped+'</b>'+(total.errors.length?'<br><small>'+inventoryEsc(total.errors.slice(0,5).join('<br>'))+'</small>':''),icon:total.errors.length?'warning':'success'});
   }catch(e){console.error(e);Swal.fire('Bulk Upload Error',e.message||String(e),'error');}
+};
+window.si_handleBulkUpload=async function(file){
+  if(!file)return;
+  if(!window.XLSX){if(window.Swal)Swal.fire('Upload Data','SheetJS is not available.','error');return;}
+  var schemas={
+    'Infusion Pump Dashboard':['id_code','serial_number','Equipment Status','brand','model','location','rental_status','borrower','รายละเอียดสัญญาเช่า/ระยะ','ผู้ประสานงาน','Email ผู้ประสานงาน','สัญญา CAL,PM','PLAN CAL,PM','PLAN PM','borrow_date','expected_return_date','due_date','overdue_days','days_remaining','return_date','action_required','recheck_note','ac_plug_sn','clamp_sn','PM Due (6 Month)','CAL/PM Due (12 Month)'],
+    'Infusion Rental History':['id_code','serial_number','Equipment Status','brand','model','location','rental_status','borrower','รายละเอียดสัญญาเช่า/ระยะ','ผู้ประสานงาน','Email ผู้ประสานงาน','สัญญา CAL,PM','PLAN CAL,PM','PLAN PM','borrow_date','expected_return_date','due_date','overdue_days','days_remaining','return_date','action_required','recheck_note','ac_plug_sn','clamp_sn','PM Due (6 Month)','CAL/PM Due (12 Month)'],
+    'Accessories Dashboard':['accessory_id','team','Accessories Type','item_name','stock_qty','min_stock_qty','status','action_required','check_interval_code','check_interval_days','last_check_date','next_check_date','check_result','physical_qty','stock_gap','stock_gap_to_min','check_note','checked_by','last_check_timestamp','stock_status','check_status','location','remark']
+  };
+  function norm(v){return String(v==null?'':v).trim().toLowerCase().replace(/[\s_-]+/g,'');}
+  function findHeader(grid,key){for(var r=0;r<Math.min(grid.length,40);r++){if((grid[r]||[]).some(function(v){return norm(v)===norm(key);}))return r;}return-1;}
+  function rowsFor(ws,name){
+    var grid=XLSX.utils.sheet_to_json(ws,{header:1,defval:'',raw:false}),schema=schemas[name],headerRow=findHeader(grid,name==='Accessories Dashboard'?'accessory_id':'id_code');
+    if(headerRow<0)throw new Error(name+': header row not found');
+    var source=grid[headerRow].map(function(v){return String(v||'').trim();}),index={};
+    source.forEach(function(h,i){index[norm(h)]=i;});
+    var aliases={'plancalpm':['placalpm'],'accessoriestype':['accessorytype','accesoriestype']};
+    var positions=schema.map(function(h){var keys=[norm(h)].concat(aliases[norm(h)]||[]);for(var k=0;k<keys.length;k++)if(index[keys[k]]!=null)return index[keys[k]];return-1;});
+    var missing=schema.filter(function(_,i){return positions[i]<0;});
+    if(missing.length)throw new Error(name+': missing columns '+missing.join(', '));
+    return grid.slice(headerRow+1).map(function(row){return positions.map(function(pos){return row[pos]==null?'':row[pos];});}).filter(function(row){return String(row[0]||'').trim()!=='';});
+  }
+  try{
+    var buf=await file.arrayBuffer(),wb=XLSX.read(buf,{type:'array',cellDates:false}),available=Object.keys(schemas).filter(function(name){return wb.Sheets[name];});
+    if(!available.length)return si_handleBulkUploadLegacyV3030_(file);
+    var imports=available.map(function(name){return{name:name,rows:rowsFor(wb.Sheets[name],name)};});
+    var totalRows=imports.reduce(function(sum,x){return sum+x.rows.length;},0);
+    var confirm=await Swal.fire({title:'Upload Clean Inventory',html:'พบ <b>'+available.length+'</b> sheets · <b>'+totalRows.toLocaleString()+'</b> rows<br><small>'+available.join(' · ')+'</small>',icon:'question',showCancelButton:true,confirmButtonText:'อัปเดตข้อมูล',cancelButtonText:'ยกเลิก',confirmButtonColor:'#0756b8'});
+    if(!confirm.isConfirmed)return;
+    Swal.fire({title:'Updating inventory...',html:'กำลังตรวจสอบและอัปเดตข้อมูล',allowOutsideClick:false,didOpen:function(){Swal.showLoading();}});
+    for(var s=0;s<imports.length;s++){
+      var item=imports[s];
+      for(var i=0;i<item.rows.length||i===0;i+=200){
+        var res=await window.CES_API.callFunction('si_importCleanInventoryChunk',[{sheetName:item.name,reset:i===0,rows:item.rows.slice(i,i+200),sourceFile:file.name}],{transport:'iframe',timeoutMs:180000,dedupe:false});
+        if(!res||res.success===false)throw new Error((res&&res.message)||('Import failed: '+item.name));
+        if(!item.rows.length)break;
+      }
+    }
+    if(typeof initStockInventoryModule==='function')await initStockInventoryModule(true);
+    if(typeof initStockDashboardModule==='function')await initStockDashboardModule(true);
+    Swal.fire('Inventory updated',totalRows.toLocaleString()+' rows imported successfully.','success');
+  }catch(e){console.error(e);Swal.fire('Upload Data Error',e.message||String(e),'error');}
 };
 window.sc_openAddNewEquipment=async function(){
   if(window.CES_TASK_PRIORITY&&typeof window.CES_TASK_PRIORITY.noteInteraction==='function')window.CES_TASK_PRIORITY.noteInteraction('check_stock');

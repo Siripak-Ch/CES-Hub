@@ -9,6 +9,7 @@
       <div class="stockpro-actions"><button class="sp-btn primary csv5-icon-btn ces-action-primary" onclick="if(typeof si_toggleCart==='function')si_toggleCart()" title="Checkout Cart"><i class="fas fa-shopping-cart"></i><span id="sdCartCountCurrent" class="sp-mini-badge">0</span></button>
         <button id="sdInfusionAlertBtnV3029" class="sp-btn csv5-icon-btn ces-action-warning ces-ready-stock-alert-v263" onclick="sd_openInfusionAlertsV3029()" title="Infusion Pump Alerts · Return, CAL/PM, Ready Stock and Contract"><i class="fas fa-bell"></i><span id="sdInfusionAlertCountV3029" class="ces-ready-stock-badge-v263">0</span></button><button class="sp-btn ghost csv5-icon-btn ces-action-neutral" onclick="initStockDashboardModule(true)" title="Refresh"><i class="fas fa-sync-alt"></i></button>
         <a id="sdCleanInventorySourceLinkV3028" class="sp-btn ghost csv5-icon-btn ces-action-neutral" href="#" target="_blank" rel="noopener" title="Open clean Inventory source"><i class="fas fa-link"></i></a>
+        <button class="sp-btn ghost csv5-icon-btn ces-action-neutral" onclick="si_triggerBulkUpload()" title="Upload latest clean Inventory workbook"><i class="fas fa-arrow-up-from-bracket"></i></button>
         <button class="sp-btn csv5-icon-btn ces-action-excel" onclick="sd_exportSummary()" title="Export Dashboard Excel"><i class="fas fa-file-excel"></i></button>
         <button class="sp-btn csv5-icon-btn ces-action-pdf-danger" onclick="sd_printDashboard()" title="Export Dashboard PDF"><i class="fas fa-file-pdf"></i></button>
       </div>
