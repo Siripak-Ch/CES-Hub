@@ -1705,10 +1705,53 @@ if(!window.__siV31ApplyFilterPatch){
 (function(){var a=window.si_addEquipmentToCart;if(typeof a==='function'&&!window.__siDashboardCartBridgeCurrent){window.__siDashboardCartBridgeCurrent=true;window.si_addEquipmentToCart=function(d){var r=a.apply(this,arguments);try{if(typeof sd_syncCartBadgeCurrent_==='function')sd_syncCartBadgeCurrent_();}catch(ignore){}return r;};}})();
 
 
-/* CES Hub V30.0.32 — Inventory dashboard cleanup. Quick module cards are intentionally removed. */
+/* ============================================================
+   CES Hub V30.0.31 — Inventory dashboard UX
+   - Quick module links
+   - Keep Bar + Pie charts on one row
+   - Exact-source XLSX export
+============================================================ */
 (function(){
   'use strict';
-  function cleanup(){var q=document.getElementById('siV3031QuickLinks');if(q)q.remove();}
-  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',cleanup);else cleanup();
-  setTimeout(cleanup,200);setTimeout(cleanup,800);
+  function invStyleV3031(){
+    if(document.getElementById('ces-inventory-v3031-style'))return;
+    var st=document.createElement('style');st.id='ces-inventory-v3031-style';
+    st.textContent=`
+      #view-inventory .si-v3031-links{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}
+      #view-inventory .si-v3031-link{display:flex;align-items:center;gap:11px;min-height:64px;padding:11px 14px;border:1px solid #dbe5f0;border-radius:16px;background:#fff;box-shadow:0 5px 16px rgba(15,23,42,.045);cursor:pointer;text-align:left;transition:.16s}
+      #view-inventory .si-v3031-link:hover{transform:translateY(-2px);box-shadow:0 10px 22px rgba(15,23,42,.08);border-color:#bfdbfe}
+      #view-inventory .si-v3031-link .ico{width:38px;height:38px;border-radius:12px;display:grid;place-items:center;flex:none}
+      #view-inventory .si-v3031-link b{display:block;font-size:12px;color:#0f172a}.si-v3031-link span{display:block;font-size:9px;color:#64748b;margin-top:2px}
+      #view-inventory .si-v3031-chart-row{display:grid!important;grid-template-columns:1.35fr 1fr!important;gap:14px!important}
+      #view-inventory .si-v3031-chart-row .stockpro-chart-box{height:245px!important}
+      @media(max-width:900px){#view-inventory .si-v3031-links{grid-template-columns:repeat(2,minmax(0,1fr))}#view-inventory .si-v3031-chart-row{grid-template-columns:1fr!important}}
+      @media(max-width:520px){#view-inventory .si-v3031-links{grid-template-columns:1fr}}
+    `;
+    document.head.appendChild(st);
+  }
+  function ensureLinks(){
+    var host=document.getElementById('siInventoryDashboardCurrent');if(!host)return;
+    var old=document.getElementById('siV3031QuickLinks');if(old)old.remove();
+    var charts=host.querySelectorAll('.stockpro-two-col');
+    if(charts[0])charts[0].classList.add('si-v3031-chart-row');
+  }
+  window.si_exportAllSourceXlsxV3031=function(){
+    if(typeof XLSX==='undefined'){Swal.fire('Export Error','XLSX library not loaded','error');return;}
+    Swal.fire({title:'Preparing XLSX…',text:'Exporting all rows and all source columns.',allowOutsideClick:false,showConfirmButton:false,didOpen:function(){Swal.showLoading();}});
+    google.script.run.withSuccessHandler(function(res){
+      Swal.close();
+      if(!res||!res.success){Swal.fire('Export Error',(res&&res.message)||'Cannot export source data','error');return;}
+      var aoa=[res.headers||[]].concat(res.rows||[]),ws=XLSX.utils.aoa_to_sheet(aoa),wb=XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(wb,ws,'Infusion Pump Dashboard');
+      XLSX.writeFile(wb,'01-09-2026_Final_Stock_Inventory.xlsx');
+    }).withFailureHandler(function(err){Swal.close();Swal.fire('Export Error',err.message||String(err),'error');}).si_getInventoryExportDataV3031();
+  };
+  var oldInit=window.initStockInventoryModule;
+  if(typeof oldInit==='function'&&!window.__siV3031Init){
+    window.__siV3031Init=true;
+    window.initStockInventoryModule=function(force){
+      invStyleV3031();var r=oldInit.apply(this,arguments);setTimeout(ensureLinks,50);return r;
+    };
+  }
+  invStyleV3031();setTimeout(ensureLinks,100);
 })();
