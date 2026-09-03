@@ -1,6 +1,6 @@
 (function(w,d){'use strict';
 var state={team:'EHS',headers:[],rows:[],weekly:[],filtered:[],stats:{},loaded:{},charts:{},documentPlan:{},realtimeTimer:null};
-var DEFAULT_LINKS={LAB:'https://bdmsgroup-my.sharepoint.com/:x:/g/personal/thippayawaree_kh_bdms_co_th/IQCjKi-uYdvOSLzF3p0f9ZxKAbdiFOB8whDw0SGb968TnyY?e=qCytt3',EHS:'https://docs.google.com/spreadsheets/d/1O7sWruE9VgGIjOWhvHB11RFfaAIosjpzOgr-Rxc2F8k/edit?gid=1675492188#gid=1675492188'};
+var DEFAULT_LINKS={LAB:'https://bdmsgroup-my.sharepoint.com/:x:/g/personal/thippayawaree_kh_bdms_co_th/IQCjKi-uYdvOSLzF3p0f9ZxKAbdiFOB8whDw0SGb968TnyY?e=qCytt3',EHS:'https://docs.google.com/spreadsheets/d/1O7sWruE9VgGIjOWhvHB11RFfaAIosjpzOgr-Rxc2F8k/edit?gid=936287898#gid=936287898'};
 var WEEKS=[{label:'Week 1',date:'1 Sep'},{label:'Week 2',date:'8 Sep'},{label:'Week 3',date:'15 Sep'},{label:'Week 4',date:'22 Sep'},{label:'Week 5',date:'29 Sep'}];
 function esc(v){return String(v==null?'':v).replace(/[&<>"']/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});}
 function cfg(){return typeof globalConfig!=='undefined'&&globalConfig?globalConfig:{};}
@@ -81,7 +81,7 @@ var auditEditStyle=d.createElement('style');auditEditStyle.textContent='#view-au
       if(rows.length<2)throw new Error('The selected sheet has no audit records.');
       var headers=rows[0].map(function(v){return String(v==null?'':v).trim();});
       var data=rows.slice(1).filter(function(r){return r.some(function(v){return String(v||'').trim();});});
-      return window.CES_API.callFunction('saveAuditLogImportV3031',[{team:team,headers:headers,rows:data,sourceFile:file.name}],{transport:'iframe',timeoutMs:120000,dedupe:false,priority:'active',userAction:true,module:'audit_log'});
+      return new Promise(function(resolve,reject){google.script.run.withSuccessHandler(resolve).withFailureHandler(reject).saveAuditLogImportV3031({team:team,headers:headers,rows:data,sourceFile:file.name});});
     }).then(function(res){
       if(!res||res.success===false)throw new Error(res&&res.message||'Import failed');
       Swal.fire({icon:'success',title:'Audit data updated',html:team+' · <b>'+Number(res.rows||0)+'</b> rows imported.',timer:1600,showConfirmButton:false});

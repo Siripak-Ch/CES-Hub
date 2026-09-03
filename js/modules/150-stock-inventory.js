@@ -451,14 +451,17 @@ function siForceTabLayout(){
   const isAcc = SI && SI.tab === 'acc';
   const pairs = [
     ['siEquipFilters', !isAcc], ['siEquipKpiGrid', !isAcc], ['siEquipSection', !isAcc],
+    ['siInventoryDashboardCurrent', !isAcc],
     ['siAccFilters', isAcc], ['siAccKpiGrid', isAcc], ['siAccSection', isAcc]
   ];
   pairs.forEach(([id,show])=>{
     const el=document.getElementById(id);
     if(el){ el.classList.toggle('hidden', !show); el.style.display = show ? '' : 'none'; }
   });
-  document.getElementById('siTabEquip')?.classList.toggle('active', !isAcc);
-  document.getElementById('siTabAcc')?.classList.toggle('active', isAcc);
+  const dash=document.getElementById('siTabDashboardCurrent');
+  const acc=document.getElementById('siTabAcc');
+  if(dash)dash.classList.toggle('active', !isAcc);
+  if(acc)acc.classList.toggle('active', isAcc);
 }
 
 function si_switchTab(tab){
@@ -466,7 +469,7 @@ function si_switchTab(tab){
   siCurrentLayoutStyle();
   si_renderKpi();
   siForceTabLayout();
-  si_applyFilters();
+  if(SI.tab==='acc')si_renderAccCards(); else si_applyFilters();
   siForceCartRight();
 }
 
