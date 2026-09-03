@@ -1,12 +1,12 @@
 (function(w,d){'use strict';
 var state={team:'EHS',headers:[],rows:[],weekly:[],filtered:[],stats:{},loaded:{},charts:{},documentPlan:{},realtimeTimer:null};
-var DEFAULT_LINKS={LAB:'https://bdmsgroup-my.sharepoint.com/:x:/g/personal/thippayawaree_kh_bdms_co_th/IQCjKi-uYdvOSLzF3p0f9ZxKAbdiFOB8whDw0SGb968TnyY?e=qCytt3',EHS:'https://docs.google.com/spreadsheets/d/1O7sWruE9VgGIjOWhvHB11RFfaAIosjpzOgr-Rxc2F8k/edit?gid=936287898#gid=936287898'};
+var DEFAULT_LINKS={LAB:'https://docs.google.com/spreadsheets/d/1js3cGqlP9oGCYHcTrj-Wcrf5MMlJqkHj4Kcr1Mozug0/edit?usp=sharing',EHS:'https://docs.google.com/spreadsheets/d/1O7sWruE9VgGIjOWhvHB11RFfaAIosjpzOgr-Rxc2F8k/edit?gid=936287898#gid=936287898'};
 var WEEKS=[{label:'Week 1',date:'1 Sep'},{label:'Week 2',date:'8 Sep'},{label:'Week 3',date:'15 Sep'},{label:'Week 4',date:'22 Sep'},{label:'Week 5',date:'29 Sep'}];
 function esc(v){return String(v==null?'':v).replace(/[&<>"']/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});}
 function cfg(){return typeof globalConfig!=='undefined'&&globalConfig?globalConfig:{};}
 function api(fn,args,opt){return w.CES_API.callFunction(fn,args||[],Object.assign({timeoutMs:70000,priority:'active',userAction:true,module:'audit_log'},opt||{}));}
-function links(){var c=cfg(),t=state.team,drive=String(c['AUDIT_DRIVE_'+t]||'').trim(),excel=String(c['AUDIT_EXCEL_'+t]||c[t==='EHS'?'AUDIT_EXCEL_EHS_ACTION_PLAN':'']||DEFAULT_LINKS[t]||'').trim();[['audit-drive-link',drive],['audit-excel-link',excel]].forEach(function(x){var a=d.getElementById(x[0]);if(!a)return;a.href=x[1]||'#';a.classList.toggle('opacity-40',!x[1]);a.onclick=x[1]?null:function(e){e.preventDefault();if(w.showToast)showToast('Configure this Audit link in Setting','warning');};});}
-function idx(re){for(var i=0;i<state.headers.length;i++)if(re.test(String(state.headers[i]||'')))return i;return-1;}
+function links(){var c=cfg(),t=state.team,drive=String(c['AUDIT_DRIVE_'+t]||'').trim(),excel=(t==='EHS'||t==='LAB')?DEFAULT_LINKS[t]:String(c['AUDIT_EXCEL_'+t]||c[t==='EHS'?'AUDIT_EXCEL_EHS_ACTION_PLAN':'']||DEFAULT_LINKS[t]||'').trim();[['audit-drive-link',drive],['audit-excel-link',excel]].forEach(function(x){var a=d.getElementById(x[0]);if(!a)return;a.href=x[1]||'#';a.classList.toggle('opacity-40',!x[1]);a.onclick=x[1]?null:function(e){e.preventDefault();if(w.showToast)showToast('Configure this Audit link in Setting','warning');};});}
+function idx(re){if(!re||typeof re.test!=='function')return-1;for(var i=0;i<state.headers.length;i++)if(re.test(String(state.headers[i]||'')))return i;return-1;}
 function val(row,re,fallback){var i=idx(re);return i>=0?row[i]:(fallback||'');}
 function statCard(label,n,tone,icon){return'<div class="audit-stat"><span class="audit-stat-icon" style="background:'+tone+'18;color:'+tone+'"><i class="fas '+icon+'"></i></span><div class="min-w-0"><small>'+label+'</small><b>'+Number(n||0)+'</b></div></div>';}
 function statusClass(v){var s=String(v||'').toLowerCase();return /complete|closed|done/.test(s)?'status-completed':/progress/.test(s)?'status-in-progress':'status-not-started';}
@@ -81,7 +81,7 @@ var auditEditStyle=d.createElement('style');auditEditStyle.textContent='#view-au
       if(rows.length<2)throw new Error('The selected sheet has no audit records.');
       var headers=rows[0].map(function(v){return String(v==null?'':v).trim();});
       var data=rows.slice(1).filter(function(r){return r.some(function(v){return String(v||'').trim();});});
-      return new Promise(function(resolve,reject){google.script.run.withSuccessHandler(resolve).withFailureHandler(reject).saveAuditLogImportV3031({team:team,headers:headers,rows:data,sourceFile:file.name});});
+      return window.CES_API.callFunction('saveAuditLogImportV3031',[{team:team,headers:headers,rows:data,sourceFile:file.name}],{transport:'iframe',timeoutMs:120000,dedupe:false,priority:'active',userAction:true,module:'audit_log'});
     }).then(function(res){
       if(!res||res.success===false)throw new Error(res&&res.message||'Import failed');
       Swal.fire({icon:'success',title:'Audit data updated',html:team+' · <b>'+Number(res.rows||0)+'</b> rows imported.',timer:1600,showConfirmButton:false});
