@@ -1249,3 +1249,5 @@
 // CES Calendar V39 compatibility helpers
 
 window.CES_CALENDAR_UI_RECHECK = function(){ return {version:'CURRENT', renderer:'google-calendar-embed', nativeEventPopup:true, tabs:['ALL','MED','LAB','EHS','ENV','TES','MGT'], jobRecordTeams:['MED','LAB','EHS','ENV','TES'], capacityTeams:['MED','LAB','EHS','ENV','TES'], ehsCalendar:'natkanok.8942@gmail.com', envCalendar:'chiraphat.env@gmail.com', planComparisonColumns:['TEAM','2025 PLAN','2026 STATUS'], memoKeywordMatchRemoved:true}; };
+
+// V30.0.31: visible-month refresh already forces getCalendarData(true); backend recheck helper is available for diagnostics.

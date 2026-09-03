@@ -14,7 +14,7 @@
         <button class="ces-standard-icon-btn ces-action-excel" onclick="si_downloadBulkTemplate()" title="Download Bulk Upload Excel Template" aria-label="Download Bulk Upload Excel Template"><i class="fas fa-file-arrow-down"></i></button>
         <button class="ces-standard-icon-btn ces-upload-icon-btn" onclick="si_triggerBulkUpload()" title="Upload clean Inventory XLSX or bulk equipment file" aria-label="Upload Inventory Data"><i class="fas fa-arrow-up-from-bracket"></i></button>
         <input id="siBulkEquipmentFile" type="file" class="hidden" accept=".csv,.xlsx,.xls" onchange="si_handleBulkUpload(this.files && this.files[0]);this.value=''">
-        <button class="ces-standard-icon-btn ces-excel-icon-btn" onclick="si_exportCurrent()" title="Export Excel (.xlsx)" aria-label="Export Excel"><i class="fas fa-file-excel"></i></button>
+        <button class="ces-standard-icon-btn ces-excel-icon-btn" onclick="si_exportAllSourceXlsxV3031()" title="Export all source data Excel (.xlsx)" aria-label="Export all source data Excel"><i class="fas fa-file-excel"></i></button>
         <button class="sp-btn csv5-icon-btn ces-action-pdf-danger" onclick="si_printInventory()" title="Export PDF"><i class="fas fa-file-pdf"></i></button>
       </div>
     </div>

@@ -1,6 +1,6 @@
 (function(w,d){'use strict';
-var state={team:'MED',headers:[],rows:[],weekly:[],filtered:[],stats:{},loaded:{},charts:{},documentPlan:{},realtimeTimer:null};
-var DEFAULT_LINKS={LAB:'https://bdmsgroup-my.sharepoint.com/:x:/g/personal/thippayawaree_kh_bdms_co_th/IQCjKi-uYdvOSLzF3p0f9ZxKAbdiFOB8whDw0SGb968TnyY?e=qCytt3',EHS:'https://bdmsgroup-my.sharepoint.com/:x:/g/personal/nathithon_ko_bdms_co_th/IQBIdkNbSnU5Q5IjcbALH0jTAWYbDUXgejzkkr1V0LE-6cM?e=fazbB6'};
+var state={team:'EHS',headers:[],rows:[],weekly:[],filtered:[],stats:{},loaded:{},charts:{},documentPlan:{},realtimeTimer:null};
+var DEFAULT_LINKS={LAB:'https://bdmsgroup-my.sharepoint.com/:x:/g/personal/thippayawaree_kh_bdms_co_th/IQCjKi-uYdvOSLzF3p0f9ZxKAbdiFOB8whDw0SGb968TnyY?e=qCytt3',EHS:'https://docs.google.com/spreadsheets/d/1O7sWruE9VgGIjOWhvHB11RFfaAIosjpzOgr-Rxc2F8k/edit?gid=1675492188#gid=1675492188'};
 var WEEKS=[{label:'Week 1',date:'1 Sep'},{label:'Week 2',date:'8 Sep'},{label:'Week 3',date:'15 Sep'},{label:'Week 4',date:'22 Sep'},{label:'Week 5',date:'29 Sep'}];
 function esc(v){return String(v==null?'':v).replace(/[&<>"']/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});}
 function cfg(){return typeof globalConfig!=='undefined'&&globalConfig?globalConfig:{};}
@@ -54,3 +54,34 @@ w.openAuditDocumentAlert=async function(){if(!w.Swal)return;Swal.fire({title:'Do
 w.saveDocumentReviewRow=async function(btn){if(!btn)return;var tr=btn.closest('tr');if(!tr)return;var get=function(field){var el=tr.querySelector('[data-field="'+field+'"]');return el?el.value:'';};btn.disabled=true;try{var r=await api('saveDocumentReviewPlanRow',[{sourceTeam:btn.dataset.sourceTeam,sourceRow:Number(btn.dataset.sourceRow||0),actorId:(w.CES_CURRENT_USER||w.currentUser||{}).id||'',code:(tr.querySelector('[data-field="code"]')||{}).value||tr.querySelector('td:nth-child(2) b').textContent.trim(),name:get('name'),revision:get('revision'),currentDate:get('currentDate'),dueDate:get('dueDate'),owner:get('owner')}],{transport:'jsonp',dedupe:false,timeoutMs:70000});if(!r||r.success===false)throw new Error(r&&r.message||'Save failed');if(w.showToast)showToast('Document review saved','success');btn.innerHTML='<i class="fas fa-check"></i> Saved';setTimeout(function(){if(btn)btn.innerHTML='<i class="fas fa-floppy-disk"></i> Save';},1400);loadDocumentBadge(true).catch(function(){});}catch(e){if(w.showToast)showToast(e.message||String(e),'error');}finally{btn.disabled=false;}};
 w.exportAuditLogExcel=function(){var rows=state.filtered.map(function(x){return x.row;});if(!rows.length)return w.showToast&&showToast('No audit data to export','warning');var wb=XLSX.utils.book_new(),ws=XLSX.utils.aoa_to_sheet([state.headers].concat(rows));XLSX.utils.book_append_sheet(wb,ws,state.team+' Audit');if(state.weekly.length){var wh=['NO.','FINDING'];WEEKS.forEach(function(x){wh.push(x.label+' '+x.date+' % Progress',x.label+' '+x.date+' Action Taken');});var ni=idx(/^no\.?$/i),fi=idx(/finding|action item/i),wr=state.rows.map(function(r,i){return[r[ni]||i+1,r[fi]||''].concat(state.weekly[i]||[]);});XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet([wh].concat(wr)),'Weekly Progress');}XLSX.writeFile(wb,'CES_Audit_Log_'+state.team+'_'+new Date().toISOString().slice(0,10)+'.xlsx');};
 })(window,document);
+
+
+/* ============================================================
+   CES Hub V30.0.31 — Audit Log final UX
+   Default EHS + import XLSX button.
+============================================================ */
+(function(){
+  'use strict';
+  window.auditImportFileV3031=function(input){
+    var file=input&&input.files&&input.files[0];if(!file)return;
+    if(typeof XLSX==='undefined'){Swal.fire('Import Error','XLSX library is unavailable.','error');return;}
+    var active=document.querySelector('#view-audit_log .audit-team-tab.primary');var team=String((active&&active.dataset&&active.dataset.team)||window.__CES_AUDIT_IMPORT_TEAM||'EHS').toUpperCase();
+    Swal.fire({title:'Import Audit Log',text:'Updating '+team+' working data…',allowOutsideClick:false,showConfirmButton:false,didOpen:function(){Swal.showLoading();}});
+    file.arrayBuffer().then(function(buf){
+      var wb=XLSX.read(buf,{type:'array',cellDates:false}),name=wb.SheetNames[0],ws=wb.Sheets[name];
+      if(!ws)throw new Error('No worksheet found.');
+      var rows=XLSX.utils.sheet_to_json(ws,{header:1,defval:'',raw:false});
+      while(rows.length&&rows[0].every(function(v){return String(v||'').trim()==='';}))rows.shift();
+      if(rows.length<2)throw new Error('The selected sheet has no audit records.');
+      var headers=rows[0].map(function(v){return String(v==null?'':v).trim();});
+      var data=rows.slice(1).filter(function(r){return r.some(function(v){return String(v||'').trim();});});
+      return window.CES_API.callFunction('saveAuditLogImportV3031',[{team:team,headers:headers,rows:data,sourceFile:file.name}],{transport:'iframe',timeoutMs:120000,dedupe:false,priority:'active',userAction:true,module:'audit_log'});
+    }).then(function(res){
+      if(!res||res.success===false)throw new Error(res&&res.message||'Import failed');
+      Swal.fire({icon:'success',title:'Audit data updated',html:team+' · <b>'+Number(res.rows||0)+'</b> rows imported.',timer:1600,showConfirmButton:false});
+      window.__CES_AUDIT_IMPORT_TEAM=team;state.loaded[team]=null;return w.initAuditLog(true);
+    }).catch(function(e){Swal.fire('Import Error',e.message||String(e),'error');}).finally(function(){if(input)input.value='';});
+  };
+  // Import uses the currently active team tab; default is EHS.
+  window.__CES_AUDIT_IMPORT_TEAM='EHS';
+})();

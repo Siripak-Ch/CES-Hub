@@ -31,3 +31,5 @@ w.mwoOpenDetailV3030=function(i){var r=state.rows[Number(i)];if(!r||!w.Swal)retu
 w.handleMemoWorkOrderUpload=handleUpload;w.exportMemoWorkOrderExcel=function(){if(!w.XLSX||!state.rows.length)return;var ws=XLSX.utils.json_to_sheet(state.rows.map(function(r){return r.detail||r;})),wb=XLSX.utils.book_new();XLSX.utils.book_append_sheet(wb,ws,state.mode==='MEMO'?'Memo':'WorkOrder');XLSX.writeFile(wb,'CES_'+state.mode+'_'+new Date().toISOString().slice(0,10)+'.xlsx');};
 injectStyle();
 })();
+
+/* CES Hub V30.0.31 — Memo / Work Order uses force=true to re-read canonical source sheets when snapshot is empty. */

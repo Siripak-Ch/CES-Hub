@@ -762,3 +762,122 @@ function sdRenderInfusionAlertsV3029_(category){var rows=SD_INFUSION_ALERT_ROWS_
 window.sdFilterInfusionAlertsV3029=function(category){sdRenderInfusionAlertsV3029_(category);};
 window.sd_openInfusionAlertsV3029=function(){SD_INFUSION_ALERT_ROWS_V3029=(SD_DASH.raw&&SD_DASH.raw.infusionAlerts)||[];if(!window.Swal)return;var cats=[['ALL','All'],['RETURN','Return'],['CAL_PM','CAL / PM'],['READY_STOCK','Ready Stock'],['CONTRACT','Contract']];var html='<div class="sd-alert-modal-v3029"><div class="sd-alert-tabs-v3029">'+cats.map(function(x){var n=x[0]==='ALL'?SD_INFUSION_ALERT_ROWS_V3029.length:SD_INFUSION_ALERT_ROWS_V3029.filter(function(a){return String(a.category||'')===x[0];}).length;return'<button class="sd-alert-tab-v3029 '+(x[0]==='ALL'?'active':'')+'" data-category="'+x[0]+'" onclick="sdFilterInfusionAlertsV3029(\''+x[0]+'\')">'+x[1]+' <b>'+n+'</b></button>';}).join('')+'</div><div id="sdInfusionAlertBodyV3029" class="sd-alert-body-v3029"></div></div>';Swal.fire({title:'Infusion Pump Alerts',width:'min(1180px,97vw)',html:html,confirmButtonText:'Close',didOpen:function(){sdRenderInfusionAlertsV3029_('ALL');}});};
 var sdInitV3029Base_=window.initStockDashboardModule;if(typeof sdInitV3029Base_==='function'&&!window.__sdV3029Bridge){window.__sdV3029Bridge=true;window.initStockDashboardModule=function(){var r=sdInitV3029Base_.apply(this,arguments);Promise.resolve(r).then(function(){setTimeout(function(){var rows=(SD_DASH.raw&&SD_DASH.raw.infusionAlerts)||[],b=document.getElementById('sdInfusionAlertCountV3029');if(b)b.textContent=rows.length>99?'99+':rows.length;},40);});return r;};}
+
+
+/* ============================================================
+   CES Hub V30.0.31 — Infusion Pump Dashboard final data layer
+   Uses one canonical status model for KPI, pie and bar charts.
+============================================================ */
+(function(){
+  'use strict';
+  function warehouse_(d){var x=String(d&&d.location||'').trim().toUpperCase();return x==='WAREHOUSE'||x==='STORE'||x.includes('WAREHOUSE')||x.includes('คลัง')||x.includes('STOCK ROOM');}
+  function status_(d){
+    d=d||{};
+    if(warehouse_(d))return 'Stock';
+    var t=[d.status,d.baseStatus,d.base_status,d.dqStatus,d.dq_status,d.rentalStatus,d.rental_status,d.actionRequired,d.action_required,d.recheckNote,d.recheck_note].join(' ').toUpperCase();
+    if(/BROKEN|BREAK|DAMAGED|DEFECT|เสีย|ชำรุด|พัง/.test(t))return 'Broken';
+    if(/MISSING|LOST|สูญหาย|หาย|หาไม่พบ/.test(t))return 'Missing';
+    if(/RECHECK|RE-CHECK|ตรวจซ้ำ|ตรวจสอบซ้ำ|รอสอบเทียบ/.test(t))return 'Recheck';
+    if(/OVERDUE|EXPIRED|เลยกำหนด|เกินกำหนด/.test(t)||Number(d.overdueDays||d.overdue_days||0)>0)return 'Overdue';
+    if(/IN[_\s-]*USE|BORROW|RENT|เช่า|ยืม|ใช้งาน/.test(t))return 'In-Use';
+    if(/STOCK|พร้อมส่ง|WAREHOUSE|คลัง/.test(t))return 'Stock';
+    return 'Stock';
+  }
+  function norm_(rows){return (rows||[]).map(function(d){return Object.assign({},d,{status:status_(d),finalStatus:status_(d)});});}
+  function filtered_(){
+    var raw=SD_DASH.raw||{},rows=norm_(raw.inventory||raw.devices||[]);
+    var q=spVal('sdSearch','').trim().toLowerCase(),b=spVal('sdBrand','all'),m=spVal('sdModel','all'),st=spVal('sdStatus','all'),loc=spVal('sdLocation','all');
+    return rows.filter(function(d){
+      var text=[d.idCode,d.sn,d.serialNumber,d.brand,d.model,d.itemName,d.location,d.borrower,d.status,d.rentalStatus,d.actionRequired,d.recheckNote].join(' ').toLowerCase();
+      return (!q||text.includes(q))&&(b==='all'||String(d.brand||'')===b)&&(m==='all'||String(d.model||'')===m)&&(st==='all'||String(d.status||'')===st)&&(loc==='all'||String(d.location||'')===loc);
+    });
+  }
+  function count_(rows,key){var m={};(rows||[]).forEach(function(x){var k=String(x[key]||'Unknown');m[k]=(m[k]||0)+1;});return Object.keys(m).map(function(k){return{name:k,count:m[k]};}).sort(function(a,b){return b.count-a.count;});}
+  function statusOrder(){return ['Stock','In-Use','Overdue','Recheck','Missing','Broken'];}
+  function renderCharts_(rows){
+    if(typeof Chart==='undefined')return;
+    rows=rows||filtered_();
+    var statusCanvas=document.getElementById('sdStatusChart');
+    if(statusCanvas){
+      if(SD_DASH.statusChart)try{SD_DASH.statusChart.destroy();}catch(e){}
+      var order=statusOrder(),sm={};rows.forEach(function(d){sm[d.status]=(sm[d.status]||0)+1;});
+      var labels=order.filter(function(x){return sm[x]>0;}),data=labels.map(function(x){return sm[x];});
+      SD_DASH.statusChart=new Chart(statusCanvas,{type:'doughnut',data:{labels:labels,datasets:[{data:data,backgroundColor:['#34d399','#fbbf24','#fb7185','#a78bfa','#fb923c','#60a5fa'],borderWidth:0}]},options:{responsive:true,maintainAspectRatio:false,cutout:'62%',plugins:{legend:{position:'right'}}}});
+    }
+    var ms=document.getElementById('sdModelStatusChart');
+    if(ms){
+      if(SD_DASH.modelStatusChart)try{SD_DASH.modelStatusChart.destroy();}catch(e){}
+      var models=count_(rows,'model').slice(0,12).map(function(x){return x.name;});
+      var statuses=['Stock','In-Use','Overdue','Recheck','Missing','Broken'];
+      var datasets=statuses.map(function(st,i){return{label:st,data:models.map(function(model){return rows.filter(function(d){return String(d.model||'Unknown')===String(model)&&d.status===st;}).length;}),backgroundColor:['#34d399','#fbbf24','#fb7185','#a78bfa','#fb923c','#60a5fa'][i],borderRadius:5};}).filter(function(ds){return ds.data.some(function(v){return v>0;});});
+      SD_DASH.modelStatusChart=new Chart(ms,{type:'bar',data:{labels:models,datasets:datasets},options:{responsive:true,maintainAspectRatio:false,scales:{x:{stacked:true,ticks:{font:{size:9}}},y:{stacked:true,beginAtZero:true,ticks:{precision:0}}},plugins:{legend:{position:'bottom'}}}});
+    }
+    var bc=document.getElementById('sdBrandChart');
+    if(bc){
+      if(SD_DASH.brandChart)try{SD_DASH.brandChart.destroy();}catch(e){}
+      var brands=count_(rows,'brand');
+      SD_DASH.brandChart=new Chart(bc,{type:'bar',data:{labels:brands.map(function(x){return x.name;}),datasets:[{label:'Equipment',data:brands.map(function(x){return x.count;}),backgroundColor:'#60a5fa',borderRadius:6,maxBarThickness:36}]},options:{responsive:true,maintainAspectRatio:false,indexAxis:'y',scales:{x:{beginAtZero:true,ticks:{precision:0}},y:{grid:{display:false}}},plugins:{legend:{display:false}}}});
+    }
+  }
+  function kpi_(rows){
+    var k={total:rows.length,stock:0,inUse:0,overdue:0,missing:0,broken:0,recheck:0};
+    rows.forEach(function(d){if(k[d.status.toLowerCase()]!==undefined)k[d.status.toLowerCase()]++;});
+    k.inUse=rows.filter(function(d){return d.status==='In-Use';}).length;k.stock=rows.filter(function(d){return d.status==='Stock';}).length;
+    k.overdue=rows.filter(function(d){return d.status==='Overdue';}).length;k.missing=rows.filter(function(d){return d.status==='Missing';}).length;
+    k.broken=rows.filter(function(d){return d.status==='Broken';}).length;k.recheck=rows.filter(function(d){return d.status==='Recheck';}).length;
+    k.rentalRows=(SD_DASH.raw&&SD_DASH.raw.rentals||[]).filter(function(r){return !(r.returnDate||/RETURNED|COMPLETED|DONE/i.test(String(r.rentalStatus||r.rental_status||'')));}).length;
+    return k;
+  }
+  function renderKpi_(k){
+    var items=[['อุปกรณ์ทั้งหมด',k.total,'fa-boxes','#2563eb','#dbeafe'],['พร้อมส่ง',k.stock,'fa-warehouse','#059669','#dcfce7'],['เช่ายืม',k.inUse,'fa-arrow-right-from-bracket','#d97706','#fef3c7'],['รอสอบเทียบ',k.recheck,'fa-triangle-exclamation','#7c3aed','#ede9fe'],['ใช้งานไม่ได้',k.broken,'fa-screwdriver-wrench','#64748b','#e2e8f0'],['ไม่พบในรายการ',k.missing,'fa-question-circle','#dc2626','#fee2e2'],['เกินกำหนดคืน',k.overdue,'fa-clock','#dc2626','#fee2e2'],['รายการเช่า',k.rentalRows,'fa-file-contract','#0ea5e9','#e0f2fe']];
+    spSetHtml('sdKpiGrid',items.map(function(i){return'<div class="sp-kpi"><div class="ico" style="background:'+i[4]+'"><i class="fas '+i[2]+'" style="color:'+i[3]+'"></i></div><div class="label">'+i[0]+'</div><div class="val" style="color:'+i[3]+'">'+spNum(i[1])+'</div></div>';}).join(''));
+  }
+  function renderAll_(rows){
+    rows=rows||filtered_();
+    try{sd_renderModelCards(rows);}catch(e){}
+    renderKpi_(kpi_(rows));
+    renderCharts_(rows);
+    try{sd_renderContractSummary();}catch(e){}
+    try{sd_renderAlerts();}catch(e){}
+    try{sd_renderSummaryTables();}catch(e){}
+  }
+  window.sdCanonicalStatusV3031=status_;
+  window.sdFilteredDevicesV3031=filtered_;
+  window.sdRenderChartsV3031=renderCharts_;
+  window.sd_renderFilteredV3031=renderAll_;
+  window.sd_renderFiltered=function(){renderAll_(filtered_());};
+  window.sd_getFilteredDevices=function(){return filtered_();};
+  window.sdFilteredDevices=function(){return filtered_();};
+
+  function alerts_(){
+    var data=(SD_DASH.raw&&SD_DASH.raw.infusionAlerts)||[];
+    var devices=filtered_(), seen={}, rows=data.slice();
+    devices.forEach(function(d){
+      var due=d.expectedReturn||d.expectedReturnDate||d.dueDate||'';
+      if(d.status==='Overdue'||Number(d.overdueDays||0)>0)rows.push({category:'RETURN',type:'RETURN',idCode:d.idCode,sn:d.sn,brand:d.brand,model:d.model,location:d.location,borrower:d.borrower,dueDate:due,message:'เกินกำหนดคืน '+Math.max(1,Number(d.overdueDays||0))+' วัน',severity:'CRITICAL'});
+      if(d.actionRequired)rows.push({category:'CAL_PM',type:'CAL_PM',idCode:d.idCode,sn:d.sn,brand:d.brand,model:d.model,location:d.location,borrower:d.borrower,dueDate:d.pmDueDate||d.dueDate||'',message:d.actionRequired,severity:'WARNING'});
+    });
+    return rows.filter(function(x){return x&&((x.category||x.type)||x.message);});
+  }
+  window.sd_openInfusionAlertsV3031=function(){
+    var rows=alerts_(),counts={ALL:rows.length};
+    rows.forEach(function(x){var c=String(x.category||x.type||'OTHER').toUpperCase();counts[c]=(counts[c]||0)+1;});
+    var cats=['ALL','RETURN','CAL_PM','READY_STOCK','CONTRACT'];
+    var html='<div class="sd-v3031-alerts"><div class="sd-v3031-filters"><input id="sdV3031AlertQ" placeholder="Search ID / SN / Location / Borrower" oninput="sdFilterAlertsV3031()"><select id="sdV3031AlertType" onchange="sdFilterAlertsV3031()">'+cats.map(function(c){return'<option value="'+c+'">'+(c==='ALL'?'All Follow-up':c)+' ('+(counts[c]||0)+')</option>';}).join('')+'</select><select id="sdV3031AlertSeverity" onchange="sdFilterAlertsV3031()"><option value="ALL">All Severity</option><option value="CRITICAL">Critical</option><option value="WARNING">Warning</option><option value="INFO">Info</option></select></div><div id="sdV3031AlertList"></div></div>';
+    window.sdAlertRowsV3031=rows;
+    Swal.fire({title:'Infusion Pump Alerts',width:'min(1180px,96vw)',html:html,confirmButtonText:'Close',didOpen:function(){sdFilterAlertsV3031();}});
+  };
+  window.sdFilterAlertsV3031=function(){
+    var rows=window.sdAlertRowsV3031||[],q=String((document.getElementById('sdV3031AlertQ')||{}).value||'').toLowerCase(),cat=String((document.getElementById('sdV3031AlertType')||{}).value||'ALL'),sev=String((document.getElementById('sdV3031AlertSeverity')||{}).value||'ALL');
+    rows=rows.filter(function(x){var text=[x.idCode,x.sn,x.brand,x.model,x.location,x.borrower,x.message,x.actionRequired].join(' ').toLowerCase(),c=String(x.category||x.type||'OTHER').toUpperCase();return(!q||text.includes(q))&&(cat==='ALL'||c===cat)&&(sev==='ALL'||String(x.severity||'INFO').toUpperCase()===sev);});
+    var root=document.getElementById('sdV3031AlertList');if(!root)return;
+    root.innerHTML=rows.map(function(x){return'<div class="sd-v3031-alert-row"><div><b>'+spEsc(x.idCode||x.model||'-')+'</b> '+spBadge(x.severity||'INFO')+'<div>'+spEsc((x.brand||'')+' '+(x.model||''))+'</div><small>'+spEsc(x.location||x.borrower||'-')+(x.dueDate?' · Due '+spEsc(spFmtDate(x.dueDate)):'')+'</small></div><strong>'+spEsc(x.message||x.actionRequired||'-')+'</strong></div>';}).join('')||'<div class="sp-muted" style="padding:30px;text-align:center">No follow-up items</div>';
+  };
+  var style=document.createElement('style');style.textContent=`
+    .sd-v3031-alerts{text-align:left}.sd-v3031-filters{display:grid;grid-template-columns:2fr 1fr 1fr;gap:8px;margin-bottom:12px}.sd-v3031-filters input,.sd-v3031-filters select{height:38px;border:1px solid #d5e0eb;border-radius:10px;padding:0 10px;font-size:11px;background:#f8fbff}.sd-v3031-alert-row{display:grid;grid-template-columns:1.2fr 1fr;gap:12px;padding:11px 12px;border:1px solid #e5edf5;border-radius:12px;background:#fff;margin-bottom:7px}.sd-v3031-alert-row small{display:block;color:#64748b;margin-top:3px}.sd-v3031-alert-row strong{color:#334155;font-size:11px;align-self:center}@media(max-width:700px){.sd-v3031-filters{grid-template-columns:1fr}.sd-v3031-alert-row{grid-template-columns:1fr}}
+  `;document.head.appendChild(style);
+  // Keep the requested public button name working.
+  window.sd_openInfusionAlertsV3029=window.sd_openInfusionAlertsV3031;
+  // Source link is explicitly labelled as the 01/09/2026 final inventory.
+  var link=document.getElementById('sdCleanInventorySourceLinkV3028');if(link){link.title='01/09/2026 Final Stock Inventory';link.setAttribute('aria-label','01/09/2026 Final Stock Inventory');}
+})();
