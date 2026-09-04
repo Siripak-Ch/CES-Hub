@@ -19,7 +19,7 @@
   <div id="mwoDataPanelV3030">
     <div id="mwoKpi" class="ces-mwo-v3030-kpis"></div>
     <div id="mwoTeamSummary" class="ces-mwo-v3030-team-grid"></div>
-    <div class="ces-mwo-v3030-card ces-mwo-v3030-chart-card"><div class="ces-mwo-v3030-card-head"><div><h3><i class="fas fa-chart-column"></i> Monthly Total Cost by Team</h3><p id="mwoChartSubtitleV3030">Filtered records</p></div></div><div class="ces-mwo-v3030-chart"><canvas id="mwoMonthlyCostChartV3030"></canvas></div></div>
+    <div class="ces-mwo-v3030-card mwo-team-cost-card"><div class="ces-mwo-v3030-card-head"><div><h3><i class="fas fa-wallet"></i> Monthly Total Cost by Team</h3><p>Summary from MEMO · updates with filters</p></div></div><div id="mwoMonthlyCostCardsV3031" class="mwo-team-cost-cards"></div></div>
 
     <div class="ces-mwo-v3030-filter-card">
       <div class="ces-mwo-v3030-search"><i class="fas fa-magnifying-glass"></i><input id="mwoSearch" placeholder="ค้นหาเลขเอกสาร / ลูกค้า / ผู้เสนอ" oninput="memoWorkOrderApply()"></div>
@@ -48,4 +48,8 @@
     </div>
     <div class="ces-mwo-v3030-card"><div class="ces-mwo-v3030-card-head"><div><h3><i class="fas fa-code-compare"></i> Memo / Work Order ↔ Service CSI 2026</h3><p>Saved comparison from the latest uploaded workbook</p></div><button class="ces-mwo-v3030-small" onclick="refreshServiceMemoMappingV55()"><i class="fas fa-rotate"></i> Refresh</button></div><div id="mwoMappingInlineV3010" class="ces-mwo-v3030-mapping"><div class="text-center text-slate-400 py-12">Open this tab to load the saved Service CSI mapping.</div></div></div>
   </div>
+
+<style>
+.mwo-team-cost-cards{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:10px}.mwo-team-cost-item{display:flex;align-items:center;gap:9px;padding:12px;border:1px solid #dbe7f3;border-radius:14px;background:#f8fbff;min-width:0}.mwo-team-cost-icon{width:34px;height:34px;border-radius:10px;background:#eaf2ff;color:#2563eb;display:grid;place-items:center;flex:0 0 auto}.mwo-team-cost-main{min-width:0;display:flex;flex-direction:column}.mwo-team-cost-main b{font-size:12px;color:#17365b}.mwo-team-cost-main span{font-size:8px;color:#7b8da4;font-weight:800;margin-top:2px}.mwo-team-cost-values{margin-left:auto;text-align:right;display:flex;flex-direction:column;min-width:0}.mwo-team-cost-values small{font-size:7px;color:#8a9ab0;font-weight:800}.mwo-team-cost-values strong{font-size:14px;color:#004aad}.mwo-team-cost-values em{font-style:normal;font-size:7px;color:#64748b;margin-top:2px}@media(max-width:1100px){.mwo-team-cost-cards{grid-template-columns:repeat(3,minmax(0,1fr))}}@media(max-width:700px){.mwo-team-cost-cards{grid-template-columns:1fr 1fr}.mwo-team-cost-item{padding:9px}}
+</style>
 </section>

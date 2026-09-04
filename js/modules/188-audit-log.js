@@ -72,10 +72,17 @@ var auditUxStyle=d.createElement('style');auditUxStyle.textContent='#view-audit_
     var active=document.querySelector('#view-audit_log .audit-team-tab.primary');var team=String((active&&active.dataset&&active.dataset.team)||window.__CES_AUDIT_IMPORT_TEAM||'EHS').toUpperCase();
     Swal.fire({title:'Import Audit Log',text:'Updating '+team+' working data…',allowOutsideClick:false,showConfirmButton:false,didOpen:function(){Swal.showLoading();}});
     file.arrayBuffer().then(function(buf){
-      var wb=XLSX.read(buf,{type:'array',cellDates:false}),name=wb.SheetNames[0],ws=wb.Sheets[name];
-      if(!ws)throw new Error('No worksheet found.');
-      var rows=XLSX.utils.sheet_to_json(ws,{header:1,defval:'',raw:false});
-      while(rows.length&&rows[0].every(function(v){return String(v||'').trim()==='';}))rows.shift();
+      var wb=XLSX.read(buf,{type:'array',cellDates:false}),selected=null,rows=null,headerAt=-1;
+      wb.SheetNames.some(function(sheetName){
+        var candidate=XLSX.utils.sheet_to_json(wb.Sheets[sheetName],{header:1,defval:'',raw:false});
+        for(var hi=0;hi<Math.min(candidate.length,25);hi++){
+          var txt=(candidate[hi]||[]).map(function(v){return String(v||'').toLowerCase().replace(/\s+/g,' ');}).join(' | ');
+          var score=(/finding|action item|finding details|ข้อบกพร่อง|ประเด็น/.test(txt)?5:0)+(/status|สถานะ/.test(txt)?4:0)+(/responsible|owner|ผู้รับผิดชอบ/.test(txt)?3:0)+(/due date|กำหนด/.test(txt)?2:0)+(/priority|severity|ระดับ/.test(txt)?2:0);
+          if(score>=7){selected=sheetName;rows=candidate;headerAt=hi;return true;}
+        } return false;
+      });
+      if(!selected)throw new Error('ไม่พบตาราง Audit Log ที่มี Finding / Responsible / Status / Due Date');
+      rows=rows.slice(headerAt);
       if(rows.length<2)throw new Error('The selected sheet has no audit records.');
       var headers=rows[0].map(function(v){return String(v==null?'':v).trim();});
       var data=rows.slice(1).filter(function(r){return r.some(function(v){return String(v||'').trim();});});
