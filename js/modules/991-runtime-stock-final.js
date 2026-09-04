@@ -610,12 +610,12 @@ window.si_handleBulkUpload=async function(file){
   var schemas={
     'Infusion Pump Dashboard':['id_code','serial_number','Equipment Status','brand','model','location','rental_status','borrower','รายละเอียดสัญญาเช่า/ระยะ','ผู้ประสานงาน','Email ผู้ประสานงาน','สัญญา CAL,PM','PLAN CAL,PM','PLAN PM','borrow_date','expected_return_date','due_date','overdue_days','days_remaining','return_date','action_required','recheck_note','ac_plug_sn','clamp_sn','PM Due (6 Month)','CAL/PM Due (12 Month)'],
     'Infusion Rental History':['id_code','serial_number','Equipment Status','brand','model','location','rental_status','borrower','รายละเอียดสัญญาเช่า/ระยะ','ผู้ประสานงาน','Email ผู้ประสานงาน','สัญญา CAL,PM','PLAN CAL,PM','PLAN PM','borrow_date','expected_return_date','due_date','overdue_days','days_remaining','return_date','action_required','recheck_note','ac_plug_sn','clamp_sn','PM Due (6 Month)','CAL/PM Due (12 Month)'],
-    'Accessories Dashboard':['accessory_id','team','Accessories Type','item_name','stock_qty','min_stock_qty','status','action_required','check_interval_code','check_interval_days','last_check_date','next_check_date','check_result','physical_qty','stock_gap','stock_gap_to_min','check_note','checked_by','last_check_timestamp','stock_status','check_status','location','remark']
+    'Accessories Data':['accessory_id','team','Accessories Type','item_name','stock_qty','min_stock_qty','status','action_required','check_interval_code','check_interval_days','last_check_date','next_check_date','check_result','physical_qty','stock_gap','stock_gap_to_min','check_note','checked_by','last_check_timestamp','stock_status','check_status','location','remark','Add Stock','Lot Number','Add Stock Date']
   };
   function norm(v){return String(v==null?'':v).trim().toLowerCase().replace(/[\s_-]+/g,'');}
   function findHeader(grid,key){for(var r=0;r<Math.min(grid.length,40);r++){if((grid[r]||[]).some(function(v){return norm(v)===norm(key);}))return r;}return-1;}
   function rowsFor(ws,name){
-    var grid=XLSX.utils.sheet_to_json(ws,{header:1,defval:'',raw:false}),schema=schemas[name],headerRow=findHeader(grid,name==='Accessories Dashboard'?'accessory_id':'id_code');
+    var grid=XLSX.utils.sheet_to_json(ws,{header:1,defval:'',raw:false}),schema=schemas[name],headerRow=findHeader(grid,name==='Accessories Data'?'accessory_id':'id_code');
     if(headerRow<0)throw new Error(name+': header row not found');
     var source=grid[headerRow].map(function(v){return String(v||'').trim();}),index={};
     source.forEach(function(h,i){index[norm(h)]=i;});
