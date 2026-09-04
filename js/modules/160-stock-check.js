@@ -29,33 +29,14 @@ function sc_lookup(){
 }
 function sc_renderResult(rows){
   if(!rows.length){spSetHtml('scResult','<div class="stockpro-card"><h3>ไม่พบข้อมูล</h3><div class="sp-muted">ลองตรวจสอบ ID / SN อีกครั้ง</div></div>');return;}
-  spSetHtml('scResult',rows.map(d=>`<div class="stockpro-card">
-    <div class="stockpro-card-head"><h3>${spEsc(d.idCode)} ${spBadge(d.status)}</h3><span class="sp-pill">${spEsc(d.brand||'-')}</span></div>
-    <div class="sp-result-grid">
-      ${sc_field('Serial Number',d.sn)}
-      ${sc_field('Equipment Status',d.equipmentStatus||d.status)}
-      ${sc_field('Model',d.model||d.itemName)}
-      ${sc_field('Location',d.location)}
-      ${sc_field('Rental Status',d.rentalStatus||'-')}
-      ${sc_field('Borrower',d.borrower||'-')}
-      ${sc_field('Contract / Duration',d.contractDetail||'-')}
-      ${sc_field('Coordinator',d.coordinator||'-')}
-      ${sc_field('Coordinator Email',d.borrowerEmail||'-')}
-      ${sc_field('CAL/PM Contract',d.calPm||'-')}
-      ${sc_field('PLAN CAL/PM',d.planCalPm||d.plaCalPm||'-')}
-      ${sc_field('PLAN PM',d.planPm||'-')}
-      ${sc_field('Borrow Date',spFmtDate(d.borrowDate))}
-      ${sc_field('Due Date',spFmtDate(d.expectedReturn||d.expectedReturnDate))}
-      ${sc_field('AC Plug SN',d.acPlugSn||'-')}
-      ${sc_field('Clamp SN',d.clampSn||'-')}
-      ${sc_field('Action Required',d.actionRequired||d.recheckNote||'-')}
-    </div>
-    <div style="display:flex;gap:8px;margin-top:14px;flex-wrap:wrap">
-      <button class="sp-btn success" onclick="sc_record('${spEsc(d.idCode)}','CHECK-IN')"><i class="fas fa-sign-in-alt"></i> Check-In</button>
-      <button class="sp-btn danger" onclick="sc_checkoutPrompt('${spEsc(d.idCode)}','${spEsc(d.brand||'')}','${spEsc(d.model||'')}','${spEsc(d.sn||'')}')"><i class="fas fa-sign-out-alt"></i> Check-Out</button>
-    </div>
-  </div>`).join(''));
+  spSetHtml('scResult',rows.map(d=>`<div class="stockpro-card sc-result-compact" onclick='sc_openResultPopup(${JSON.stringify(d).replace(/'/g,"&#39;")})' style="cursor:pointer"><div class="stockpro-card-head"><h3>${spEsc(d.idCode)} ${spBadge(d.status)}</h3><span class="sp-pill">${spEsc(d.model||d.itemName||'-')}</span></div><div class="sp-result-grid sc-result-summary"><div class="sp-field"><div class="k">SN</div><div class="v">${spEsc(d.sn||'-')}</div></div><div class="sp-field"><div class="k">Location</div><div class="v">${spEsc(d.location||'-')}</div></div><div class="sp-field"><div class="k">Rental</div><div class="v">${spEsc(d.rentalStatus||'-')}</div></div><div class="sp-field"><div class="k">CAL / PM</div><div class="v">${spEsc(d.calPm||d.actionRequired||'-')}</div></div></div><div class="sp-muted" style="margin-top:8px">กดเพื่อดูรายละเอียดและ Action</div></div>`).join(''));
 }
+function sc_openResultPopup(d){
+  if(!d)return;
+  const field=(k,v)=>`<div class="sc-popup-field"><span>${spEsc(k)}</span><b>${spEsc(v||'-')}</b></div>`;
+  Swal.fire({title:`${spEsc(d.idCode||'-')} · ${spEsc(d.model||d.itemName||'')}`,width:'min(760px,94vw)',html:`<div class="sc-popup-grid">${field('Serial Number',d.sn)}${field('Equipment Status',d.equipmentStatus||d.status)}${field('Brand',d.brand)}${field('Model',d.model||d.itemName)}${field('Location',d.location)}${field('Rental Status',d.rentalStatus)}${field('Borrower',d.borrower)}${field('Due Date',spFmtDate(d.expectedReturn||d.expectedReturnDate))}${field('CAL/PM Contract',d.calPm)}${field('PLAN CAL/PM',d.planCalPm||d.plaCalPm)}${field('PLAN PM',d.planPm)}${field('Action Required',d.actionRequired||d.recheckNote)}</div><div class="sc-popup-actions"><button class="sc-white-action green" onclick="sc_record('${spEsc(d.idCode)}','CHECK-IN');Swal.close()"><i class="fas fa-rotate-left"></i> รับคืน</button><button class="sc-white-action blue" onclick="sc_record('${spEsc(d.idCode)}','CALIBRATION_CONFIRM');Swal.close()"><i class="fas fa-circle-check"></i> ยืนยันสอบเทียบ</button><button class="sc-white-action orange" onclick="sc_record('${spEsc(d.idCode)}','PM_CONFIRM');Swal.close()"><i class="fas fa-screwdriver-wrench"></i> ยืนยัน PM</button><button class="sc-white-action red" onclick="sc_record('${spEsc(d.idCode)}','CANCEL');Swal.close()"><i class="fas fa-xmark"></i> ยกเลิก</button></div>`,showConfirmButton:false,showCloseButton:true});
+}
+
 function sc_field(k,v){return `<div class="sp-field"><div class="k">${spEsc(k)}</div><div class="v">${spEsc(v||'-')}</div></div>`;}
 function sc_record(idCode,action,payload={}){
   const p=Object.assign({action,idCode},payload);
@@ -215,3 +196,5 @@ if(typeof window.scOriginalIssueSelectedAccessory==='undefined' && typeof sc_iss
     try { window.scOriginalIssueSelectedAccessory(); } finally { setTimeout(()=>{try{Swal.close();}catch(e){}},1200); }
   };
 }
+
+(function(){if(document.getElementById('sc-popup-style-current'))return;var st=document.createElement('style');st.id='sc-popup-style-current';st.textContent='#view-check_stock .sc-result-compact{transition:.15s}#view-check_stock .sc-result-compact:hover{transform:translateY(-1px);box-shadow:0 10px 24px rgba(15,23,42,.08)}.sc-popup-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;text-align:left;max-height:48vh;overflow:auto;padding:2px}.sc-popup-field{border:1px solid #dbe5f0;background:#f8fbff;border-radius:10px;padding:8px 10px}.sc-popup-field span{display:block;font-size:9px;color:#64748b;font-weight:800}.sc-popup-field b{display:block;margin-top:2px;font-size:11px;color:#0f172a;word-break:break-word}.sc-popup-actions{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;margin-top:14px}.sc-white-action{border:0;border-radius:10px;padding:9px 12px;font-weight:900;color:#fff!important;cursor:pointer}.sc-white-action.green{background:#059669}.sc-white-action.blue{background:#2563eb}.sc-white-action.orange{background:#d97706}.sc-white-action.red{background:#dc2626}@media(max-width:600px){.sc-popup-grid{grid-template-columns:1fr}.sc-popup-actions{display:grid;grid-template-columns:1fr 1fr}.sc-white-action{width:100%;font-size:11px}}';document.head.appendChild(st)})();

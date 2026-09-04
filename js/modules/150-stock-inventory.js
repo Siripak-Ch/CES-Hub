@@ -41,7 +41,9 @@ function siEnsureStyle(){
    Keeps V6 functions and overrides only UX/rendering for inventory/accessories/cart.
 ============================================================ */
 function si_extendPrompt(d){const current=d.expectedReturn||d.expectedReturnDate||'';Swal.fire({title:'ต่อสัญญา '+d.idCode,html:`<label class="lbl">วันคืนเดิม</label><input class="swal2-input" value="${spEsc(current||'-')}" disabled><label class="lbl">วันคืนใหม่</label><input id="swDue" class="swal2-input" type="date" value="${spEsc(current)}"><input id="swNote" class="swal2-input" placeholder="หมายเหตุ">`,showCancelButton:true,confirmButtonText:'ต่อสัญญา'}).then(r=>{if(!r.isConfirmed)return;const due=spVal('swDue','');if(!due){Swal.fire('กรุณาเลือกวันที่','','warning');return;}google.script.run.withSuccessHandler(si_afterAction).withFailureHandler(si_actionError).si_extendRental({idCode:d.idCode,expectedReturnDate:due,note:spVal('swNote','')});});}
-function si_restockPrompt(a){Swal.fire({title:`Restock ${spEsc(a.itemName||a.name)}`,html:`<input id="rsQty" class="swal2-input" type="number" min="1" value="1"><input id="rsNote" class="swal2-input" placeholder="หมายเหตุ">`,showCancelButton:true,confirmButtonText:'Restock'}).then(r=>{if(!r.isConfirmed)return;google.script.run.withSuccessHandler(res=>{if(res&&res.success){Swal.fire('สำเร็จ',`New Qty: ${res.newQty}`,'success');initStockInventoryModule(true);}else Swal.fire('Error',(res&&res.message)||'Failed','error');}).si_restockAccessory({accessoryId:a.accessoryId||a.idCode||a.itemName,qty:spVal('rsQty','1'),note:spVal('rsNote','')});});}
+function si_restockPrompt(a){
+  Swal.fire({title:`เติม Stock · ${spEsc(a.itemName||a.name)}`,width:560,html:`<div style="text-align:left"><label style="font-size:11px;font-weight:900">จำนวนที่เติม<input id="rsQty" class="swal2-input" type="number" min="1" value="1"></label><label style="font-size:11px;font-weight:900">Lot Number<input id="rsLot" class="swal2-input" placeholder="ระบุ Lot / Batch"></label><label style="font-size:11px;font-weight:900">วันที่เติม Stock<input id="rsDate" class="swal2-input" type="date" value="${new Date().toISOString().slice(0,10)}"></label><label style="font-size:11px;font-weight:900">หมายเหตุ<input id="rsNote" class="swal2-input" placeholder="หมายเหตุ"></label></div>`,showCancelButton:true,confirmButtonText:'บันทึกการเติม Stock',cancelButtonText:'ยกเลิก'}).then(r=>{if(!r.isConfirmed)return;google.script.run.withSuccessHandler(res=>{if(res&&res.success){Swal.fire('บันทึกสำเร็จ',`New Qty: ${res.newQty}<br>Lot: ${spEsc(res.lotNumber||spVal('rsLot','-'))}`,'success');initStockInventoryModule(true);}else Swal.fire('Error',(res&&res.message)||'Failed','error');}).withFailureHandler(err=>Swal.fire('Error',err.message||String(err),'error')).si_restockAccessory({accessoryId:a.accessoryId||a.idCode||a.itemName,qty:spVal('rsQty','1'),lotNumber:spVal('rsLot',''),restockDate:spVal('rsDate',''),note:spVal('rsNote','')});});
+}
 
 
 /* ============================================================
@@ -451,17 +453,14 @@ function siForceTabLayout(){
   const isAcc = SI && SI.tab === 'acc';
   const pairs = [
     ['siEquipFilters', !isAcc], ['siEquipKpiGrid', !isAcc], ['siEquipSection', !isAcc],
-    ['siInventoryDashboardCurrent', !isAcc],
     ['siAccFilters', isAcc], ['siAccKpiGrid', isAcc], ['siAccSection', isAcc]
   ];
   pairs.forEach(([id,show])=>{
     const el=document.getElementById(id);
     if(el){ el.classList.toggle('hidden', !show); el.style.display = show ? '' : 'none'; }
   });
-  const dash=document.getElementById('siTabDashboardCurrent');
-  const acc=document.getElementById('siTabAcc');
-  if(dash)dash.classList.toggle('active', !isAcc);
-  if(acc)acc.classList.toggle('active', isAcc);
+  document.getElementById('siTabEquip')?.classList.toggle('active', !isAcc);
+  document.getElementById('siTabAcc')?.classList.toggle('active', isAcc);
 }
 
 function si_switchTab(tab){
@@ -469,7 +468,7 @@ function si_switchTab(tab){
   siCurrentLayoutStyle();
   si_renderKpi();
   siForceTabLayout();
-  if(SI.tab==='acc')si_renderAccCards(); else si_applyFilters();
+  si_applyFilters();
   siForceCartRight();
 }
 
