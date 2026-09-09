@@ -99,6 +99,7 @@
   function team_(x){return String(x.team||'GENERAL').trim()||'GENERAL';}
   function type_(x){return String(x.itemName||x.item_name||x.name||x.type||x.accessoriesType||x.accessories_type||'GENERAL').trim()||'GENERAL';}
   function status_(x){var raw=String(x.status||'').toUpperCase();if(raw.indexOf('PENDING')>=0)return'PENDING_APPROVAL';return qty_(x)<=min_(x)?'LOW_STOCK':'STOCK';}
+  function updated_(x){return String(x.lastCheckTimestamp||x.last_check_timestamp||x.lastCheckDate||x.last_check_date||x.addStockDate||x['Add Stock Date']||'').trim();}
   function unique_(rows,fn){var m={};(rows||[]).forEach(function(x){var v=fn(x);if(v)m[v]=1;});return Object.keys(m).sort(function(a,b){return a.localeCompare(b);});}
   function filtered_(){
     var a=acc_(),t=(document.getElementById('siDashFilterTeamV3031')||{}).value||'all',ty=(document.getElementById('siDashFilterTypeV3031')||{}).value||'all',st=(document.getElementById('siDashFilterStatusV3031')||{}).value||'all';
@@ -124,10 +125,10 @@
     if(sc)statusChart=new Chart(sc,{type:'doughnut',data:{labels:['STOCK','LOW STOCK'],datasets:[{data:[byStatus.STOCK,byStatus.LOW_STOCK],backgroundColor:['#10b981','#f59e0b'],borderWidth:0}]},options:{responsive:true,maintainAspectRatio:false,cutout:'64%',plugins:{legend:{position:'right'}}}});
   }
   function renderSummary_(rows){
-    var map={};rows.forEach(function(x){var k=team_(x)+'||'+type_(x);if(!map[k])map[k]={team:team_(x),type:type_(x),items:0,stock:0,min:0,low:0,cost:0};var q=qty_(x),m=min_(x);map[k].items++;map[k].stock+=q;map[k].min+=m;map[k].cost+=cost_(x);if(status_(x)==='LOW_STOCK')map[k].low++;});
+    var map={};rows.forEach(function(x){var k=team_(x)+'||'+type_(x);if(!map[k])map[k]={team:team_(x),type:type_(x),items:0,stock:0,min:0,low:0,cost:0,updated:''};var q=qty_(x),m=min_(x),u=updated_(x);map[k].items++;map[k].stock+=q;map[k].min+=m;map[k].cost+=cost_(x);if(status_(x)==='LOW_STOCK')map[k].low++;if(u&&(!map[k].updated||String(u).localeCompare(String(map[k].updated))>0))map[k].updated=u;});
     var root=document.getElementById('siAccessoriesSummaryV3028');if(!root)return;
     var list=Object.keys(map).map(function(k){return map[k];}).sort(function(a,b){return a.team.localeCompare(b.team)||a.type.localeCompare(b.type);});
-    root.innerHTML='<div class="si-accessories-summary-wrap-v3031"><table><thead><tr><th>Team</th><th>Accessories Type</th><th>Items</th><th>Total Stock</th><th>Min Stock</th><th>Gap</th><th>Low Stock</th><th>Cost</th></tr></thead><tbody>'+list.map(function(x){var gap=x.stock-x.min;return'<tr><td><b>'+esc_(x.team)+'</b></td><td>'+esc_(x.type)+'</td><td>'+x.items.toLocaleString('en-US')+'</td><td><b>'+x.stock.toLocaleString('en-US')+'</b></td><td>'+x.min.toLocaleString('en-US')+'</td><td><span class="'+(gap<0?'gap-bad':'gap-ok')+'">'+(gap<0?'−':'')+Math.abs(gap).toLocaleString('en-US')+'</span></td><td><span class="'+(x.low?'low':'ok')+'">'+x.low+'</span></td><td><b>฿'+x.cost.toLocaleString('en-US',{maximumFractionDigits:2})+'</b></td></tr>';}).join('')+'</tbody></table></div>'+(list.length?'':'<div class="si-dash-empty-v3031">No accessory data for current filter.</div>');
+    root.innerHTML='<div class="si-accessories-summary-wrap-v3031"><table><thead><tr><th>Team</th><th>Accessories Type</th><th>Stock</th><th>Total Stock</th><th>Min Stock</th><th>Status</th><th>Last Stock Update</th><th>Cost</th></tr></thead><tbody>'+list.map(function(x){var low=x.low>0;return'<tr><td><b>'+esc_(x.team)+'</b></td><td>'+esc_(x.type)+'</td><td>'+x.items.toLocaleString('en-US')+'</td><td><b>'+x.stock.toLocaleString('en-US')+'</b></td><td>'+x.min.toLocaleString('en-US')+'</td><td><span class="'+(low?'low':'ok')+'">'+(low?'LOW STOCK':'STOCK')+'</span></td><td>'+esc_(x.updated||'-')+'</td><td><b>฿'+x.cost.toLocaleString('en-US',{maximumFractionDigits:2})+'</b></td></tr>';}).join('')+'</tbody></table></div>'+(list.length?'':'<div class="si-dash-empty-v3031">No accessory data for current filter.</div>');
   }
   function render(){applySourceLink_();fillFilters_();var rows=filtered_();renderKpi_(rows);renderCharts_(rows);renderSummary_(rows);}
   window.si_renderAccessoriesDashboardV3031=render;

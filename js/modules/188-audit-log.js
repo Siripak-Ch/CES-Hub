@@ -1,11 +1,15 @@
 (function(w,d){'use strict';
 var state={team:'EHS',headers:[],rows:[],weekly:[],weeklyHeaders:[],sourceHeaders:[],sourceRows:[],filtered:[],stats:{},loaded:{},charts:{},documentPlan:{},realtimeTimer:null};
-var DEFAULT_LINKS={LAB:'https://bdmsgroup-my.sharepoint.com/:x:/r/personal/thippayawaree_kh_bdms_co_th/Documents/00%20Work/0.2%20Expand_New%20Scope%202026/Summary%20CAR_OBS%20-%20External%20Audit%20(ISO17025)%2024-25.08.2026.xlsx?d=wae2f2aa3db6148cebcc5de9d1ff59c4a&csf=1&web=1&e=Ny4jap',EHS:'https://docs.google.com/spreadsheets/d/1O7sWruE9VgGIjOWhvHB11RFfaAIosjpzOgr-Rxc2F8k/edit?gid=936287898#gid=936287898'};
+var DEFAULT_LINKS={
+  LAB:{primary:'https://bdmsgroup-my.sharepoint.com/:x:/r/personal/thippayawaree_kh_bdms_co_th/Documents/00%20Work/0.2%20Expand_New%20Scope%202026/Summary%20CAR_OBS%20-%20External%20Audit%20(ISO17025)%2024-25.08.2026.xlsx?d=wae2f2aa3db6148cebcc5de9d1ff59c4a&csf=1&web=1&e=SJGCFa',secondary:'https://docs.google.com/spreadsheets/d/1js3cGqlP9oGCYHcTrj-Wcrf5MMlJqkHj4Kcr1Mozug0/edit'},
+  EHS:{primary:'https://docs.google.com/spreadsheets/d/1O7sWruE9VgGIjOWhvHB11RFfaAIosjpzOgr-Rxc2F8k/edit?gid=936287898#gid=936287898',secondary:'https://docs.google.com/spreadsheets/d/1O7sWruE9VgGIjOWhvHB11RFfaAIosjpzOgr-Rxc2F8k/edit?gid=936287898#gid=936287898'},
+  MED:{primary:'',secondary:''}
+};
 var WEEKS=[{label:'Week 1',date:'1 Sep'},{label:'Week 2',date:'8 Sep'},{label:'Week 3',date:'15 Sep'},{label:'Week 4',date:'22 Sep'},{label:'Week 5',date:'29 Sep'}];
 function esc(v){return String(v==null?'':v).replace(/[&<>"']/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});}
 function cfg(){return typeof globalConfig!=='undefined'&&globalConfig?globalConfig:{};}
 function api(fn,args,opt){return w.CES_API.callFunction(fn,args||[],Object.assign({timeoutMs:70000,priority:'active',userAction:true,module:'audit_log'},opt||{}));}
-function links(){var c=cfg(),t=state.team,excel=String(c['AUDIT_EXCEL_'+t]||c[t==='EHS'?'AUDIT_EXCEL_EHS_ACTION_PLAN':'']||DEFAULT_LINKS[t]||'').trim(),drive=String(c['AUDIT_DRIVE_'+t]||excel||'').trim();[['audit-drive-link',drive],['audit-excel-link',excel]].forEach(function(x){var a=d.getElementById(x[0]);if(!a)return;a.href=x[1]||'#';a.classList.toggle('opacity-40',!x[1]);a.onclick=x[1]?null:function(e){e.preventDefault();if(w.showToast)showToast('Configure this Audit link in Setting','warning');};});}
+function links(){var c=cfg(),t=state.team,defs=DEFAULT_LINKS[t]||{},primary=String(c['AUDIT_DRIVE_'+t]||defs.primary||'').trim(),secondary=String(c['AUDIT_EXCEL_'+t]||c[t==='EHS'?'AUDIT_EXCEL_EHS_ACTION_PLAN':'']||defs.secondary||'').trim();[['audit-drive-link',primary],['audit-excel-link',secondary]].forEach(function(x){var a=d.getElementById(x[0]);if(!a)return;a.href=x[1]||'#';a.classList.toggle('opacity-40',!x[1]);a.onclick=x[1]?null:function(e){e.preventDefault();if(w.showToast)showToast('Configure this Audit link in Setting','warning');};});}
 function idx(re){if(!re||typeof re.test!=='function')return-1;for(var i=0;i<state.headers.length;i++)if(re.test(String(state.headers[i]||'')))return i;return-1;}
 function val(row,re,fallback){var i=idx(re);return i>=0?row[i]:(fallback||'');}
 function statCard(label,n,tone,icon){return'<div class="audit-stat"><span class="audit-stat-icon" style="background:'+tone+'18;color:'+tone+'"><i class="fas '+icon+'"></i></span><div class="min-w-0"><small>'+label+'</small><b>'+Number(n||0)+'</b></div></div>';}
