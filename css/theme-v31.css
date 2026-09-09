@@ -165,3 +165,23 @@ body .ces-kpi-early { color:#047857!important; background:#ECFDF5!important; bor
 body .ces-kpi-on-time { color:#A16207!important; background:#FEFCE8!important; border-color:#FDE68A!important; }
 body .ces-kpi-late { color:#B91C1C!important; background:#FEF2F2!important; border-color:#FCA5A5!important; }
 body .ces-kpi-process { color:var(--ces-grey-600)!important; background:var(--ces-grey-50)!important; border-color:var(--ces-grey-100)!important; }
+
+/* Final mobile density: keep labels readable and allow action rows to scroll. */
+@media (max-width: 760px) {
+  .stockpro-page{padding-left:10px!important;padding-right:10px!important}
+  .stockpro-header-card{display:grid!important;grid-template-columns:minmax(0,1fr)!important;gap:10px!important;padding:12px!important;overflow:visible!important}
+  .stockpro-title-wrap{min-width:0!important;align-items:center!important}
+  .stockpro-title-wrap h1{font-size:18px!important;line-height:1.2!important;overflow-wrap:anywhere!important}
+  .stockpro-actions{width:100%!important;max-width:100%!important;display:flex!important;flex-wrap:nowrap!important;gap:7px!important;overflow-x:auto!important;overflow-y:visible!important;padding:2px 2px 7px!important;scrollbar-width:thin}
+  .stockpro-actions>a,.stockpro-actions>button{flex:0 0 42px!important;width:42px!important;min-width:42px!important;height:42px!important}
+  .ces-stock-header-meta{display:flex!important;flex-wrap:wrap!important;gap:6px!important;min-width:0!important}
+  .ces-stock-header-scope{max-width:100%!important;white-space:normal!important;line-height:1.25!important}
+  .stockpro-kpi-grid{grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:10px!important}
+  .stockpro-kpi-grid .stockpro-card{min-width:0!important;padding:13px!important}
+  .stockpro-two-col{grid-template-columns:1fr!important}
+  .sp-tabs,.ces-stock-tabs-v260{overflow-x:auto!important;display:flex!important;flex-wrap:nowrap!important}
+  .sp-tabs>button,.ces-stock-tabs-v260>button{min-width:145px!important;flex:1 0 auto!important}
+  .swal2-popup{width:calc(100vw - 20px)!important;max-height:calc(100dvh - 20px)!important}
+  .swal2-title{font-size:20px!important;line-height:1.25!important}
+  .swal2-actions{position:sticky!important;bottom:0!important;background:#fff!important;padding:10px!important;margin-top:8px!important;z-index:4!important}
+}

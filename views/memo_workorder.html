@@ -6,7 +6,7 @@
       <input id="mwoUploadFile" type="file" class="hidden" accept=".xlsx,.xls" onchange="handleMemoWorkOrderUpload(this.files&&this.files[0]);this.value=''">
       <button class="ces-mwo-v3030-icon upload" onclick="document.getElementById('mwoUploadFile').click()" title="Upload latest Memo / Work Order workbook"><i class="fas fa-arrow-up-from-bracket"></i></button>
       <button class="ces-mwo-v3030-icon excel" onclick="exportMemoWorkOrderExcel()" title="Export filtered data"><i class="fas fa-file-excel"></i></button>
-      <button class="ces-mwo-v3030-icon refresh" onclick="syncMemoWorkOrderSourceV3037(this)" title="Sync Memo and WorkOrder from Google Sheets"><i class="fas fa-rotate"></i></button>
+      <button class="ces-mwo-v3030-icon refresh" onclick="syncMemoWorkOrderSource(this)" title="Sync current-month Memo and WorkOrder from Google Sheets"><i class="fas fa-rotate"></i></button>
     </div>
   </div>
 
@@ -30,7 +30,7 @@
       <input id="mwoDateToV3030" type="date" onchange="memoWorkOrderApply()" title="Date to">
       <select id="mwoCostCenterV3030" onchange="memoWorkOrderApply()"><option value="ALL">All Cost Centers</option></select>
       <select id="mwoApprovalV3030" onchange="memoWorkOrderApply()"><option value="ALL">All Approval Status</option></select>
-      <button class="ces-mwo-v3030-reset" onclick="memoWorkOrderResetV3030()"><i class="fas fa-rotate-left"></i> Reset</button>
+      <button class="ces-mwo-v3030-reset" onclick="memoWorkOrderReset()"><i class="fas fa-rotate-left"></i> Reset</button>
     </div>
 
     <div class="ces-mwo-v3030-card">
