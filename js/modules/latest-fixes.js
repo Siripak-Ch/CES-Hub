@@ -42,7 +42,9 @@
       for(var s=0;s<specs.length;s++){
         var spec=specs[s],offset=0,headers=[],rows=[],sheetName=spec.name||'Data',done=false;
         while(!done){
-          var res=await api('ces_getStockSheetExportChunkV3035',[{sheetKey:spec.key,offset:offset,limit:125}]);
+          /* Use the long-standing allowlisted endpoint name.  Newer backends
+             honor chunked/offset/limit; this avoids a new API-contract name. */
+          var res=await api('sd_getInfusionTabExportLatest',[{tab:spec.key,chunked:true,offset:offset,limit:100}]);
           if(!res||res.success===false)throw new Error(res&&res.message||('Cannot export '+sheetName));
           if(!headers.length)headers=res.headers||[];Array.prototype.push.apply(rows,res.rows||[]);sheetName=res.sheetName||sheetName;
           done=res.done===true||res.nextOffset==null;offset=done?rows.length:Number(res.nextOffset||rows.length);
@@ -63,7 +65,8 @@
   w.sd_exportEquipmentExcel=function(){return exportChunkedSheets([{key:'equipment',name:'Infusion Pump Dashboard'}],'Infusion_Pump_Equipment_List');};
   w.sc_exportCurrent=function(){return safeExport(function(){return exportRows(equipmentRows(),'Check_Stock_Equipment','Infusion Pump');});};
   function exportAccessories(){return safeExport(function(){var p=stockPayload()||{},rows=p.accessories||[];try{if(typeof SI!=='undefined'&&Array.isArray(SI.acc)&&SI.acc.length)rows=SI.acc;}catch(ignore){}return exportRows(rows.map(function(x){return{accessory_id:x.accessoryId||x.accessory_id||x.idCode||'',team:x.team||'',item_name:x.itemName||x.item_name||x.name||'',stock_qty:x.stockQty||x.stock_qty||x.qty||0,min_stock_qty:x.minStockQty||x.min_stock_qty||x.minStock||0,status:x.status||'',action_required:x.actionRequired||x.action_required||'',cost:x.cost||x.unitCost||x.unit_cost||x.totalCost||x.total_cost||0};}),'Accessories_Data','Accessories Data');});}
-  var inventoryExportBase=w.si_exportCurrent;w.si_exportCurrent=function(){if(typeof SI!=='undefined'&&SI.tab!=='acc'&&typeof inventoryExportBase==='function')return inventoryExportBase();return exportAccessories();};w.si_exportAllSourceXlsxV3031=function(){return exportChunkedSheets([{key:'accessories_data',name:'Accessories Data'},{key:'accessories_dashboard',name:'Accessories Dashboard'}],'Inventory_Accessories');};
+  w.si_exportAllSourceXlsxV3031=function(){return exportChunkedSheets([{key:'accessories_data',name:'Accessories Data'},{key:'accessories_dashboard',name:'Accessories Dashboard'}],'Inventory_Accessories');};
+  w.si_exportCurrent=function(){return w.si_exportAllSourceXlsxV3031();};
 
   var exportViewBase=w.CES_exportCurrentView;if(typeof exportViewBase==='function')w.CES_exportCurrentView=function(tab){tab=tab||((typeof w.CES_getCurrentTab==='function'&&w.CES_getCurrentTab())||w.CES_ACTIVE_TAB||'');if(tab==='check_stock')return w.sc_exportCurrent();return exportViewBase.apply(this,arguments);};
 
