@@ -1,0 +1,49 @@
+<section id="view-ces_ai_knowledge" class="hidden animate-fade-in space-y-5 pb-20">
+  <div class="bg-white rounded-3xl border border-slate-100 shadow-sm p-5 flex flex-col md:flex-row md:items-center justify-between gap-4">
+    <div class="flex items-center gap-4">
+      <div class="w-12 h-12 rounded-2xl bg-blue-50 text-[#003DA5] grid place-items-center"><i class="fas fa-robot text-lg"></i></div>
+      <div><h2 class="text-xl font-black text-slate-800">CES AI Knowledge</h2><p class="text-xs font-bold text-slate-400">AI Chat Evaluation · Training Console · AI Logbook</p></div>
+    </div>
+    <div class="ces-page-header-actions-v225 flex items-center gap-2">
+      <a id="ces-ai-knowledge-sheet-link-v225" class="ces-standard-icon-btn ces-external-link-btn" href="#" target="_blank" rel="noopener" title="Open AI database" aria-label="Open AI database"><i class="fas fa-link"></i></a>
+    </div>
+  </div>
+
+  <div class="ces-ai-k-tabs-v225 ces-ai-k-tabs-v229" role="tablist" aria-label="CES AI Knowledge workspace">
+    <button class="active" data-ai-k-tab="eval" role="tab" aria-selected="true" onclick="switchCesAiKnowledgeV225('eval')"><i class="fas fa-thumbs-up"></i> AI Chat Evaluation</button>
+    <button data-ai-k-tab="train" role="tab" aria-selected="false" onclick="switchCesAiKnowledgeV225('train')"><i class="fas fa-robot"></i> Training Console</button>
+    <button data-ai-k-tab="log" role="tab" aria-selected="false" onclick="switchCesAiKnowledgeV225('log')"><i class="fas fa-book-open"></i> AI Logbook</button>
+  </div>
+
+  <div id="ces-ai-k-pane-eval-v225" class="space-y-5">
+    <div class="grid grid-cols-2 lg:grid-cols-4 gap-3">
+      <div class="ces-ai-k-card-v225"><span>Total Feedback</span><strong id="ces-ai-eval-total-v225">-</strong></div>
+      <div class="ces-ai-k-card-v225"><span>Useful</span><strong id="ces-ai-eval-yes-v225">-</strong></div>
+      <div class="ces-ai-k-card-v225"><span>Not Correct</span><strong id="ces-ai-eval-no-v225">-</strong></div>
+      <div class="ces-ai-k-card-v225"><span>Helpful Rate</span><strong id="ces-ai-eval-rate-v225">-</strong><small>%</small></div>
+    </div>
+    <div class="bg-white rounded-3xl border border-slate-100 shadow-sm p-5">
+      <h3 class="font-black text-slate-800 mb-1">AI Chat Evaluation</h3><p id="ces-ai-eval-count-v225" class="text-xs text-slate-400 mb-4">Loading…</p>
+      <div id="ces-ai-eval-table-v225" class="py-12 text-center text-slate-400">Loading AI feedback…</div>
+    </div>
+  </div>
+
+  <div id="ces-ai-k-pane-train-v225" class="hidden">
+    <div id="ces-ai-training-console-mount-v229" class="ces-ai-training-inline-v229">
+      <div class="py-16 text-center text-slate-400"><i class="fas fa-circle-notch fa-spin"></i> Loading Training Console…</div>
+    </div>
+  </div>
+
+  <div id="ces-ai-k-pane-log-v225" class="hidden space-y-5">
+    <div class="grid grid-cols-2 lg:grid-cols-4 gap-3">
+      <div class="ces-ai-k-card-v225"><span>Total Logs</span><strong id="ces-ai-k-total-log-v225">-</strong></div>
+      <div class="ces-ai-k-card-v225"><span>Answered</span><strong id="ces-ai-k-answered-v225">-</strong></div>
+      <div class="ces-ai-k-card-v225"><span>Unanswered</span><strong id="ces-ai-k-unanswered-v225">-</strong></div>
+      <div class="ces-ai-k-card-v225"><span>Negative Feedback</span><strong id="ces-ai-k-negative-v225">-</strong></div>
+    </div>
+    <div class="bg-white rounded-3xl border border-slate-100 shadow-sm p-5">
+      <div class="flex justify-between mb-4"><div><h3 class="font-black text-slate-800">AI Logbook Detail</h3><p id="ces-ai-k-log-count-v225" class="text-xs text-slate-400">Loading…</p></div></div>
+      <div id="ces-ai-k-log-table-v225" class="py-12 text-center text-slate-400">Loading AI logbook…</div>
+    </div>
+  </div>
+</section>

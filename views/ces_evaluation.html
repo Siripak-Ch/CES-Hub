@@ -1,0 +1,14 @@
+<section id="view-ces_evaluation" class="hidden animate-fade-in space-y-5 pb-20">
+  <div class="bg-white rounded-3xl border border-slate-100 shadow-sm p-5 flex flex-col md:flex-row md:items-center justify-between gap-4">
+    <div class="flex items-center gap-4"><div class="w-12 h-12 rounded-2xl bg-blue-50 text-[#003DA5] grid place-items-center"><i class="fas fa-star-half-stroke text-lg"></i></div><div><h2 class="text-xl font-black text-slate-800">CES Hub Evaluation</h2><p class="text-xs font-bold text-slate-400">Website Evaluation · คะแนนภาพรวมการใช้งาน CES Hub</p></div></div>
+    <div class="ces-page-header-actions-v225 flex items-center gap-2"><a id="ces-evaluation-source-link" class="ces-standard-icon-btn ces-external-link-btn" href="#" target="_blank" rel="noopener" title="Open evaluation sheet"><i class="fas fa-link"></i></a><button class="ces-standard-icon-btn ces-action-excel" onclick="exportCesHubEvaluationV225()" title="Export Excel"><i class="fas fa-file-excel"></i></button><button class="ces-standard-icon-btn ces-action-neutral" onclick="loadCesHubEvaluationV225(true)" title="Resync"><i class="fas fa-rotate-right"></i></button><button class="ces-standard-icon-btn ces-action-delete" onclick="clearCesHubEvaluationV225()" title="Delete Website Evaluation"><i class="fas fa-trash-can"></i></button></div>
+  </div>
+  <div class="ces-system-eval-grid-v225">
+    <div class="ces-system-eval-card-v225"><span>Total Responses</span><strong id="ces-eval-total-v225">0</strong><small>responses</small></div>
+    <div class="ces-system-eval-card-v225"><span>Ease of Use</span><strong id="ces-eval-ease-v22">-</strong><small>/ 5</small></div>
+    <div class="ces-system-eval-card-v225"><span>Speed / Responsiveness</span><strong id="ces-eval-speed-v22">-</strong><small>/ 5</small></div>
+    <div class="ces-system-eval-card-v225"><span>Completeness</span><strong id="ces-eval-completeness-v22">-</strong><small>/ 5</small></div>
+    <div class="ces-system-eval-card-v225"><span>Overall Average</span><strong id="ces-eval-overall-v22">-</strong><small>/ 5</small></div>
+  </div>
+  <div class="bg-white rounded-3xl border border-slate-100 shadow-sm p-5"><div class="flex items-center justify-between gap-3 mb-4"><div><h3 class="font-black text-slate-800">All Website Evaluation Responses</h3><p id="ces-eval-count-v22" class="text-xs text-slate-400 mt-1">Loading…</p></div></div><div id="ces-eval-table-v22" class="text-sm text-slate-400 py-12 text-center">Loading website evaluation…</div></div>
+</section>

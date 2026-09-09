@@ -1,0 +1,48 @@
+<section id="view-monthly_report" class="hidden animate-fade-in space-y-5 pb-20">
+  <div class="bg-white rounded-3xl border border-slate-100 shadow-sm p-5 flex flex-col md:flex-row md:items-center justify-between gap-4">
+    <div class="flex items-center gap-4">
+      <div class="w-12 h-12 rounded-2xl bg-blue-50 text-[#003DA5] grid place-items-center"><i class="fas fa-file-circle-check text-lg"></i></div>
+      <div><h2 class="text-xl font-black text-slate-800">Monthly Report</h2><p class="text-xs font-bold text-slate-400">Monthly meeting summary</p></div>
+    </div>
+    <div class="ces-page-header-actions-v226 flex items-center gap-2">
+      <a id="monthly-report-sheet-link-v229" class="ces-standard-icon-btn ces-external-link-btn" href="#" target="_blank" rel="noopener" title="Open Monthly Report Sheet" aria-label="Open Monthly Report Sheet"><i class="fas fa-table"></i></a>
+      <a id="monthly-report-summary-sheet-link-v3016" class="ces-standard-icon-btn ces-external-link-btn pointer-events-none" href="#" target="_blank" rel="noopener" title="Open Acknowledgement Summary Sheet" aria-label="Open Acknowledgement Summary Sheet"><i class="fas fa-chart-pie"></i></a>
+      <button id="monthly-report-add-v226" class="ces-standard-icon-btn ces-action-primary hidden" onclick="openMonthlyReportEditor()" title="Add Monthly Report" aria-label="Add Monthly Report"><i class="fas fa-plus"></i></button>
+      <button class="ces-standard-icon-btn ces-action-neutral" onclick="loadMonthlyReport(true)" title="Resync" aria-label="Resync"><i class="fas fa-rotate-right"></i></button>
+      <button class="ces-standard-icon-btn ces-action-excel" onclick="exportMonthlyReportExcel()" title="Export Excel" aria-label="Export Excel"><i class="fas fa-file-excel"></i></button>
+    </div>
+  </div>
+
+  <div class="bg-white rounded-3xl border border-slate-100 shadow-sm p-4">
+    <div class="flex items-center justify-between mb-3"><div><h3 class="font-black text-slate-800">Acknowledgement Summary by Team</h3><p class="text-xs text-slate-400 mt-1">จำนวนผู้รับทราบรายเดือน แยกตามทีม โดยไม่รวม ENV</p></div><span class="text-[10px] font-bold text-slate-400">Active staff</span></div>
+    <div class="grid grid-cols-1 xl:grid-cols-[minmax(0,1fr)_250px] gap-3">
+      <div id="monthly-report-ack-summary-v230" class="grid grid-cols-1 sm:grid-cols-2 gap-2"><div class="text-xs text-slate-400">Loading acknowledgement summary…</div></div>
+      <div class="rounded-2xl border border-slate-100 bg-slate-50 p-3 min-h-[180px]">
+        <div class="flex items-center justify-between mb-2">
+          <b class="text-xs text-slate-700">Completed all months</b>
+          <span id="monthly-report-ack-pie-note-v3015" class="text-[10px] font-bold text-slate-400">-</span>
+        </div>
+        <div class="h-[140px]"><canvas id="monthly-report-ack-pie-v3015"></canvas></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="ces-monthly-summary-v226">
+    <div class="ces-monthly-summary-card-v226"><span>Reports</span><strong id="monthly-report-total-v226">-</strong><small>available months</small></div>
+    <div class="ces-monthly-summary-card-v226"><span>Acknowledged</span><strong id="monthly-report-ack-v226">-</strong><small>by you</small></div>
+    <div class="ces-monthly-summary-card-v226"><span>Pending</span><strong id="monthly-report-pending-v226">-</strong><small>need acknowledgement</small></div>
+    <div class="ces-monthly-summary-card-v226"><span>Latest</span><strong id="monthly-report-latest-v226" class="text-base">-</strong><small>monthly report</small></div>
+  </div>
+
+  <div class="bg-white rounded-3xl border border-slate-100 shadow-sm p-5">
+    <div class="flex flex-col md:flex-row md:items-end justify-between gap-3 mb-4">
+      <div><h3 class="font-black text-slate-800">Monthly Report Archive</h3><p id="monthly-report-count-v226" class="text-xs text-slate-400 mt-1">Loading…</p></div>
+      <div class="flex flex-wrap gap-2">
+        <label class="text-[10px] font-black text-slate-500 uppercase">Year<select id="monthly-report-year-v226" class="ml-2 border border-slate-200 rounded-xl px-3 py-2 text-xs bg-white" onchange="renderMonthlyReport()"><option value="ALL">All Years</option></select></label>
+        <label class="text-[10px] font-black text-slate-500 uppercase">Status<select id="monthly-report-status-v226" class="ml-2 border border-slate-200 rounded-xl px-3 py-2 text-xs bg-white" onchange="renderMonthlyReport()"><option value="ALL">All</option><option value="PENDING">Pending</option><option value="ACK">Acknowledged</option></select></label>
+        <button class="sp-btn ghost ces-filter-reset-word-v227" onclick="resetMonthlyReportFilters()" title="Reset Filters" aria-label="Reset Filters"><i class="fas fa-rotate-left"></i><span>Reset Filter</span></button>
+      </div>
+    </div>
+    <div id="monthly-report-grid-v226" class="ces-monthly-grid-v226"><div class="py-16 text-center text-slate-400 col-span-full"><i class="fas fa-circle-notch fa-spin"></i> Loading monthly reports…</div></div>
+  </div>
+</section>

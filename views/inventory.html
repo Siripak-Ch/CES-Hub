@@ -1,0 +1,60 @@
+<!-- CES Hub Stock Inventory — Fast Cache V6 Equipment Dashboard -->
+<section id="view-inventory" class="hidden stockpro-page ces-stock-v5-page">
+  <div class="stockpro-shell">
+    <div class="stockpro-header-card">
+      <div class="stockpro-title-wrap">
+        <div class="stockpro-icon blue ces-page-header-icon-v15"><i class="fas fa-boxes-stacked"></i></div>
+        <div><h1>Inventory</h1><div class="ces-stock-header-meta"><span class="ces-stock-header-scope"><i class="fas fa-layer-group"></i> Accessories & Inventory Dashboard</span><span id="siDataFreshness" class="csv6-freshness stale"><i class="fas fa-database"></i> Cached data</span></div></div>
+      </div>
+      <div class="stockpro-actions">
+        <a id="siInventorySourceLink" class="sp-btn ghost csv5-icon-btn ces-action-neutral" href="#" target="_blank" rel="noopener" title="Open Accessories Dashboard source"><i class="fas fa-link"></i></a><button class="sp-btn ghost csv5-icon-btn ces-action-neutral" onclick="initStockInventoryModule(true)" title="Refresh"><i class="fas fa-sync-alt"></i></button>
+        <button class="sp-btn ghost csv5-icon-btn ces-action-neutral" onclick="si_openInventoryHistory()" title="Activity History"><i class="fas fa-history"></i></button>
+        <button class="sp-btn warn csv5-icon-btn ces-action-warning ces-notification-icon-btn" onclick="si_openAccessoryLowStockAlerts()" title="Accessory Alerts"><i class="fas fa-bell"></i><span id="siLowStockHeaderCount" class="sp-mini-badge ces-notification-count">0</span></button>
+        <button class="sp-btn primary csv5-icon-btn ces-action-primary" onclick="si_toggleCart()" title="Checkout Cart"><i class="fas fa-shopping-cart"></i><span id="siCartCount" class="sp-mini-badge">0</span></button>
+        <button class="ces-standard-icon-btn ces-action-excel" onclick="si_downloadBulkTemplate()" title="Download Bulk Upload Excel Template" aria-label="Download Bulk Upload Excel Template"><i class="fas fa-file-arrow-down"></i></button>
+        <button class="ces-standard-icon-btn ces-upload-icon-btn" onclick="si_triggerBulkUpload()" title="Upload clean Inventory XLSX or bulk equipment file" aria-label="Upload Inventory Data"><i class="fas fa-arrow-up-from-bracket"></i></button>
+        <input id="siBulkEquipmentFile" type="file" class="hidden" accept=".csv,.xlsx,.xls" onchange="si_handleBulkUpload(this.files && this.files[0]);this.value=''">
+        <button class="ces-standard-icon-btn ces-excel-icon-btn" onclick="si_exportAllSourceXlsxV3031()" title="Export all source data Excel (.xlsx)" aria-label="Export all source data Excel"><i class="fas fa-file-excel"></i></button>
+        <button class="sp-btn csv5-icon-btn ces-action-pdf-danger" onclick="si_printInventory()" title="Export PDF"><i class="fas fa-file-pdf"></i></button>
+      </div>
+    </div>
+
+    <div class="sp-tabs ces-inventory-mode-tabs">
+      <button id="siTabDashboardCurrent" class="sp-tab active" onclick="si_switchTab('dashboard')"><i class="fas fa-chart-pie"></i> Dashboard</button><button id="siTabAcc" class="sp-tab" onclick="si_switchTab('acc')"><i class="fas fa-plug"></i> Accessories</button>
+    </div>
+
+    <div id="siInventoryDashboardCurrent" class="space-y-4">
+      <div class="stockpro-kpi-grid csv5-kpi-six"><div class="stockpro-card"><div class="sp-muted">Accessories Type</div><div id="siDashTotalAccCurrent" class="text-3xl font-black text-blue-600">0</div></div><div class="stockpro-card"><div class="sp-muted">Total Stock</div><div id="siDashTotalStockCurrent" class="text-3xl font-black text-emerald-600">0</div></div><div class="stockpro-card"><div class="sp-muted">Low Stock</div><div id="siDashLowAccCurrent" class="text-3xl font-black text-orange-600">0</div></div><div class="stockpro-card"><div class="sp-muted">Cost</div><div id="siDashCostCurrent" class="text-3xl font-black text-violet-600">0</div></div></div>
+      <div id="siDashAccessoryFiltersV3031" class="si-dash-filter-card-v3031"><div class="si-dash-filter-title-v3031"><span><i class="fas fa-filter"></i> Inventory Filter</span><span id="siDashFilterResultV3031">All accessories</span></div><div class="si-dash-filter-grid-v3031"><select id="siDashFilterTeamV3031" onchange="si_renderAccessoriesDashboardV3031()"><option value="all">All Teams</option></select><select id="siDashFilterTypeV3031" onchange="si_renderAccessoriesDashboardV3031()"><option value="all">All Accessories Type</option></select><select id="siDashFilterStatusV3031" onchange="si_renderAccessoriesDashboardV3031()"><option value="all">All Status</option><option value="STOCK">STOCK</option><option value="LOW_STOCK">LOW STOCK</option></select><button type="button" class="sp-btn ghost" onclick="si_resetDashboardFiltersV3031()"><i class="fas fa-rotate-left"></i> Reset</button></div></div>
+      <div class="stockpro-two-col"><div class="stockpro-card"><div class="stockpro-card-head"><h3><i class="fas fa-users text-blue-500"></i> Accessories by Team</h3></div><div class="stockpro-chart-box"><canvas id="siAccessoriesTeamChartV3028"></canvas></div></div><div class="stockpro-card"><div class="stockpro-card-head"><h3><i class="fas fa-chart-pie text-violet-500"></i> Stock Status</h3></div><div class="stockpro-chart-box"><canvas id="siAccessoriesStatusChartV3028"></canvas></div></div></div>
+      <div class="stockpro-card"><div class="stockpro-card-head"><h3><i class="fas fa-layer-group text-emerald-500"></i> Summary by Team / Accessories Type</h3><button class="sp-btn ghost" onclick="si_openInventoryHistory()"><i class="fas fa-clock-rotate-left"></i> History</button></div><div id="siAccessoriesSummaryV3028"></div></div>
+    </div>
+
+    <div class="stockpro-filter-card hidden" id="siAccFilters">
+      <div class="sp-search"><i class="fas fa-search"></i><input id="siAccSearch" oninput="si_applyFilters()" placeholder="ค้นหา accessories"></div>
+      <select id="siAccTeam" onchange="si_applyFilters()"><option value="all">All Team</option></select>
+      <select id="siAccItem" onchange="si_applyFilters()"><option value="all">All Item</option></select>
+      <select id="siAccStatus" onchange="si_applyFilters()"><option value="all">All Status</option><option value="STOCK">STOCK</option><option value="LOW_STOCK">LOW_STOCK</option><option value="PENDING_APPROVAL">PENDING_APPROVAL</option></select>
+      <select id="siAccAction" onchange="si_applyFilters()"><option value="all">All Action</option></select>
+      <button type="button" class="sp-btn ghost ces-stock-filter-reset-v226 ces-filter-reset-word-v227" onclick="si_resetMainFilters()" title="Reset Filters" aria-label="Reset Filters"><i class="fas fa-rotate-left"></i><span>Reset Filter</span></button>
+    </div>
+
+    <div class="stockpro-card hidden" id="siAccSection">
+      <div class="stockpro-card-head"><h3><i class="fas fa-plug text-emerald-500"></i> Accessories Inventory</h3><div class="ces-accessory-head-actions"><button type="button" class="sp-btn primary" onclick="si_addAccessoryPrompt()" title="Add accessory"><i class="fas fa-plus"></i> Add</button><span id="siAccCount" class="sp-pill">—</span></div></div>
+      <div id="siAccCards"></div><div id="siAccPagination" class="sp-pagination"></div>
+    </div>
+  </div>
+
+  <button id="siCartFab" class="sp-cart-fab" onclick="si_toggleCart()" title="Checkout Cart"><i class="fas fa-shopping-cart"></i><span id="siCartFabBadge">0</span></button>
+  <div id="siCartOverlay" class="hidden fixed inset-0 bg-slate-900/40 z-[180]" onclick="si_closeCart()"></div>
+  <div id="siCartDrawer" class="ces-checkout-drawer-v3025 hidden fixed top-0 w-[min(560px,100vw)] h-screen bg-white z-[181] shadow-2xl transition-all duration-300 flex-col" aria-hidden="true" style="right:-600px;display:none">
+    <div class="ces-checkout-head-v3025"><div class="flex items-center gap-3"><span class="ces-checkout-head-icon-v3025"><i class="fas fa-cart-shopping"></i></span><div><h2>ตะกร้า Check-Out</h2><p><span id="siCartDrawerCount">0</span> รายการที่เลือก</p></div></div><button onclick="si_closeCart()" class="ces-checkout-close-v3025" aria-label="Close cart"><i class="fas fa-times"></i></button></div>
+    <div class="ces-checkout-scroll-v3025"><section class="ces-checkout-section-v3025"><div class="ces-checkout-section-title-v3025"><span><i class="fas fa-list-check"></i> รายการเบิก</span><small>ตรวจสอบอุปกรณ์ก่อนยืนยัน</small></div><div id="siCartItems" class="ces-checkout-items-v3025"></div></section><div id="siCartDetailSummary" class="ces-checkout-summary-v3025"></div></div>
+    <div class="ces-checkout-form-v3025">
+      <div class="ces-checkout-section-title-v3025"><span><i class="fas fa-address-card"></i> ข้อมูลการยืม</span><small><b>*</b> จำเป็น</small></div>
+      <label>ชื่อผู้ยืม / Borrower *<input id="siBorrower" class="stockpro-control" placeholder="ระบุชื่อผู้ยืม"></label><label>สถานที่ / Location *<input id="siCheckoutLocation" class="stockpro-control" placeholder="ระบุสถานที่ใช้งาน"></label>
+      <div class="grid grid-cols-2 gap-3"><label>วันที่เบิก<input id="siBorrowDate" class="stockpro-control" type="date"></label><label>กำหนดคืน *<input id="siDueDate" class="stockpro-control" type="date"></label></div>
+      <label>หมายเหตุ<input id="siNote" class="stockpro-control" placeholder="รายละเอียดเพิ่มเติม (ถ้ามี)"></label><button id="siCheckoutSubmitBtn" class="ces-checkout-submit-v3025" onclick="si_submitCheckout(this)"><i class="fas fa-paper-plane"></i><span>ยืนยัน Check-Out</span></button>
+    </div>
+  </div>
+</section>
