@@ -27,25 +27,46 @@
     var ws=XLSX.utils.json_to_sheet(rows),wb=XLSX.utils.book_new();XLSX.utils.book_append_sheet(wb,ws,String(sheetName||'Data').slice(0,31));
     XLSX.writeFile(wb,fileName+'_'+new Date().toISOString().slice(0,10)+'.xlsx');return{success:true,count:rows.length};
   }
-  async function exportSourceSheet(sheetKey){
-    if(w.Swal)Swal.fire({title:'Preparing XLSX…',html:'กำลังสร้างไฟล์จากชีตต้นฉบับโดยตรง',allowOutsideClick:false,showConfirmButton:false,didOpen:function(){Swal.showLoading();}});
+  function appendExactSheet(wb,sheet){var aoa=[sheet.headers||[]].concat(sheet.rows||[]),ws=XLSX.utils.aoa_to_sheet(aoa);XLSX.utils.book_append_sheet(wb,ws,String(sheet.sheetName||'Data').slice(0,31));}
+  function exportExactApi(fn,args,fileName){
+    if(!w.XLSX)return Promise.reject(new Error('XLSX library is unavailable.'));
+    if(w.Swal)Swal.fire({title:'Preparing XLSX…',allowOutsideClick:false,showConfirmButton:false,didOpen:function(){Swal.showLoading();}});
+    return api(fn,args).then(function(res){if(!res||res.success===false)throw new Error(res&&res.message||'Export source is unavailable.');var wb=XLSX.utils.book_new(),sheets=Array.isArray(res.sheets)?res.sheets:[res];sheets.forEach(function(s){appendExactSheet(wb,s);});XLSX.writeFile(wb,fileName+'_'+new Date().toISOString().slice(0,10)+'.xlsx');if(w.Swal)Swal.close();return{success:true,sheets:sheets.length};}).catch(function(e){if(w.Swal)Swal.fire('Export Error',e.message||String(e),'error');throw e;});
+  }
+  async function exportChunkedSheets(specs,fileName){
+    if(!w.XLSX)throw new Error('XLSX library is unavailable.');
+    specs=Array.isArray(specs)?specs:[];if(!specs.length)throw new Error('No export sheets were selected.');
+    if(w.Swal)Swal.fire({title:'Preparing XLSX…',html:'กำลังอ่านข้อมูลจากต้นฉบับแบบแบ่งชุด<br><b id="cesExportProgress">0%</b>',allowOutsideClick:false,showConfirmButton:false,didOpen:function(){Swal.showLoading();}});
     try{
-      var res=await api('CES_EXPORT_SHEET_XLSX',[{sheetKey:sheetKey}]);
-      if(!res||res.success===false||!res.base64)throw new Error(res&&res.message||'Cannot create XLSX.');
-      var binary=atob(res.base64),bytes=new Uint8Array(binary.length);for(var i=0;i<binary.length;i++)bytes[i]=binary.charCodeAt(i);
-      var blob=new Blob([bytes],{type:res.mimeType||'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'}),url=URL.createObjectURL(blob),a=d.createElement('a');a.href=url;a.download=res.fileName||'CES_Export.xlsx';d.body.appendChild(a);a.click();a.remove();setTimeout(function(){URL.revokeObjectURL(url);},1500);
-      if(w.Swal)Swal.close();return{success:true,sheetName:res.sheetName,size:res.size};
+      var wb=XLSX.utils.book_new();
+      for(var s=0;s<specs.length;s++){
+        var spec=specs[s],offset=0,headers=[],rows=[],sheetName=spec.name||'Data',done=false;
+        while(!done){
+          /* Use the long-standing allowlisted endpoint name.  Newer backends
+             honor chunked/offset/limit; this avoids a new API-contract name. */
+          var res=await api('sd_getInfusionTabExportLatest',[{tab:spec.key,chunked:true,offset:offset,limit:100}]);
+          if(!res||res.success===false)throw new Error(res&&res.message||('Cannot export '+sheetName));
+          if(!headers.length)headers=res.headers||[];Array.prototype.push.apply(rows,res.rows||[]);sheetName=res.sheetName||sheetName;
+          done=res.done===true||res.nextOffset==null;offset=done?rows.length:Number(res.nextOffset||rows.length);
+          var total=Math.max(1,Number(res.totalRows||rows.length)),part=Math.min(1,rows.length/total),pct=Math.round(((s+part)/specs.length)*100),progress=d.getElementById('cesExportProgress');if(progress)progress.textContent=pct+'% · '+sheetName+' '+rows.length.toLocaleString()+'/'+Number(res.totalRows||rows.length).toLocaleString();
+        }
+        appendExactSheet(wb,{sheetName:sheetName,headers:headers,rows:rows});
+      }
+      XLSX.writeFile(wb,fileName+'_'+new Date().toISOString().slice(0,10)+'.xlsx');if(w.Swal)Swal.close();return{success:true,sheets:specs.length};
     }catch(e){if(w.Swal)Swal.fire('Export Error',e.message||String(e),'error');throw e;}
   }
   function equipmentRows(){var p=stockPayload()||{},rows=p.devices||p.inventory||[];return rows.map(function(x){return{
     id_code:x.idCode||x.id_code||'',serial_number:x.sn||x.serialNumber||x.serial_number||'','Equipment Status':x.status||x.equipmentStatus||'',brand:x.brand||'',model:x.model||'',location:x.location||'',rental_status:x.rentalStatus||x.rental_status||'',borrower:x.borrower||'',borrow_date:x.borrowDate||x.borrow_date||'',expected_return_date:x.expectedReturn||x.expectedReturnDate||x.expected_return_date||'',overdue_days:x.overdueDays||x.overdue_days||0,action_required:x.actionRequired||x.action_required||'',ac_plug_sn:x.acPlugSn||x.ac_plug_sn||'',clamp_sn:x.clampSn||x.clamp_sn||''};});}
+  function rentalRows(){var p=stockPayload()||{},rows=p.rentals||[];if(!rows.length){try{rows=(SD_RENTAL_WORKFLOW_V260.cards||[]);}catch(ignore){rows=[];}}return rows.map(function(x){return{
+    rental_id:x.rentalId||x.rental_id||'',id_code:x.idCode||x.id_code||'',serial_number:x.sn||x.serialNumber||x.serial_number||'',brand:x.brand||'',model:x.model||'',location:x.location||'',rental_status:x.rentalStatus||x.rental_status||x.workflowStatus||'',borrower:x.borrower||'',borrow_date:x.borrowDate||x.borrow_date||'',expected_return_date:x.expectedReturn||x.expectedReturnDate||x.expected_return_date||x.dueDate||'',overdue_days:x.overdueDays||x.overdue_days||0,return_date:x.returnDate||x.return_date||'',action_required:x.actionRequired||x.action_required||x.borrowerAction||'',note:x.note||x.adminNote||''};});}
   function safeExport(fn){try{return fn();}catch(e){if(w.Swal)Swal.fire('Export Error',e.message||String(e),'error');return{success:false,message:e.message||String(e)};}}
-  w.sd_exportSummary=function(){return exportSourceSheet('summary');};
-  w.sd_exportContractSummaryExcel=w.sd_exportContracts=function(){return exportSourceSheet('contract');};
-  w.sd_exportEquipmentExcel=function(){return exportSourceSheet('equipment');};
+  w.sd_exportSummary=function(){return exportChunkedSheets([{key:'summary',name:'Summary'}],'Infusion_Pump_Dashboard_Summary');};
+  w.sd_exportContractSummaryExcel=w.sd_exportContracts=function(){return exportChunkedSheets([{key:'contract',name:'Infusion Rental History'}],'Infusion_Rental_History');};
+  w.sd_exportEquipmentExcel=function(){return exportChunkedSheets([{key:'equipment',name:'Infusion Pump Dashboard'}],'Infusion_Pump_Equipment_List');};
   w.sc_exportCurrent=function(){return safeExport(function(){return exportRows(equipmentRows(),'Check_Stock_Equipment','Infusion Pump');});};
-  w.si_exportInventorySheet=function(){var accessories=false;try{accessories=typeof SI!=='undefined'&&SI.tab==='acc';}catch(ignore){}return exportSourceSheet(accessories?'accessories_data':'accessories_dashboard');};
-  w.si_exportCurrent=w.si_exportInventorySheet;
+  function exportAccessories(){return safeExport(function(){var p=stockPayload()||{},rows=p.accessories||[];try{if(typeof SI!=='undefined'&&Array.isArray(SI.acc)&&SI.acc.length)rows=SI.acc;}catch(ignore){}return exportRows(rows.map(function(x){return{accessory_id:x.accessoryId||x.accessory_id||x.idCode||'',team:x.team||'',item_name:x.itemName||x.item_name||x.name||'',stock_qty:x.stockQty||x.stock_qty||x.qty||0,min_stock_qty:x.minStockQty||x.min_stock_qty||x.minStock||0,status:x.status||'',action_required:x.actionRequired||x.action_required||'',cost:x.cost||x.unitCost||x.unit_cost||x.totalCost||x.total_cost||0};}),'Accessories_Data','Accessories Data');});}
+  w.si_exportAllSourceXlsxV3031=function(){return exportChunkedSheets([{key:'accessories_data',name:'Accessories Data'},{key:'accessories_dashboard',name:'Accessories Dashboard'}],'Inventory_Accessories');};
+  w.si_exportCurrent=function(){return w.si_exportAllSourceXlsxV3031();};
 
   var exportViewBase=w.CES_exportCurrentView;if(typeof exportViewBase==='function')w.CES_exportCurrentView=function(tab){tab=tab||((typeof w.CES_getCurrentTab==='function'&&w.CES_getCurrentTab())||w.CES_ACTIVE_TAB||'');if(tab==='check_stock')return w.sc_exportCurrent();return exportViewBase.apply(this,arguments);};
 
