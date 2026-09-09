@@ -1,12 +1,12 @@
 <section id="view-memo_workorder" class="hidden ces-mwo-v3030-page">
   <div class="ces-mwo-v3030-header">
-    <div class="ces-mwo-v3030-title"><span><i class="fas fa-file-circle-check"></i></span><div><h1>Memo & Work Order</h1><p>Memo · Work Order · Service CSI — uploaded SharePoint snapshot</p></div></div>
+    <div class="ces-mwo-v3030-title"><span><i class="fas fa-file-circle-check"></i></span><div><h1>Memo & Work Order</h1><p>Memo · WorkOrder — synchronized from the configured Google Sheet</p></div></div>
     <div class="ces-mwo-v3030-actions">
       <a id="mwoSourceLink" class="ces-mwo-v3030-icon link" href="#" target="_blank" rel="noopener" title="Open configured Memo / Work Order source"><i class="fas fa-link"></i></a>
       <input id="mwoUploadFile" type="file" class="hidden" accept=".xlsx,.xls" onchange="handleMemoWorkOrderUpload(this.files&&this.files[0]);this.value=''">
       <button class="ces-mwo-v3030-icon upload" onclick="document.getElementById('mwoUploadFile').click()" title="Upload latest Memo / Work Order workbook"><i class="fas fa-arrow-up-from-bracket"></i></button>
       <button class="ces-mwo-v3030-icon excel" onclick="exportMemoWorkOrderExcel()" title="Export filtered data"><i class="fas fa-file-excel"></i></button>
-      <button class="ces-mwo-v3030-icon refresh" onclick="initMemoWorkOrder(true)" title="Refresh data"><i class="fas fa-rotate"></i></button>
+      <button class="ces-mwo-v3030-icon refresh" onclick="syncMemoWorkOrderSourceV3037(this)" title="Sync Memo and WorkOrder from Google Sheets"><i class="fas fa-rotate"></i></button>
     </div>
   </div>
 
