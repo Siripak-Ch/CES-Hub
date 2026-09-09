@@ -28,7 +28,7 @@ window.CES_CONFIG = {
   },
 
   DEBUG: false,
-  RELEASE: 'CES-HUB-V30.0.34-DATA-EXPORT',
+  RELEASE: 'CES-HUB-V30.0.35-CHUNKED-EXPORT',
 
   // External links are kept in one place. Config sheet values override these defaults at runtime.
   EXTERNAL_LINKS: {
