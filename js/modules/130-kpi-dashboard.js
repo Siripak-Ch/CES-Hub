@@ -18,29 +18,29 @@ let currentKpiTeam = 'EHS';
 // MED / LAB / EHS does not re-read the source Sheet every time.
 // Manual Refresh and every status update bypass the cache.
 // ============================================================
-const CES_KPI_CACHE_TTL_MS = 30 * 60 * 1000;
-const CES_KPI_MEMORY_CACHE = {};
-const KPI_TABLE_PAGE_SIZE_ = 10;
-let KPI_TABLE_PAGE_ = 1;
-let KPI_FILTER_SIGNATURE_ = '';
+const CES_KPI_CACHE_TTL_MS_V36 = 30 * 60 * 1000;
+const CES_KPI_MEMORY_CACHE_V36 = {};
+const KPI_TABLE_PAGE_SIZE_V36 = 10;
+let KPI_TABLE_PAGE_V36 = 1;
+let KPI_FILTER_SIGNATURE_V36 = '';
 
 function cesKpiCacheKey(team) {
     return 'ces_kpi_dashboard_v16_sheet_aligned_' + String(team || 'EHS').toUpperCase();
 }
 function cesKpiReadCache(team) {
     const key = cesKpiCacheKey(team);
-    const memory = CES_KPI_MEMORY_CACHE[key];
-    if (memory && Date.now() - Number(memory.ts || 0) <= CES_KPI_CACHE_TTL_MS) return memory.payload || null;
-    if (memory) delete CES_KPI_MEMORY_CACHE[key];
+    const memory = CES_KPI_MEMORY_CACHE_V36[key];
+    if (memory && Date.now() - Number(memory.ts || 0) <= CES_KPI_CACHE_TTL_MS_V36) return memory.payload || null;
+    if (memory) delete CES_KPI_MEMORY_CACHE_V36[key];
     try {
         const raw = localStorage.getItem(key);
         if (!raw) return null;
         const saved = JSON.parse(raw);
-        if (!saved || !saved.ts || Date.now() - Number(saved.ts) > CES_KPI_CACHE_TTL_MS) {
+        if (!saved || !saved.ts || Date.now() - Number(saved.ts) > CES_KPI_CACHE_TTL_MS_V36) {
             localStorage.removeItem(key);
             return null;
         }
-        CES_KPI_MEMORY_CACHE[key] = saved;
+        CES_KPI_MEMORY_CACHE_V36[key] = saved;
         return saved.payload || null;
     } catch (ignore) {
         return null;
@@ -49,12 +49,12 @@ function cesKpiReadCache(team) {
 function cesKpiWriteCache(team, payload) {
     const key = cesKpiCacheKey(team);
     const saved = { ts:Date.now(), payload:payload };
-    CES_KPI_MEMORY_CACHE[key] = saved;
+    CES_KPI_MEMORY_CACHE_V36[key] = saved;
     try { localStorage.setItem(key, JSON.stringify(saved)); } catch (ignore) {}
 }
 function cesKpiClearCache(team) {
     const key = cesKpiCacheKey(team);
-    delete CES_KPI_MEMORY_CACHE[key];
+    delete CES_KPI_MEMORY_CACHE_V36[key];
     try { localStorage.removeItem(key); } catch (ignore) {}
 }
 window.cesKpiReadCache = cesKpiReadCache;
@@ -94,21 +94,21 @@ function kpiCurrentFilterSignature() {
 }
 function kpiPaginateRows(rows) {
     const signature = kpiCurrentFilterSignature();
-    if (signature !== KPI_FILTER_SIGNATURE_) {
-        KPI_FILTER_SIGNATURE_ = signature;
-        KPI_TABLE_PAGE_ = 1;
+    if (signature !== KPI_FILTER_SIGNATURE_V36) {
+        KPI_FILTER_SIGNATURE_V36 = signature;
+        KPI_TABLE_PAGE_V36 = 1;
     }
     const total = rows.length;
-    const pages = Math.max(1, Math.ceil(total / KPI_TABLE_PAGE_SIZE_));
-    KPI_TABLE_PAGE_ = Math.max(1, Math.min(KPI_TABLE_PAGE_, pages));
-    const start = (KPI_TABLE_PAGE_ - 1) * KPI_TABLE_PAGE_SIZE_;
+    const pages = Math.max(1, Math.ceil(total / KPI_TABLE_PAGE_SIZE_V36));
+    KPI_TABLE_PAGE_V36 = Math.max(1, Math.min(KPI_TABLE_PAGE_V36, pages));
+    const start = (KPI_TABLE_PAGE_V36 - 1) * KPI_TABLE_PAGE_SIZE_V36;
     return {
-        rows:rows.slice(start, start + KPI_TABLE_PAGE_SIZE_),
-        page:KPI_TABLE_PAGE_,
+        rows:rows.slice(start, start + KPI_TABLE_PAGE_SIZE_V36),
+        page:KPI_TABLE_PAGE_V36,
         pages:pages,
         total:total,
         start:total ? start + 1 : 0,
-        end:Math.min(start + KPI_TABLE_PAGE_SIZE_, total)
+        end:Math.min(start + KPI_TABLE_PAGE_SIZE_V36, total)
     };
 }
 window.kpiPaginateRows = kpiPaginateRows;
@@ -132,7 +132,7 @@ function kpiRenderPagination(meta) {
 }
 window.kpiRenderPagination = kpiRenderPagination;
 function kpiChangePage(page) {
-    KPI_TABLE_PAGE_ = Math.max(1, Number(page || 1));
+    KPI_TABLE_PAGE_V36 = Math.max(1, Number(page || 1));
     renderKPITable();
     const scroll = document.getElementById('kpi-table-scroll');
     if (scroll) scroll.scrollTop = 0;
@@ -218,8 +218,8 @@ function kpiApplyDashboardResponse(res, keepOpenRowId, fromCache) {
     if (!res || !res.success) return false;
     globalKpiData = kpiApplyStrictWorkflowStatus(res.data || []);
     globalKpiSummary = res.summary || null;
-    KPI_TABLE_PAGE_ = 1;
-    KPI_FILTER_SIGNATURE_ = '';
+    KPI_TABLE_PAGE_V36 = 1;
+    KPI_FILTER_SIGNATURE_V36 = '';
 
     populateKpiStatusFilter(res.statusOptions || KPI_DETAIL_STATUS_OPTIONS);
     populateKpiYearMonthFilters();
@@ -945,8 +945,8 @@ function kpiResetFilters() {
         if (!el) return;
         el.value = id === 'kpi-filter-search' ? '' : (id === 'kpi-filter-date-sort' ? 'date_desc' : 'All');
     });
-    KPI_TABLE_PAGE_ = 1;
-    KPI_FILTER_SIGNATURE_ = '';
+    KPI_TABLE_PAGE_V36 = 1;
+    KPI_FILTER_SIGNATURE_V36 = '';
     renderKPITable();
 }
 
@@ -1137,7 +1137,7 @@ function kpiSummaryFilterChanged() {
     const links = [['kpi-summary-year','kpi-filter-year'],['kpi-summary-month','kpi-filter-month']];
     if (currentKpiTeam === 'EHS') links.push(['kpi-summary-team','kpi-filter-team']);
     links.forEach(pair => { const from=document.getElementById(pair[0]), to=document.getElementById(pair[1]); if(from&&to) to.value=from.value; });
-    KPI_TABLE_PAGE_=1;
+    KPI_TABLE_PAGE_V36=1;
     renderKPITable();
 }
 

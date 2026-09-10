@@ -11,13 +11,13 @@
     try{if(typeof switchKpiTab==='function'&&typeof currentKpiTeam!=='undefined')switchKpiTab(currentKpiTeam||'EHS');}catch(e){}
   }
   var oldSave=window.saveFullSystemConfig;
-  if(typeof oldSave==='function'&&!oldSave.__ces){
+  if(typeof oldSave==='function'&&!oldSave.__cesV31){
     window.saveFullSystemConfig=function(){var result=oldSave.apply(this,arguments);setTimeout(refreshKpiDriveButtons,800);return result;};
-    window.saveFullSystemConfig.__ces=true;
+    window.saveFullSystemConfig.__cesV31=true;
   }
   window.CES_OPERATIONS_PERMISSIONS_RECHECK=function(){
     var required=['view-car_booking','view-van_booking','view-team_information','view-audit_log','btn-car_booking','btn-van_booking','btn-team_information','btn-audit_log','kpi-drive-ehs-link','kpi-drive-env-link','cfg-line-oa-basic-id','cfg-line-gateway-url','cfg-line-channel-secret'];
-    var out={version:'latest',missing:required.filter(function(id){return!document.getElementById(id);}),bookingApi:typeof initVehicleBooking==='function',teamInfoApi:typeof initTeamInformation==='function',alertBadgeParent:(document.getElementById('sdAlertHeaderCount')||{}).parentElement&&document.getElementById('sdAlertHeaderCount').parentElement.getAttribute('onclick')};
+    var out={version:'V31',missing:required.filter(function(id){return!document.getElementById(id);}),bookingApi:typeof initVehicleBooking==='function',teamInfoApi:typeof initTeamInformation==='function',alertBadgeParent:(document.getElementById('sdAlertHeaderCount')||{}).parentElement&&document.getElementById('sdAlertHeaderCount').parentElement.getAttribute('onclick')};
     console.log('[CES V31 Recheck]',out);return out;
   };
   document.addEventListener('DOMContentLoaded',function(){setTimeout(fixStockAlertBadge,100);});

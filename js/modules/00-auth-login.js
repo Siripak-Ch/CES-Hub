@@ -8,22 +8,22 @@
 // ──────────────────────────────────────────────────────────────────
 //  V60 — remembered browser login and recent Employee IDs
 // ──────────────────────────────────────────────────────────────────
-const CES_RECENT_LOGIN_USERS_KEY = 'CES_RECENT_LOGIN_USERS';
-const CES_REMEMBER_LOGIN_KEY = 'CES_REMEMBER_LOGIN_';
-const CES_LAST_EMPLOYEE_ID_KEY = 'ces_last_employee_id';
-let CES_LOGIN_REQUEST_SEQ = 0;
-let CES_REGISTER_REQUEST_SEQ = 0;
+const CES_RECENT_LOGIN_USERS_KEY_V60 = 'CES_RECENT_LOGIN_USERS_V60';
+const CES_REMEMBER_LOGIN_KEY_V60 = 'CES_REMEMBER_LOGIN_V60';
+const CES_LAST_EMPLOYEE_ID_KEY_V60 = 'ces_last_employee_id';
+let CES_LOGIN_REQUEST_SEQ_V62 = 0;
+let CES_REGISTER_REQUEST_SEQ_V62 = 0;
 
 
 function cesRememberLoginEnabled() {
     const checkbox = document.getElementById('rememberLogin');
     if (checkbox) return !!checkbox.checked;
-    return localStorage.getItem(CES_REMEMBER_LOGIN_KEY) !== '0';
+    return localStorage.getItem(CES_REMEMBER_LOGIN_KEY_V60) !== '0';
 }
 
 function cesReadRecentLogins() {
     try {
-        const rows = JSON.parse(localStorage.getItem(CES_RECENT_LOGIN_USERS_KEY) || '[]');
+        const rows = JSON.parse(localStorage.getItem(CES_RECENT_LOGIN_USERS_KEY_V60) || '[]');
         return Array.isArray(rows) ? rows.filter(item => item && item.id).slice(0, 5) : [];
     } catch (e) {
         return [];
@@ -37,17 +37,17 @@ function cesRecordRecentLogin(userOrId) {
 
     const remember = cesRememberLoginEnabled();
     try {
-        sessionStorage.setItem(CES_LAST_EMPLOYEE_ID_KEY, id);
+        sessionStorage.setItem(CES_LAST_EMPLOYEE_ID_KEY_V60, id);
         if (remember) {
-            localStorage.setItem(CES_REMEMBER_LOGIN_KEY, '1');
-            localStorage.setItem(CES_LAST_EMPLOYEE_ID_KEY, id);
+            localStorage.setItem(CES_REMEMBER_LOGIN_KEY_V60, '1');
+            localStorage.setItem(CES_LAST_EMPLOYEE_ID_KEY_V60, id);
             const next = [{
                 id: id,
                 name: String(user.name_eng || user.name_th || '').trim(),
                 team: String(user.team || '').trim(),
                 lastLoginAt: new Date().toISOString()
             }].concat(cesReadRecentLogins().filter(item => String(item.id) !== id)).slice(0, 5);
-            localStorage.setItem(CES_RECENT_LOGIN_USERS_KEY, JSON.stringify(next));
+            localStorage.setItem(CES_RECENT_LOGIN_USERS_KEY_V60, JSON.stringify(next));
         }
     } catch (e) {}
     cesRenderLoginMemory();
@@ -58,11 +58,11 @@ function cesRenderLoginMemory() {
     const checkbox = document.getElementById('rememberLogin');
     const dataList = document.getElementById('recentEmployeeIds');
     const hint = document.getElementById('recentLoginHint');
-    const remember = localStorage.getItem(CES_REMEMBER_LOGIN_KEY) !== '0';
+    const remember = localStorage.getItem(CES_REMEMBER_LOGIN_KEY_V60) !== '0';
     const recent = cesReadRecentLogins();
     const lastId = String(
-        localStorage.getItem(CES_LAST_EMPLOYEE_ID_KEY) ||
-        sessionStorage.getItem(CES_LAST_EMPLOYEE_ID_KEY) ||
+        localStorage.getItem(CES_LAST_EMPLOYEE_ID_KEY_V60) ||
+        sessionStorage.getItem(CES_LAST_EMPLOYEE_ID_KEY_V60) ||
         (recent[0] && recent[0].id) || ''
     ).trim();
 
@@ -99,15 +99,15 @@ function cesUseMostRecentLogin() {
 function cesHandleRememberLoginChange() {
     const enabled = cesRememberLoginEnabled();
     try {
-        localStorage.setItem(CES_REMEMBER_LOGIN_KEY, enabled ? '1' : '0');
+        localStorage.setItem(CES_REMEMBER_LOGIN_KEY_V60, enabled ? '1' : '0');
         if (!enabled) {
             // Keep the Employee ID available for this tab only, but do not keep an
             // authenticated session after the browser is closed.
-            localStorage.removeItem('CES_AUTH_SESSION');
+            localStorage.removeItem('CES_AUTH_SESSION_V50');
             localStorage.removeItem('ces_user');
         } else {
             const input = document.getElementById('loginId');
-            if (input && input.value.trim()) localStorage.setItem(CES_LAST_EMPLOYEE_ID_KEY, input.value.trim());
+            if (input && input.value.trim()) localStorage.setItem(CES_LAST_EMPLOYEE_ID_KEY_V60, input.value.trim());
         }
     } catch (e) {}
     cesRenderLoginMemory();
@@ -126,7 +126,7 @@ function cesHydrateLoginMemory() {
         });
         input.addEventListener('change', function() {
             const id = input.value.trim();
-            if (id && cesRememberLoginEnabled()) localStorage.setItem(CES_LAST_EMPLOYEE_ID_KEY, id);
+            if (id && cesRememberLoginEnabled()) localStorage.setItem(CES_LAST_EMPLOYEE_ID_KEY_V60, id);
         });
     }
 }
@@ -252,21 +252,21 @@ window.cesHydrateLoginMemory = cesHydrateLoginMemory;
         }
 
         try {
-            sessionStorage.setItem(CES_LAST_EMPLOYEE_ID_KEY, userId);
+            sessionStorage.setItem(CES_LAST_EMPLOYEE_ID_KEY_V60, userId);
             if (cesRememberLoginEnabled()) {
-                localStorage.setItem(CES_LAST_EMPLOYEE_ID_KEY, userId);
-                localStorage.setItem(CES_REMEMBER_LOGIN_KEY, '1');
+                localStorage.setItem(CES_LAST_EMPLOYEE_ID_KEY_V60, userId);
+                localStorage.setItem(CES_REMEMBER_LOGIN_KEY_V60, '1');
             }
         } catch (e) {}
 
         const btn = document.getElementById('btnLogin');
         if (!btn || btn.disabled) return;
         const oldHtml = btn.innerHTML;
-        const requestSeq = ++CES_LOGIN_REQUEST_SEQ;
+        const requestSeq = ++CES_LOGIN_REQUEST_SEQ_V62;
         let settled = false;
 
         function finish() {
-            if (requestSeq !== CES_LOGIN_REQUEST_SEQ || settled) return false;
+            if (requestSeq !== CES_LOGIN_REQUEST_SEQ_V62 || settled) return false;
             settled = true;
             btn.innerHTML = oldHtml;
             btn.disabled = false;
@@ -381,11 +381,11 @@ window.cesHydrateLoginMemory = cesHydrateLoginMemory;
         if (!btn || btn.disabled) return;
 
         const oldHtml = btn.innerHTML;
-        const requestSeq = ++CES_REGISTER_REQUEST_SEQ;
+        const requestSeq = ++CES_REGISTER_REQUEST_SEQ_V62;
         let settled = false;
 
         function finish() {
-            if (requestSeq !== CES_REGISTER_REQUEST_SEQ) return false;
+            if (requestSeq !== CES_REGISTER_REQUEST_SEQ_V62) return false;
             if (settled) return false;
             settled = true;
             btn.innerHTML = oldHtml;
@@ -398,7 +398,7 @@ window.cesHydrateLoginMemory = cesHydrateLoginMemory;
 
         const timeout = setTimeout(() => {
             if (!finish()) return;
-            CES_REGISTER_REQUEST_SEQ++;
+            CES_REGISTER_REQUEST_SEQ_V62++;
             Swal.fire({
                 icon:'warning',
                 title:'Request is taking longer than expected',

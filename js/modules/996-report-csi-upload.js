@@ -11,7 +11,7 @@
   window._CES_REPORT_FAST = true;
 
   var BLUE = '#003DA5';
-  var CACHE_KEY = 'CES_REPORT_CSI_CACHE_';
+  var CACHE_KEY = 'CES_REPORT_CSI_CACHE_V31';
   var active = false;
   var watchdog = null;
 
@@ -321,8 +321,8 @@
       // Do not block the user while reading the sheet again. The page already reflects the uploaded rows.
       setTimeout(function () {
         try {
-          if (typeof loadReportCSIOnly === 'function') {
-            Promise.resolve(loadReportCSIOnly(true, false)).catch(function (e) { console.warn('[Report CSI V31] background refresh failed', e); });
+          if (typeof loadReportCSIOnlyV31 === 'function') {
+            Promise.resolve(loadReportCSIOnlyV31(true, false)).catch(function (e) { console.warn('[Report CSI V31] background refresh failed', e); });
           }
         } catch (_) {}
       }, 100);
@@ -358,10 +358,10 @@
     var input = byId('reportFileInput');
     var ui = null;
     try {
-      if (typeof window.CES_REPORT_UI_RECHECK === 'function') ui = window.CES_REPORT_UI_RECHECK();
+      if (typeof window.CES_REPORT_UI_V31_RECHECK === 'function') ui = window.CES_REPORT_UI_V31_RECHECK();
     } catch (ignore) {}
     return {
-      version:'latest', installed:!!window._CES_REPORT_FAST,
+      version:'V31', installed:!!window._CES_REPORT_FAST,
       inputHandler:input ? input.getAttribute('onchange') : '', active:active,
       transport:'single iframe POST with JSONP fallback', currentRecords:currentReportRows().length,
       ui:ui

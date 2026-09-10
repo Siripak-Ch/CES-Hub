@@ -19,13 +19,13 @@ const thaiHolidays = [
 
     let lastRMResult = null;
     let lastRMFormData = null;
-    const RM_ALLOWED_COST_CENTERS_ = ['106130','106067','106206','106207','106154'];
-    const RM_TEAM_COST_CENTER_ = { MED:'106130', LAB:'106067', EHS:'106206', ENV:'106207', MNG:'106154', TES:'106130', MANAGEMENT:'106154', OTHER:'106154' };
-    const RM_OLD_COST_CENTER_MAP_ = { '6130':'106130', '6067':'106067', '6206':'106206', '6207':'106207', '6154':'106154' };
+    const RM_ALLOWED_COST_CENTERS_V3015 = ['106130','106067','106206','106207','106154'];
+    const RM_TEAM_COST_CENTER_V3015 = { MED:'106130', LAB:'106067', EHS:'106206', ENV:'106207', MNG:'106154', TES:'106130', MANAGEMENT:'106154', OTHER:'106154' };
+    const RM_OLD_COST_CENTER_MAP_V3015 = { '6130':'106130', '6067':'106067', '6206':'106206', '6207':'106207', '6154':'106154' };
 
 
     function rmErrorMessage(value) {
-        if (window.cesSwalMessage) return window.cesSwalMessage(value);
+        if (window.cesSwalMessageV209) return window.cesSwalMessageV209(value);
         if (value == null) return 'Unexpected report error.';
         if (typeof value === 'string') return value;
         if (value && (value.message || value.error || value.details)) return String(value.message || value.error || value.details);
@@ -153,7 +153,7 @@ function fillUserInfoRM() {
     document.getElementById('rm-empId').value = empId;
     document.getElementById('rm-dept').value = dept;
     const ccList = document.getElementById('rm-costCenterList');
-    if (ccList) ccList.innerHTML = RM_ALLOWED_COST_CENTERS_.map(v => `<option value="${v}"></option>`).join('');
+    if (ccList) ccList.innerHTML = RM_ALLOWED_COST_CENTERS_V3015.map(v => `<option value="${v}"></option>`).join('');
 
     const teamSelect = document.getElementById('rm-mainTeam');
     let targetCode = "";
@@ -179,13 +179,13 @@ function fillUserInfoRM() {
     const ccInput = document.getElementById('rm-costCenter');
     if (ccInput && !ccInput.value) {
         const raw = costCenterValue.replace(/\D/g,'');
-        ccInput.value = RM_ALLOWED_COST_CENTERS_.includes(raw) ? raw : (RM_OLD_COST_CENTER_MAP_[raw] || RM_TEAM_COST_CENTER_[String(targetCode || staffTeam || '').toUpperCase()] || '');
+        ccInput.value = RM_ALLOWED_COST_CENTERS_V3015.includes(raw) ? raw : (RM_OLD_COST_CENTER_MAP_V3015[raw] || RM_TEAM_COST_CENTER_V3015[String(targetCode || staffTeam || '').toUpperCase()] || '');
     }
 }
     function initReportManage() {
         fillUserInfoRM();
         const select = document.getElementById('rm-sigId');
-        const signatureCacheKey='CES_RM_SIGNATURES_';
+        const signatureCacheKey='CES_RM_SIGNATURES_V3020';
         let cachedSignatures=null;
         try{cachedSignatures=JSON.parse(localStorage.getItem(signatureCacheKey)||'null');}catch(ignoreCache){}
         if (select && cachedSignatures && Array.isArray(cachedSignatures.data) && cachedSignatures.data.length) {

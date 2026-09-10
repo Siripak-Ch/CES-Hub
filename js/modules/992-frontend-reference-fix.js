@@ -150,12 +150,12 @@
 
   function patchKpiEnvWorkflow() {
     var original = window.kpiApplyStrictWorkflowStatus;
-    if (typeof original === 'function' && !original.__cesEnvPatched) {
+    if (typeof original === 'function' && !original.__cesV31EnvPatched) {
       var wrapped = function (rows) {
         var out = original.call(this, rows);
         return (Array.isArray(out) ? out : []).map(normalizeEnvStatus);
       };
-      wrapped.__cesEnvPatched = true;
+      wrapped.__cesV31EnvPatched = true;
       window.kpiApplyStrictWorkflowStatus = wrapped;
     }
     if (Array.isArray(window.globalKpiData)) {
@@ -200,51 +200,51 @@
 
   function patchRuntimeHooks() {
     var oldReport = window.applyReportFilters;
-    if (typeof oldReport === 'function' && !oldReport.__cesPainted) {
+    if (typeof oldReport === 'function' && !oldReport.__cesV31Painted) {
       window.applyReportFilters = function () {
         var result = oldReport.apply(this, arguments);
         paintReportTabs();
         return result;
       };
-      window.applyReportFilters.__cesPainted = true;
+      window.applyReportFilters.__cesV31Painted = true;
     }
     var oldKpiSwitch = window.switchKpiTab;
-    if (typeof oldKpiSwitch === 'function' && !oldKpiSwitch.__cesPainted) {
+    if (typeof oldKpiSwitch === 'function' && !oldKpiSwitch.__cesV31Painted) {
       window.switchKpiTab = function () {
         window.__CES_KPI_ACTIVE_TEAM = arguments[0] || 'EHS';
         var result = oldKpiSwitch.apply(this, arguments);
         setTimeout(function () { patchKpiEnvWorkflow(); paintKpiTabs(); }, 0);
         return result;
       };
-      window.switchKpiTab.__cesPainted = true;
+      window.switchKpiTab.__cesV31Painted = true;
     }
     var oldProgress = window.getKpiProgressInfo;
-    if (typeof oldProgress === 'function' && !oldProgress.__cesEnvPatched) {
+    if (typeof oldProgress === 'function' && !oldProgress.__cesV31EnvPatched) {
       window.getKpiProgressInfo = function (row) {
         normalizeEnvStatus(row);
         return oldProgress.call(this, row);
       };
-      window.getKpiProgressInfo.__cesEnvPatched = true;
+      window.getKpiProgressInfo.__cesV31EnvPatched = true;
     }
     var oldSetRFilter = window.setRFilter;
-    if (typeof oldSetRFilter === 'function' && !oldSetRFilter.__cesPainted) {
+    if (typeof oldSetRFilter === 'function' && !oldSetRFilter.__cesV31Painted) {
       window.setRFilter = function (key, value) {
         if (key === 'team') window.__CES_REPORT_ACTIVE_TEAM = value || 'All';
         var result = oldSetRFilter.apply(this, arguments);
         paintReportTabs();
         return result;
       };
-      window.setRFilter.__cesPainted = true;
+      window.setRFilter.__cesV31Painted = true;
     }
     var oldRenderKpi = window.renderKPITable;
-    if (typeof oldRenderKpi === 'function' && !oldRenderKpi.__cesEnvPatched) {
+    if (typeof oldRenderKpi === 'function' && !oldRenderKpi.__cesV31EnvPatched) {
       window.renderKPITable = function () {
         patchKpiEnvWorkflow();
         var result = oldRenderKpi.apply(this, arguments);
         paintKpiTabs();
         return result;
       };
-      window.renderKPITable.__cesEnvPatched = true;
+      window.renderKPITable.__cesV31EnvPatched = true;
     }
   }
 
@@ -277,26 +277,26 @@
   observer.observe(document.documentElement, {subtree:true, childList:true, characterData:true});
 
   var oldSwitchTab = window.switchTab;
-  if (typeof oldSwitchTab === 'function' && !oldSwitchTab.__cesWrapped) {
+  if (typeof oldSwitchTab === 'function' && !oldSwitchTab.__cesV31Wrapped) {
     window.switchTab = function () {
       var result = oldSwitchTab.apply(this, arguments);
       setTimeout(refresh, 20);
       return result;
     };
-    window.switchTab.__cesWrapped = true;
+    window.switchTab.__cesV31Wrapped = true;
   }
 
   window.CES_FRONTEND_RECHECK = function () {
     var envSample = [];
     try {
-      var envResult = typeof window.kpiEnvWorkflowRecheck === 'function' ? window.kpiEnvWorkflowRecheck() : null;
+      var envResult = typeof window.kpiEnvWorkflowV31Recheck === 'function' ? window.kpiEnvWorkflowV31Recheck() : null;
       envSample = envResult && Array.isArray(envResult.sample) ? envResult.sample : [];
     } catch (e) {}
     var badEnv = envSample.filter(function (r) { return !r.currentStatus || r.currentStatus === 'รอเริ่มงาน'; });
     var actionGroups = Array.from(document.querySelectorAll('#view-inventory .csv5-actions'));
     var out = {
-      version: 'latest',
-      systemRuntimeCompleted: !!window.CESUI && typeof window.kpiEnvWorkflowRecheck === 'function',
+      version: 'V31',
+      systemRuntimeCompleted: !!window.CESUI && typeof window.kpiEnvWorkflowV31Recheck === 'function',
       stockRuntimeLoaded: typeof window.CES_STOCK_RECHECK === 'function' && typeof window.initStockDashboardModule === 'function',
       envWorkflowSample: envSample.map(function(r){return r.currentStatus;}),
       envRowsWithWrongStartStatus: badEnv.length,

@@ -84,7 +84,7 @@
     run(); setTimeout(run,400); setTimeout(run,1200);
     if(w.MutationObserver)new MutationObserver(function(){setTimeout(run,20);}).observe(d.body,{childList:true,subtree:true,attributes:true,attributeFilter:['class','style']});
     w.addEventListener('resize',moveCartAboveAi); w.addEventListener('ces:tab-changed',function(){setTimeout(run,50);});
-    w.CES_UI={version:VERSION,refresh:run};
+    w.CES_V230_UI={version:VERSION,refresh:run};
   }
   if(d.readyState==='loading')d.addEventListener('DOMContentLoaded',init,{once:true});else init();
 })(window,document);

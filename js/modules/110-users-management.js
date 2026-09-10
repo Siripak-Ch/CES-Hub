@@ -5,14 +5,14 @@
 
 let _userCache = null; 
     let _permConfig = {};
-    const CES_USER_CACHE_='CES_USER_MANAGEMENT_CACHE_';
+    const CES_USER_CACHE_V3025='CES_USER_MANAGEMENT_CACHE_V3025';
     function userApi(fn,args,opt){
         if(!window.CES_API||typeof window.CES_API.callFunction!=='function')return Promise.reject(new Error('CES API bridge is not ready.'));
         const options=Object.assign({transport:'jsonp',timeoutMs:50000,dedupe:false,priority:'active',userAction:true,module:'users'},opt||{});
         let attempt=0;function run(){attempt++;return window.CES_API.callFunction(fn,args||[],options).catch(err=>{if(attempt<3&&/temporarily unavailable|timeout|Cannot connect|Failed to fetch|NetworkError/i.test(String(err&&err.message||err)))return new Promise(resolve=>setTimeout(resolve,attempt*450)).then(run);throw err;});}return run();
     }
-    function readUserCache(){try{const x=JSON.parse(localStorage.getItem(CES_USER_CACHE_)||'null');return x&&Array.isArray(x.rows)&&Date.now()-Number(x.at||0)<86400000?x.rows:null;}catch(e){return null;}}
-    function writeUserCache(rows){try{localStorage.setItem(CES_USER_CACHE_,JSON.stringify({at:Date.now(),rows:rows||[]}));}catch(e){}}
+    function readUserCache(){try{const x=JSON.parse(localStorage.getItem(CES_USER_CACHE_V3025)||'null');return x&&Array.isArray(x.rows)&&Date.now()-Number(x.at||0)<86400000?x.rows:null;}catch(e){return null;}}
+    function writeUserCache(rows){try{localStorage.setItem(CES_USER_CACHE_V3025,JSON.stringify({at:Date.now(),rows:rows||[]}));}catch(e){}}
     const ALL_MODULES = [
         { id:'portal',name:'Home',group:'Main Dashboard',icon:'fa-house' },
         { id:'management_overview',name:'Management Overview',group:'Main Dashboard',icon:'fa-chart-line' },
@@ -297,8 +297,8 @@ let _userCache = null;
         }
         // V22.8: the permission dialog can be opened from Setting as well as User Management.
         // Move the fixed modal outside a hidden view so ancestor display:none never suppresses it.
-        const permissionModal = document.getElementById('permissionModal');
-        if (permissionModal && permissionModal.parentElement !== document.body) document.body.appendChild(permissionModal);
+        const permissionModalV228 = document.getElementById('permissionModal');
+        if (permissionModalV228 && permissionModalV228.parentElement !== document.body) document.body.appendChild(permissionModalV228);
         const defaultPerms = {
             'MANAGER': [
                 'portal', 'management_overview', 'yearly', 'revenue', 'ot',
@@ -336,7 +336,7 @@ let _userCache = null;
         }
 
         renderPermissionTable();
-        if (permissionModal) permissionModal.classList.remove('hidden');
+        if (permissionModalV228) permissionModalV228.classList.remove('hidden');
     }
 
     function renderPermissionTable() {

@@ -102,11 +102,11 @@
   function updated_(x){return String(x.lastCheckTimestamp||x.last_check_timestamp||x.lastCheckDate||x.last_check_date||x.addStockDate||x['Add Stock Date']||'').trim();}
   function unique_(rows,fn){var m={};(rows||[]).forEach(function(x){var v=fn(x);if(v)m[v]=1;});return Object.keys(m).sort(function(a,b){return a.localeCompare(b);});}
   function filtered_(){
-    var a=acc_(),t=(document.getElementById('siDashFilterTeam')||{}).value||'all',ty=(document.getElementById('siDashFilterType')||{}).value||'all',st=(document.getElementById('siDashFilterStatus')||{}).value||'all';
+    var a=acc_(),t=(document.getElementById('siDashFilterTeamV3031')||{}).value||'all',ty=(document.getElementById('siDashFilterTypeV3031')||{}).value||'all',st=(document.getElementById('siDashFilterStatusV3031')||{}).value||'all';
     return a.filter(function(x){return(t==='all'||team_(x)===t)&&(ty==='all'||type_(x)===ty)&&(st==='all'||status_(x)===st);});
   }
   function fillFilters_(){
-    var a=acc_(),defs=[['siDashFilterTeam',unique_(a,team_),'All Teams'],['siDashFilterType',unique_(a,type_),'All Accessories Type']];
+    var a=acc_(),defs=[['siDashFilterTeamV3031',unique_(a,team_),'All Teams'],['siDashFilterTypeV3031',unique_(a,type_),'All Accessories Type']];
     defs.forEach(function(d){var el=document.getElementById(d[0]);if(!el)return;var cur=el.value||'all';el.innerHTML='<option value="all">'+d[2]+'</option>'+d[1].map(function(v){return'<option value="'+esc_(v)+'">'+esc_(v)+'</option>';}).join('');el.value=d[1].indexOf(cur)>=0?cur:'all';});
   }
   function card_(label,value,sub,icon,cls,prefix){return'<div class="si-dash-kpi-icon-v3031 '+cls+'"><i class="fas '+icon+'"></i></div><div class="si-dash-kpi-copy-v3031"><span>'+label+'</span><b>'+(prefix||'')+Number(value||0).toLocaleString('en-US',{maximumFractionDigits:2})+'</b><small>'+sub+'</small></div>';}
@@ -114,25 +114,25 @@
     var types=unique_(rows,type_),total=rows.reduce(function(s,x){return s+qty_(x);},0),low=rows.filter(function(x){return status_(x)==='LOW_STOCK';}).length,cost=rows.reduce(function(s,x){return s+cost_(x);},0);
     var vals=[['siDashTotalAccCurrent',card_('Accessories Type',types.length,'Unique types in current filter','fa-layer-group','blue')],['siDashTotalStockCurrent',card_('Total Stock',total,'Physical quantity in current filter','fa-boxes-stacked','green')],['siDashLowAccCurrent',card_('Low Stock',low,'Items at / below minimum','fa-triangle-exclamation','amber')],['siDashCostCurrent',card_('Cost',cost,'Sum of Cost column AA','fa-coins','violet','฿')]];
     vals.forEach(function(x){var n=document.getElementById(x[0]);if(n){var host=n.parentElement;host.classList.add('si-dash-kpi-card-v3031');host.innerHTML=x[1];}});
-    var r=document.getElementById('siDashFilterResult');if(r)r.textContent=rows.length.toLocaleString('en-US')+' items · '+total.toLocaleString('en-US')+' units';
+    var r=document.getElementById('siDashFilterResultV3031');if(r)r.textContent=rows.length.toLocaleString('en-US')+' items · '+total.toLocaleString('en-US')+' units';
   }
   function renderCharts_(rows){
     if(typeof Chart==='undefined')return;
     var byTeam={},byStatus={'STOCK':0,'LOW_STOCK':0};rows.forEach(function(x){byTeam[team_(x)]=(byTeam[team_(x)]||0)+qty_(x);if(status_(x)==='LOW_STOCK')byStatus.LOW_STOCK++;else byStatus.STOCK++;});
-    var tc=document.getElementById('siAccessoriesTeamChart'),sc=document.getElementById('siAccessoriesStatusChart');
+    var tc=document.getElementById('siAccessoriesTeamChartV3028'),sc=document.getElementById('siAccessoriesStatusChartV3028');
     if(teamChart)try{teamChart.destroy();}catch(e){} if(statusChart)try{statusChart.destroy();}catch(e){}
     if(tc)teamChart=new Chart(tc,{type:'bar',data:{labels:Object.keys(byTeam),datasets:[{label:'Total Stock',data:Object.values(byTeam),backgroundColor:'#2563eb',borderRadius:8,maxBarThickness:38}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{beginAtZero:true,ticks:{precision:0}},x:{grid:{display:false}}}}});
     if(sc)statusChart=new Chart(sc,{type:'doughnut',data:{labels:['STOCK','LOW STOCK'],datasets:[{data:[byStatus.STOCK,byStatus.LOW_STOCK],backgroundColor:['#10b981','#f59e0b'],borderWidth:0}]},options:{responsive:true,maintainAspectRatio:false,cutout:'64%',plugins:{legend:{position:'right'}}}});
   }
   function renderSummary_(rows){
     var map={};rows.forEach(function(x){var k=team_(x)+'||'+type_(x);if(!map[k])map[k]={team:team_(x),type:type_(x),items:0,stock:0,min:0,low:0,cost:0,updated:''};var q=qty_(x),m=min_(x),u=updated_(x);map[k].items++;map[k].stock+=q;map[k].min+=m;map[k].cost+=cost_(x);if(status_(x)==='LOW_STOCK')map[k].low++;if(u&&(!map[k].updated||String(u).localeCompare(String(map[k].updated))>0))map[k].updated=u;});
-    var root=document.getElementById('siAccessoriesSummary');if(!root)return;
+    var root=document.getElementById('siAccessoriesSummaryV3028');if(!root)return;
     var list=Object.keys(map).map(function(k){return map[k];}).sort(function(a,b){return a.team.localeCompare(b.team)||a.type.localeCompare(b.type);});
     root.innerHTML='<div class="si-accessories-summary-wrap-v3031"><table><thead><tr><th>Team</th><th>Accessories Type</th><th>Stock</th><th>Total Stock</th><th>Min Stock</th><th>Status</th><th>Last Stock Update</th><th>Cost</th></tr></thead><tbody>'+list.map(function(x){var low=x.low>0;return'<tr><td><b>'+esc_(x.team)+'</b></td><td>'+esc_(x.type)+'</td><td>'+x.items.toLocaleString('en-US')+'</td><td><b>'+x.stock.toLocaleString('en-US')+'</b></td><td>'+x.min.toLocaleString('en-US')+'</td><td><span class="'+(low?'low':'ok')+'">'+(low?'LOW STOCK':'STOCK')+'</span></td><td>'+esc_(x.updated||'-')+'</td><td><b>฿'+x.cost.toLocaleString('en-US',{maximumFractionDigits:2})+'</b></td></tr>';}).join('')+'</tbody></table></div>'+(list.length?'':'<div class="si-dash-empty-v3031">No accessory data for current filter.</div>');
   }
   function render(){applySourceLink_();fillFilters_();var rows=filtered_();renderKpi_(rows);renderCharts_(rows);renderSummary_(rows);}
   window.si_renderAccessoriesDashboard=render;
-  window.si_resetDashboardFilters=function(){['siDashFilterTeam','siDashFilterType','siDashFilterStatus'].forEach(function(id){var e=document.getElementById(id);if(e)e.value='all';});render();};
+  window.si_resetDashboardFilters=function(){['siDashFilterTeamV3031','siDashFilterTypeV3031','siDashFilterStatusV3031'].forEach(function(id){var e=document.getElementById(id);if(e)e.value='all';});render();};
   var prior=window.si_switchTab;
   window.si_switchTab=function(t){var r=prior?prior.apply(this,arguments):undefined;if(String(t||'')==='dashboard')setTimeout(render,20);return r;};
   var init=window.initStockInventoryModule;

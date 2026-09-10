@@ -1,14 +1,12 @@
 // CES Hub V19 — Team Information cache-first + team colors + Admin edit
 let CES_TEAM_INFO={loaded:false,rows:[],team:'ALL',generatedAt:'',cacheSource:''};
-let CES_TEAM_INFO_ROW_MAP=Object.create(null);
+let CES_TEAM_INFO_ROW_MAP_V3020=Object.create(null);
 const CES_TEAM_INFO_LOCAL_KEY='ces_team_information_v19';
 const CES_TEAM_INFO_LOCAL_TTL=30*24*60*60*1000; // 30 days
 
 function cesTeamEsc_(v){return String(v==null?'':v).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
 function cesTeamIsAdmin_(){try{return typeof currentUser!=='undefined'&&currentUser&&String(currentUser.role||'').toUpperCase()==='ADMIN';}catch(e){return false;}}
 function cesTeamActorId_(){try{return (typeof currentUser!=='undefined'&&currentUser&&(currentUser.id||currentUser.empId))||'';}catch(e){return '';}}
-function cesTeamNormalize_(v){var t=String(v||'OTHER').trim().toUpperCase();if(t==='REPORTING'||t==='REPORT TEAM'||t==='REPORT')return'REPORT';return t||'OTHER';}
-function cesTeamList_(){var seen={},rows=CES_TEAM_INFO.rows||[];(rows).forEach(function(r){seen[cesTeamNormalize_(r.team)]=1;});seen.REPORT=1;var preferred=['MED','LAB','EHS','ENV','TES','QM','MNG','SALES','REPORT','OTHER'];return ['ALL'].concat(preferred.filter(function(t){return seen[t];}),Object.keys(seen).filter(function(t){return preferred.indexOf(t)<0;}).sort());}
 function cesTeamColor_(team){
   return {bg:'#f8fafc',text:'#475569',border:'#cbd5e1',contrast:'#0f172a'};
 }
@@ -42,25 +40,25 @@ function loadTeamInformation(force,background){
   }else fail(new Error('CES API bridge is not ready.'));
 }
 function renderTeamTabs_(){
-  const teams=cesTeamList_(),root=document.getElementById('team-info-tabs');if(!root)return;
+  const teams=['ALL','MED','LAB','EHS','TES','QM','MNG','SALES'],root=document.getElementById('team-info-tabs');if(!root)return;
   root.innerHTML=teams.map(t=>{const c=cesTeamColor_(t);const active=CES_TEAM_INFO.team===t;return `<button onclick="CES_TEAM_INFO.team='${t}';renderTeamTabs_();renderTeamInformation()" class="px-3 py-2 rounded-xl text-[10px] font-black border transition-all" style="${active?`background:${c.text};color:#fff;border-color:${c.text}`:`background:${c.bg};color:${c.text};border-color:${c.border}`}">${t}</button>`;}).join('');
 }
 function openTeamInformationDetail(row){row=row||{};var entries=Object.keys(row).filter(function(k){return row[k]!==null&&row[k]!==undefined&&String(row[k]).trim()!=='';});var html='<div class="text-left max-h-[70vh] overflow-auto pr-1"><div class="grid grid-cols-1 md:grid-cols-2 gap-2">'+entries.map(function(k){var v=String(row[k]),safe=cesTeamEsc_(v);if(/^https?:\/\//i.test(v))safe='<a href="'+safe+'" target="_blank" rel="noopener" class="text-[#003DA5] underline break-all">'+safe+'</a>';if(k.toLowerCase().includes('email')&&v.indexOf('@')>0)safe='<a href="mailto:'+cesTeamEsc_(v)+'" class="text-[#003DA5] underline break-all">'+cesTeamEsc_(v)+'</a>';return '<div class="rounded-xl border border-slate-100 bg-slate-50 p-3"><div class="text-[9px] uppercase tracking-wide font-black text-slate-400">'+cesTeamEsc_(k)+'</div><div class="mt-1 text-xs font-bold text-slate-700 break-words">'+safe+'</div></div>';}).join('')+'</div></div>';if(window.Swal)Swal.fire({title:cesTeamEsc_(row.nameEng||row.nameTh||row.id||'Staff Detail'),html:html,width:'min(920px,94vw)',confirmButtonText:'Close',confirmButtonColor:'#003DA5'});}
-function openTeamInformationDetailByKey(key){var row=CES_TEAM_INFO_ROW_MAP[String(key||'')];if(row)openTeamInformationDetail(row);}
-function editTeamInformationByKey(key){var row=CES_TEAM_INFO_ROW_MAP[String(key||'')];if(row)editTeamInformation(row);}
+function openTeamInformationDetailByKey(key){var row=CES_TEAM_INFO_ROW_MAP_V3020[String(key||'')];if(row)openTeamInformationDetail(row);}
+function editTeamInformationByKey(key){var row=CES_TEAM_INFO_ROW_MAP_V3020[String(key||'')];if(row)editTeamInformation(row);}
 function renderTeamInformation(){
   const rows=CES_TEAM_INFO.rows||[],q=(document.getElementById('team-info-search')?.value||'').toLowerCase().trim();
-  const filtered=rows.filter(r=>{const team=cesTeamNormalize_(r.team);const matchTeam=CES_TEAM_INFO.team==='ALL'||team===CES_TEAM_INFO.team;const text=[r.id,r.nameTh,r.nameEng,r.email,r.team,r.position,r.supervisor,r.tel,r.costCenter].join(' ').toLowerCase();return matchTeam&&(!q||text.includes(q));});
+  const filtered=rows.filter(r=>{const rawTeam=(r.team||'').toUpperCase();if(rawTeam==='ENV')return false;const team=['MED','LAB','EHS','TES','QM','MNG','SALES'].includes(rawTeam)?rawTeam:'MNG';const matchTeam=CES_TEAM_INFO.team==='ALL'||team===CES_TEAM_INFO.team;const text=[r.id,r.nameTh,r.nameEng,r.email,r.team,r.position,r.supervisor,r.tel,r.costCenter].join(' ').toLowerCase();return matchTeam&&(!q||text.includes(q));});
   renderTeamSummary_(rows);const root=document.getElementById('team-info-table');if(!root)return;
   const meta=document.getElementById('team-info-cache-status');if(meta)meta.textContent=`${CES_TEAM_INFO.cacheSource==='browser'?'Cached data':'Staff_Data'}${CES_TEAM_INFO.generatedAt?' · '+new Date(CES_TEAM_INFO.generatedAt).toLocaleString('th-TH'):''}`;
   if(!filtered.length){root.innerHTML='<div class="py-14 text-center text-slate-400"><i class="fas fa-user-slash text-3xl mb-3 text-slate-300"></i><div class="font-bold">No staff found</div></div>';return;}
   const admin=cesTeamIsAdmin_();
-  CES_TEAM_INFO_ROW_MAP=Object.create(null);
-  root.innerHTML=`<div class="ces-team-info-table-wrap overflow-auto rounded-2xl border border-slate-200 max-h-[680px]"><table class="ces-team-info-table w-full min-w-[1280px] text-xs text-left"><thead class="sticky top-0 z-20 bg-slate-50 text-[10px] uppercase tracking-wider text-slate-500"><tr><th class="p-3 sticky left-0 z-30 bg-slate-50 min-w-[250px]">Staff</th><th class="p-3 min-w-[90px]">Team</th><th class="p-3 min-w-[260px]">Position / Role</th><th class="p-3 min-w-[250px]">Email</th><th class="p-3 min-w-[190px]">Supervisor</th><th class="p-3 min-w-[150px]">Employee Type</th><th class="p-3 min-w-[140px]">Contact</th>${admin?'<th class="p-3 text-center min-w-[80px]">Action</th>':''}</tr></thead><tbody class="divide-y divide-slate-100">${filtered.map((r,index)=>{const key='r'+index+'_'+String(r.id||'').replace(/[^a-z0-9_-]/gi,'');CES_TEAM_INFO_ROW_MAP[key]=r;const displayTeam=cesTeamNormalize_(r.team);const c=cesTeamColor_(displayTeam);return `<tr class="hover:bg-slate-50/80 cursor-pointer" style="border-left:4px solid ${c.text}" onclick="openTeamInformationDetailByKey('${key}')"><td class="p-3 sticky left-0 bg-white group-hover:bg-slate-50 z-10"><b class="text-slate-800 whitespace-nowrap">${cesTeamEsc_(r.nameEng||r.nameTh||r.id)}</b><div class="text-[10px] text-slate-400 whitespace-nowrap">${cesTeamEsc_(r.nameTh||'')} · ${cesTeamEsc_(r.id||'')}</div></td><td class="p-3"><span class="inline-flex px-2.5 py-1 rounded-full font-black whitespace-nowrap" style="background:${c.bg};color:${c.text};border:1px solid ${c.border}">${cesTeamEsc_(displayTeam)}</span></td><td class="p-3 font-bold text-slate-600"><div class="leading-5">${cesTeamEsc_(r.position||'-')}</div><div class="text-[10px] text-slate-400 mt-1 whitespace-nowrap">${cesTeamEsc_(r.role||'-')}</div></td><td class="p-3 text-slate-600 whitespace-nowrap"><a onclick="event.stopPropagation()" class="hover:underline" href="mailto:${cesTeamEsc_(r.email||'')}">${cesTeamEsc_(r.email||'-')}</a></td><td class="p-3 text-slate-600 whitespace-nowrap">${cesTeamEsc_(r.supervisor||'-')}</td><td class="p-3 text-slate-600 whitespace-nowrap">${cesTeamEsc_(r.empType||'-')}</td><td class="p-3 text-slate-600 whitespace-nowrap">${cesTeamEsc_(r.tel||'-')}</td>${admin?`<td class="p-3 text-center"><button class="w-8 h-8 rounded-lg bg-blue-50 text-[#003DA5] border border-blue-100" onclick="event.stopPropagation();editTeamInformationByKey('${key}')" title="Edit"><i class="fas fa-pen"></i></button></td>`:''}</tr>`;}).join('')}</tbody></table></div><div class="mt-3 text-[10px] font-bold text-slate-400">${admin?'Admin edit enabled':'Read-only'} · ${filtered.length} staff · Scroll horizontally to view all columns</div>`;
+  CES_TEAM_INFO_ROW_MAP_V3020=Object.create(null);
+  root.innerHTML=`<div class="ces-team-info-table-wrap overflow-auto rounded-2xl border border-slate-200 max-h-[680px]"><table class="ces-team-info-table w-full min-w-[1280px] text-xs text-left"><thead class="sticky top-0 z-20 bg-slate-50 text-[10px] uppercase tracking-wider text-slate-500"><tr><th class="p-3 sticky left-0 z-30 bg-slate-50 min-w-[250px]">Staff</th><th class="p-3 min-w-[90px]">Team</th><th class="p-3 min-w-[260px]">Position / Role</th><th class="p-3 min-w-[250px]">Email</th><th class="p-3 min-w-[190px]">Supervisor</th><th class="p-3 min-w-[150px]">Employee Type</th><th class="p-3 min-w-[140px]">Contact</th>${admin?'<th class="p-3 text-center min-w-[80px]">Action</th>':''}</tr></thead><tbody class="divide-y divide-slate-100">${filtered.map((r,index)=>{const key='r'+index+'_'+String(r.id||'').replace(/[^a-z0-9_-]/gi,'');CES_TEAM_INFO_ROW_MAP_V3020[key]=r;const rawTeam=String(r.team||'').toUpperCase();const displayTeam=['MED','LAB','EHS','ENV','TES','QM','MNG','SALES'].includes(rawTeam)?rawTeam:'MNG';const c=cesTeamColor_(displayTeam);return `<tr class="hover:bg-slate-50/80 cursor-pointer" style="border-left:4px solid ${c.text}" onclick="openTeamInformationDetailByKey('${key}')"><td class="p-3 sticky left-0 bg-white group-hover:bg-slate-50 z-10"><b class="text-slate-800 whitespace-nowrap">${cesTeamEsc_(r.nameEng||r.nameTh||r.id)}</b><div class="text-[10px] text-slate-400 whitespace-nowrap">${cesTeamEsc_(r.nameTh||'')} · ${cesTeamEsc_(r.id||'')}</div></td><td class="p-3"><span class="inline-flex px-2.5 py-1 rounded-full font-black whitespace-nowrap" style="background:${c.bg};color:${c.text};border:1px solid ${c.border}">${cesTeamEsc_(displayTeam)}</span></td><td class="p-3 font-bold text-slate-600"><div class="leading-5">${cesTeamEsc_(r.position||'-')}</div><div class="text-[10px] text-slate-400 mt-1 whitespace-nowrap">${cesTeamEsc_(r.role||'-')}</div></td><td class="p-3 text-slate-600 whitespace-nowrap"><a onclick="event.stopPropagation()" class="hover:underline" href="mailto:${cesTeamEsc_(r.email||'')}">${cesTeamEsc_(r.email||'-')}</a></td><td class="p-3 text-slate-600 whitespace-nowrap">${cesTeamEsc_(r.supervisor||'-')}</td><td class="p-3 text-slate-600 whitespace-nowrap">${cesTeamEsc_(r.empType||'-')}</td><td class="p-3 text-slate-600 whitespace-nowrap">${cesTeamEsc_(r.tel||'-')}</td>${admin?`<td class="p-3 text-center"><button class="w-8 h-8 rounded-lg bg-blue-50 text-[#003DA5] border border-blue-100" onclick="event.stopPropagation();editTeamInformationByKey('${key}')" title="Edit"><i class="fas fa-pen"></i></button></td>`:''}</tr>`;}).join('')}</tbody></table></div><div class="mt-3 text-[10px] font-bold text-slate-400">${admin?'Admin edit enabled':'Read-only'} · ${filtered.length} staff · Scroll horizontally to view all columns</div>`;
 }
 function renderTeamSummary_(rows){
-  const teams=cesTeamList_().filter(function(t){return t!=='ALL';}),root=document.getElementById('team-info-summary');if(!root)return;
-  root.innerHTML=teams.map(t=>{const n=rows.filter(r=>cesTeamNormalize_(r.team)===t).length,c=cesTeamColor_(t);return `<div class="rounded-2xl border p-3 text-center" style="background:${c.bg};border-color:${c.border}"><div class="text-[10px] font-black" style="color:${c.text}">${t}</div><div class="text-xl font-black mt-1" style="color:${c.text}">${n}</div></div>`;}).join('');
+  const teams=['MED','LAB','EHS','TES','QM','MNG','SALES'],root=document.getElementById('team-info-summary');if(!root)return;
+  root.innerHTML=teams.map(t=>{const n=rows.filter(r=>{const raw=(r.team||'').toUpperCase();const x=['MED','LAB','EHS','TES','QM','MNG','SALES'].includes(raw)?raw:'MNG';return x===t;}).length,c=cesTeamColor_(t);return `<div class="rounded-2xl border p-3 text-center" style="background:${c.bg};border-color:${c.border}"><div class="text-[10px] font-black" style="color:${c.text}">${t}</div><div class="text-xl font-black mt-1" style="color:${c.text}">${n}</div></div>`;}).join('');
 }
 function cesTeamApplyCurrentUserUpdate(staff){
   if(!staff)return; const actor=cesTeamActorId_(); if(String(actor)!==String(staff.id)&&String(actor)!==String(staff.originalId||''))return;
@@ -68,14 +66,14 @@ function cesTeamApplyCurrentUserUpdate(staff){
   try{if(typeof currentUser!=='undefined'&&currentUser)Object.assign(currentUser,patch);}catch(e){}
   try{window.CES_CURRENT_USER=Object.assign({},window.CES_CURRENT_USER||{},patch);}catch(e){}
   try{localStorage.setItem('ces_user',JSON.stringify(window.CES_CURRENT_USER||patch));}catch(e){}
-  try{if(typeof cesPersistSession_==='function')cesPersistSession_(window.CES_CURRENT_USER||patch,'team_information','STAFF_INFO_UPDATED');}catch(e){}
+  try{if(typeof cesPersistSessionV50_==='function')cesPersistSessionV50_(window.CES_CURRENT_USER||patch,'team_information','STAFF_INFO_UPDATED');}catch(e){}
   try{if(typeof updateProfileUI==='function')updateProfileUI();}catch(e){}
 }
 
 function editTeamInformation(row){
   if(!cesTeamIsAdmin_()){Swal.fire('Permission Denied','Admin permission is required.','error');return;}
-  const teams=cesTeamList_().filter(function(t){return t!=='ALL';}),roles=['ADMIN','MANAGER','SUPERVISOR','STAFF'];
-  Swal.fire({title:'Edit Team Information',width:820,html:`<div class="grid grid-cols-1 md:grid-cols-2 gap-3 text-left"><div><label class="ces-form-label">Staff ID</label><input id="ti-id" class="swal2-input !m-0 !w-full" value="${cesTeamEsc_(row.id)}"></div><div><label class="ces-form-label">Email</label><input id="ti-email" class="swal2-input !m-0 !w-full" value="${cesTeamEsc_(row.email)}"></div><div><label class="ces-form-label">Thai Name</label><input id="ti-th" class="swal2-input !m-0 !w-full" value="${cesTeamEsc_(row.nameTh)}"></div><div><label class="ces-form-label">English Name</label><input id="ti-en" class="swal2-input !m-0 !w-full" value="${cesTeamEsc_(row.nameEng)}"></div><div><label class="ces-form-label">Team</label><select id="ti-team" class="swal2-select !m-0 !w-full">${teams.map(x=>`<option ${x===cesTeamNormalize_(row.team)?'selected':''}>${x}</option>`).join('')}</select></div><div><label class="ces-form-label">Role</label><select id="ti-role" class="swal2-select !m-0 !w-full">${roles.map(x=>`<option ${x===row.role?'selected':''}>${x}</option>`).join('')}</select></div><div><label class="ces-form-label">Position</label><input id="ti-position" class="swal2-input !m-0 !w-full" value="${cesTeamEsc_(row.position)}"></div><div><label class="ces-form-label">Supervisor</label><input id="ti-supervisor" class="swal2-input !m-0 !w-full" value="${cesTeamEsc_(row.supervisor)}"></div><div><label class="ces-form-label">Cost Center</label><input id="ti-cost" class="swal2-input !m-0 !w-full" value="${cesTeamEsc_(row.costCenter)}"></div><div><label class="ces-form-label">Employee Type</label><input id="ti-type" class="swal2-input !m-0 !w-full" value="${cesTeamEsc_(row.empType)}"></div><div><label class="ces-form-label">Contact</label><input id="ti-tel" class="swal2-input !m-0 !w-full" value="${cesTeamEsc_(row.tel)}"></div></div>`,showCancelButton:true,confirmButtonText:'Save Staff Data',preConfirm:()=>({actorId:cesTeamActorId_(),originalId:row.id,id:document.getElementById('ti-id').value.trim(),nameTh:document.getElementById('ti-th').value.trim(),nameEng:document.getElementById('ti-en').value.trim(),email:document.getElementById('ti-email').value.trim(),team:document.getElementById('ti-team').value,position:document.getElementById('ti-position').value.trim(),role:document.getElementById('ti-role').value,costCenter:document.getElementById('ti-cost').value.trim(),supervisor:document.getElementById('ti-supervisor').value.trim(),empType:document.getElementById('ti-type').value.trim(),tel:document.getElementById('ti-tel').value.trim()})}).then(async result=>{
+  const teams=['MED','LAB','EHS','TES','QM','MNG','SALES'],roles=['ADMIN','MANAGER','SUPERVISOR','STAFF'];
+  Swal.fire({title:'Edit Team Information',width:820,html:`<div class="grid grid-cols-1 md:grid-cols-2 gap-3 text-left"><div><label class="ces-form-label">Staff ID</label><input id="ti-id" class="swal2-input !m-0 !w-full" value="${cesTeamEsc_(row.id)}"></div><div><label class="ces-form-label">Email</label><input id="ti-email" class="swal2-input !m-0 !w-full" value="${cesTeamEsc_(row.email)}"></div><div><label class="ces-form-label">Thai Name</label><input id="ti-th" class="swal2-input !m-0 !w-full" value="${cesTeamEsc_(row.nameTh)}"></div><div><label class="ces-form-label">English Name</label><input id="ti-en" class="swal2-input !m-0 !w-full" value="${cesTeamEsc_(row.nameEng)}"></div><div><label class="ces-form-label">Team</label><select id="ti-team" class="swal2-select !m-0 !w-full">${teams.map(x=>`<option ${x===((['MED','LAB','EHS','ENV','TES','QM','MNG','SALES'].includes(String(row.team||'').toUpperCase()))?String(row.team||'').toUpperCase():'MNG')?'selected':''}>${x}</option>`).join('')}</select></div><div><label class="ces-form-label">Role</label><select id="ti-role" class="swal2-select !m-0 !w-full">${roles.map(x=>`<option ${x===row.role?'selected':''}>${x}</option>`).join('')}</select></div><div><label class="ces-form-label">Position</label><input id="ti-position" class="swal2-input !m-0 !w-full" value="${cesTeamEsc_(row.position)}"></div><div><label class="ces-form-label">Supervisor</label><input id="ti-supervisor" class="swal2-input !m-0 !w-full" value="${cesTeamEsc_(row.supervisor)}"></div><div><label class="ces-form-label">Cost Center</label><input id="ti-cost" class="swal2-input !m-0 !w-full" value="${cesTeamEsc_(row.costCenter)}"></div><div><label class="ces-form-label">Employee Type</label><input id="ti-type" class="swal2-input !m-0 !w-full" value="${cesTeamEsc_(row.empType)}"></div><div><label class="ces-form-label">Contact</label><input id="ti-tel" class="swal2-input !m-0 !w-full" value="${cesTeamEsc_(row.tel)}"></div></div>`,showCancelButton:true,confirmButtonText:'Save Staff Data',preConfirm:()=>({actorId:cesTeamActorId_(),originalId:row.id,id:document.getElementById('ti-id').value.trim(),nameTh:document.getElementById('ti-th').value.trim(),nameEng:document.getElementById('ti-en').value.trim(),email:document.getElementById('ti-email').value.trim(),team:document.getElementById('ti-team').value,position:document.getElementById('ti-position').value.trim(),role:document.getElementById('ti-role').value,costCenter:document.getElementById('ti-cost').value.trim(),supervisor:document.getElementById('ti-supervisor').value.trim(),empType:document.getElementById('ti-type').value.trim(),tel:document.getElementById('ti-tel').value.trim()})}).then(async result=>{
     if(!result.isConfirmed)return;
     Swal.fire({title:'Updating Staff_Data...',allowOutsideClick:false,didOpen:()=>Swal.showLoading()});
     try{const res=await window.CES_API.callFunction('updateTeamInformation',[result.value],{transport:'jsonp',timeoutMs:60000});if(!res||!res.success)throw new Error((res&&res.message)||'Update failed');cesTeamApplyCurrentUserUpdate(res.data);localStorage.removeItem(CES_TEAM_INFO_LOCAL_KEY);CES_TEAM_INFO.loaded=false;await Swal.fire('Updated',res.message||'Staff information updated','success');loadTeamInformation(true,false);}catch(err){Swal.fire('Update Error',err.message||String(err),'error');}
@@ -86,38 +84,38 @@ function editTeamInformation(row){
 // ============================================================
 // CES Hub V20 — Training Record (2026)
 // ============================================================
-const CES_TRAINING={loaded:false,data:null,mode:'directory',planLoaded:false,planData:null,planDirty:{},planSheet:'STEP FORWARD 2026'};
+const CES_TRAINING_V20={loaded:false,data:null,mode:'directory',planLoaded:false,planData:null,planDirty:{},planSheet:'STEP FORWARD 2026'};
 function refreshTeamInformation(){
-  if(CES_TRAINING.mode==='training') loadTrainingDashboard(true);
-  else if(CES_TRAINING.mode==='plan') loadTrainingPlan(true);
+  if(CES_TRAINING_V20.mode==='training') loadTrainingDashboard(true);
+  else if(CES_TRAINING_V20.mode==='plan') loadTrainingPlan(true);
   else loadTeamInformation(true,false);
 }
 function switchTeamInfoMode(mode){
-  CES_TRAINING.mode=(mode==='training'||mode==='plan')?mode:'directory';
+  CES_TRAINING_V20.mode=(mode==='training'||mode==='plan')?mode:'directory';
   const dir=document.getElementById('team-info-directory-panel'),training=document.getElementById('team-info-training-panel'),plan=document.getElementById('team-info-plan-panel');
-  if(dir)dir.classList.toggle('hidden',CES_TRAINING.mode!=='directory');
-  if(training)training.classList.toggle('hidden',CES_TRAINING.mode!=='training');
-  if(plan)plan.classList.toggle('hidden',CES_TRAINING.mode!=='plan');
+  if(dir)dir.classList.toggle('hidden',CES_TRAINING_V20.mode!=='directory');
+  if(training)training.classList.toggle('hidden',CES_TRAINING_V20.mode!=='training');
+  if(plan)plan.classList.toggle('hidden',CES_TRAINING_V20.mode!=='plan');
   const d=document.getElementById('team-info-directory-tab'),tr=document.getElementById('team-info-training-tab'),pl=document.getElementById('team-info-plan-tab');
-  if(d)d.classList.toggle('active',CES_TRAINING.mode==='directory');
-  if(tr)tr.classList.toggle('active',CES_TRAINING.mode==='training');
-  if(pl)pl.classList.toggle('active',CES_TRAINING.mode==='plan');
-  if(CES_TRAINING.mode==='training'&&!CES_TRAINING.loaded)loadTrainingDashboard(false);
-  if(CES_TRAINING.mode==='plan'&&!CES_TRAINING.planLoaded)loadTrainingPlan(false);
+  if(d)d.classList.toggle('active',CES_TRAINING_V20.mode==='directory');
+  if(tr)tr.classList.toggle('active',CES_TRAINING_V20.mode==='training');
+  if(pl)pl.classList.toggle('active',CES_TRAINING_V20.mode==='plan');
+  if(CES_TRAINING_V20.mode==='training'&&!CES_TRAINING_V20.loaded)loadTrainingDashboard(false);
+  if(CES_TRAINING_V20.mode==='plan'&&!CES_TRAINING_V20.planLoaded)loadTrainingPlan(false);
   if(window.CES_LANGUAGE&&window.CES_LANGUAGE.apply)window.CES_LANGUAGE.apply();
 }
 async function loadTrainingDashboard(force){
   const root=document.getElementById('training-people-list');
-  if(root&&!CES_TRAINING.loaded)root.innerHTML='<div class="lg:col-span-2 py-12 text-center text-slate-400"><i class="fas fa-circle-notch fa-spin text-2xl"></i><div class="mt-2 font-bold">Loading Training Records…</div></div>';
+  if(root&&!CES_TRAINING_V20.loaded)root.innerHTML='<div class="lg:col-span-2 py-12 text-center text-slate-400"><i class="fas fa-circle-notch fa-spin text-2xl"></i><div class="mt-2 font-bold">Loading Training Records…</div></div>';
   try{
     if(!window.CES_API)throw new Error('CES API is not ready.');
     const res=await window.CES_API.callFunction('getTrainingDashboard',[{forceRefresh:!!force}],{transport:'jsonp',timeoutMs:45000});
     if(!res||res.success===false)throw new Error((res&&res.message)||'Cannot load training records.');
-    CES_TRAINING.loaded=true;CES_TRAINING.data=res;renderTrainingDashboard();
+    CES_TRAINING_V20.loaded=true;CES_TRAINING_V20.data=res;renderTrainingDashboard();
   }catch(err){if(root)root.innerHTML='<div class="lg:col-span-2 py-12 text-center text-red-500 font-bold">'+cesTeamEsc_(err.message||String(err))+'</div>';}
 }
 function renderTrainingDashboard(){
-  const data=CES_TRAINING.data||{people:[],teams:[],overall:{}};
+  const data=CES_TRAINING_V20.data||{people:[],teams:[],overall:{}};
   const overall=data.overall||{},rate=Number(overall.completionRate||0);
   const donut=document.getElementById('training-overall-donut');if(donut)donut.style.setProperty('--progress',Math.max(0,Math.min(100,rate))+'%');
   const rateEl=document.getElementById('training-overall-rate');if(rateEl)rateEl.textContent=rate.toFixed(1)+'%';
@@ -178,29 +176,29 @@ async function openTrainingManual(userId){
 // ============================================================
 // Training Plan 2026 — editable view backed by CES Staff List & Training Plan 2026
 // ============================================================
-function trainingPlanSheet_(){return CES_TRAINING.planSheet||'STEP FORWARD 2026';}
+function trainingPlanSheet_(){return CES_TRAINING_V20.planSheet||'STEP FORWARD 2026';}
 function trainingPlanEscape_(v){return cesTeamEsc_(v);}
 function trainingPlanColumnName_(n){let s='';while(n>0){n--;s=String.fromCharCode(65+n%26)+s;n=Math.floor(n/26);}return s;}
 function setTrainingPlanSheet(sheetName){
-  CES_TRAINING.planSheet=String(sheetName||'STEP FORWARD 2026');
-  CES_TRAINING.planLoaded=false;
+  CES_TRAINING_V20.planSheet=String(sheetName||'STEP FORWARD 2026');
+  CES_TRAINING_V20.planLoaded=false;
   document.querySelectorAll('[data-training-plan-sheet]').forEach(function(btn){
-    btn.classList.toggle('active',btn.getAttribute('data-training-plan-sheet')===CES_TRAINING.planSheet);
+    btn.classList.toggle('active',btn.getAttribute('data-training-plan-sheet')===CES_TRAINING_V20.planSheet);
   });
   loadTrainingPlan(false);
 }
 async function loadTrainingPlan(force){
   const root=document.getElementById('training-plan-grid'),cacheKey='ces_training_plan_'+trainingPlanSheet_();
-  if(!force&&!CES_TRAINING.planLoaded){try{const cached=JSON.parse(localStorage.getItem(cacheKey)||'null');if(cached&&cached.data){CES_TRAINING.planData=cached.data;CES_TRAINING.planLoaded=true;renderTrainingPlan();}}catch(ignore){}}
-  if(root&&!CES_TRAINING.planLoaded)root.innerHTML='<div class="py-14 text-center text-slate-400"><i class="fas fa-circle-notch fa-spin text-xl"></i><div class="mt-2 text-xs font-bold">Loading Training Plan…</div></div>';
+  if(!force&&!CES_TRAINING_V20.planLoaded){try{const cached=JSON.parse(localStorage.getItem(cacheKey)||'null');if(cached&&cached.data){CES_TRAINING_V20.planData=cached.data;CES_TRAINING_V20.planLoaded=true;renderTrainingPlan();}}catch(ignore){}}
+  if(root&&!CES_TRAINING_V20.planLoaded)root.innerHTML='<div class="py-14 text-center text-slate-400"><i class="fas fa-circle-notch fa-spin text-xl"></i><div class="mt-2 text-xs font-bold">Loading Training Plan…</div></div>';
   try{
     const res=await window.CES_API.callFunction('getTrainingPlan',[{sheetName:trainingPlanSheet_(),force:!!force}],{transport:'jsonp',timeoutMs:60000,dedupe:false});
     if(!res||res.success===false)throw new Error((res&&res.message)||'Cannot load training plan');
-    CES_TRAINING.planLoaded=true;CES_TRAINING.planData=res;CES_TRAINING.planDirty={};try{localStorage.setItem(cacheKey,JSON.stringify({at:Date.now(),data:res}));}catch(ignoreCache){}renderTrainingPlan();
+    CES_TRAINING_V20.planLoaded=true;CES_TRAINING_V20.planData=res;CES_TRAINING_V20.planDirty={};try{localStorage.setItem(cacheKey,JSON.stringify({at:Date.now(),data:res}));}catch(ignoreCache){}renderTrainingPlan();
   }catch(err){if(root)root.innerHTML='<div class="py-14 text-center text-red-500 font-bold">'+trainingPlanEscape_(err.message||String(err))+'</div>';}
 }
 function renderTrainingPlan(){
-  const data=CES_TRAINING.planData||{},root=document.getElementById('training-plan-grid');if(!root)return;
+  const data=CES_TRAINING_V20.planData||{},root=document.getElementById('training-plan-grid');if(!root)return;
   const rows=Array.isArray(data.values)?data.values:[],headerRows=Number(data.headerRows||0),formulaMap=data.formulas||[];
   const maxCols=Number(data.columnCount||0)||Math.max(0,...rows.map(r=>r.length));
   const merges=Array.isArray(data.merges)?data.merges:[];
@@ -250,15 +248,15 @@ function renderTrainingPlan(){
   document.querySelectorAll('[data-training-plan-sheet]').forEach(function(btn){btn.classList.toggle('active',btn.getAttribute('data-training-plan-sheet')===trainingPlanSheet_());});
 }
 function markTrainingPlanCell(input){
-  const row=Number(input.dataset.row||0),col=Number(input.dataset.col||0);if(!row||!col)return;CES_TRAINING.planDirty[row+':'+col]={row:row,col:col,value:input.value};
-  const save=document.getElementById('training-plan-save');if(save){save.disabled=false;save.innerHTML='<i class="fas fa-floppy-disk"></i> Save '+Object.keys(CES_TRAINING.planDirty).length+' change(s)';}
+  const row=Number(input.dataset.row||0),col=Number(input.dataset.col||0);if(!row||!col)return;CES_TRAINING_V20.planDirty[row+':'+col]={row:row,col:col,value:input.value};
+  const save=document.getElementById('training-plan-save');if(save){save.disabled=false;save.innerHTML='<i class="fas fa-floppy-disk"></i> Save '+Object.keys(CES_TRAINING_V20.planDirty).length+' change(s)';}
 }
 async function saveTrainingPlan(){
-  const changes=Object.values(CES_TRAINING.planDirty||{});if(!changes.length)return;const btn=document.getElementById('training-plan-save');if(btn)btn.disabled=true;
+  const changes=Object.values(CES_TRAINING_V20.planDirty||{});if(!changes.length)return;const btn=document.getElementById('training-plan-save');if(btn)btn.disabled=true;
   try{const res=await window.CES_API.callFunction('saveTrainingPlanChanges',[{actorId:cesTeamActorId_(),sheetName:trainingPlanSheet_(),changes:changes}],{transport:'iframe',timeoutMs:90000,dedupe:false});if(!res||res.success===false)throw new Error((res&&res.message)||'Save failed');await loadTrainingPlan(true);Swal.fire({icon:'success',title:'Training Plan updated',text:(res.updated||changes.length)+' cells saved',timer:1500,showConfirmButton:false});}
   catch(err){if(btn)btn.disabled=false;Swal.fire('Training Plan',err.message||String(err),'error');}
 }
-function openTrainingPlanSource(){const url=(typeof window.cesExternalLink==='function'&&window.cesExternalLink('TRAINING_PLAN_2026'))||(CES_TRAINING.planData&&CES_TRAINING.planData.sourceUrl)||'';if(url)window.open(url,'_blank','noopener,noreferrer');}
+function openTrainingPlanSource(){const url=(typeof window.cesExternalLink==='function'&&window.cesExternalLink('TRAINING_PLAN_2026'))||(CES_TRAINING_V20.planData&&CES_TRAINING_V20.planData.sourceUrl)||'';if(url)window.open(url,'_blank','noopener,noreferrer');}
 
 window.refreshTeamInformation=refreshTeamInformation;window.openTeamInformationDetail=openTeamInformationDetail;window.openTeamInformationDetailByKey=openTeamInformationDetailByKey;window.editTeamInformationByKey=editTeamInformationByKey;
 window.switchTeamInfoMode=switchTeamInfoMode;
@@ -272,7 +270,7 @@ window.renderTrainingPlan=renderTrainingPlan;
 window.markTrainingPlanCell=markTrainingPlanCell;
 window.saveTrainingPlan=saveTrainingPlan;
 window.openTrainingPlanSource=openTrainingPlanSource;
-window.initTeamPlan=function(){CES_TRAINING.mode='plan';return loadTrainingPlan(false);};
+window.initTeamPlan=function(){CES_TRAINING_V20.mode='plan';return loadTrainingPlan(false);};
 
 // V22.5 standalone Information > Team Plan
 window.initTeamPlan=function(){try{if(typeof window.loadTrainingPlan==='function')return window.loadTrainingPlan(false);}catch(e){console.warn('[Team Plan V22.5]',e);}return null;};

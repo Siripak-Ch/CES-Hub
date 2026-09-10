@@ -211,7 +211,7 @@
 
   function renderReport(report) {
     state.report = report || {};
-    try { localStorage.setItem('CES_HEALTH_REPORT', JSON.stringify(state.report)); } catch (e) {}
+    try { localStorage.setItem('CES_HEALTH_REPORT_V18', JSON.stringify(state.report)); } catch (e) {}
     var updated = el('health-last-updated');
     if (updated) updated.innerHTML = '<i class="far fa-clock"></i> ' + esc(state.report.generatedAt || new Date().toLocaleString());
     setSummary(state.report);
@@ -288,7 +288,7 @@
       rows = rows.concat(runtimeRows());
       var counts = countRows(rows);
       state.frontend = { generatedAt:new Date().toISOString(), rows:rows, counts:counts, overall:worstStatus(rows.map(function (x) { return x.status; })) };
-      try { localStorage.setItem('CES_FRONTEND_HEALTH', JSON.stringify(state.frontend)); } catch (e) {}
+      try { localStorage.setItem('CES_FRONTEND_HEALTH_V18', JSON.stringify(state.frontend)); } catch (e) {}
       renderFrontendAudit();
       setSummary(state.report || {});
       if (force && window.Swal) {
@@ -319,7 +319,7 @@
       return report;
     } catch (error) {
       var cached=null;
-      try{cached=JSON.parse(localStorage.getItem('CES_HEALTH_REPORT')||'null');}catch(ignore){}
+      try{cached=JSON.parse(localStorage.getItem('CES_HEALTH_REPORT_V18')||'null');}catch(ignore){}
       if(cached){
         renderReport(cached);
         if(window.Swal)Swal.fire({icon:'warning',title:'Live health check unavailable',text:'Showing the last saved health report. Retry after the Apps Script deployment is reachable.',confirmButtonColor:'#003DA5'});
@@ -381,7 +381,7 @@
     var url = URL.createObjectURL(blob);
     var link = document.createElement('a');
     link.href = url;
-    link.download = 'CES_HUB_System_Health_' + new Date().toISOString().replace(/[:.]/g, '-') + '.json';
+    link.download = 'CES_HUB_System_Health_V18_' + new Date().toISOString().replace(/[:.]/g, '-') + '.json';
     document.body.appendChild(link); link.click(); link.remove();
     setTimeout(function () { URL.revokeObjectURL(url); }, 1000);
   }
@@ -389,8 +389,8 @@
   function init() {
     if (state.initialized) return;
     state.initialized = true;
-    try { state.report = JSON.parse(localStorage.getItem('CES_HEALTH_REPORT') || 'null'); } catch (e) {}
-    try { state.frontend = JSON.parse(localStorage.getItem('CES_FRONTEND_HEALTH') || 'null'); } catch (e2) {}
+    try { state.report = JSON.parse(localStorage.getItem('CES_HEALTH_REPORT_V18') || 'null'); } catch (e) {}
+    try { state.frontend = JSON.parse(localStorage.getItem('CES_FRONTEND_HEALTH_V18') || 'null'); } catch (e2) {}
     if (state.report) renderReport(state.report); else renderFrontendAudit();
     loadSystemHealth(false).catch(function () {});
   }

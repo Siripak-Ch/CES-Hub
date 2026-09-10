@@ -7,7 +7,7 @@
 let wkCurrentTeam = 'MED', wkActiveDashTeam = 'ALL', wkActiveStatus = 'ALL'; 
 let wkRawJobs = [], wkRawStaff = [], wkSelectedMembers = [], wkUploadQueue = [], wkMemoQueue = []; 
 let wkCurrentWeekInfo = '', wkRawDashboardData = [], wkDraftQueue = [];
-let wkInitialLoaded = false, wkInitialLoading = false; 
+let wkInitialLoadedV38 = false, wkInitialLoadingV38 = false; 
 const WK_INITIAL_CACHE_KEY = 'CES_WEEKLY_INITIAL_CACHE';
 const WK_INITIAL_CACHE_TTL = 10 * 60 * 1000;
 
@@ -22,7 +22,7 @@ const WK_SUBTEAMS = {
 
 function wkReadInitialCache_(){try{const box=JSON.parse(localStorage.getItem(WK_INITIAL_CACHE_KEY)||'null');return box&&box.data?box:null;}catch(error){return null;}}
 function wkWriteInitialCache_(data){try{localStorage.setItem(WK_INITIAL_CACHE_KEY,JSON.stringify({at:Date.now(),data:data||{}}));}catch(error){}}
-function wkApplyInitialData_(data){data=data||{};wkRawJobs=Array.isArray(data.jobs)?data.jobs:[];wkRawStaff=Array.isArray(data.staff)?data.staff:[];wkInitialLoaded=true;switchWeeklyTeam(wkCurrentTeam||'MED');return data;}
+function wkApplyInitialData_(data){data=data||{};wkRawJobs=Array.isArray(data.jobs)?data.jobs:[];wkRawStaff=Array.isArray(data.staff)?data.staff:[];wkInitialLoadedV38=true;switchWeeklyTeam(wkCurrentTeam||'MED');return data;}
 function wkSetInitialLoading_(visible,message,isError){
     const loading=document.getElementById('weekly-loading');if(!loading)return;
     loading.classList.toggle('hidden',!visible);if(!visible)return;
@@ -42,27 +42,27 @@ function initWeekly(forceRefresh) {
 
     ['filter-year', 'filter-month', 'filter-week'].forEach(id => {
         const el = document.getElementById(id);
-        if (!el || el.dataset.weeklyBound === '1') return;
-        el.dataset.weeklyBound = '1';
+        if (!el || el.dataset.weeklyBoundV38 === '1') return;
+        el.dataset.weeklyBoundV38 = '1';
         el.addEventListener('change', () => { if(id==='filter-month') updateWeekOptions(); applyFilters(); });
     });
 
-    if (wkInitialLoaded && !forceRefresh) {
+    if (wkInitialLoadedV38 && !forceRefresh) {
         switchWeeklyTeam(wkCurrentTeam || 'MED');
         return;
     }
     const cachedBox=wkReadInitialCache_(),cached=cachedBox&&cachedBox.data;
     if(!forceRefresh&&cached){wkApplyInitialData_(cached);wkSetInitialLoading_(false);if(Date.now()-Number(cachedBox.at||0)<WK_INITIAL_CACHE_TTL)return;}
-    if (wkInitialLoading) return;
-    wkInitialLoading = true;
+    if (wkInitialLoadingV38) return;
+    wkInitialLoadingV38 = true;
     const backgroundRefresh=!forceRefresh&&!!cached;
     if(!backgroundRefresh)wkSetInitialLoading_(true,forceRefresh?'Refreshing Weekly data...':'Loading Configuration...');
     return wkLoadInitialApi_(!!forceRefresh,backgroundRefresh).then(data=>{wkWriteInitialCache_(data);wkApplyInitialData_(data);wkSetInitialLoading_(false);return data;}).catch(err=>{
         if(cached){wkApplyInitialData_(cached);wkSetInitialLoading_(false);return cached;}
-        wkInitialLoaded=false;wkSetInitialLoading_(true,'',true);console.warn('[Weekly initial data]',err);return null;
-    }).finally(()=>{wkInitialLoading=false;});
+        wkInitialLoadedV38=false;wkSetInitialLoading_(true,'',true);console.warn('[Weekly initial data]',err);return null;
+    }).finally(()=>{wkInitialLoadingV38=false;});
 }
-window.refreshWeeklyInitial = function(){ wkInitialLoaded=false; return initWeekly(true); };
+window.refreshWeeklyInitial = function(){ wkInitialLoadedV38=false; return initWeekly(true); };
 
 function submitWeeklyReport(e) { if (e) e.preventDefault(); addReportToQueue(); }
 

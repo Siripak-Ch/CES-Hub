@@ -1485,21 +1485,21 @@ function processServiceUpload(jsonData, meta) {
 // Memo / Work Order ↔ Service CSI V55
 // Monthly import merge; persistent comparison; browser cache first
 // ============================================================
-let serviceMemoMappingRows = [];
-let serviceMemoMappingMeta = null;
-let serviceMemoMappingLoaded = false;
-let serviceMemoMappingLoading = false;
-let serviceMemoMappingPopupOpen = false;
-let serviceActiveTab = 'dashboard';
-let serviceMemoMappingFilters = {status:'ALL',year:'2026',month:'ALL',team:'ALL'};
-let serviceMemoMappingPage = 1;
-const CES_SERVICE_MEMO_TARGET_YEAR = 2026;
-const CES_SERVICE_MEMO_PAGE_SIZE = 50;
-const CES_SERVICE_MEMO_CACHE_KEY = 'CES_SERVICE_MEMO_COMPARISON_CACHE_2026';
-const CES_SERVICE_MEMO_RESTORE_KEY = 'CES_SERVICE_MEMO_RESTORE_';
-const CES_SERVICE_MEMO_MATCH_THRESHOLD = 70; // MATCHED requires score > 70.
-const CES_SERVICE_MEMO_PROVINCES = ['กรุงเทพ','นนทบุรี','ปทุมธานี','สมุทรปราการ','สมุทรสาคร','สมุทรสงคราม','นครปฐม','พระนครศรีอยุธยา','อยุธยา','สระบุรี','ลพบุรี','สุพรรณบุรี','กาญจนบุรี','ราชบุรี','เพชรบุรี','ประจวบคีรีขันธ์','ชลบุรี','ระยอง','จันทบุรี','ตราด','ฉะเชิงเทรา','ปราจีนบุรี','นครนายก','สระแก้ว','นครราชสีมา','ขอนแก่น','อุดรธานี','อุบลราชธานี','บุรีรัมย์','สุรินทร์','ศรีสะเกษ','ร้อยเอ็ด','มหาสารคาม','กาฬสินธุ์','สกลนคร','นครพนม','มุกดาหาร','หนองคาย','บึงกาฬ','เลย','หนองบัวลำภู','ยโสธร','อำนาจเจริญ','เชียงใหม่','เชียงราย','ลำปาง','ลำพูน','พะเยา','แพร่','น่าน','แม่ฮ่องสอน','อุตรดิตถ์','พิษณุโลก','สุโขทัย','ตาก','กำแพงเพชร','พิจิตร','เพชรบูรณ์','นครสวรรค์','อุทัยธานี','สุราษฎร์ธานี','สุราษฎร์','นครศรีธรรมราช','สงขลา','ภูเก็ต','กระบี่','พังงา','ตรัง','พัทลุง','สตูล','ชุมพร','ระนอง','ปัตตานี','ยะลา','นราธิวาส'];
-const CES_SERVICE_MEMO_LEGACY_KEYS = ['CES_SERVICE_MEMO_COMPARISON_2026_LEGACY','CES_SERVICE_MEMO_COMPARISON_2026_LEGACY_2','CES_SERVICE_MEMO_COMPARISON_2026_LEGACY_3','CES_SERVICE_MEMO_COMPARISON_2026_LEGACY_4','CES_SERVICE_MEMO_COMPARISON','CES_SERVICE_MEMO_COMPARISON_LEGACY','CES_SERVICE_MEMO_COMPARISON'];
+let serviceMemoMappingRowsV55 = [];
+let serviceMemoMappingMetaV55 = null;
+let serviceMemoMappingLoadedV55 = false;
+let serviceMemoMappingLoadingV55 = false;
+let serviceMemoMappingPopupOpenV55 = false;
+let serviceActiveTabV266 = 'dashboard';
+let serviceMemoMappingFiltersV55 = {status:'ALL',year:'2026',month:'ALL',team:'ALL'};
+let serviceMemoMappingPageV55 = 1;
+const CES_SERVICE_MEMO_V55_TARGET_YEAR = 2026;
+const CES_SERVICE_MEMO_V55_PAGE_SIZE = 50;
+const CES_SERVICE_MEMO_V55_CACHE_KEY = 'CES_SERVICE_MEMO_COMPARISON_V55_2026';
+const CES_SERVICE_MEMO_V55_RESTORE_KEY = 'CES_SERVICE_MEMO_RESTORE_V55';
+const CES_SERVICE_MEMO_V55_MATCH_THRESHOLD = 70; // MATCHED requires score > 70.
+const CES_SERVICE_MEMO_V55_PROVINCES = ['กรุงเทพ','นนทบุรี','ปทุมธานี','สมุทรปราการ','สมุทรสาคร','สมุทรสงคราม','นครปฐม','พระนครศรีอยุธยา','อยุธยา','สระบุรี','ลพบุรี','สุพรรณบุรี','กาญจนบุรี','ราชบุรี','เพชรบุรี','ประจวบคีรีขันธ์','ชลบุรี','ระยอง','จันทบุรี','ตราด','ฉะเชิงเทรา','ปราจีนบุรี','นครนายก','สระแก้ว','นครราชสีมา','ขอนแก่น','อุดรธานี','อุบลราชธานี','บุรีรัมย์','สุรินทร์','ศรีสะเกษ','ร้อยเอ็ด','มหาสารคาม','กาฬสินธุ์','สกลนคร','นครพนม','มุกดาหาร','หนองคาย','บึงกาฬ','เลย','หนองบัวลำภู','ยโสธร','อำนาจเจริญ','เชียงใหม่','เชียงราย','ลำปาง','ลำพูน','พะเยา','แพร่','น่าน','แม่ฮ่องสอน','อุตรดิตถ์','พิษณุโลก','สุโขทัย','ตาก','กำแพงเพชร','พิจิตร','เพชรบูรณ์','นครสวรรค์','อุทัยธานี','สุราษฎร์ธานี','สุราษฎร์','นครศรีธรรมราช','สงขลา','ภูเก็ต','กระบี่','พังงา','ตรัง','พัทลุง','สตูล','ชุมพร','ระนอง','ปัตตานี','ยะลา','นราธิวาส'];
+const CES_SERVICE_MEMO_V55_LEGACY_KEYS = ['CES_SERVICE_MEMO_COMPARISON_V54_2026','CES_SERVICE_MEMO_COMPARISON_V53_2026','CES_SERVICE_MEMO_COMPARISON_V52_2026','CES_SERVICE_MEMO_COMPARISON_V50_2026','CES_SERVICE_MEMO_COMPARISON_V45','CES_SERVICE_MEMO_COMPARISON_V43','CES_SERVICE_MEMO_COMPARISON'];
 
 function svcMapEsc(value){return String(value==null?'':value).replace(/[&<>"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));}
 function svcMapText(value){return String(value==null?'':value).trim();}
@@ -1543,7 +1543,7 @@ function svcMapSheetRows(worksheet,type){
   })).filter(row=>(row.formId||row.docNo||row.customer)&&svcMapMonthFromDate(row.date).startsWith('2026-'));
 }
 function svcMapServiceRows(){
-  return (Array.isArray(serviceRawData)?serviceRawData:[]).filter(row=>{let year=Number(row&&row.year||0);if(year>2400)year-=543;if(year===CES_SERVICE_MEMO_TARGET_YEAR)return true;return String((row&&row.date)||(row&&row.receivedDate)||'').includes(String(CES_SERVICE_MEMO_TARGET_YEAR));});
+  return (Array.isArray(serviceRawData)?serviceRawData:[]).filter(row=>{let year=Number(row&&row.year||0);if(year>2400)year-=543;if(year===CES_SERVICE_MEMO_V55_TARGET_YEAR)return true;return String((row&&row.date)||(row&&row.receivedDate)||'').includes(String(CES_SERVICE_MEMO_V55_TARGET_YEAR));});
 }
 function svcMapThaiCanon(value){
   return svcMapText(value).toLowerCase()
@@ -1587,7 +1587,7 @@ function svcMapDice(a,b){
   const bs=new Set(bb);let common=0;aa.forEach(x=>{if(bs.has(x))common++;});return (2*common)/(aa.length+bb.length);
 }
 function svcMapProvinceTokens(value){
-  const text=svcMapThaiCanon(value);return [...new Set(CES_SERVICE_MEMO_PROVINCES.filter(name=>text.includes(name)).map(name=>name==='พระนครศรีอยุธยา'?'อยุธยา':name==='สุราษฎร์ธานี'?'สุราษฎร์':name))];
+  const text=svcMapThaiCanon(value);return [...new Set(CES_SERVICE_MEMO_V55_PROVINCES.filter(name=>text.includes(name)).map(name=>name==='พระนครศรีอยุธยา'?'อยุธยา':name==='สุราษฎร์ธานี'?'สุราษฎร์':name))];
 }
 function svcMapTokenSimilarity(a,b){
   if(a===b)return 1;
@@ -1595,8 +1595,8 @@ function svcMapTokenSimilarity(a,b){
   return svcMapDice(a,b);
 }
 function svcMapLearnedPairScore(sourceName,targetName){
-  const a=svcMapNorm(sourceName),b=svcMapNorm(targetName);if(!a||!b||!Array.isArray(serviceMemoMappingRows))return 0;
-  for(const row of serviceMemoMappingRows){
+  const a=svcMapNorm(sourceName),b=svcMapNorm(targetName);if(!a||!b||!Array.isArray(serviceMemoMappingRowsV55))return 0;
+  for(const row of serviceMemoMappingRowsV55){
     if(Number(row&&row.score||0)<90)continue;
     const sa=svcMapNorm(row&&row.source&&row.source.customer),sb=svcMapNorm(row&&row.match&&(row.match.customerName||row.match.customer));
     if((sa===a&&sb===b)||(sa===b&&sb===a))return 96;
@@ -1654,41 +1654,41 @@ function svcBuildMemoMapping(memoRows,workOrderRows){
   const sources=memoRows.map(row=>Object.assign({},row,{workOrder:workOrderByForm[svcMapNorm(row.formId)]||null}));
   workOrderRows.filter(row=>!memoForms.has(svcMapNorm(row.formId))).forEach(row=>sources.push({type:'WORK_ORDER',sourceRow:row.sourceRow,formId:row.formId,docNo:'',date:row.date,endDate:row.endDate,customer:row.customer,team:row.team,url:'',workOrder:row}));
   const csiRows=svcMapServiceRows();
-  return sources.map(source=>{let best=null,bestScore=0;csiRows.forEach(csi=>{const score=svcMapSimilarity(source,csi);if(score>bestScore){bestScore=score;best=csi;}});const matched=bestScore>CES_SERVICE_MEMO_MATCH_THRESHOLD;return{source,match:matched?best:null,score:bestScore,status:matched?'MATCHED':'UNMATCHED'};}).sort((a,b)=>String(a.source.date||'').localeCompare(String(b.source.date||''))||b.score-a.score);
+  return sources.map(source=>{let best=null,bestScore=0;csiRows.forEach(csi=>{const score=svcMapSimilarity(source,csi);if(score>bestScore){bestScore=score;best=csi;}});const matched=bestScore>CES_SERVICE_MEMO_V55_MATCH_THRESHOLD;return{source,match:matched?best:null,score:bestScore,status:matched?'MATCHED':'UNMATCHED'};}).sort((a,b)=>String(a.source.date||'').localeCompare(String(b.source.date||''))||b.score-a.score);
 }
 function svcMapCompactRow(row){
   const source=row.source||{},match=row.match||{},workOrder=source.workOrder||{};
-  return {status:Number(row.score||0)>CES_SERVICE_MEMO_MATCH_THRESHOLD&&row.match?'MATCHED':'UNMATCHED',score:Number(row.score||0),sourceType:source.type||'MEMO',sourceRow:source.sourceRow||'',formId:source.formId||'',memoNo:source.type==='MEMO'?(source.docNo||''):'',workOrderNo:workOrder.docNo||(source.type==='WORK_ORDER'?source.docNo:'')||'',sourceDate:svcMapEffectiveSourceDate(source)||source.date||'',sourceEndDate:(workOrder.endDate||source.endDate||''),customer:source.customer||'',sourceTeam:source.team||'',memoUrl:source.url||'',workOrderUrl:workOrder.url||'',csiId:match.id||'',csiCustomer:match.customerName||match.customer||'',csiTeam:match.team||'',csiMonth:match.monthOnly||'',csiYear:match.year||'',evidence:`Name score ${svcMapNameScore(source.customer,match.customerName||match.customer||'')}% | Keywords: ${svcMapTokens(source.customer).slice(0,8).join(', ')||'-'} | Work Order date ${svcMapEffectiveSourceDate(source)||'-'} | CSI ${row.match?svcMapMonthKey(match):'-'}`};
+  return {status:Number(row.score||0)>CES_SERVICE_MEMO_V55_MATCH_THRESHOLD&&row.match?'MATCHED':'UNMATCHED',score:Number(row.score||0),sourceType:source.type||'MEMO',sourceRow:source.sourceRow||'',formId:source.formId||'',memoNo:source.type==='MEMO'?(source.docNo||''):'',workOrderNo:workOrder.docNo||(source.type==='WORK_ORDER'?source.docNo:'')||'',sourceDate:svcMapEffectiveSourceDate(source)||source.date||'',sourceEndDate:(workOrder.endDate||source.endDate||''),customer:source.customer||'',sourceTeam:source.team||'',memoUrl:source.url||'',workOrderUrl:workOrder.url||'',csiId:match.id||'',csiCustomer:match.customerName||match.customer||'',csiTeam:match.team||'',csiMonth:match.monthOnly||'',csiYear:match.year||'',evidence:`Name score ${svcMapNameScore(source.customer,match.customerName||match.customer||'')}% | Keywords: ${svcMapTokens(source.customer).slice(0,8).join(', ')||'-'} | Work Order date ${svcMapEffectiveSourceDate(source)||'-'} | CSI ${row.match?svcMapMonthKey(match):'-'}`};
 }
 function svcMapStoredRow(row){
   const sourceType=String(row.sourceType||'MEMO').toUpperCase(),workOrder={docNo:row.workOrderNo||'',url:row.workOrderUrl||''};
   const source={type:sourceType,sourceRow:row.sourceRow||'',formId:row.formId||'',docNo:sourceType==='MEMO'?(row.memoNo||''):(row.workOrderNo||''),date:row.sourceDate||'',endDate:row.sourceEndDate||'',customer:row.customer||'',team:row.sourceTeam||'',url:row.memoUrl||'',workOrder:Object.assign(workOrder,{date:row.sourceDate||'',endDate:row.sourceEndDate||'',customer:row.customer||'',team:row.sourceTeam||''})};
   const hasMatch=!!(row.csiId||row.csiCustomer||row.csiTeam||row.csiYear);const match=hasMatch?{id:row.csiId||'',customerName:row.csiCustomer||'',customer:row.csiCustomer||'',team:row.csiTeam||'',monthOnly:row.csiMonth||'',year:row.csiYear||'',raw:row.evidence||''}:null;
-  const score=Number(row.score||0);const status=hasMatch&&score>CES_SERVICE_MEMO_MATCH_THRESHOLD?'MATCHED':'UNMATCHED';return{source,match:status==='MATCHED'?match:null,score,status,evidence:row.evidence||''};
+  const score=Number(row.score||0);const status=hasMatch&&score>CES_SERVICE_MEMO_V55_MATCH_THRESHOLD?'MATCHED':'UNMATCHED';return{source,match:status==='MATCHED'?match:null,score,status,evidence:row.evidence||''};
 }
 function svcMapTeamCode(value){const text=String(value||'').trim().toUpperCase();if(!text)return'';if(text.includes('ENV'))return'ENV';if(text.includes('EHS'))return'EHS';if(text.includes('LAB'))return'LAB';if(text.includes('MED'))return'MED';if(text.includes('TES')||text.includes('TECHNICAL'))return'TES';return text.replace(/^CAL[-_ ]?/,'');}
 function svcMapRowMonth(row){return svcMapMonthFromDate(row&&row.source&&row.source.date);}
-function svcMapClearLegacyCache(){CES_SERVICE_MEMO_LEGACY_KEYS.forEach(key=>{try{localStorage.removeItem(key);}catch(ignore){}});}
+function svcMapClearLegacyCache(){CES_SERVICE_MEMO_V55_LEGACY_KEYS.forEach(key=>{try{localStorage.removeItem(key);}catch(ignore){}});}
 function svcMapSummary(rows){rows=rows||[];const matched=rows.filter(row=>row.status==='MATCHED').length;return{all:rows.length,matched,unmatched:rows.length-matched,percent:rows.length?Math.round(matched*10000/rows.length)/100:0};}
 function svcMapCacheSave(){
-  try{const summary=svcMapSummary(serviceMemoMappingRows);const payload={version:'latest',savedAt:new Date().toISOString(),targetYear:2026,meta:Object.assign({},serviceMemoMappingMeta||{},summary),rows:serviceMemoMappingRows.map(svcMapCompactRow)};localStorage.setItem(CES_SERVICE_MEMO_CACHE_KEY,JSON.stringify(payload));svcMapClearLegacyCache();return true;}catch(error){console.warn('[Memo V55 cache save]',error);return false;}
+  try{const summary=svcMapSummary(serviceMemoMappingRowsV55);const payload={version:'V55',savedAt:new Date().toISOString(),targetYear:2026,meta:Object.assign({},serviceMemoMappingMetaV55||{},summary),rows:serviceMemoMappingRowsV55.map(svcMapCompactRow)};localStorage.setItem(CES_SERVICE_MEMO_V55_CACHE_KEY,JSON.stringify(payload));svcMapClearLegacyCache();return true;}catch(error){console.warn('[Memo V55 cache save]',error);return false;}
 }
 function svcMapParseCachedRows(cached){
   if(!cached||!Array.isArray(cached.rows))return false;
-  const rows=cached.rows.map(row=>{if(!row)return null;if(!row.source)return svcMapStoredRow(row);const score=Number(row.score||0),hasMatch=!!row.match;row.status=hasMatch&&score>CES_SERVICE_MEMO_MATCH_THRESHOLD?'MATCHED':'UNMATCHED';if(row.status!=='MATCHED')row.match=null;return row;}).filter(Boolean);
+  const rows=cached.rows.map(row=>{if(!row)return null;if(!row.source)return svcMapStoredRow(row);const score=Number(row.score||0),hasMatch=!!row.match;row.status=hasMatch&&score>CES_SERVICE_MEMO_V55_MATCH_THRESHOLD?'MATCHED':'UNMATCHED';if(row.status!=='MATCHED')row.match=null;return row;}).filter(Boolean);
   if(!rows.length)return false;
-  serviceMemoMappingRows=rows;const summary=svcMapSummary(rows);
-  serviceMemoMappingMeta=Object.assign({success:true,version:'latest',targetYear:2026,rowCount:summary.all,mappingRows:summary.all,matchedRows:summary.matched,unmatchedRows:summary.unmatched,matchPercent:summary.percent,storageMode:'BROWSER_CACHE'},cached.meta||{});
-  serviceMemoMappingLoaded=true;return true;
+  serviceMemoMappingRowsV55=rows;const summary=svcMapSummary(rows);
+  serviceMemoMappingMetaV55=Object.assign({success:true,version:'V55',targetYear:2026,rowCount:summary.all,mappingRows:summary.all,matchedRows:summary.matched,unmatchedRows:summary.unmatched,matchPercent:summary.percent,storageMode:'BROWSER_CACHE'},cached.meta||{});
+  serviceMemoMappingLoadedV55=true;return true;
 }
 function svcMapCacheLoad(){
   try{
-    const current=localStorage.getItem(CES_SERVICE_MEMO_CACHE_KEY);
+    const current=localStorage.getItem(CES_SERVICE_MEMO_V55_CACHE_KEY);
     if(current&&svcMapParseCachedRows(JSON.parse(current))){svcMapCacheSave();return true;}
     // One-time browser migration: reuse a valid V50/V52/V53 cache before removing it.
-    for(const key of CES_SERVICE_MEMO_LEGACY_KEYS){
+    for(const key of CES_SERVICE_MEMO_V55_LEGACY_KEYS){
       const raw=localStorage.getItem(key);if(!raw)continue;
-      try{if(svcMapParseCachedRows(JSON.parse(raw))){serviceMemoMappingMeta.storageMode='MIGRATED_BROWSER_CACHE';svcMapCacheSave();return true;}}catch(ignoreLegacy){}
+      try{if(svcMapParseCachedRows(JSON.parse(raw))){serviceMemoMappingMetaV55.storageMode='MIGRATED_BROWSER_CACHE';svcMapCacheSave();return true;}}catch(ignoreLegacy){}
     }
     return false;
   }catch(error){console.warn('[Memo V55 cache load]',error);return false;}
@@ -1704,85 +1704,85 @@ async function svcMapSnapshotRows(snapshot){
   const json=await new Response(stream).text();const rows=JSON.parse(json||'[]');return Array.isArray(rows)?rows:[];
 }
 async function svcMapRestoreSaved(force){
-  if(serviceMemoMappingLoading)return serviceMemoMappingRows;if(!force&&serviceMemoMappingLoaded)return serviceMemoMappingRows;if(!window.CES_API||typeof window.CES_API.callFunction!=='function')return serviceMemoMappingRows;
-  localStorage.setItem(CES_SERVICE_MEMO_RESTORE_KEY,String(Date.now()));serviceMemoMappingLoading=true;serviceMemoMappingMeta=Object.assign({},serviceMemoMappingMeta||{},{restoring:true,restoreError:''});renderServiceMemoMapping();
+  if(serviceMemoMappingLoadingV55)return serviceMemoMappingRowsV55;if(!force&&serviceMemoMappingLoadedV55)return serviceMemoMappingRowsV55;if(!window.CES_API||typeof window.CES_API.callFunction!=='function')return serviceMemoMappingRowsV55;
+  localStorage.setItem(CES_SERVICE_MEMO_V55_RESTORE_KEY,String(Date.now()));serviceMemoMappingLoadingV55=true;serviceMemoMappingMetaV55=Object.assign({},serviceMemoMappingMetaV55||{},{restoring:true,restoreError:''});renderServiceMemoMapping();
   try{
     const snapshot=await window.CES_API.callFunction('getServiceMemoMappingSnapshot',[],{transport:'jsonp',timeoutMs:120000,dedupe:true,priority:'active',userAction:true,module:'service',silentLoading:true});if(!snapshot||!snapshot.success)throw new Error((snapshot&&snapshot.message)||'Unable to restore the saved Memo comparison.');
-    const restoredRows=await svcMapSnapshotRows(snapshot);serviceMemoMappingRows=restoredRows.map(svcMapStoredRow);serviceMemoMappingMeta=Object.assign({},snapshot,{rows:undefined,rowsPayloadChunks:undefined,restoring:false,restoreError:''});serviceMemoMappingLoaded=true;svcMapCacheSave();renderServiceMemoMapping();return serviceMemoMappingRows;
-  }catch(error){console.warn('[Memo V55 restore]',error);serviceMemoMappingMeta=Object.assign({},serviceMemoMappingMeta||{},{success:false,restoring:false,restoreError:error.message||String(error),targetYear:2026});serviceMemoMappingLoaded=true;renderServiceMemoMapping();return serviceMemoMappingRows;}
-  finally{serviceMemoMappingLoading=false;}
+    const restoredRows=await svcMapSnapshotRows(snapshot);serviceMemoMappingRowsV55=restoredRows.map(svcMapStoredRow);serviceMemoMappingMetaV55=Object.assign({},snapshot,{rows:undefined,rowsPayloadChunks:undefined,restoring:false,restoreError:''});serviceMemoMappingLoadedV55=true;svcMapCacheSave();renderServiceMemoMapping();return serviceMemoMappingRowsV55;
+  }catch(error){console.warn('[Memo V55 restore]',error);serviceMemoMappingMetaV55=Object.assign({},serviceMemoMappingMetaV55||{},{success:false,restoring:false,restoreError:error.message||String(error),targetYear:2026});serviceMemoMappingLoadedV55=true;renderServiceMemoMapping();return serviceMemoMappingRowsV55;}
+  finally{serviceMemoMappingLoadingV55=false;}
 }
-function svcMapMergeLocal(incoming,months){const monthSet=new Set(months||[]);const kept=(serviceMemoMappingRows||[]).filter(row=>!monthSet.has(svcMapRowMonth(row)));const map=new Map();kept.concat(incoming||[]).forEach(row=>{const source=row.source||{},workOrder=source.workOrder||{};const key=[source.type,source.formId,source.docNo,workOrder.docNo,source.date].join('|').toUpperCase();map.set(key,row);});return Array.from(map.values()).sort((a,b)=>String(a.source&&a.source.date||'').localeCompare(String(b.source&&b.source.date||''))||b.score-a.score);}
+function svcMapMergeLocal(incoming,months){const monthSet=new Set(months||[]);const kept=(serviceMemoMappingRowsV55||[]).filter(row=>!monthSet.has(svcMapRowMonth(row)));const map=new Map();kept.concat(incoming||[]).forEach(row=>{const source=row.source||{},workOrder=source.workOrder||{};const key=[source.type,source.formId,source.docNo,workOrder.docNo,source.date].join('|').toUpperCase();map.set(key,row);});return Array.from(map.values()).sort((a,b)=>String(a.source&&a.source.date||'').localeCompare(String(b.source&&b.source.date||''))||b.score-a.score);}
 async function recalculateServiceMemoMapping(){
-  if(!serviceMemoMappingRows.length){Swal.fire('Recalculate Match','No saved source rows are available. Import the template first.','info');return;}
+  if(!serviceMemoMappingRowsV55.length){Swal.fire('Recalculate Match','No saved source rows are available. Import the template first.','info');return;}
   try{
     if(!Array.isArray(serviceRawData)||!serviceRawData.length)throw new Error('Service CSI 2026 data is not loaded yet.');
-    const months=[...new Set(serviceMemoMappingRows.map(svcMapRowMonth).filter(m=>/^2026-\d{2}$/.test(m)))].sort(),latestMonth=months[months.length-1];
+    const months=[...new Set(serviceMemoMappingRowsV55.map(svcMapRowMonth).filter(m=>/^2026-\d{2}$/.test(m)))].sort(),latestMonth=months[months.length-1];
     if(!latestMonth)throw new Error('No valid 2026 month is available to recalculate.');
-    const monthRows=serviceMemoMappingRows.filter(row=>svcMapRowMonth(row)===latestMonth);
+    const monthRows=serviceMemoMappingRowsV55.filter(row=>svcMapRowMonth(row)===latestMonth);
     Swal.fire({title:'Recalculating latest month…',html:`Only <b>${latestMonth}</b> is recalculated. Older months stay unchanged.`,allowOutsideClick:false,showConfirmButton:false,didOpen:()=>Swal.showLoading()});
     const memoRows=[],workOrderRows=[],seenMemo=new Set(),seenWo=new Set();
     monthRows.forEach(row=>{const source=row.source||{},wo=source.workOrder||{};if(source.type==='MEMO'){const key=[source.formId,source.docNo,source.date].join('|');if(!seenMemo.has(key)){seenMemo.add(key);memoRows.push({type:'MEMO',sourceRow:source.sourceRow,formId:source.formId,docNo:source.docNo,date:source.date,endDate:source.endDate,customer:source.customer,team:source.team,url:source.url});}}if(wo&&(wo.formId||wo.docNo||wo.customer)){const key=[wo.formId,wo.docNo,wo.date].join('|');if(!seenWo.has(key)){seenWo.add(key);workOrderRows.push({type:'WORK_ORDER',sourceRow:wo.sourceRow,formId:wo.formId||source.formId,docNo:wo.docNo,date:wo.date||source.date,endDate:wo.endDate||source.endDate,customer:wo.customer||source.customer,team:wo.team||source.team,url:wo.url});}}});
     const mappingRows=svcBuildMemoMapping(memoRows,workOrderRows),importMonths=[latestMonth];
-    const payload={uploadId:'MM55-RECALC-'+Date.now(),sourceFile:(serviceMemoMappingMeta&&serviceMemoMappingMeta.sourceFile)||'Saved Memo comparison',uploadedAt:new Date().toISOString(),targetYear:2026,importMonths,memoRows,workOrderRows,mappingRows:mappingRows.map(svcMapCompactRow)};
-    serviceMemoMappingRows=svcMapMergeLocal(mappingRows,importMonths);serviceMemoMappingLoaded=true;svcMapCacheSave();
+    const payload={uploadId:'MM55-RECALC-'+Date.now(),sourceFile:(serviceMemoMappingMetaV55&&serviceMemoMappingMetaV55.sourceFile)||'Saved Memo comparison',uploadedAt:new Date().toISOString(),targetYear:2026,importMonths,memoRows,workOrderRows,mappingRows:mappingRows.map(svcMapCompactRow)};
+    serviceMemoMappingRowsV55=svcMapMergeLocal(mappingRows,importMonths);serviceMemoMappingLoadedV55=true;svcMapCacheSave();
     const saved=await window.CES_API.callFunction('saveServiceMemoMapping',[payload],{transport:'iframe',timeoutMs:180000});if(!saved||!saved.success)throw new Error((saved&&saved.message)||'Unable to save recalculated matches.');
-    serviceMemoMappingMeta=Object.assign({},saved,{recalculatedMonth:latestMonth});serviceMemoMappingPage=1;svcMapCacheSave();Swal.close();serviceMemoMappingPopupOpen=true;renderServiceMemoMapping();
+    serviceMemoMappingMetaV55=Object.assign({},saved,{recalculatedMonth:latestMonth});serviceMemoMappingPageV55=1;svcMapCacheSave();Swal.close();serviceMemoMappingPopupOpenV55=true;renderServiceMemoMapping();
     if(typeof showToast==='function')showToast(`Recalculated ${latestMonth} only`,'success');
-  }catch(error){Swal.close();serviceMemoMappingPopupOpen=true;renderServiceMemoMapping();Swal.fire('Recalculate Match',error.message||String(error),'error');}
+  }catch(error){Swal.close();serviceMemoMappingPopupOpenV55=true;renderServiceMemoMapping();Swal.fire('Recalculate Match',error.message||String(error),'error');}
 }
 function triggerServiceMemoMappingImport(){const input=document.getElementById('serviceMemoMappingInput');if(input)input.click();}
-function refreshServiceMemoMapping(){try{localStorage.removeItem(CES_SERVICE_MEMO_CACHE_KEY);localStorage.removeItem(CES_SERVICE_MEMO_RESTORE_KEY);}catch(ignore){}serviceMemoMappingRows=[];serviceMemoMappingLoaded=false;return svcMapRestoreSaved(true);}
-let serviceMemoFilterRender=0;
+function refreshServiceMemoMapping(){try{localStorage.removeItem(CES_SERVICE_MEMO_V55_CACHE_KEY);localStorage.removeItem(CES_SERVICE_MEMO_V55_RESTORE_KEY);}catch(ignore){}serviceMemoMappingRowsV55=[];serviceMemoMappingLoadedV55=false;return svcMapRestoreSaved(true);}
+let serviceMemoFilterRenderV264=0;
 function setServiceMemoMappingFilter(key,value){
-  serviceMemoMappingFilters[key]=value||'ALL';serviceMemoMappingPage=1;
-  if(serviceMemoFilterRender)cancelAnimationFrame(serviceMemoFilterRender);
-  serviceMemoFilterRender=requestAnimationFrame(()=>{serviceMemoFilterRender=0;renderServiceMemoMapping();});
+  serviceMemoMappingFiltersV55[key]=value||'ALL';serviceMemoMappingPageV55=1;
+  if(serviceMemoFilterRenderV264)cancelAnimationFrame(serviceMemoFilterRenderV264);
+  serviceMemoFilterRenderV264=requestAnimationFrame(()=>{serviceMemoFilterRenderV264=0;renderServiceMemoMapping();});
 }
-function setServiceMemoMappingPage(page){const max=Math.max(1,Math.ceil(svcMapFiltered().length/CES_SERVICE_MEMO_PAGE_SIZE));serviceMemoMappingPage=Math.max(1,Math.min(Number(page||1),max));renderServiceMemoMapping();}
-function svcMapFiltered(){const filter=serviceMemoMappingFilters;return(serviceMemoMappingRows||[]).filter(row=>{const month=svcMapRowMonth(row),team=svcMapTeamCode((row.source&&row.source.team)||(row.match&&row.match.team));return(filter.status==='ALL'||row.status===filter.status)&&(filter.month==='ALL'||month===filter.month)&&(filter.team==='ALL'||team===filter.team);});}
+function setServiceMemoMappingPage(page){const max=Math.max(1,Math.ceil(svcMapFiltered().length/CES_SERVICE_MEMO_V55_PAGE_SIZE));serviceMemoMappingPageV55=Math.max(1,Math.min(Number(page||1),max));renderServiceMemoMapping();}
+function svcMapFiltered(){const filter=serviceMemoMappingFiltersV55;return(serviceMemoMappingRowsV55||[]).filter(row=>{const month=svcMapRowMonth(row),team=svcMapTeamCode((row.source&&row.source.team)||(row.match&&row.match.team));return(filter.status==='ALL'||row.status===filter.status)&&(filter.month==='ALL'||month===filter.month)&&(filter.team==='ALL'||team===filter.team);});}
 function exportServiceMemoMapping(){
   const rows=svcMapFiltered();if(!rows.length){Swal.fire('Export Memo VS CSI','No rows match the selected filters.','info');return;}
   if(!window.XLSX){Swal.fire('Export Error','XLSX library is not loaded.','error');return;}
   const data=rows.map(row=>{const source=row.source||{},match=row.match||{},workOrder=source.workOrder||{};return{'Status':row.status,'Match %':Number(row.score||0),'Date':source.date||'','Team':svcMapTeamCode(source.team||match.team),'Customer / Memo':source.customer||'','Form ID':source.formId||'','Memo No.':source.type==='MEMO'?(source.docNo||''):'','Work Order No.':workOrder.docNo||(source.type==='WORK_ORDER'?source.docNo:'')||'','Memo URL':source.url||'','Work Order URL':workOrder.url||'','CSI Customer':match.customerName||match.customer||'','CSI Team':match.team||'','CSI Month':match.monthOnly||'','CSI Year':match.year||'','Evidence':row.evidence||''};});
-  const sheet=XLSX.utils.json_to_sheet(data),book=XLSX.utils.book_new();XLSX.utils.book_append_sheet(book,sheet,'Memo VS CSI');const month=serviceMemoMappingFilters.month==='ALL'?'ALL':serviceMemoMappingFilters.month;XLSX.writeFile(book,`Memo_VS_CSI_2026_${month}.xlsx`);
+  const sheet=XLSX.utils.json_to_sheet(data),book=XLSX.utils.book_new();XLSX.utils.book_append_sheet(book,sheet,'Memo VS CSI');const month=serviceMemoMappingFiltersV55.month==='ALL'?'ALL':serviceMemoMappingFiltersV55.month;XLSX.writeFile(book,`Memo_VS_CSI_2026_${month}.xlsx`);
 }
 function svcMapPopupHtml(){
-  const allRows=serviceMemoMappingRows||[],filtered=svcMapFiltered(),filter=serviceMemoMappingFilters,summary=svcMapSummary(filtered),allSummary=svcMapSummary(allRows);
+  const allRows=serviceMemoMappingRowsV55||[],filtered=svcMapFiltered(),filter=serviceMemoMappingFiltersV55,summary=svcMapSummary(filtered),allSummary=svcMapSummary(allRows);
   const months=[...new Set(allRows.map(svcMapRowMonth).filter(Boolean))].sort(),teams=[...new Set(allRows.map(row=>svcMapTeamCode((row.source&&row.source.team)||(row.match&&row.match.team))).filter(Boolean))].sort();
   const monthNames={'2026-01':'Jan 2026','2026-02':'Feb 2026','2026-03':'Mar 2026','2026-04':'Apr 2026','2026-05':'May 2026','2026-06':'Jun 2026','2026-07':'Jul 2026','2026-08':'Aug 2026','2026-09':'Sep 2026','2026-10':'Oct 2026','2026-11':'Nov 2026','2026-12':'Dec 2026'};
   let banner='';
-  if(serviceMemoMappingMeta&&serviceMemoMappingMeta.restoring)banner='<div class="mb-3 rounded-xl bg-blue-50 border border-blue-100 px-3 py-3 text-sm text-[#003DA5] font-bold"><i class="fas fa-circle-notch fa-spin mr-2"></i>Loading the saved comparison snapshot once…</div>';
-  else if(serviceMemoMappingMeta&&serviceMemoMappingMeta.restoreError&&!allRows.length)banner=`<div class="mb-3 rounded-xl bg-amber-50 border border-amber-200 px-3 py-3 text-sm text-amber-800 font-bold flex items-center justify-between gap-2"><span><i class="fas fa-circle-info mr-2"></i>${svcMapEsc(serviceMemoMappingMeta.restoreError)}</span><button class="px-3 py-2 rounded-xl bg-white border" onclick="refreshServiceMemoMapping()"><i class="fas fa-rotate mr-1"></i>Refresh saved data</button></div>`;
+  if(serviceMemoMappingMetaV55&&serviceMemoMappingMetaV55.restoring)banner='<div class="mb-3 rounded-xl bg-blue-50 border border-blue-100 px-3 py-3 text-sm text-[#003DA5] font-bold"><i class="fas fa-circle-notch fa-spin mr-2"></i>Loading the saved comparison snapshot once…</div>';
+  else if(serviceMemoMappingMetaV55&&serviceMemoMappingMetaV55.restoreError&&!allRows.length)banner=`<div class="mb-3 rounded-xl bg-amber-50 border border-amber-200 px-3 py-3 text-sm text-amber-800 font-bold flex items-center justify-between gap-2"><span><i class="fas fa-circle-info mr-2"></i>${svcMapEsc(serviceMemoMappingMetaV55.restoreError)}</span><button class="px-3 py-2 rounded-xl bg-white border" onclick="refreshServiceMemoMapping()"><i class="fas fa-rotate mr-1"></i>Refresh saved data</button></div>`;
   else if(!allRows.length)banner='<div class="mb-3 rounded-xl bg-slate-50 border border-slate-200 px-3 py-3 text-sm text-slate-600 font-bold"><i class="fas fa-arrow-up-from-bracket mr-2"></i>Import a 2026 Memo Form + Work Order Form template. Later imports replace only the month(s) in the new file.</div>';
   else banner=`<div class="mb-3 grid grid-cols-1 md:grid-cols-4 gap-2"><div class="rounded-xl bg-slate-50 border p-3"><div class="text-[10px] font-black text-slate-400">SAVED ROWS</div><div class="text-xl font-black text-slate-800">${allSummary.all}</div></div><div class="rounded-xl bg-emerald-50 border border-emerald-100 p-3"><div class="text-[10px] font-black text-emerald-600">MATCHED</div><div class="text-xl font-black text-emerald-700">${allSummary.matched}</div></div><div class="rounded-xl bg-rose-50 border border-rose-100 p-3"><div class="text-[10px] font-black text-rose-600">UNMATCHED</div><div class="text-xl font-black text-rose-700">${allSummary.unmatched}</div></div><div class="rounded-xl bg-blue-50 border border-blue-100 p-3"><div class="text-[10px] font-black text-[#003DA5]">MATCH RATE</div><div class="text-xl font-black text-[#003DA5]">${allSummary.percent}%</div></div></div>`;
-  const totalPages=Math.max(1,Math.ceil(filtered.length/CES_SERVICE_MEMO_PAGE_SIZE));if(serviceMemoMappingPage>totalPages)serviceMemoMappingPage=totalPages;const start=(serviceMemoMappingPage-1)*CES_SERVICE_MEMO_PAGE_SIZE,pageRows=filtered.slice(start,start+CES_SERVICE_MEMO_PAGE_SIZE);
+  const totalPages=Math.max(1,Math.ceil(filtered.length/CES_SERVICE_MEMO_V55_PAGE_SIZE));if(serviceMemoMappingPageV55>totalPages)serviceMemoMappingPageV55=totalPages;const start=(serviceMemoMappingPageV55-1)*CES_SERVICE_MEMO_V55_PAGE_SIZE,pageRows=filtered.slice(start,start+CES_SERVICE_MEMO_V55_PAGE_SIZE);
   const body=pageRows.map(row=>{const source=row.source||{},match=row.match||{},workOrder=source.workOrder||{},matched=row.status==='MATCHED';return`<tr class="border-b border-slate-100 hover:bg-slate-50"><td class="p-3"><span class="px-2 py-1 rounded-lg text-[10px] font-black ${matched?'bg-emerald-50 text-emerald-700':'bg-rose-50 text-rose-700'}">${row.status}</span><div class="text-[9px] text-slate-400 mt-1">${Number(row.score||0)}%</div></td><td class="p-3 whitespace-nowrap font-bold text-slate-600">${svcMapEsc(source.date||'-')}</td><td class="p-3 whitespace-nowrap"><span class="px-2 py-1 rounded-lg bg-slate-50 border text-[10px] font-bold">${svcMapEsc(svcMapTeamCode(source.team||match.team)||'-')}</span></td><td class="p-3 min-w-[340px]"><div class="font-bold text-slate-800 whitespace-nowrap overflow-hidden text-ellipsis max-w-[370px]" title="${svcMapEsc(source.customer||'')}">${svcMapEsc(source.customer||'-')}</div><div class="text-[10px] text-slate-400 whitespace-nowrap">${svcMapEsc(source.docNo||'-')} · Form ${svcMapEsc(source.formId||'-')}</div>${source.url?`<a class="text-[#003DA5] font-bold" href="${svcMapSafeUrl(source.url)}" target="_blank">Open Memo</a>`:''}</td><td class="p-3 min-w-[280px]"><div class="font-bold text-slate-700 whitespace-nowrap overflow-hidden text-ellipsis max-w-[300px]">${svcMapEsc(workOrder.docNo||'-')}</div>${workOrder.url?`<a class="text-[#003DA5] font-bold" href="${svcMapSafeUrl(workOrder.url)}" target="_blank">Open Work Order</a>`:''}</td><td class="p-3 min-w-[420px]"><div class="font-bold text-slate-800 whitespace-nowrap overflow-hidden text-ellipsis max-w-[430px]">${svcMapEsc(match.customerName||match.customer||'-')}</div><div class="text-[10px] text-slate-400 whitespace-nowrap">${svcMapEsc(match.team||'-')} · ${svcMapEsc(match.monthOnly||'-')} ${svcMapEsc(match.year||'')}</div></td><td class="p-3 min-w-[300px] text-[11px] text-slate-500">${svcMapEsc(row.evidence||'-')}</td></tr>`;}).join('')||'<tr><td colspan="7" class="p-12 text-center text-slate-400">No mapping rows for the selected filters.</td></tr>';
-  return`<div class="text-left">${banner}<div class="flex flex-wrap gap-2 mb-3 items-center"><button class="px-3 py-2 rounded-xl text-xs font-black border ${filter.status==='ALL'?'bg-[#003DA5] text-white':'bg-white text-slate-600'}" onclick="setServiceMemoMappingFilter('status','ALL')">All ${allSummary.all}</button><button class="px-3 py-2 rounded-xl text-xs font-black border ${filter.status==='MATCHED'?'bg-emerald-600 text-white':'bg-white text-slate-600'}" onclick="setServiceMemoMappingFilter('status','MATCHED')">Matched ${allSummary.matched}</button><button class="px-3 py-2 rounded-xl text-xs font-black border ${filter.status==='UNMATCHED'?'bg-rose-600 text-white':'bg-white text-slate-600'}" onclick="setServiceMemoMappingFilter('status','UNMATCHED')">Unmatched ${allSummary.unmatched}</button><select class="px-3 py-2 rounded-xl text-xs font-bold border bg-white" onchange="setServiceMemoMappingFilter('month',this.value)"><option value="ALL">All Months</option>${months.map(month=>`<option value="${month}" ${filter.month===month?'selected':''}>${monthNames[month]||month}</option>`).join('')}</select><select class="px-3 py-2 rounded-xl text-xs font-bold border bg-white" onchange="setServiceMemoMappingFilter('team',this.value)"><option value="ALL">All Teams</option>${teams.map(team=>`<option value="${team}" ${filter.team===team?'selected':''}>${team}</option>`).join('')}</select><button class="ml-auto px-3 py-2 rounded-xl text-xs font-black bg-violet-50 text-violet-700 border border-violet-100" onclick="recalculateServiceMemoMapping()"><i class="fas fa-wand-magic-sparkles mr-1"></i>Recalculate Match</button><button class="px-3 py-2 rounded-xl text-xs font-black bg-emerald-50 text-emerald-700 border border-emerald-100" onclick="exportServiceMemoMapping()"><i class="fas fa-file-excel mr-1"></i>Export Memo VS CSI</button><button class="px-3 py-2 rounded-xl text-xs font-black bg-blue-50 text-[#003DA5] border border-blue-100" onclick="triggerServiceMemoMappingImport()"><i class="fas fa-arrow-up-from-bracket mr-1"></i>${allRows.length?'Import / Update Month':'Import Template'}</button></div><div class="flex items-center justify-between gap-3 text-[10px] font-bold text-slate-400 mb-2"><span>Showing ${filtered.length?start+1:0}-${Math.min(start+pageRows.length,filtered.length)} of ${filtered.length} · Filter match ${summary.percent}%</span><span class="flex items-center gap-2"><button class="px-2 py-1 rounded-lg border bg-white disabled:opacity-40" ${serviceMemoMappingPage<=1?'disabled':''} onclick="setServiceMemoMappingPage(${serviceMemoMappingPage-1})">Previous</button><b class="text-slate-600">Page ${serviceMemoMappingPage} / ${totalPages}</b><button class="px-2 py-1 rounded-lg border bg-white disabled:opacity-40" ${serviceMemoMappingPage>=totalPages?'disabled':''} onclick="setServiceMemoMappingPage(${serviceMemoMappingPage+1})">Next</button></span></div><div class="max-h-[72vh] overflow-auto border border-slate-200 rounded-xl"><table class="w-full text-xs min-w-[1680px] table-fixed"><thead class="sticky top-0 z-20 bg-slate-50 text-slate-500"><tr><th class="p-3 w-[110px]">Status</th><th class="p-3 w-[120px]">Date</th><th class="p-3 w-[100px]">Team</th><th class="p-3 w-[340px]">Memo</th><th class="p-3 w-[280px]">Work Order</th><th class="p-3 w-[420px]">Service CSI 2026 Match</th><th class="p-3 w-[300px]">Evidence</th></tr></thead><tbody>${body}</tbody></table></div><p class="text-[10px] text-slate-400 mt-3">Comparison results are saved and reused. Matched requires a score above 70%. A later import updates only its 2026 month(s); other months remain unchanged.</p></div>`;
+  return`<div class="text-left">${banner}<div class="flex flex-wrap gap-2 mb-3 items-center"><button class="px-3 py-2 rounded-xl text-xs font-black border ${filter.status==='ALL'?'bg-[#003DA5] text-white':'bg-white text-slate-600'}" onclick="setServiceMemoMappingFilter('status','ALL')">All ${allSummary.all}</button><button class="px-3 py-2 rounded-xl text-xs font-black border ${filter.status==='MATCHED'?'bg-emerald-600 text-white':'bg-white text-slate-600'}" onclick="setServiceMemoMappingFilter('status','MATCHED')">Matched ${allSummary.matched}</button><button class="px-3 py-2 rounded-xl text-xs font-black border ${filter.status==='UNMATCHED'?'bg-rose-600 text-white':'bg-white text-slate-600'}" onclick="setServiceMemoMappingFilter('status','UNMATCHED')">Unmatched ${allSummary.unmatched}</button><select class="px-3 py-2 rounded-xl text-xs font-bold border bg-white" onchange="setServiceMemoMappingFilter('month',this.value)"><option value="ALL">All Months</option>${months.map(month=>`<option value="${month}" ${filter.month===month?'selected':''}>${monthNames[month]||month}</option>`).join('')}</select><select class="px-3 py-2 rounded-xl text-xs font-bold border bg-white" onchange="setServiceMemoMappingFilter('team',this.value)"><option value="ALL">All Teams</option>${teams.map(team=>`<option value="${team}" ${filter.team===team?'selected':''}>${team}</option>`).join('')}</select><button class="ml-auto px-3 py-2 rounded-xl text-xs font-black bg-violet-50 text-violet-700 border border-violet-100" onclick="recalculateServiceMemoMapping()"><i class="fas fa-wand-magic-sparkles mr-1"></i>Recalculate Match</button><button class="px-3 py-2 rounded-xl text-xs font-black bg-emerald-50 text-emerald-700 border border-emerald-100" onclick="exportServiceMemoMapping()"><i class="fas fa-file-excel mr-1"></i>Export Memo VS CSI</button><button class="px-3 py-2 rounded-xl text-xs font-black bg-blue-50 text-[#003DA5] border border-blue-100" onclick="triggerServiceMemoMappingImport()"><i class="fas fa-arrow-up-from-bracket mr-1"></i>${allRows.length?'Import / Update Month':'Import Template'}</button></div><div class="flex items-center justify-between gap-3 text-[10px] font-bold text-slate-400 mb-2"><span>Showing ${filtered.length?start+1:0}-${Math.min(start+pageRows.length,filtered.length)} of ${filtered.length} · Filter match ${summary.percent}%</span><span class="flex items-center gap-2"><button class="px-2 py-1 rounded-lg border bg-white disabled:opacity-40" ${serviceMemoMappingPageV55<=1?'disabled':''} onclick="setServiceMemoMappingPage(${serviceMemoMappingPageV55-1})">Previous</button><b class="text-slate-600">Page ${serviceMemoMappingPageV55} / ${totalPages}</b><button class="px-2 py-1 rounded-lg border bg-white disabled:opacity-40" ${serviceMemoMappingPageV55>=totalPages?'disabled':''} onclick="setServiceMemoMappingPage(${serviceMemoMappingPageV55+1})">Next</button></span></div><div class="max-h-[72vh] overflow-auto border border-slate-200 rounded-xl"><table class="w-full text-xs min-w-[1680px] table-fixed"><thead class="sticky top-0 z-20 bg-slate-50 text-slate-500"><tr><th class="p-3 w-[110px]">Status</th><th class="p-3 w-[120px]">Date</th><th class="p-3 w-[100px]">Team</th><th class="p-3 w-[340px]">Memo</th><th class="p-3 w-[280px]">Work Order</th><th class="p-3 w-[420px]">Service CSI 2026 Match</th><th class="p-3 w-[300px]">Evidence</th></tr></thead><tbody>${body}</tbody></table></div><p class="text-[10px] text-slate-400 mt-3">Comparison results are saved and reused. Matched requires a score above 70%. A later import updates only its 2026 month(s); other months remain unchanged.</p></div>`;
 }
 function renderServiceMemoMapping(){
-  const memoInline=document.getElementById('mwoMappingInline');
+  const memoInline=document.getElementById('mwoMappingInlineV3010');
   if(memoInline){memoInline.innerHTML='<div class="ces-service-memo-inline-v266">'+svcMapPopupHtml()+'</div>';return;}
-  const inline=document.getElementById('serviceMemoMappingInline');
-  if(inline&&serviceActiveTab==='memo'){inline.innerHTML='<div class="ces-service-memo-inline-v266">'+svcMapPopupHtml()+'</div>';return;}
-  if(!serviceMemoMappingPopupOpen)return;
-  const options={title:'<div class="text-left text-[#003DA5] font-black"><i class="fas fa-code-compare mr-2"></i>Memo / Work Order ↔ Service CSI 2026</div>',html:svcMapPopupHtml(),width:'min(1920px,99vw)',showConfirmButton:false,showCloseButton:true,customClass:{popup:'rounded-[1.75rem] ces-service-memo-popup-v264'},didClose:()=>{serviceMemoMappingPopupOpen=false;}};
+  const inline=document.getElementById('serviceMemoMappingInlineV266');
+  if(inline&&serviceActiveTabV266==='memo'){inline.innerHTML='<div class="ces-service-memo-inline-v266">'+svcMapPopupHtml()+'</div>';return;}
+  if(!serviceMemoMappingPopupOpenV55)return;
+  const options={title:'<div class="text-left text-[#003DA5] font-black"><i class="fas fa-code-compare mr-2"></i>Memo / Work Order ↔ Service CSI 2026</div>',html:svcMapPopupHtml(),width:'min(1920px,99vw)',showConfirmButton:false,showCloseButton:true,customClass:{popup:'rounded-[1.75rem] ces-service-memo-popup-v264'},didClose:()=>{serviceMemoMappingPopupOpenV55=false;}};
   if(Swal.isVisible()&&document.querySelector('.swal2-popup'))Swal.update(options);else Swal.fire(options);
 }
 async function switchServiceTab(tab){
-  serviceActiveTab=String(tab||'dashboard').toLowerCase()==='memo'?'memo':'dashboard';
-  const dash=document.getElementById('serviceDashboardPanel'),memo=document.getElementById('serviceMemoPanel');
-  const dashBtn=document.getElementById('serviceTabDashboard'),memoBtn=document.getElementById('serviceTabMemo');
-  if(dash)dash.classList.toggle('hidden',serviceActiveTab!=='dashboard');
-  if(memo)memo.classList.toggle('hidden',serviceActiveTab!=='memo');
-  if(dashBtn)dashBtn.classList.toggle('active',serviceActiveTab==='dashboard');
-  if(memoBtn)memoBtn.classList.toggle('active',serviceActiveTab==='memo');
-  if(serviceActiveTab!=='memo')return serviceMemoMappingRows;
-  if(!serviceMemoMappingLoaded)svcMapCacheLoad();
-  serviceMemoMappingPopupOpen=true;
+  serviceActiveTabV266=String(tab||'dashboard').toLowerCase()==='memo'?'memo':'dashboard';
+  const dash=document.getElementById('serviceDashboardPanelV266'),memo=document.getElementById('serviceMemoPanelV266');
+  const dashBtn=document.getElementById('serviceTabDashboardV266'),memoBtn=document.getElementById('serviceTabMemoV266');
+  if(dash)dash.classList.toggle('hidden',serviceActiveTabV266!=='dashboard');
+  if(memo)memo.classList.toggle('hidden',serviceActiveTabV266!=='memo');
+  if(dashBtn)dashBtn.classList.toggle('active',serviceActiveTabV266==='dashboard');
+  if(memoBtn)memoBtn.classList.toggle('active',serviceActiveTabV266==='memo');
+  if(serviceActiveTabV266!=='memo')return serviceMemoMappingRowsV55;
+  if(!serviceMemoMappingLoadedV55)svcMapCacheLoad();
+  serviceMemoMappingPopupOpenV55=true;
   renderServiceMemoMapping();
   // Stale-while-revalidate: do not hit the server when a saved browser copy exists.
-  if(serviceMemoMappingLoaded&&serviceMemoMappingRows.length)return serviceMemoMappingRows;
+  if(serviceMemoMappingLoadedV55&&serviceMemoMappingRowsV55.length)return serviceMemoMappingRowsV55;
   return svcMapRestoreSaved(true);
 }
 async function openServiceMemoMapping(){return switchServiceTab('memo');}
@@ -1796,11 +1796,11 @@ async function handleServiceMemoMapping(event){
     if(!memoRows.length&&!workOrderRows.length)throw new Error('No dated 2026 rows were found in Memo or WorkOrder.');const allMappingRows=svcBuildMemoMapping(memoRows,workOrderRows);if(!allMappingRows.length)throw new Error('No comparison rows could be created.');const recent3=svcMapRecent3MonthKeys();const mappingRows=allMappingRows.filter(row=>recent3.has(svcMapRowMonth(row)));if(!mappingRows.length)throw new Error('No comparison rows were found in the latest 3 months.');
     const importMonths=[...new Set(mappingRows.map(svcMapRowMonth).filter(Boolean))].sort();if(!importMonths.length)throw new Error('No valid 2026 month was detected.');
     const recentMonths=new Set(importMonths);const sourceMonth=row=>svcMapMonthFromDate(row&&row.date);const recentMemoRows=memoRows.filter(row=>recentMonths.has(sourceMonth(row)));const recentWorkOrderRows=workOrderRows.filter(row=>recentMonths.has(sourceMonth(row)));const payload={uploadId:'MM55-'+Date.now()+'-'+Math.random().toString(36).slice(2,8).toUpperCase(),sourceFile:file.name,uploadedAt:new Date().toISOString(),targetYear:2026,importMonths,memoRows:recentMemoRows,workOrderRows:recentWorkOrderRows,mappingRows:mappingRows.map(svcMapCompactRow)};
-    serviceMemoMappingRows=svcMapMergeLocal(mappingRows,importMonths);const localSummary=svcMapSummary(serviceMemoMappingRows);serviceMemoMappingMeta={success:true,version:'latest',uploadId:payload.uploadId,sourceFile:file.name,uploadedAt:payload.uploadedAt,targetYear:2026,rowCount:localSummary.all,mappingRows:localSummary.all,matchedRows:localSummary.matched,unmatchedRows:localSummary.unmatched,matchPercent:localSummary.percent,updatedMonths:importMonths,storageMode:'LOCAL_SAVE_PENDING'};serviceMemoMappingLoaded=true;svcMapCacheSave();
+    serviceMemoMappingRowsV55=svcMapMergeLocal(mappingRows,importMonths);const localSummary=svcMapSummary(serviceMemoMappingRowsV55);serviceMemoMappingMetaV55={success:true,version:'V55',uploadId:payload.uploadId,sourceFile:file.name,uploadedAt:payload.uploadedAt,targetYear:2026,rowCount:localSummary.all,mappingRows:localSummary.all,matchedRows:localSummary.matched,unmatchedRows:localSummary.unmatched,matchPercent:localSummary.percent,updatedMonths:importMonths,storageMode:'LOCAL_SAVE_PENDING'};serviceMemoMappingLoadedV55=true;svcMapCacheSave();
     if(!window.CES_API||typeof window.CES_API.callFunction!=='function')throw new Error('CES API is not ready. The browser copy is saved, but the shared snapshot was not updated.');
     const saved=await window.CES_API.callFunction('saveServiceMemoMapping',[payload],{transport:'iframe',timeoutMs:300000});if(!saved||!saved.success)throw new Error((saved&&saved.message)||'Unable to save the Memo comparison.');
-    serviceMemoMappingMeta=Object.assign({},saved);serviceMemoMappingFilters={status:'ALL',year:'2026',month:importMonths.length===1?importMonths[0]:'ALL',team:'ALL'};serviceMemoMappingPage=1;svcMapCacheSave();Swal.close();serviceMemoMappingPopupOpen=true;renderServiceMemoMapping();if(typeof showToast==='function')showToast(`Memo comparison updated: ${importMonths.join(', ')} · ${saved.matchPercent}% matched`,'success');
-  }catch(error){Swal.close();serviceMemoMappingPopupOpen=true;renderServiceMemoMapping();Swal.fire({icon:serviceMemoMappingRows.length?'warning':'error',title:'Memo Mapping',text:error.message||String(error)});}finally{if(input)input.value='';}
+    serviceMemoMappingMetaV55=Object.assign({},saved);serviceMemoMappingFiltersV55={status:'ALL',year:'2026',month:importMonths.length===1?importMonths[0]:'ALL',team:'ALL'};serviceMemoMappingPageV55=1;svcMapCacheSave();Swal.close();serviceMemoMappingPopupOpenV55=true;renderServiceMemoMapping();if(typeof showToast==='function')showToast(`Memo comparison updated: ${importMonths.join(', ')} · ${saved.matchPercent}% matched`,'success');
+  }catch(error){Swal.close();serviceMemoMappingPopupOpenV55=true;renderServiceMemoMapping();Swal.fire({icon:serviceMemoMappingRowsV55.length?'warning':'error',title:'Memo Mapping',text:error.message||String(error)});}finally{if(input)input.value='';}
 }
 
 window.switchServiceTab=switchServiceTab;
@@ -1814,7 +1814,7 @@ window.exportServiceMemoMapping=exportServiceMemoMapping;
 window.recalculateServiceMemoMapping=recalculateServiceMemoMapping;
 window.svcBuildMemoMapping=svcBuildMemoMapping;
 window.svcMapCompactRow=svcMapCompactRow;
-window.CES_SERVICE_MEMO_RECHECK=function(){const summary=svcMapSummary(serviceMemoMappingRows);return{success:true,version:'latest',targetYear:2026,latestFunctionNames:true,pageApiRemoved:true,monthlyMerge:true,keywordDateScoring:true,thaiAwareMatching:true,matchThreshold:'>70%',rows:summary.all,matchedRows:summary.matched,unmatchedRows:summary.unmatched,matchPercent:summary.percent,loadedFromCache:serviceMemoMappingLoaded,meta:serviceMemoMappingMeta};};
+window.CES_SERVICE_MEMO_RECHECK=function(){const summary=svcMapSummary(serviceMemoMappingRowsV55);return{success:true,version:'V55',targetYear:2026,latestFunctionNames:true,pageApiRemoved:true,monthlyMerge:true,keywordDateScoring:true,thaiAwareMatching:true,matchThreshold:'>70%',rows:summary.all,matchedRows:summary.matched,unmatchedRows:summary.unmatched,matchPercent:summary.percent,loadedFromCache:serviceMemoMappingLoadedV55,meta:serviceMemoMappingMetaV55};};
 
 async function sendServiceCsiCurrentMonthSummary() {
   const button=document.querySelector('[onclick="sendServiceCsiCurrentMonthSummary()"]'),oldHtml=button?button.innerHTML:'';

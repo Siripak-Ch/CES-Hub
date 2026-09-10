@@ -4816,3 +4816,18 @@ body,input,select,textarea,button,table,th,td,.swal2-container,.swal2-popup,.swa
 #ces-home-sync-btn.is-loading i{animation:ces-home-sync-spin-v3020 .8s linear infinite}
 #ces-home-sync-btn:disabled{opacity:.65;cursor:wait}
 .ces-stock-tabs-v260{grid-template-columns:repeat(3,minmax(0,1fr))!important}.sd-equipment-table-wrap-current{max-height:680px;overflow:auto;border:1px solid #dbe5f1;border-radius:14px}.sd-equipment-table-current{min-width:1450px}.sd-equipment-table-current th{position:sticky;top:0;z-index:3;background:#f4f8fc;white-space:nowrap}.sd-equipment-table-current td{white-space:nowrap;vertical-align:middle}.sd-eq-action-current{white-space:normal!important;min-width:230px;max-width:330px}#view-inventory #siEquipFilters,#view-inventory #siEquipKpiGrid,#view-inventory #siEquipSection{display:none!important}#view-inventory .sp-tabs{grid-template-columns:repeat(2,minmax(0,1fr))}#view-inventory #siInventoryDashboardCurrent{grid-template-columns:repeat(4,minmax(0,1fr));margin-bottom:16px}#view-inventory #siInventoryDashboardCurrent .stockpro-card{min-height:110px;padding:18px}@media(max-width:900px){#view-inventory #siInventoryDashboardCurrent{grid-template-columns:repeat(2,minmax(0,1fr))}.ces-stock-tabs-v260{grid-template-columns:1fr!important}.sd-equipment-table-current{min-width:1200px}}
+/* Final responsive pass: keep page actions, icons and labels readable on LINE/mobile. */
+@media (max-width: 760px) {
+  .ces-vehicle-header-actions,.ces-mwo-v3030-actions,.ces-page-header-actions-v226,.ces-yearly-header-actions{display:flex!important;max-width:100%!important;gap:8px!important;overflow-x:auto!important;overflow-y:hidden!important;padding-bottom:4px!important;scrollbar-width:thin;flex-wrap:nowrap!important}
+  .ces-vehicle-action,.ces-mwo-v3030-icon,.ces-standard-icon-btn{flex:0 0 auto!important;min-width:42px!important;min-height:42px!important}
+  .ces-vehicle-action span{max-width:145px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  #view-inventory>div:first-child,#view-stock_dashboard>div:first-child,.ces-mwo-v3030-header{align-items:flex-start!important;gap:10px!important}
+  #view-inventory .stockpro-card,#view-stock_dashboard .stockpro-card,.ces-mwo-v3030-card{min-width:0!important;overflow:hidden}
+  #view-inventory table,#view-stock_dashboard table,#view-memo_workorder table{font-size:10px!important}
+  #view-inventory .sp-search,#view-stock_dashboard .sp-search{min-width:100%!important}
+  .audit-finding-popup{width:calc(100vw - 16px)!important;padding:0!important}.audit-finding-body{padding:0 10px 10px!important}.audit-finding-actions{position:sticky!important;bottom:0!important;background:#fff!important;padding:10px!important;z-index:3!important}
+}
+@media (max-width: 430px) {
+  .ces-vehicle-action span{max-width:112px}.ces-mwo-v3030-title h1,#view-inventory h2,#view-stock_dashboard h2{font-size:17px!important;line-height:1.2!important}
+  .mwo-team-cost-cards{grid-template-columns:1fr!important}.swal2-title{font-size:20px!important}.swal2-actions{width:100%!important;padding:0 10px!important}.swal2-confirm,.swal2-cancel{flex:1 1 120px!important}
+}

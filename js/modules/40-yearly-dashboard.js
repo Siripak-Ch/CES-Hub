@@ -473,9 +473,9 @@
 ============================================================ */
 (function () {
   'use strict';
-  const MONTH_FULL_ = ['', 'January','February','March','April','May','June','July','August','September','October','November','December'];
-  const TEAM_COLORS_ = { MED: '#004aad', LAB: '#19a7ce', EHS: '#0fc1a1' };
-  const TARGET_COLOR_ = '#e2e8f0';
+  const MONTH_FULL_V19 = ['', 'January','February','March','April','May','June','July','August','September','October','November','December'];
+  const TEAM_COLORS_V19 = { MED: '#004aad', LAB: '#19a7ce', EHS: '#0fc1a1' };
+  const TARGET_COLOR_V19 = '#e2e8f0';
 
   function yearlyNum(v) {
     const n = Number(String(v == null ? '' : v).replace(/[^0-9.-]/g, ''));
@@ -501,7 +501,7 @@
         map[m] = {
           year: yearlyNum(r.year) || year,
           month: m,
-          monthName: r.monthName || MONTH_FULL_[m],
+          monthName: r.monthName || MONTH_FULL_V19[m],
           med: yearlyNum(r.med),
           lab: yearlyNum(r.lab),
           ehs: yearlyNum(r.ehs)
@@ -510,13 +510,13 @@
     });
     const out = [];
     for (let m = 1; m <= 12; m++) {
-      out.push(map[m] || { year, month: m, monthName: MONTH_FULL_[m], med: 0, lab: 0, ehs: 0 });
+      out.push(map[m] || { year, month: m, monthName: MONTH_FULL_V19[m], med: 0, lab: 0, ehs: 0 });
     }
     return out;
   }
 
-  const targetOverlayPlugin = {
-    id: 'cesJobTargetOverlay',
+  const targetOverlayPluginV19 = {
+    id: 'cesJobTargetOverlayV19',
     beforeDatasetsDraw(chart, args, opts) {
       const targetsByTeam = (opts && opts.targets) || {};
       const ctx = chart.ctx;
@@ -524,7 +524,7 @@
       if (!ctx || !yScale) return;
 
       ctx.save();
-      ctx.fillStyle = (opts && opts.color) || TARGET_COLOR_;
+      ctx.fillStyle = (opts && opts.color) || TARGET_COLOR_V19;
       ctx.globalAlpha = 1;
 
       chart.data.datasets.forEach((dataset, datasetIndex) => {
@@ -568,7 +568,7 @@
   window.renderYearlyCharts = function (data, teamConfig, year) {
     const selectedYear = yearlyNum(year) || new Date().getFullYear();
     const rows = yearlyCompleteRows(data || [], selectedYear);
-    const labels = rows.map(d => String(d.monthName || MONTH_FULL_[d.month]).substring(0, 3));
+    const labels = rows.map(d => String(d.monthName || MONTH_FULL_V19[d.month]).substring(0, 3));
     const cfg = teamConfig || {};
     const cap = {
       med: yearlyNum(cfg.med || 12) || 12,
@@ -590,9 +590,9 @@
         data: {
           labels,
           datasets: [
-            { label: 'MED', data: rows.map(d => yearlyNum(d.med)), backgroundColor: TEAM_COLORS_.MED, borderRadius: 5, barPercentage: 0.48, categoryPercentage: 0.72 },
-            { label: 'LAB', data: rows.map(d => yearlyNum(d.lab)), backgroundColor: TEAM_COLORS_.LAB, borderRadius: 5, barPercentage: 0.48, categoryPercentage: 0.72 },
-            { label: 'EHS', data: rows.map(d => yearlyNum(d.ehs)), backgroundColor: TEAM_COLORS_.EHS, borderRadius: 5, barPercentage: 0.48, categoryPercentage: 0.72 }
+            { label: 'MED', data: rows.map(d => yearlyNum(d.med)), backgroundColor: TEAM_COLORS_V19.MED, borderRadius: 5, barPercentage: 0.48, categoryPercentage: 0.72 },
+            { label: 'LAB', data: rows.map(d => yearlyNum(d.lab)), backgroundColor: TEAM_COLORS_V19.LAB, borderRadius: 5, barPercentage: 0.48, categoryPercentage: 0.72 },
+            { label: 'EHS', data: rows.map(d => yearlyNum(d.ehs)), backgroundColor: TEAM_COLORS_V19.EHS, borderRadius: 5, barPercentage: 0.48, categoryPercentage: 0.72 }
           ]
         },
         options: {
@@ -604,7 +604,7 @@
             y: { stacked: false, beginAtZero: true, grid: { color: '#f1f5f9' } }
           },
           plugins: {
-            cesJobTargetOverlay: { targets, color: TARGET_COLOR_ },
+            cesJobTargetOverlayV19: { targets, color: TARGET_COLOR_V19 },
             legend: {
               position: 'bottom',
               labels: { usePointStyle: true, boxWidth: 7 }
@@ -632,7 +632,7 @@
             }
           }
         },
-        plugins: [targetOverlayPlugin].concat(window.ChartDataLabels ? [ChartDataLabels] : [])
+        plugins: [targetOverlayPluginV19].concat(window.ChartDataLabels ? [ChartDataLabels] : [])
       });
     }
 
@@ -647,7 +647,7 @@
         type: 'doughnut',
         data: {
           labels: ['MED', 'LAB', 'EHS'],
-          datasets: [{ data: [med, lab, ehs], backgroundColor: [TEAM_COLORS_.MED, TEAM_COLORS_.LAB, TEAM_COLORS_.EHS], borderWidth: 0 }]
+          datasets: [{ data: [med, lab, ehs], backgroundColor: [TEAM_COLORS_V19.MED, TEAM_COLORS_V19.LAB, TEAM_COLORS_V19.EHS], borderWidth: 0 }]
         },
         options: {
           cutout: '75%',
@@ -669,8 +669,8 @@
  * MED | LAB | EHS | ENV | TES. MGT intentionally remains calendar-only.
  * ========================================================================== */
 (function(){
-  const TEAM_ORDER_ = ['MED','LAB','EHS','ENV','TES'];
-  const TEAM_META_ = {
+  const TEAM_ORDER_V40 = ['MED','LAB','EHS','ENV','TES'];
+  const TEAM_META_V40 = {
     MED:{key:'med'}, LAB:{key:'lab'}, EHS:{key:'ehs'}, ENV:{key:'env'}, TES:{key:'tes'}
   };
   function color40(team){ return typeof window.cesGetTeamColor==='function' ? window.cesGetTeamColor(team) : ({MED:'#004aad',LAB:'#19a7ce',EHS:'#0fc1a1',ENV:'#7ed957',TES:'#ffde59'})[team]; }
@@ -723,8 +723,8 @@
   }
   window.openYearlyMonth=openYearlyMonth;
 
-  const targetOverlay={
-    id:'yearlyTargetOverlay',
+  const targetOverlayV40={
+    id:'yearlyTargetOverlayV40',
     beforeDatasetsDraw(chart,args,opts){
       const {ctx,scales}=chart; if(!scales||!scales.y) return;
       chart.data.datasets.forEach((ds,di)=>{
@@ -762,10 +762,10 @@
     const year=Number(select.value)||new Date().getFullYear();
     const rows=fullYear40(normalize40(cachedYearlyStats),year), caps=capacities40();
     const actual={MED:0,LAB:0,EHS:0,ENV:0,TES:0}, target={MED:0,LAB:0,EHS:0,ENV:0,TES:0};
-    rows.forEach(r=>TEAM_ORDER_.forEach(t=>{actual[t]+=n40(r[TEAM_META_[t].key]);}));
-    for(let m=1;m<=12;m++){ const wd=getYearlyWeekdays(m,year); TEAM_ORDER_.forEach(t=>target[t]+=wd*caps[t]); }
-    TEAM_ORDER_.forEach(t=>{setKpi40(t,actual[t],target[t]); const color=color40(t),id=t.toLowerCase(); ['y-cap-'+id,'y-bar-'+id].forEach(x=>{const el=document.getElementById(x);if(el){el.style.color=color;if(el.id.indexOf('y-bar-')===0)el.style.background=color;}});});
-    const actualAll=TEAM_ORDER_.reduce((s,t)=>s+actual[t],0), targetAll=TEAM_ORDER_.reduce((s,t)=>s+target[t],0);
+    rows.forEach(r=>TEAM_ORDER_V40.forEach(t=>{actual[t]+=n40(r[TEAM_META_V40[t].key]);}));
+    for(let m=1;m<=12;m++){ const wd=getYearlyWeekdays(m,year); TEAM_ORDER_V40.forEach(t=>target[t]+=wd*caps[t]); }
+    TEAM_ORDER_V40.forEach(t=>{setKpi40(t,actual[t],target[t]); const color=color40(t),id=t.toLowerCase(); ['y-cap-'+id,'y-bar-'+id].forEach(x=>{const el=document.getElementById(x);if(el){el.style.color=color;if(el.id.indexOf('y-bar-')===0)el.style.background=color;}});});
+    const actualAll=TEAM_ORDER_V40.reduce((s,t)=>s+actual[t],0), targetAll=TEAM_ORDER_V40.reduce((s,t)=>s+target[t],0);
     if(typeof animateValue==='function') animateValue('y-act-all',0,actualAll,500); else setText40('y-act-all',actualAll);
     setText40('y-tgt-all',targetAll);
     const allPct=targetAll?Math.round(actualAll/targetAll*100):0;
@@ -775,27 +775,27 @@
   };
   renderYearlyCharts=function(rows,caps,year){
     const labels=rows.map(r=>(r.monthName||'').slice(0,3));
-    const datasets=TEAM_ORDER_.map(t=>{
-      const def=TEAM_META_[t];
+    const datasets=TEAM_ORDER_V40.map(t=>{
+      const def=TEAM_META_V40[t];
       return {label:t,data:rows.map(r=>n40(r[def.key])),targetData:rows.map(r=>getYearlyWeekdays(r.month,year)*caps[t]),backgroundColor:color40(t),borderRadius:5,barPercentage:.58,categoryPercentage:.8};
     });
     const trend=document.getElementById('yearlyTrendChart');
     if(trend){
       if(yearlyTrendChartInstance) yearlyTrendChartInstance.destroy();
-      yearlyTrendChartInstance=new Chart(trend.getContext('2d'),{type:'bar',data:{labels,datasets},options:{responsive:true,maintainAspectRatio:false,interaction:{mode:'index',intersect:false},scales:{x:{grid:{display:false}},y:{beginAtZero:true,grid:{color:'#f1f5f9'}}},plugins:{legend:{position:'bottom',labels:{usePointStyle:true,boxWidth:7}},tooltip:{callbacks:{afterLabel(ctx){return 'Target: '+Number(ctx.dataset.targetData?.[ctx.dataIndex]||0).toLocaleString();}},},datalabels:{anchor:'end',align:'top',formatter:v=>v>0?v:'',color:'#475569',font:{weight:'bold',size:9}}}},plugins:[targetOverlay].concat(window.ChartDataLabels?[ChartDataLabels]:[])});
+      yearlyTrendChartInstance=new Chart(trend.getContext('2d'),{type:'bar',data:{labels,datasets},options:{responsive:true,maintainAspectRatio:false,interaction:{mode:'index',intersect:false},scales:{x:{grid:{display:false}},y:{beginAtZero:true,grid:{color:'#f1f5f9'}}},plugins:{legend:{position:'bottom',labels:{usePointStyle:true,boxWidth:7}},tooltip:{callbacks:{afterLabel(ctx){return 'Target: '+Number(ctx.dataset.targetData?.[ctx.dataIndex]||0).toLocaleString();}},},datalabels:{anchor:'end',align:'top',formatter:v=>v>0?v:'',color:'#475569',font:{weight:'bold',size:9}}}},plugins:[targetOverlayV40].concat(window.ChartDataLabels?[ChartDataLabels]:[])});
     }
-    const totals=TEAM_ORDER_.map(t=>rows.reduce((s,r)=>s+n40(r[TEAM_META_[t].key]),0));
+    const totals=TEAM_ORDER_V40.map(t=>rows.reduce((s,r)=>s+n40(r[TEAM_META_V40[t].key]),0));
     const pie=document.getElementById('yearlyPieChart');
     if(pie){
       if(yearlyPieChartInstance) yearlyPieChartInstance.destroy();
-      yearlyPieChartInstance=new Chart(pie.getContext('2d'),{type:'doughnut',data:{labels:TEAM_ORDER_,datasets:[{data:totals,backgroundColor:TEAM_ORDER_.map(t=>color40(t)),borderWidth:0}]},options:{cutout:'72%',responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom',labels:{usePointStyle:true,boxWidth:7}},datalabels:{formatter:v=>v>0?v:'',color:ctx=>typeof window.cesReadableTextColor==='function'?window.cesReadableTextColor(ctx.dataset.backgroundColor[ctx.dataIndex]):'#fff',font:{weight:'bold'}}}},plugins:window.ChartDataLabels?[ChartDataLabels]:[]});
+      yearlyPieChartInstance=new Chart(pie.getContext('2d'),{type:'doughnut',data:{labels:TEAM_ORDER_V40,datasets:[{data:totals,backgroundColor:TEAM_ORDER_V40.map(t=>color40(t)),borderWidth:0}]},options:{cutout:'72%',responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom',labels:{usePointStyle:true,boxWidth:7}},datalabels:{formatter:v=>v>0?v:'',color:ctx=>typeof window.cesReadableTextColor==='function'?window.cesReadableTextColor(ctx.dataset.backgroundColor[ctx.dataIndex]):'#fff',font:{weight:'bold'}}}},plugins:window.ChartDataLabels?[ChartDataLabels]:[]});
     }
   };
   renderYearlyTable=function(rows){
     const body=document.getElementById('yearly-table-body'); if(!body) return;
     body.innerHTML=rows.map(r=>`<tr class="ces-yearly-month-row cursor-pointer" role="button" tabindex="0" title="Open ${r.monthName} ${r.year} in Master Calendar" onclick="openYearlyMonth(${Number(r.year)},${Number(r.month)})" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();openYearlyMonth(${Number(r.year)},${Number(r.month)})}"><td class="text-center font-bold">${r.year}</td><td class="text-center font-bold text-[#003DA5]">${r.monthName}</td><td class="text-right">${n40(r.med).toLocaleString()}</td><td class="text-right">${n40(r.lab).toLocaleString()}</td><td class="text-right">${n40(r.ehs).toLocaleString()}</td><td class="text-right">${n40(r.env).toLocaleString()}</td><td class="text-right">${n40(r.tes).toLocaleString()}</td><td class="text-right font-black">${n40(r.total).toLocaleString()}</td><td class="text-center"><button type="button" class="w-8 h-8 rounded-lg bg-blue-50 text-[#003DA5] hover:bg-[#003DA5] hover:text-white" onclick="event.stopPropagation();openYearlyMonth(${Number(r.year)},${Number(r.month)})" aria-label="Open ${r.monthName} ${r.year} in Master Calendar"><i class="fas fa-calendar-alt"></i></button></td></tr>`).join('');
   };
-  window.CES_YEARLY_UI_RECHECK=function(){return{version:'latest',teams:TEAM_ORDER_.slice(),mgtVisible:false};};
+  window.CES_YEARLY_UI_RECHECK=function(){return{version:'V41',teams:TEAM_ORDER_V40.slice(),mgtVisible:false};};
 })();
 
-window.CES_YEARLY_UI_RECHECK = window.CES_YEARLY_UI_RECHECK || function(){return{version:'latest',teams:['MED','LAB','EHS','ENV','TES'],colors:['MED','LAB','EHS','ENV','TES'].reduce((o,t)=>(o[t]=cesGetTeamColor(t),o),{})};};
+window.CES_YEARLY_UI_RECHECK = window.CES_YEARLY_UI_RECHECK || function(){return{version:'V41',teams:['MED','LAB','EHS','ENV','TES'],colors:['MED','LAB','EHS','ENV','TES'].reduce((o,t)=>(o[t]=cesGetTeamColor(t),o),{})};};
