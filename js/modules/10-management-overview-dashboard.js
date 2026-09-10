@@ -671,9 +671,9 @@ function renderHomeWeeklySection(data) {
     }).join(''));
 }
 
-window.CES_HOME_UI_RECHECK=function(){return{version:'V41',teams:['MED','LAB','EHS','ENV','TES'],serviceCsi:{EHS:['EHS','ENV']}};};
+window.CES_HOME_UI_RECHECK=function(){return{version:'latest',teams:['MED','LAB','EHS','ENV','TES'],serviceCsi:{EHS:['EHS','ENV']}};};
 
-window.CES_HOME_UI_V40_RECHECK=window.CES_HOME_UI_RECHECK;
+window.CES_HOME_UI_RECHECK=window.CES_HOME_UI_RECHECK;
 
 // V18.6 canonical name; legacy alias is retained only for cached frontends.
 window.renderManagementOverviewDashboard = renderManagementOverviewDashboard;

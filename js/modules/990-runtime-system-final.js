@@ -15,8 +15,8 @@
 
 (function () {
   'use strict';
-  if (window.__CES_SERVICE_CSI_INDEX_FIX_V18__) return;
-  window.__CES_SERVICE_CSI_INDEX_FIX_V18__ = true;
+  if (window._CES_SERVICE_CSI_INDEX_FIX) return;
+  window._CES_SERVICE_CSI_INDEX_FIX = true;
 
   const MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
   const SERVICE_CACHE_KEY = 'CES_SERVICE_CSI_CACHE';
@@ -1323,7 +1323,7 @@
       var view = $('#view-stock_dashboard') || $('#stockpro-dashboard') || $('#main-content');
       if (!view) return;
 
-      var cacheKey = 'CES_STOCK_DASHBOARD_CACHE_V17';
+      var cacheKey = 'CES_STOCK_DASHBOARD_CACHE';
       var cacheTtlMs = 5 * 60 * 1000;
 
       function renderFromPayload(res, fromCache) {
@@ -2550,7 +2550,7 @@
   if(document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot); else boot();
 
   window.CES_FINAL_ALL_SYNC_RECHECK = function(){
-    var out = { ok:true, version:'V40-'+VERSION, hasApi:!!(window.CES_API), hasPdfLibs:!!(window.html2canvas && window.jspdf), homeCsiSection:!!qs('#home-service-csi-summary-section'), tesCalendarCard:!!qs('#stat-tes'), envJobRecordCard:!!qs('#stat-env'), mgtSummaryHidden:!qs('#stat-mgt'), envCapacityCard:!!qs('#capacity-dashboard-grid') };
+    var out = { ok:true, version:'latest'+VERSION, hasApi:!!(window.CES_API), hasPdfLibs:!!(window.html2canvas && window.jspdf), homeCsiSection:!!qs('#home-service-csi-summary-section'), tesCalendarCard:!!qs('#stat-tes'), envJobRecordCard:!!qs('#stat-env'), mgtSummaryHidden:!qs('#stat-mgt'), envCapacityCard:!!qs('#capacity-dashboard-grid') };
     console.log('[CES_FINAL_ALL_SYNC_RECHECK]', out);
     return out;
   };
@@ -2589,7 +2589,7 @@
         var script = document.createElement('script');
         script.src = url;
         script.async = false;
-        script.dataset.cesV13Lib = id;
+        script.dataset.cesLib = id;
         script.onload = function(){ setTimeout(function(){ testFn && testFn() ? resolve() : next(); }, 20); };
         script.onerror = next;
         document.head.appendChild(script);
@@ -2919,7 +2919,7 @@
     var rootRect = root.getBoundingClientRect();
     var values = [0, fullHeight];
     var nodes = root.querySelectorAll(
-      '#serviceDashboardPanelV266 > *, #serviceMemoPanelV266 > *, '+
+      '#serviceDashboardPanel > *, #serviceMemoPanel > *, '+
       '#customer-list-body > tr, #growth-table-body > tr'
     );
     for(var i=0; i<nodes.length; i++){
@@ -3231,7 +3231,7 @@ window.CES_MODULES_RECHECK = function CES_MODULES_RECHECK() {
     inventory: typeof window.initStockInventoryModule === 'function' && !!document.getElementById('view-inventory'),
     checkStock: typeof window.initStockCheckModule === 'function' && !!document.getElementById('view-check_stock'),
     portal: typeof window.initPortalDashboard === 'function' && !!document.getElementById('view-portal'),
-    vehicle: typeof window.initVehicleBookingWorkspaceV55 === 'function' && !!document.getElementById('view-car_booking')
+    vehicle: typeof window.initVehicleBookingWorkspace === 'function' && !!document.getElementById('view-car_booking')
   };
   return {success:Object.keys(checks).every(function(k){return !!checks[k];}),release:'CES-HUB-FRONTEND-V20.9',checks:checks};
 };

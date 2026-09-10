@@ -7,11 +7,11 @@
 ============================================================ */
 (function (window, document) {
   'use strict';
-  if (window.__CES_REPORT_FAST_V31__) return;
-  window.__CES_REPORT_FAST_V31__ = true;
+  if (window._CES_REPORT_FAST) return;
+  window._CES_REPORT_FAST = true;
 
   var BLUE = '#003DA5';
-  var CACHE_KEY = 'CES_REPORT_CSI_CACHE_V31';
+  var CACHE_KEY = 'CES_REPORT_CSI_CACHE_';
   var active = false;
   var watchdog = null;
 
@@ -135,7 +135,7 @@
     });
   }
 
-  function parseWorkbookV31(file) {
+  function parseWorkbook(file) {
     return ensureXlsx().then(function () {
       return new Promise(function (resolve, reject) {
         var reader = new FileReader();
@@ -278,14 +278,14 @@
     return summary;
   }
 
-  async function handleReportUploadV31(event) {
+  async function handleReportUpload(event) {
     var input = event && event.target ? event.target : byId('reportFileInput');
     var file = input && input.files ? input.files[0] : null;
     if (!file || active) return;
     active = true;
     show('Reading Report CSI Excel file...');
     try {
-      var parsed = await parseWorkbookV31(file);
+      var parsed = await parseWorkbook(file);
       var diff = selectChangedRows(parsed.rows);
       hide();
 
@@ -321,8 +321,8 @@
       // Do not block the user while reading the sheet again. The page already reflects the uploaded rows.
       setTimeout(function () {
         try {
-          if (typeof loadReportCSIOnlyV31 === 'function') {
-            Promise.resolve(loadReportCSIOnlyV31(true, false)).catch(function (e) { console.warn('[Report CSI V31] background refresh failed', e); });
+          if (typeof loadReportCSIOnly === 'function') {
+            Promise.resolve(loadReportCSIOnly(true, false)).catch(function (e) { console.warn('[Report CSI V31] background refresh failed', e); });
           }
         } catch (_) {}
       }, 100);
@@ -350,19 +350,18 @@
 
   function install() {
     var input = byId('reportFileInput');
-    if (input) input.setAttribute('onchange', 'handleReportUploadV31(event)');
-    window.handleReportUploadV31 = handleReportUploadV31;
-    window.handleReportUpload = handleReportUploadV31;
+    if (input) input.setAttribute('onchange', 'handleReportUpload(event)');
+    window.handleReportUpload = handleReportUpload;
   }
 
-  window.CES_REPORT_V31_RECHECK = function () {
+  window.CES_REPORT_RECHECK = function () {
     var input = byId('reportFileInput');
     var ui = null;
     try {
-      if (typeof window.CES_REPORT_UI_V31_RECHECK === 'function') ui = window.CES_REPORT_UI_V31_RECHECK();
+      if (typeof window.CES_REPORT_UI_RECHECK === 'function') ui = window.CES_REPORT_UI_RECHECK();
     } catch (ignore) {}
     return {
-      version:'V31', installed:!!window.__CES_REPORT_FAST_V31__,
+      version:'latest', installed:!!window._CES_REPORT_FAST,
       inputHandler:input ? input.getAttribute('onchange') : '', active:active,
       transport:'single iframe POST with JSONP fallback', currentRecords:currentReportRows().length,
       ui:ui

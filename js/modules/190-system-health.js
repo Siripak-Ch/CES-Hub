@@ -211,7 +211,7 @@
 
   function renderReport(report) {
     state.report = report || {};
-    try { localStorage.setItem('CES_HEALTH_REPORT_V18', JSON.stringify(state.report)); } catch (e) {}
+    try { localStorage.setItem('CES_HEALTH_REPORT', JSON.stringify(state.report)); } catch (e) {}
     var updated = el('health-last-updated');
     if (updated) updated.innerHTML = '<i class="far fa-clock"></i> ' + esc(state.report.generatedAt || new Date().toLocaleString());
     setSummary(state.report);
@@ -288,7 +288,7 @@
       rows = rows.concat(runtimeRows());
       var counts = countRows(rows);
       state.frontend = { generatedAt:new Date().toISOString(), rows:rows, counts:counts, overall:worstStatus(rows.map(function (x) { return x.status; })) };
-      try { localStorage.setItem('CES_FRONTEND_HEALTH_V18', JSON.stringify(state.frontend)); } catch (e) {}
+      try { localStorage.setItem('CES_FRONTEND_HEALTH', JSON.stringify(state.frontend)); } catch (e) {}
       renderFrontendAudit();
       setSummary(state.report || {});
       if (force && window.Swal) {
@@ -319,7 +319,7 @@
       return report;
     } catch (error) {
       var cached=null;
-      try{cached=JSON.parse(localStorage.getItem('CES_HEALTH_REPORT_V18')||'null');}catch(ignore){}
+      try{cached=JSON.parse(localStorage.getItem('CES_HEALTH_REPORT')||'null');}catch(ignore){}
       if(cached){
         renderReport(cached);
         if(window.Swal)Swal.fire({icon:'warning',title:'Live health check unavailable',text:'Showing the last saved health report. Retry after the Apps Script deployment is reachable.',confirmButtonColor:'#003DA5'});
@@ -381,7 +381,7 @@
     var url = URL.createObjectURL(blob);
     var link = document.createElement('a');
     link.href = url;
-    link.download = 'CES_HUB_System_Health_V18_' + new Date().toISOString().replace(/[:.]/g, '-') + '.json';
+    link.download = 'CES_HUB_System_Health_' + new Date().toISOString().replace(/[:.]/g, '-') + '.json';
     document.body.appendChild(link); link.click(); link.remove();
     setTimeout(function () { URL.revokeObjectURL(url); }, 1000);
   }
@@ -389,34 +389,20 @@
   function init() {
     if (state.initialized) return;
     state.initialized = true;
-    try { state.report = JSON.parse(localStorage.getItem('CES_HEALTH_REPORT_V18') || 'null'); } catch (e) {}
-    try { state.frontend = JSON.parse(localStorage.getItem('CES_FRONTEND_HEALTH_V18') || 'null'); } catch (e2) {}
+    try { state.report = JSON.parse(localStorage.getItem('CES_HEALTH_REPORT') || 'null'); } catch (e) {}
+    try { state.frontend = JSON.parse(localStorage.getItem('CES_FRONTEND_HEALTH') || 'null'); } catch (e2) {}
     if (state.report) renderReport(state.report); else renderFrontendAudit();
     loadSystemHealth(false).catch(function () {});
   }
 
-  window.initSystemHealthV18 = init;
-  window.initSystemHealthV17 = init;
-  window.loadSystemHealthV18 = loadSystemHealth;
-  window.loadSystemHealthV17 = loadSystemHealth;
-  window.runFullApiAuditV18 = runFullAudit;
-  window.runFullApiAuditV17 = runFullAudit;
-  window.runFrontendAssetAuditV18 = runFrontendAssetAudit;
-  window.runFrontendAssetAuditV17 = runFrontendAssetAudit;
-  window.filterHealthProbesV18 = filterProbes;
-  window.filterHealthProbesV17 = filterProbes;
-  window.renderHealthApiInventoryV18 = renderApiInventory;
-  window.renderHealthApiInventoryV17 = renderApiInventory;
-  window.renderFrontendAuditV18 = renderFrontendAudit;
-  window.renderFrontendAuditV17 = renderFrontendAudit;
-  window.exportSystemHealthJsonV18 = exportJson;
-  window.exportSystemHealthJsonV17 = exportJson;
+  window.initSystemHealth = init;
+  window.loadSystemHealth = loadSystemHealth;
+  window.runFullApiAudit = runFullAudit;
+  window.runFrontendAssetAudit = runFrontendAssetAudit;
+  window.filterHealthProbes = filterProbes;
+  window.renderHealthApiInventory = renderApiInventory;
+  window.renderFrontendAudit = renderFrontendAudit;
+  window.exportSystemHealthJson = exportJson;
 
   // Backward-compatible names used by cached V14/V16 HTML/controller.
-  window.initSystemHealthV14 = init;
-  window.loadSystemHealthV14 = loadSystemHealth;
-  window.runFullApiAuditV14 = runFullAudit;
-  window.filterHealthProbesV14 = filterProbes;
-  window.renderHealthApiInventoryV14 = renderApiInventory;
-  window.exportSystemHealthJsonV14 = exportJson;
 })();

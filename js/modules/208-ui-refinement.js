@@ -17,6 +17,6 @@
     ['view-ot','view-memo_workorder','view-car_booking','view-van_booking'].forEach(function(id){var v=d.getElementById(id);if(v)v.classList.add('ces-v229-job-reference-spacing');});
   }
   function run(){cleanNoActionViews();normalizeOuterSpacing();d.documentElement.setAttribute('data-ces-ui-refinement',VERSION);}
-  function init(){run();var root=d.getElementById('app-main-content');if(root&&w.MutationObserver)new MutationObserver(function(){setTimeout(run,20);}).observe(root,{childList:true,subtree:true});w.addEventListener('ces:tab-changed',run);w.CES_UI_V229={version:VERSION,normalize:run};}
+  function init(){run();var root=d.getElementById('app-main-content');if(root&&w.MutationObserver)new MutationObserver(function(){setTimeout(run,20);}).observe(root,{childList:true,subtree:true});w.addEventListener('ces:tab-changed',run);w.CES_UI={version:VERSION,normalize:run};}
   if(d.readyState==='loading')d.addEventListener('DOMContentLoaded',init,{once:true});else init();
 })(window,document);

@@ -7,7 +7,7 @@
   'use strict';
 
   var report = window.CES_BOOT_REPORT || {
-    version: 'V18',
+    version: 'latest',
     startedAt: new Date().toISOString(),
     completedAt: '',
     assets: [],

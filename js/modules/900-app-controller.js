@@ -18,13 +18,13 @@
     let globalConfig      = { MED: 12, LAB: 3, EHS: 3 };
     let globalPermissions = null;
 
-    const CES_TAB_RUNTIME_V20 = {initialized:Object.create(null),lastSync:Object.create(null)};
+    const CES_TAB_RUNTIME = {initialized:Object.create(null),lastSync:Object.create(null)};
     const CES_SYNC_POLICY = {
         calendar:60000, car_booking:30000, van_booking:30000, stock_dashboard:60000, inventory:60000, check_stock:30000
     };
     // Tabs not listed above initialize once per page session and then use cached/local data until manual refresh or full page reload.
-    const CES_LIVE_TABS_V20 = Object.keys(CES_SYNC_POLICY).reduce(function(out,key){out[key]=true;return out;},{});
-    const CES_CORE_CACHE_KEY_V20 = 'CES_CORE_DATA_CACHE_V20';
+    const CES_LIVE_TABS = Object.keys(CES_SYNC_POLICY).reduce(function(out,key){out[key]=true;return out;},{});
+    const CES_CORE_CACHE_KEY = 'CES_CORE_DATA_CACHE_';
     let CES_CORE_LOAD_PROMISE = null;
     function cesLoadCoreDataOnDemand_(){
         if(CES_CORE_LOAD_PROMISE)return CES_CORE_LOAD_PROMISE;
@@ -41,14 +41,14 @@
         globalYearlyStats=data.yearlyStats||globalYearlyStats||[];globalCalData=data.calSummary||globalCalData||[];
         if(currentUser)applyRolePermissions(currentUser.role);
         if(typeof renderYearlyStats==='function')renderYearlyStats(globalYearlyStats,globalConfig);
-        if(typeof initCalendar==='function'&&!CES_TAB_RUNTIME_V20.initialized.calendar)initCalendar(globalCalData);
+        if(typeof initCalendar==='function'&&!CES_TAB_RUNTIME.initialized.calendar)initCalendar(globalCalData);
         if(currentTab==='management_overview'&&typeof renderManagementOverviewDashboard==='function')renderManagementOverviewDashboard(true);
     }
-    function cesRestoreCoreCache_(){try{var c=JSON.parse(localStorage.getItem(CES_CORE_CACHE_KEY_V20)||'null');if(c&&c.data)cesApplyCoreData_(c.data);}catch(e){}}
-    function cesStoreCoreCache_(data){try{localStorage.setItem(CES_CORE_CACHE_KEY_V20,JSON.stringify({at:Date.now(),data:data}));}catch(e){}}
+    function cesRestoreCoreCache_(){try{var c=JSON.parse(localStorage.getItem(CES_CORE_CACHE_KEY)||'null');if(c&&c.data)cesApplyCoreData_(c.data);}catch(e){}}
+    function cesStoreCoreCache_(data){try{localStorage.setItem(CES_CORE_CACHE_KEY,JSON.stringify({at:Date.now(),data:data}));}catch(e){}}
     function cesTabNeedsInit_(tab){
         if(tab==='monthly_report'&&window.CES_MONTHLY_REPORT_READY!==true)return true;
-        return !CES_TAB_RUNTIME_V20.initialized[tab];
+        return !CES_TAB_RUNTIME.initialized[tab];
     }
     let CES_CALENDAR_SYNC_PROMISE = null;
     let CES_DEFERRED_IDLE_SCHEDULED = false;
@@ -122,7 +122,7 @@
         return cesSyncCalendarRuntime_(!!force,true,target).then(function(){
             return window.CES_API.callFunction('getCalendarData',[true],{transport:'jsonp',timeoutMs:60000,dedupe:false,priority:'active',userAction:true,module:'calendar'});
         }).then(function(rows){
-            if(Array.isArray(rows)){globalCalData=rows;if(typeof initCalendar==='function')initCalendar(globalCalData);try{var cache=JSON.parse(localStorage.getItem(CES_CORE_CACHE_KEY_V20)||'{}');if(cache.data){cache.data.calSummary=rows;cache.at=Date.now();localStorage.setItem(CES_CORE_CACHE_KEY_V20,JSON.stringify(cache));}}catch(ignore){}}
+            if(Array.isArray(rows)){globalCalData=rows;if(typeof initCalendar==='function')initCalendar(globalCalData);try{var cache=JSON.parse(localStorage.getItem(CES_CORE_CACHE_KEY)||'{}');if(cache.data){cache.data.calSummary=rows;cache.at=Date.now();localStorage.setItem(CES_CORE_CACHE_KEY,JSON.stringify(cache));}}catch(ignore){}}
             return rows;
         }).catch(function(error){console.warn('[Calendar refresh]',error);return null;});
     }
@@ -131,12 +131,12 @@
         return cesRefreshCalendar_(options.force===true,{year:Number(options.year||0),month:Number(options.month||0)});
     };
     function cesRunTabInit_(tab){
-        var wasInitialized=!!CES_TAB_RUNTIME_V20.initialized[tab];
+        var wasInitialized=!!CES_TAB_RUNTIME.initialized[tab];
         if(!cesTabNeedsInit_(tab))return;
-        var isLive=!!CES_LIVE_TABS_V20[tab];
+        var isLive=!!CES_LIVE_TABS[tab];
         var isStockTab=/^(?:stock_dashboard|inventory|check_stock)$/.test(String(tab||''));
         var forceRefresh=isLive&&wasInitialized&&!isStockTab;
-        CES_TAB_RUNTIME_V20.initialized[tab]=true;CES_TAB_RUNTIME_V20.lastSync[tab]=Date.now();
+        CES_TAB_RUNTIME.initialized[tab]=true;CES_TAB_RUNTIME.lastSync[tab]=Date.now();
         if      (tab === 'portal'        && typeof initPortalDashboard === 'function') initPortalDashboard(false);
         else if (tab === 'management_overview' && typeof renderManagementOverviewDashboard === 'function') {
             // Paint cached/read-model cards immediately. Core data refreshes in
@@ -180,13 +180,13 @@
 
 
     // ---------- Remembered login / latest usage V50 ----------
-    const CES_AUTH_SESSION_KEY_V50 = 'CES_AUTH_SESSION_V50';
-    const CES_LAST_USAGE_KEY_V50 = 'CES_LAST_USAGE_V50';
-    const CES_AUTH_SESSION_TTL_V50 = 30 * 24 * 60 * 60 * 1000;
-    const CES_ACTIVE_TAB_KEY_V60 = 'CES_ACTIVE_TAB_V60';
-    const CES_VALID_TABS_V60 = ['portal','management_overview','yearly','revenue','ot','service','report','memo_workorder','calendar','checkin','car_booking','van_booking','weekly','report_manage','kpi','stock_dashboard','inventory','check_stock','team_information','team_plan','master_cal_pm_plan','audit_log','monthly_report','users','ces_evaluation','ces_ai_knowledge','setting','notification_config','health'];
-    let cesUsageHeartbeatV50 = null;
-    let cesUsageLastApiV50 = { module:'', action:'', at:0 };
+    const CES_AUTH_SESSION_KEY = 'CES_AUTH_SESSION';
+    const CES_LAST_USAGE_KEY = 'CES_LAST_USAGE';
+    const CES_AUTH_SESSION_TTL = 30 * 24 * 60 * 60 * 1000;
+    const CES_ACTIVE_TAB_KEY = 'CES_ACTIVE_TAB';
+    const CES_VALID_TABS = ['portal','management_overview','yearly','revenue','ot','service','report','memo_workorder','calendar','checkin','car_booking','van_booking','weekly','report_manage','kpi','stock_dashboard','inventory','check_stock','team_information','team_plan','master_cal_pm_plan','audit_log','monthly_report','users','ces_evaluation','ces_ai_knowledge','setting','notification_config','health'];
+    let cesUsageHeartbeat = null;
+    let cesUsageLastApi = { module:'', action:'', at:0 };
 
     function cesUsageSource_() {
         return isLineEnvironment() ? 'line' : 'web';
@@ -194,7 +194,7 @@
     function cesShouldRememberLogin_() {
         try {
             if (typeof window.cesRememberLoginEnabled_ === 'function') return !!window.cesRememberLoginEnabled_();
-            return localStorage.getItem('CES_REMEMBER_LOGIN_V60') !== '0';
+            return localStorage.getItem('CES_REMEMBER_LOGIN_') !== '0';
         } catch (e) {
             return true;
         }
@@ -215,14 +215,14 @@
         tab = String(tab || '').toLowerCase().trim();
         if (tab === 'home') tab = 'portal';
         if (tab === 'dashboard' || tab === 'management-overview') tab = 'management_overview';
-        return CES_VALID_TABS_V60.indexOf(tab) !== -1 ? tab : '';
+        return CES_VALID_TABS.indexOf(tab) !== -1 ? tab : '';
     }
     function cesPersistActiveTab_(tab) {
         tab = cesValidTab_(tab);
         if (!tab) return '';
         try {
-            sessionStorage.setItem(CES_ACTIVE_TAB_KEY_V60, tab);
-            localStorage.setItem(CES_ACTIVE_TAB_KEY_V60, tab);
+            sessionStorage.setItem(CES_ACTIVE_TAB_KEY, tab);
+            localStorage.setItem(CES_ACTIVE_TAB_KEY, tab);
         } catch (e) {}
         try {
             const url = new URL(window.location.href);
@@ -233,25 +233,25 @@
     }
     function cesReadActiveTab_() {
         try {
-            return cesValidTab_(sessionStorage.getItem(CES_ACTIVE_TAB_KEY_V60)) ||
-                cesValidTab_(localStorage.getItem(CES_ACTIVE_TAB_KEY_V60));
+            return cesValidTab_(sessionStorage.getItem(CES_ACTIVE_TAB_KEY)) ||
+                cesValidTab_(localStorage.getItem(CES_ACTIVE_TAB_KEY));
         } catch (e) {
             return '';
         }
     }
     function cesVisibleTab_() {
-        for (let i = 0; i < CES_VALID_TABS_V60.length; i++) {
-            const tab = CES_VALID_TABS_V60[i];
+        for (let i = 0; i < CES_VALID_TABS.length; i++) {
+            const tab = CES_VALID_TABS[i];
             const view = document.getElementById('view-' + tab);
             if (view && !view.classList.contains('hidden')) return tab;
         }
         return '';
     }
     function cesSessionId_() {
-        let id = localStorage.getItem('CES_BROWSER_SESSION_ID_V50') || '';
+        let id = localStorage.getItem('CES_BROWSER_SESSION_ID') || '';
         if (!id) {
             id = 'SES50-' + Date.now() + '-' + Math.random().toString(36).slice(2, 10).toUpperCase();
-            localStorage.setItem('CES_BROWSER_SESSION_ID_V50', id);
+            localStorage.setItem('CES_BROWSER_SESSION_ID', id);
         }
         return id;
     }
@@ -260,16 +260,16 @@
         for (let s = 0; s < stores.length; s++) {
             try {
                 const store = stores[s];
-                const raw = store.getItem(CES_AUTH_SESSION_KEY_V50);
+                const raw = store.getItem(CES_AUTH_SESSION_KEY);
                 if (!raw) continue;
                 const session = JSON.parse(raw);
                 if (!session || !session.user || !session.user.id) {
-                    store.removeItem(CES_AUTH_SESSION_KEY_V50);
+                    store.removeItem(CES_AUTH_SESSION_KEY);
                     continue;
                 }
                 const lastActive = Date.parse(session.lastActiveAt || session.loginAt || 0) || 0;
-                if (!lastActive || Date.now() - lastActive > CES_AUTH_SESSION_TTL_V50) {
-                    store.removeItem(CES_AUTH_SESSION_KEY_V50);
+                if (!lastActive || Date.now() - lastActive > CES_AUTH_SESSION_TTL) {
+                    store.removeItem(CES_AUTH_SESSION_KEY);
                     continue;
                 }
                 return session;
@@ -282,7 +282,7 @@
         const previous = cesReadRememberedSession_();
         const now = new Date().toISOString();
         const session = {
-            version:'V50',
+            version:'latest',
             sessionId:cesSessionId_(),
             user:user,
             loginAt:(previous && previous.user && String(previous.user.id) === String(user.id) && previous.loginAt) || now,
@@ -294,12 +294,12 @@
         try {
             const target = cesAuthStore_();
             const other = target === localStorage ? sessionStorage : localStorage;
-            target.setItem(CES_AUTH_SESSION_KEY_V50, JSON.stringify(session));
+            target.setItem(CES_AUTH_SESSION_KEY, JSON.stringify(session));
             target.setItem('ces_user', JSON.stringify(user));
-            other.removeItem(CES_AUTH_SESSION_KEY_V50);
+            other.removeItem(CES_AUTH_SESSION_KEY);
             other.removeItem('ces_user');
             localStorage.setItem('ces_last_employee_id', String(user.id));
-            localStorage.setItem(CES_LAST_USAGE_KEY_V50, JSON.stringify({
+            localStorage.setItem(CES_LAST_USAGE_KEY, JSON.stringify({
                 employeeId:user.id,lastTab:session.lastTab,lastAction:session.lastAction,
                 lastActiveAt:session.lastActiveAt,sessionId:session.sessionId
             }));
@@ -319,8 +319,8 @@
         if (!session || !window.CES_API || typeof window.CES_API.callFunction !== 'function') return;
         const now = Date.now();
         const moduleKey = moduleName || currentTab || 'portal';
-        if (!force && cesUsageLastApiV50.module === moduleKey && cesUsageLastApiV50.action === action && now - cesUsageLastApiV50.at < 60000) return;
-        cesUsageLastApiV50 = {module:moduleKey, action:action || 'ACTIVE', at:now};
+        if (!force && cesUsageLastApi.module === moduleKey && cesUsageLastApi.action === action && now - cesUsageLastApi.at < 60000) return;
+        cesUsageLastApi = {module:moduleKey, action:action || 'ACTIVE', at:now};
         const payload = {
             employeeId:currentUser.id,
             name:currentUser.name_eng || currentUser.name_th || '',
@@ -332,8 +332,8 @@
         window.CES_API.callFunction('recordUserLastUsage', [payload], {transport:'jsonp', timeoutMs:15000,priority:'background',background:true,silentLoading:true,module:'usage'}).catch(function(){});
     }
     function cesStartUsageHeartbeat_() {
-        if (cesUsageHeartbeatV50) clearInterval(cesUsageHeartbeatV50);
-        cesUsageHeartbeatV50 = setInterval(function(){
+        if (cesUsageHeartbeat) clearInterval(cesUsageHeartbeat);
+        cesUsageHeartbeat = setInterval(function(){
             if (!document.hidden && currentUser) cesRecordLatestUsage_('ACTIVE', currentTab || 'portal', false);
         }, 45000);
     }
@@ -466,9 +466,9 @@
             didOpen: () => { Swal.showLoading(); }
         }).then(() => {
             localStorage.removeItem('ces_user');
-            localStorage.removeItem(CES_AUTH_SESSION_KEY_V50);
+            localStorage.removeItem(CES_AUTH_SESSION_KEY);
             sessionStorage.removeItem('ces_user');
-            sessionStorage.removeItem(CES_AUTH_SESSION_KEY_V50);
+            sessionStorage.removeItem(CES_AUTH_SESSION_KEY);
             currentUser      = null;
             window.CES_CURRENT_USER = null;
             window.currentUser = null;
@@ -557,8 +557,8 @@
             }
         }
 
-        const portalButtonV185 = document.getElementById('btn-portal');
-        if (portalButtonV185) portalButtonV185.classList.remove('hidden');
+        const portalButton = document.getElementById('btn-portal');
+        if (portalButton) portalButton.classList.remove('hidden');
 
         // Smart group hiding
         document.querySelectorAll('.menu-group').forEach(group => {
@@ -626,13 +626,13 @@
     function cesHideTabLoadingPreview_(){var box=document.getElementById('ces-tab-loading-preview');if(box)box.remove();}
 
     function switchTab(tab, requestedToken) {
-        var previousTabV4 = currentTab;
+        var previousTab = currentTab;
         tab = cesValidTab_(tab) || cesReadActiveTab_() || 'portal';
         if (!requestedToken) {
-            requestedToken = (Number(window.CES_NAVIGATION_TOKEN_V3024) || 0) + 1;
-            window.CES_NAVIGATION_TOKEN_V3024 = requestedToken;
-            window.CES_REQUESTED_TAB_V3024 = tab;
-        } else if (requestedToken !== window.CES_NAVIGATION_TOKEN_V3024 || window.CES_REQUESTED_TAB_V3024 !== tab) {
+            requestedToken = (Number(window.CES_NAVIGATION_TOKEN) || 0) + 1;
+            window.CES_NAVIGATION_TOKEN = requestedToken;
+            window.CES_REQUESTED_TAB = tab;
+        } else if (requestedToken !== window.CES_NAVIGATION_TOKEN || window.CES_REQUESTED_TAB !== tab) {
             return;
         }
         if (currentUser && !cesCanAccessTab_(tab)) {
@@ -650,12 +650,12 @@
             // "Preparing page" placeholder. Business code is loaded next at
             // active-tab priority, then the normal initializer runs once.
             if(!cesRevealDeferredViewShell_(tab) && typeof window.CES_ensureDeferredView==='function'){
-                window.CES_ensureDeferredView(tab).then(function(){if(requestedToken===window.CES_NAVIGATION_TOKEN_V3024&&window.CES_REQUESTED_TAB_V3024===tab)cesRevealDeferredViewShell_(tab);}).catch(function(error){console.warn('[lazy view]',error);});
+                window.CES_ensureDeferredView(tab).then(function(){if(requestedToken===window.CES_NAVIGATION_TOKEN&&window.CES_REQUESTED_TAB===tab)cesRevealDeferredViewShell_(tab);}).catch(function(error){console.warn('[lazy view]',error);});
             }
             window.CES_loadDeferredModules(tab).then(function(){
-                if(requestedToken===window.CES_NAVIGATION_TOKEN_V3024&&window.CES_REQUESTED_TAB_V3024===tab)switchTab(tab,requestedToken);
+                if(requestedToken===window.CES_NAVIGATION_TOKEN&&window.CES_REQUESTED_TAB===tab)switchTab(tab,requestedToken);
             }).catch(function(error){
-                if(requestedToken!==window.CES_NAVIGATION_TOKEN_V3024)return;
+                if(requestedToken!==window.CES_NAVIGATION_TOKEN)return;
                 console.warn('[lazy module]', error);cesHideTabLoadingPreview_();
                 var view=document.getElementById('view-'+tab);if(view){view.classList.remove('hidden');view.innerHTML='<div class="ces-standard-card ces-module-unavailable-card"><div class="ces-module-unavailable-icon"><i class="fas fa-triangle-exclamation"></i></div><h2>Page load error</h2><p>'+String(error&&error.message||error)+'</p><button class="ces-standard-icon-btn ces-action-neutral" onclick="switchTab(\''+tab+'\')"><i class="fas fa-rotate-right"></i></button></div>';}
             });
@@ -719,7 +719,7 @@
         },120);
 
 
-        if (previousTabV4 === tab && activeView && !activeView.classList.contains('hidden')) {
+        if (previousTab === tab && activeView && !activeView.classList.contains('hidden')) {
             // The initial tab is already named `portal` before the first render.  The
             // old early-return skipped its initializer, leaving Home with CES Team,
             // --:--:-- and an empty Applications grid.  Run the idempotent tab
@@ -810,8 +810,6 @@
                 btn.disabled  = false;
                 if (res.success) {
                     Object.assign(currentUser, updates, res.user || {});
-                    window.CES_CURRENT_USER = currentUser;
-                    window.currentUser = currentUser;
                     cesStoreCurrentUser_(currentUser);
                     updateProfileUI();
                     closeProfileModal();
@@ -987,11 +985,11 @@
         if (!isInitial) cesPersistActiveTab_(activeBeforeLoad);
 
         const loader = document.getElementById('loadingOverlay');
-        let refreshTokenV14 = '';
+        let refreshToken = '';
         if (isInitial && options.nonBlocking !== true) {
             if (loader) loader.classList.remove('hidden');
         } else if (!isInitial && window.CES_UI && typeof window.CES_UI.begin === 'function') {
-            refreshTokenV14 = window.CES_UI.begin({target:'#app-main-content', mode:'section', message:'Refreshing the current function…'});
+            refreshToken = window.CES_UI.begin({target:'#app-main-content', mode:'section', message:'Refreshing the current function…'});
         }
         const loadingText = document.getElementById('loadingText');
         if (loadingText) {
@@ -1011,7 +1009,7 @@
             .withSuccessHandler((data) => {
                 cesApplyCoreData_(data); cesStoreCoreCache_(data);
                 if (isInitial && loader) loader.classList.add('hidden');
-                if (refreshTokenV14 && window.CES_UI) window.CES_UI.end(refreshTokenV14);
+                if (refreshToken && window.CES_UI) window.CES_UI.end(refreshToken);
 
                 if (data.config) {
                     globalConfig = data.config;
@@ -1073,7 +1071,7 @@
                         const allowed = (globalPermissions && globalPermissions[currentUser.role]) || [];
                         startTab = allowed.find(canOpenTab) || (canOpenTab('calendar') ? 'calendar' : allowed[0]);
                     } else {
-                        startTab = CES_VALID_TABS_V60.find(canOpenTab) || 'portal';
+                        startTab = CES_VALID_TABS.find(canOpenTab) || 'portal';
                     }
                 }
                 startTab = cesValidTab_(startTab) || 'portal';
@@ -1096,7 +1094,7 @@
             })
             .withFailureHandler(err => {
                 if (isInitial && loader) loader.classList.add('hidden');
-                if (refreshTokenV14 && window.CES_UI) window.CES_UI.end(refreshTokenV14);
+                if (refreshToken && window.CES_UI) window.CES_UI.end(refreshToken);
                 Swal.fire('Connection Error', (err && err.message ? err.message : 'Could not load system data. Please refresh.'), 'error');
             })
             .getCoreReadModel(options.force === true);
@@ -1153,14 +1151,14 @@
         document.getElementById('login-container').classList.remove('hidden');
         document.getElementById('main-dashboard').classList.add('hidden');
 
-        const loginInputV38 = document.getElementById('loginId');
-        if (loginInputV38) {
+        const loginInput = document.getElementById('loginId');
+        if (loginInput) {
             if (pendingLineProfile) {
                 // First-time LINE linking must require an explicit Employee ID.
                 // Never auto-fill a cached browser identity into a new LINE account link.
-                loginInputV38.value = '';
-            } else if (!loginInputV38.value) {
-                loginInputV38.value = localStorage.getItem('ces_last_employee_id') || sessionStorage.getItem('ces_last_employee_id') || '';
+                loginInput.value = '';
+            } else if (!loginInput.value) {
+                loginInput.value = localStorage.getItem('ces_last_employee_id') || sessionStorage.getItem('ces_last_employee_id') || '';
             }
         }
         if (!pendingLineProfile && typeof window.cesHydrateLoginMemory_ === 'function') window.cesHydrateLoginMemory_();
@@ -1190,7 +1188,7 @@
             // Read/persist the requested module now, never before init during LINE flow.
             const requestedTabAfterLiff = getRequestedTabFromUrl();
             if (requestedTabAfterLiff) {
-                try { sessionStorage.setItem(CES_ACTIVE_TAB_KEY_V60, requestedTabAfterLiff); } catch (ignore) {}
+                try { sessionStorage.setItem(CES_ACTIVE_TAB_KEY, requestedTabAfterLiff); } catch (ignore) {}
             }
 
             if (!liff.isLoggedIn()) {
@@ -1304,9 +1302,9 @@
         }
 
         // Standard browser: restore remembered CES session.
-        const rememberedSessionV50 = cesReadRememberedSession_();
-        if (rememberedSessionV50 && rememberedSessionV50.user && rememberedSessionV50.user.id) {
-            onLoginSuccess(rememberedSessionV50.user, true, 'SESSION_RESTORED');
+        const rememberedSession = cesReadRememberedSession_();
+        if (rememberedSession && rememberedSession.user && rememberedSession.user.id) {
+            onLoginSuccess(rememberedSession.user, true, 'SESSION_RESTORED');
             return;
         }
 
@@ -1363,7 +1361,7 @@ window.cesStoreCurrentUser_ = cesStoreCurrentUser_;
 
 
 
-// CES_V221_ADMIN_MENU_WATCHDOG — later compatibility modules must not hide ADMIN System tabs.
+// CES_ADMIN_MENU_WATCHDOG — later compatibility modules must not hide ADMIN System tabs.
 (function(){
   function fix(){try{if(typeof window.cesForceAdminSystemMenu==='function')window.cesForceAdminSystemMenu();}catch(e){}}
   ['ces:app-ready','ces:deferred-ready','ces:home-ready'].forEach(function(ev){window.addEventListener(ev,function(){setTimeout(fix,30);setTimeout(fix,600);});});

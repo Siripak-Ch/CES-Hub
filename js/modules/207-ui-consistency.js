@@ -129,7 +129,7 @@
     if(root&&w.MutationObserver){new MutationObserver(schedule).observe(root,{childList:true,subtree:true,attributes:true,attributeFilter:['class','aria-selected']});}
     w.addEventListener('ces:tab-changed',schedule);
     w.addEventListener('resize',schedule,{passive:true});
-    w.CES_UI_V228={version:VERSION,normalize:run,schedule:schedule};
+    w.CES_UI_LEGACY={version:VERSION,normalize:run,schedule:schedule};
   }
   if(d.readyState==='loading') d.addEventListener('DOMContentLoaded',init,{once:true}); else init();
 })(window,document);

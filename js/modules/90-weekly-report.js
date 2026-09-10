@@ -7,7 +7,7 @@
 let wkCurrentTeam = 'MED', wkActiveDashTeam = 'ALL', wkActiveStatus = 'ALL'; 
 let wkRawJobs = [], wkRawStaff = [], wkSelectedMembers = [], wkUploadQueue = [], wkMemoQueue = []; 
 let wkCurrentWeekInfo = '', wkRawDashboardData = [], wkDraftQueue = [];
-let wkInitialLoadedV38 = false, wkInitialLoadingV38 = false; 
+let wkInitialLoaded = false, wkInitialLoading = false; 
 const WK_INITIAL_CACHE_KEY = 'CES_WEEKLY_INITIAL_CACHE';
 const WK_INITIAL_CACHE_TTL = 10 * 60 * 1000;
 
@@ -22,11 +22,11 @@ const WK_SUBTEAMS = {
 
 function wkReadInitialCache_(){try{const box=JSON.parse(localStorage.getItem(WK_INITIAL_CACHE_KEY)||'null');return box&&box.data?box:null;}catch(error){return null;}}
 function wkWriteInitialCache_(data){try{localStorage.setItem(WK_INITIAL_CACHE_KEY,JSON.stringify({at:Date.now(),data:data||{}}));}catch(error){}}
-function wkApplyInitialData_(data){data=data||{};wkRawJobs=Array.isArray(data.jobs)?data.jobs:[];wkRawStaff=Array.isArray(data.staff)?data.staff:[];wkInitialLoadedV38=true;switchWeeklyTeam(wkCurrentTeam||'MED');return data;}
+function wkApplyInitialData_(data){data=data||{};wkRawJobs=Array.isArray(data.jobs)?data.jobs:[];wkRawStaff=Array.isArray(data.staff)?data.staff:[];wkInitialLoaded=true;switchWeeklyTeam(wkCurrentTeam||'MED');return data;}
 function wkSetInitialLoading_(visible,message,isError){
     const loading=document.getElementById('weekly-loading');if(!loading)return;
     loading.classList.toggle('hidden',!visible);if(!visible)return;
-    if(isError){loading.innerHTML='<div class="text-center px-6"><i class="fas fa-cloud-arrow-down text-3xl text-amber-500 mb-3"></i><p class="text-sm font-black text-slate-700">เชื่อมต่อข้อมูล Weekly ชั่วคราวไม่ได้</p><p class="text-xs font-bold text-slate-400 mt-1">ระบบจะเชื่อมต่อใหม่อัตโนมัติ หรือกด Retry</p><button type="button" class="mt-4 px-4 py-2 rounded-xl bg-[#003DA5] text-white text-xs font-black" onclick="refreshWeeklyInitialV38()"><i class="fas fa-rotate-right mr-1"></i> Retry</button></div>';return;}
+    if(isError){loading.innerHTML='<div class="text-center px-6"><i class="fas fa-cloud-arrow-down text-3xl text-amber-500 mb-3"></i><p class="text-sm font-black text-slate-700">เชื่อมต่อข้อมูล Weekly ชั่วคราวไม่ได้</p><p class="text-xs font-bold text-slate-400 mt-1">ระบบจะเชื่อมต่อใหม่อัตโนมัติ หรือกด Retry</p><button type="button" class="mt-4 px-4 py-2 rounded-xl bg-[#003DA5] text-white text-xs font-black" onclick="refreshWeeklyInitial()"><i class="fas fa-rotate-right mr-1"></i> Retry</button></div>';return;}
     loading.innerHTML='<i class="fas fa-spinner fa-spin text-4xl text-[#003DA5] mb-3"></i><p class="text-sm font-bold text-gray-500">'+String(message||'Loading Configuration...')+'</p>';
 }
 function wkLoadInitialApi_(forceRefresh,background){
@@ -42,27 +42,27 @@ function initWeekly(forceRefresh) {
 
     ['filter-year', 'filter-month', 'filter-week'].forEach(id => {
         const el = document.getElementById(id);
-        if (!el || el.dataset.weeklyBoundV38 === '1') return;
-        el.dataset.weeklyBoundV38 = '1';
+        if (!el || el.dataset.weeklyBound === '1') return;
+        el.dataset.weeklyBound = '1';
         el.addEventListener('change', () => { if(id==='filter-month') updateWeekOptions(); applyFilters(); });
     });
 
-    if (wkInitialLoadedV38 && !forceRefresh) {
+    if (wkInitialLoaded && !forceRefresh) {
         switchWeeklyTeam(wkCurrentTeam || 'MED');
         return;
     }
     const cachedBox=wkReadInitialCache_(),cached=cachedBox&&cachedBox.data;
     if(!forceRefresh&&cached){wkApplyInitialData_(cached);wkSetInitialLoading_(false);if(Date.now()-Number(cachedBox.at||0)<WK_INITIAL_CACHE_TTL)return;}
-    if (wkInitialLoadingV38) return;
-    wkInitialLoadingV38 = true;
+    if (wkInitialLoading) return;
+    wkInitialLoading = true;
     const backgroundRefresh=!forceRefresh&&!!cached;
     if(!backgroundRefresh)wkSetInitialLoading_(true,forceRefresh?'Refreshing Weekly data...':'Loading Configuration...');
     return wkLoadInitialApi_(!!forceRefresh,backgroundRefresh).then(data=>{wkWriteInitialCache_(data);wkApplyInitialData_(data);wkSetInitialLoading_(false);return data;}).catch(err=>{
         if(cached){wkApplyInitialData_(cached);wkSetInitialLoading_(false);return cached;}
-        wkInitialLoadedV38=false;wkSetInitialLoading_(true,'',true);console.warn('[Weekly initial data]',err);return null;
-    }).finally(()=>{wkInitialLoadingV38=false;});
+        wkInitialLoaded=false;wkSetInitialLoading_(true,'',true);console.warn('[Weekly initial data]',err);return null;
+    }).finally(()=>{wkInitialLoading=false;});
 }
-window.refreshWeeklyInitialV38 = function(){ wkInitialLoadedV38=false; return initWeekly(true); };
+window.refreshWeeklyInitial = function(){ wkInitialLoaded=false; return initWeekly(true); };
 
 function submitWeeklyReport(e) { if (e) e.preventDefault(); addReportToQueue(); }
 

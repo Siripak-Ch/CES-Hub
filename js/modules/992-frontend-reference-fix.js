@@ -4,8 +4,8 @@
 ============================================================ */
 (function (window, document) {
   'use strict';
-  if (window.__CES_FRONTEND_REFERENCE_FIX_V31__) return;
-  window.__CES_FRONTEND_REFERENCE_FIX_V31__ = true;
+  if (window._CES_FRONTEND_REFERENCE_FIX) return;
+  window._CES_FRONTEND_REFERENCE_FIX = true;
 
   var COLORS = {
     navy: '#172033', blue: '#003DA5', blue2: '#0A5BD3', cyan: '#00A9E0',
@@ -150,12 +150,12 @@
 
   function patchKpiEnvWorkflow() {
     var original = window.kpiApplyStrictWorkflowStatus;
-    if (typeof original === 'function' && !original.__cesV31EnvPatched) {
+    if (typeof original === 'function' && !original.__cesEnvPatched) {
       var wrapped = function (rows) {
         var out = original.call(this, rows);
         return (Array.isArray(out) ? out : []).map(normalizeEnvStatus);
       };
-      wrapped.__cesV31EnvPatched = true;
+      wrapped.__cesEnvPatched = true;
       window.kpiApplyStrictWorkflowStatus = wrapped;
     }
     if (Array.isArray(window.globalKpiData)) {
@@ -186,7 +186,7 @@
 
   function patchAlertPopup() {
     window.sd_openAlertPopup = function () {
-      var rows = Array.isArray(window.CES_STOCK_V7_ALERTS) ? window.CES_STOCK_V7_ALERTS : [];
+      var rows = Array.isArray(window.CES_STOCK_ALERTS) ? window.CES_STOCK_ALERTS : [];
       if (!window.Swal) return;
       window.Swal.fire({
         title: 'Rental Alerts',
@@ -200,51 +200,51 @@
 
   function patchRuntimeHooks() {
     var oldReport = window.applyReportFilters;
-    if (typeof oldReport === 'function' && !oldReport.__cesV31Painted) {
+    if (typeof oldReport === 'function' && !oldReport.__cesPainted) {
       window.applyReportFilters = function () {
         var result = oldReport.apply(this, arguments);
         paintReportTabs();
         return result;
       };
-      window.applyReportFilters.__cesV31Painted = true;
+      window.applyReportFilters.__cesPainted = true;
     }
     var oldKpiSwitch = window.switchKpiTab;
-    if (typeof oldKpiSwitch === 'function' && !oldKpiSwitch.__cesV31Painted) {
+    if (typeof oldKpiSwitch === 'function' && !oldKpiSwitch.__cesPainted) {
       window.switchKpiTab = function () {
         window.__CES_KPI_ACTIVE_TEAM = arguments[0] || 'EHS';
         var result = oldKpiSwitch.apply(this, arguments);
         setTimeout(function () { patchKpiEnvWorkflow(); paintKpiTabs(); }, 0);
         return result;
       };
-      window.switchKpiTab.__cesV31Painted = true;
+      window.switchKpiTab.__cesPainted = true;
     }
     var oldProgress = window.getKpiProgressInfo;
-    if (typeof oldProgress === 'function' && !oldProgress.__cesV31EnvPatched) {
+    if (typeof oldProgress === 'function' && !oldProgress.__cesEnvPatched) {
       window.getKpiProgressInfo = function (row) {
         normalizeEnvStatus(row);
         return oldProgress.call(this, row);
       };
-      window.getKpiProgressInfo.__cesV31EnvPatched = true;
+      window.getKpiProgressInfo.__cesEnvPatched = true;
     }
     var oldSetRFilter = window.setRFilter;
-    if (typeof oldSetRFilter === 'function' && !oldSetRFilter.__cesV31Painted) {
+    if (typeof oldSetRFilter === 'function' && !oldSetRFilter.__cesPainted) {
       window.setRFilter = function (key, value) {
         if (key === 'team') window.__CES_REPORT_ACTIVE_TEAM = value || 'All';
         var result = oldSetRFilter.apply(this, arguments);
         paintReportTabs();
         return result;
       };
-      window.setRFilter.__cesV31Painted = true;
+      window.setRFilter.__cesPainted = true;
     }
     var oldRenderKpi = window.renderKPITable;
-    if (typeof oldRenderKpi === 'function' && !oldRenderKpi.__cesV31EnvPatched) {
+    if (typeof oldRenderKpi === 'function' && !oldRenderKpi.__cesEnvPatched) {
       window.renderKPITable = function () {
         patchKpiEnvWorkflow();
         var result = oldRenderKpi.apply(this, arguments);
         paintKpiTabs();
         return result;
       };
-      window.renderKPITable.__cesV31EnvPatched = true;
+      window.renderKPITable.__cesEnvPatched = true;
     }
   }
 
@@ -277,26 +277,26 @@
   observer.observe(document.documentElement, {subtree:true, childList:true, characterData:true});
 
   var oldSwitchTab = window.switchTab;
-  if (typeof oldSwitchTab === 'function' && !oldSwitchTab.__cesV31Wrapped) {
+  if (typeof oldSwitchTab === 'function' && !oldSwitchTab.__cesWrapped) {
     window.switchTab = function () {
       var result = oldSwitchTab.apply(this, arguments);
       setTimeout(refresh, 20);
       return result;
     };
-    window.switchTab.__cesV31Wrapped = true;
+    window.switchTab.__cesWrapped = true;
   }
 
-  window.CES_FRONTEND_V31_RECHECK = function () {
+  window.CES_FRONTEND_RECHECK = function () {
     var envSample = [];
     try {
-      var envResult = typeof window.kpiEnvWorkflowV31Recheck === 'function' ? window.kpiEnvWorkflowV31Recheck() : null;
+      var envResult = typeof window.kpiEnvWorkflowRecheck === 'function' ? window.kpiEnvWorkflowRecheck() : null;
       envSample = envResult && Array.isArray(envResult.sample) ? envResult.sample : [];
     } catch (e) {}
     var badEnv = envSample.filter(function (r) { return !r.currentStatus || r.currentStatus === 'รอเริ่มงาน'; });
     var actionGroups = Array.from(document.querySelectorAll('#view-inventory .csv5-actions'));
     var out = {
-      version: 'V31',
-      systemRuntimeCompleted: !!window.CESUI && typeof window.kpiEnvWorkflowV31Recheck === 'function',
+      version: 'latest',
+      systemRuntimeCompleted: !!window.CESUI && typeof window.kpiEnvWorkflowRecheck === 'function',
       stockRuntimeLoaded: typeof window.CES_STOCK_RECHECK === 'function' && typeof window.initStockDashboardModule === 'function',
       envWorkflowSample: envSample.map(function(r){return r.currentStatus;}),
       envRowsWithWrongStartStatus: badEnv.length,
@@ -310,7 +310,7 @@
   };
 })(window, document);
 
-  function cesFixSidebarSelectionV186_(){
+  function cesFixSidebarSelection(){
     var tab=String(window.currentTab||document.body.getAttribute('data-ces-active-tab')||'portal').toLowerCase();
     if(tab==='home')tab='portal';
     document.querySelectorAll('.nav-item').forEach(function(btn){
@@ -321,5 +321,5 @@
       if(active)btn.setAttribute('aria-current','page');else btn.removeAttribute('aria-current');
     });
   }
-  window.addEventListener('ces:tab-changed',cesFixSidebarSelectionV186_);
-  document.addEventListener('DOMContentLoaded',function(){setTimeout(cesFixSidebarSelectionV186_,120);});
+  window.addEventListener('ces:tab-changed',cesFixSidebarSelection);
+  document.addEventListener('DOMContentLoaded',function(){setTimeout(cesFixSidebarSelection,120);});

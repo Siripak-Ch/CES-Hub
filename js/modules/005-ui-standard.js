@@ -12,7 +12,7 @@
   var apiPatched = false;
   var switchPatched = false;
   var activeTab = '';
-  var SCROLL_KEY = 'CES_TAB_SCROLL_V18';
+  var SCROLL_KEY = 'CES_TAB_SCROLL_';
   var MAX_JOB_MS = 180000;
 
   function now() { return Date.now ? Date.now() : new Date().getTime(); }
@@ -451,8 +451,8 @@
       activeTab = next || activeTab;
       try {
         document.body.dataset.cesTab = activeTab;
-        sessionStorage.setItem('CES_ACTIVE_TAB_V60', activeTab);
-        localStorage.setItem('CES_ACTIVE_TAB_V60', activeTab);
+        sessionStorage.setItem('CES_ACTIVE_TAB', activeTab);
+        localStorage.setItem('CES_ACTIVE_TAB', activeTab);
       } catch (e) {}
       normalizeAllViews();
       restoreScroll(activeTab);

@@ -5,14 +5,14 @@
 
 let _userCache = null; 
     let _permConfig = {};
-    const CES_USER_CACHE_V3025='CES_USER_MANAGEMENT_CACHE_V3025';
-    function userApiV3025_(fn,args,opt){
+    const CES_USER_CACHE_='CES_USER_MANAGEMENT_CACHE_';
+    function userApi(fn,args,opt){
         if(!window.CES_API||typeof window.CES_API.callFunction!=='function')return Promise.reject(new Error('CES API bridge is not ready.'));
         const options=Object.assign({transport:'jsonp',timeoutMs:50000,dedupe:false,priority:'active',userAction:true,module:'users'},opt||{});
         let attempt=0;function run(){attempt++;return window.CES_API.callFunction(fn,args||[],options).catch(err=>{if(attempt<3&&/temporarily unavailable|timeout|Cannot connect|Failed to fetch|NetworkError/i.test(String(err&&err.message||err)))return new Promise(resolve=>setTimeout(resolve,attempt*450)).then(run);throw err;});}return run();
     }
-    function readUserCacheV3025_(){try{const x=JSON.parse(localStorage.getItem(CES_USER_CACHE_V3025)||'null');return x&&Array.isArray(x.rows)&&Date.now()-Number(x.at||0)<86400000?x.rows:null;}catch(e){return null;}}
-    function writeUserCacheV3025_(rows){try{localStorage.setItem(CES_USER_CACHE_V3025,JSON.stringify({at:Date.now(),rows:rows||[]}));}catch(e){}}
+    function readUserCache(){try{const x=JSON.parse(localStorage.getItem(CES_USER_CACHE_)||'null');return x&&Array.isArray(x.rows)&&Date.now()-Number(x.at||0)<86400000?x.rows:null;}catch(e){return null;}}
+    function writeUserCache(rows){try{localStorage.setItem(CES_USER_CACHE_,JSON.stringify({at:Date.now(),rows:rows||[]}));}catch(e){}}
     const ALL_MODULES = [
         { id:'portal',name:'Home',group:'Main Dashboard',icon:'fa-house' },
         { id:'management_overview',name:'Management Overview',group:'Main Dashboard',icon:'fa-chart-line' },
@@ -45,7 +45,7 @@ let _userCache = null;
         { id:'health',name:'System Health',group:'System',icon:'fa-heart-pulse' }
     ];
 
-    function getPermissionModulesV228() {
+    function getPermissionModules() {
         const byId = new Map(ALL_MODULES.map(m => [m.id, Object.assign({}, m)]));
         const ordered = [];
         const seen = new Set();
@@ -65,7 +65,7 @@ let _userCache = null;
         ALL_MODULES.forEach(m => { if (!seen.has(m.id)) ordered.push(Object.assign({},m)); });
         return ordered;
     }
-    window.CES_PERMISSION_MODULES_V228 = getPermissionModulesV228;
+    window.CES_PERMISSION_MODULES = getPermissionModules;
 
 
     function initUsers() {
@@ -80,9 +80,9 @@ let _userCache = null;
     function refreshUserList(force = false) {
         if(force) _userCache = null;
         const tbody = document.getElementById('user-list-tbody');
-        const cached=readUserCacheV3025_();if(cached&&!_userCache){_userCache=cached;renderApprovalSection();filterUserTable();}
+        const cached=readUserCache();if(cached&&!_userCache){_userCache=cached;renderApprovalSection();filterUserTable();}
         if(!_userCache)tbody.innerHTML = '<tr><td colspan="6" class="p-12 text-center text-gray-400 italic"><div class="flex flex-col items-center"><i class="fas fa-circle-notch fa-spin text-2xl mb-3 text-[#003DA5]"></i>Fetching user data...</div></td></tr>';
-        userApiV3025_('getAllUsers',[!!force],{dedupe:!force}).then(data=>{_userCache=Array.isArray(data)?data:[];writeUserCacheV3025_(_userCache);renderApprovalSection();filterUserTable();}).catch(err=>{if(cached){_userCache=cached;renderApprovalSection();filterUserTable();if(typeof showToast==='function')showToast('ใช้รายชื่อผู้ใช้ล่าสุดที่บันทึกไว้ · กด Refresh เพื่อลองใหม่','warning');}else tbody.innerHTML=`<tr><td colspan="6" class="p-7 text-center text-red-500"><b>ไม่สามารถเชื่อมต่อ Apps Script ชั่วคราว</b><div class="text-xs text-slate-400 mt-2">${String(err&&err.message||err)}</div><button class="mt-3 px-4 py-2 rounded-xl bg-[#004aad] text-white font-bold" onclick="refreshUserList(true)"><i class="fas fa-rotate"></i> Retry</button></td></tr>`;});
+        userApi('getAllUsers',[!!force],{dedupe:!force}).then(data=>{_userCache=Array.isArray(data)?data:[];writeUserCache(_userCache);renderApprovalSection();filterUserTable();}).catch(err=>{if(cached){_userCache=cached;renderApprovalSection();filterUserTable();if(typeof showToast==='function')showToast('ใช้รายชื่อผู้ใช้ล่าสุดที่บันทึกไว้ · กด Refresh เพื่อลองใหม่','warning');}else tbody.innerHTML=`<tr><td colspan="6" class="p-7 text-center text-red-500"><b>ไม่สามารถเชื่อมต่อ Apps Script ชั่วคราว</b><div class="text-xs text-slate-400 mt-2">${String(err&&err.message||err)}</div><button class="mt-3 px-4 py-2 rounded-xl bg-[#004aad] text-white font-bold" onclick="refreshUserList(true)"><i class="fas fa-rotate"></i> Retry</button></td></tr>`;});
     }
 
     function renderApprovalSection() {
@@ -297,8 +297,8 @@ let _userCache = null;
         }
         // V22.8: the permission dialog can be opened from Setting as well as User Management.
         // Move the fixed modal outside a hidden view so ancestor display:none never suppresses it.
-        const permissionModalV228 = document.getElementById('permissionModal');
-        if (permissionModalV228 && permissionModalV228.parentElement !== document.body) document.body.appendChild(permissionModalV228);
+        const permissionModal = document.getElementById('permissionModal');
+        if (permissionModal && permissionModal.parentElement !== document.body) document.body.appendChild(permissionModal);
         const defaultPerms = {
             'MANAGER': [
                 'portal', 'management_overview', 'yearly', 'revenue', 'ot',
@@ -318,7 +318,7 @@ let _userCache = null;
                 'checkin', 'car_booking', 'van_booking', 'weekly', 'report_manage', 'kpi',
                 'stock_dashboard', 'inventory', 'check_stock', 'team_information'
             ],
-            'ADMIN': getPermissionModulesV228().map(m => m.id)
+            'ADMIN': getPermissionModules().map(m => m.id)
         };
 
         if (!globalPermissions) {
@@ -332,11 +332,11 @@ let _userCache = null;
             });
 
             // ADMIN always sees every module.
-            _permConfig.ADMIN = getPermissionModulesV228().map(m => m.id);
+            _permConfig.ADMIN = getPermissionModules().map(m => m.id);
         }
 
         renderPermissionTable();
-        if (permissionModalV228) permissionModalV228.classList.remove('hidden');
+        if (permissionModal) permissionModal.classList.remove('hidden');
     }
 
     function renderPermissionTable() {
@@ -347,7 +347,7 @@ let _userCache = null;
         let currentGroup = '';
         const rows = [];
 
-        getPermissionModulesV228().forEach(mod => {
+        getPermissionModules().forEach(mod => {
             if (mod.group !== currentGroup) {
                 currentGroup = mod.group;
                 rows.push(`
@@ -400,12 +400,12 @@ let _userCache = null;
         });
 
         tbody.innerHTML = rows.join('');
-        updatePermissionSummaryV228(_permConfig);
+        updatePermissionSummary(_permConfig);
     }
 
-    function updatePermissionSummaryV228(source) {
+    function updatePermissionSummary(source) {
         try {
-            const modules = getPermissionModulesV228();
+            const modules = getPermissionModules();
             const total = modules.length;
             const perms = source && typeof source === 'object' ? source : ((typeof globalPermissions !== 'undefined' && globalPermissions) ? globalPermissions : _permConfig || {});
             const validIds = new Set(modules.map(m => m.id));
@@ -418,13 +418,13 @@ let _userCache = null;
             write('perm-count-total-v228', total);
         } catch(ignore) {}
     }
-    window.updatePermissionSummaryV228 = updatePermissionSummaryV228;
+    window.updatePermissionSummary = updatePermissionSummary;
 
     function savePermissions() {
         const newPerms = { ADMIN: [], MANAGER: [], SUPERVISOR: [], STAFF: [] };
 
         // ADMIN always receives all modules; only the other roles are editable.
-        newPerms.ADMIN = getPermissionModulesV228().map(m => m.id);
+        newPerms.ADMIN = getPermissionModules().map(m => m.id);
         document.querySelectorAll('.perm-chk:checked').forEach(chk => {
             const r = chk.dataset.role;
             const m = chk.dataset.mod;
@@ -554,7 +554,7 @@ let _userCache = null;
             .saveRolePermissions(JSON.stringify(newPerms));
     }
 
-window.refreshPermissionSummaryV228=function(){try{updatePermissionSummaryV228();}catch(e){}};
+window.refreshPermissionSummary=function(){try{updatePermissionSummary();}catch(e){}};
 
-function setAllRolePermissionsV240_(role,checked){role=String(role||'').toUpperCase();if(role==='ADMIN')return;document.querySelectorAll('.perm-chk[data-role="'+role+'"]').forEach(function(chk){chk.checked=!!checked;});}
-window.setAllRolePermissionsV240_=setAllRolePermissionsV240_;
+function setAllRolePermissions(role,checked){role=String(role||'').toUpperCase();if(role==='ADMIN')return;document.querySelectorAll('.perm-chk[data-role="'+role+'"]').forEach(function(chk){chk.checked=!!checked;});}
+window.setAllRolePermissions=setAllRolePermissions;

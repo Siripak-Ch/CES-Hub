@@ -6,12 +6,12 @@
 ============================================================ */
 (function (window, document) {
   'use strict';
-  if (window.__CES_HEADER_REPORT_V31__) return;
-  window.__CES_HEADER_REPORT_V31__ = true;
+  if (window._CES_HEADER_REPORT) return;
+  window._CES_HEADER_REPORT = true;
 
   var VERSION = 'V31';
   var BLUE = '#003DA5';
-  var CACHE_KEY = 'CES_REPORT_CSI_CACHE_V31';
+  var CACHE_KEY = 'CES_REPORT_CSI_CACHE_';
   var refreshPromise = null;
   var overlayWatchdog = null;
   var chartRefreshTimer = null;
@@ -181,14 +181,14 @@
   setTimeout(apply, 1800);
 
   var originalSwitchTab = window.switchTab;
-  if (typeof originalSwitchTab === 'function' && !originalSwitchTab.__cesV31Wrapped) {
+  if (typeof originalSwitchTab === 'function' && !originalSwitchTab.__cesWrapped) {
     window.switchTab = function () {
       var result = originalSwitchTab.apply(this, arguments);
       setTimeout(apply, 0);
       setTimeout(apply, 180);
       return result;
     };
-    window.switchTab.__cesV31Wrapped = true;
+    window.switchTab.__cesWrapped = true;
   }
 
   window.CES_REPORT_API_TEST = function () {

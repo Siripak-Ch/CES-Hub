@@ -127,7 +127,7 @@
   // Values are read from Config and exposed as CSS variables so
   // cards, charts, tables and generated UI stay consistent.
   // ============================================================
-  var TEAM_COLOR_DEFAULTS_V41 = {
+  var TEAM_COLOR_DEFAULTS_ = {
     MED:'#004aad', LAB:'#19a7ce', EHS:'#0fc1a1', ENV:'#7ed957',
     TES:'#ffde59', QM:'#f97316', MNG:'#b4b4b4', MGT:'#b4b4b4', OTHER:'#b4b4b4', ALL:'#475569'
   };
@@ -163,7 +163,7 @@
     var key = 'TEAM_COLOR_' + code;
     var value = validHex(cfg[key]);
     if (!value && code === 'MNG') value = validHex(cfg.TEAM_COLOR_MGT);
-    return value || TEAM_COLOR_DEFAULTS_V41[code] || TEAM_COLOR_DEFAULTS_V41.MNG;
+    return value || TEAM_COLOR_DEFAULTS_[code] || TEAM_COLOR_DEFAULTS_.MNG;
   }
 
   function hexRgb(hex) {
@@ -254,7 +254,7 @@
   window.cesExternalLink = cesExternalLink;
   window.cesOpenExternalLink = cesOpenExternalLink;
 
-  window.CES_TEAM_COLOR_DEFAULTS = TEAM_COLOR_DEFAULTS_V41;
+  window.CES_TEAM_COLOR_DEFAULTS = TEAM_COLOR_DEFAULTS_;
   window.cesNormalizeTeamCode = normalizeTeam;
   window.cesGetTeamColor = teamColor;
   window.cesGetTeamStyle = teamStyle;
