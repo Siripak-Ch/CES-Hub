@@ -810,6 +810,8 @@
                 btn.disabled  = false;
                 if (res.success) {
                     Object.assign(currentUser, updates, res.user || {});
+                    window.CES_CURRENT_USER = currentUser;
+                    window.currentUser = currentUser;
                     cesStoreCurrentUser_(currentUser);
                     updateProfileUI();
                     closeProfileModal();

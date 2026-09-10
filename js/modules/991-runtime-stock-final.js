@@ -527,6 +527,7 @@ window.CES_STOCK_BOOTSTRAP=null; // V35: live Google Sheet is the only source of
     var overdue=rows.filter(function(d){return d.status==='เช่ายืม'&&d.isOverdue;});setText('sdAlertHeaderCount',overdue.length);setText('sdAlertCount',overdue.length);window.CES_STOCK_ALERTS=overdue;
     clearTimeout(window.__cesStockV7ChartTimer);window.__cesStockV7ChartTimer=setTimeout(function(){try{renderCharts(rows);}catch(e){console.warn('[Stock V7 charts]',e);}},60);
   };
+  window.sd_renderAll=window.sd_renderFiltered;
   window.sd_openAlertPopup=function(){var rows=window.CES_STOCK_ALERTS||[];if(!window.Swal)return;var body=rows.length?detailTable(rows):'<div class="sp-muted">ไม่มีสัญญาเกินกำหนด</div>';Swal.fire({title:'Rental Alerts',width:1080,html:body,confirmButtonText:'ปิด'});};
 
   /* Mode selection is immediate; a blocking confirmation caused orphaned

@@ -396,13 +396,27 @@
   }
 
   window.initSystemHealth = init;
+  window.initSystemHealth = init;
+  window.loadSystemHealth = loadSystemHealth;
   window.loadSystemHealth = loadSystemHealth;
   window.runFullApiAudit = runFullAudit;
+  window.runFullApiAudit = runFullAudit;
+  window.runFrontendAssetAudit = runFrontendAssetAudit;
   window.runFrontendAssetAudit = runFrontendAssetAudit;
   window.filterHealthProbes = filterProbes;
+  window.filterHealthProbes = filterProbes;
+  window.renderHealthApiInventory = renderApiInventory;
   window.renderHealthApiInventory = renderApiInventory;
   window.renderFrontendAudit = renderFrontendAudit;
+  window.renderFrontendAudit = renderFrontendAudit;
+  window.exportSystemHealthJson = exportJson;
   window.exportSystemHealthJson = exportJson;
 
   // Backward-compatible names used by cached V14/V16 HTML/controller.
+  window.initSystemHealth = init;
+  window.loadSystemHealth = loadSystemHealth;
+  window.runFullApiAudit = runFullAudit;
+  window.filterHealthProbes = filterProbes;
+  window.renderHealthApiInventory = renderApiInventory;
+  window.exportSystemHealthJson = exportJson;
 })();

@@ -1744,7 +1744,7 @@ if(!window._siApplyFilterPatch){
       var aoa=[res.headers||[]].concat(res.rows||[]),ws=XLSX.utils.aoa_to_sheet(aoa),wb=XLSX.utils.book_new();
       XLSX.utils.book_append_sheet(wb,ws,'Infusion Pump Dashboard');
       XLSX.writeFile(wb,'01-09-2026_Final_Stock_Inventory.xlsx');
-    }).withFailureHandler(function(err){Swal.close();Swal.fire('Export Error',err.message||String(err),'error');}).si_getInventoryExportDataV3031();
+    }).withFailureHandler(function(err){Swal.close();Swal.fire('Export Error',err.message||String(err),'error');}).si_getInventoryExportData();
   };
   var oldInit=window.initStockInventoryModule;
   if(typeof oldInit==='function'&&!window._siInit){

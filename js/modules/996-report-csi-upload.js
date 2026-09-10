@@ -352,6 +352,7 @@
     var input = byId('reportFileInput');
     if (input) input.setAttribute('onchange', 'handleReportUpload(event)');
     window.handleReportUpload = handleReportUpload;
+    window.handleReportUpload = handleReportUpload;
   }
 
   window.CES_REPORT_RECHECK = function () {
