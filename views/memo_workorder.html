@@ -3,7 +3,7 @@
     <div class="ces-mwo-v3030-title"><span><i class="fas fa-file-circle-check"></i></span><div><h1>Memo & Work Order</h1><p>Memo · WorkOrder — synchronized from the configured Google Sheet</p></div></div>
     <div class="ces-mwo-v3030-actions">
       <a id="mwoSourceLink" class="ces-mwo-v3030-icon link" href="https://docs.google.com/spreadsheets/d/1bbbucI7aVkKWsIZe39jSevtvnZCIWyvz8e7aZCmCjBA/edit" target="_blank" rel="noopener" title="Data Memo Form + Work Order Form"><i class="fas fa-link"></i></a>
-      <a id="mwoKeyFormLink" class="ces-mwo-v3030-icon link" href="https://forms.cloud.microsoft/pages/responsepage.aspx?id=vkBcMittBkCyxQeJR8hW0rSvo_9RxKxPlvy4TSI-BLZUMVlZMjhaR1MwU1NPSDVKU0ZVTEdFMDNHVS4u&amp;route=shorturl" target="_blank" rel="noopener" title="KEY MEMO/Workorder"><i class="fas fa-link"></i></a>
+      <a id="mwoKeyFormLink" class="ces-mwo-v3030-icon link" href="https://forms.cloud.microsoft/pages/responsepage.aspx?id=vkBcMittBkCyxQeJR8hW0rSvo_9RxKxPlvy4TSI-BLZUMVlZMjhaR1MwU1NPSDVKU0ZVTEdFMDNHVS4u&amp;route=shorturl" target="_blank" rel="noopener" title="KEY MEMO/Workorder"><i class="fas fa-key"></i></a>
       <a id="mwoRawDataLink" class="ces-mwo-v3030-icon link" href="https://bdmsgroup.sharepoint.com/:x:/r/sites/Dataanalysis908/_layouts/15/Doc.aspx?sourcedoc=%7B6DB9AC4E-AFF2-441A-ACAD-DD1ED7FD3C37%7D&amp;file=Memo%20Form%20%20Work%20Order%20Form.xlsx&amp;action=default&amp;mobileredirect=true&amp;ovuser=325c40be-6d2b-4006-b2c5-078947c856d2%2CSiripak.Ch%40BDMS.CO.TH&amp;clickparams=eyJBcHBOYW1lIjoiVGVhbXMtRGVza3RvcCIsIkFwcFZlcnNpb24iOiI0OS8yNjA4MTMxOTMxNyIsIkhhc0ZlZGVyYXRlZFVzZXIiOmZhbHNlfQ%3D%3D" target="_blank" rel="noopener" title="Raw Data"><i class="fas fa-folder-open"></i></a>
       <input id="mwoUploadFile" type="file" class="hidden" accept=".xlsx,.xls" onchange="handleMemoWorkOrderUpload(this.files&&this.files[0]);this.value=''">
       <button class="ces-mwo-v3030-icon upload" onclick="document.getElementById('mwoUploadFile').click()" title="Upload latest Memo / Work Order workbook"><i class="fas fa-arrow-up-from-bracket"></i></button>
@@ -11,6 +11,12 @@
       <button class="ces-mwo-v3030-icon refresh" onclick="syncMemoWorkOrderSource(this)" title="Sync Memo and WorkOrder from Google Sheets"><i class="fas fa-rotate"></i></button>
     </div>
   </div>
+
+  
+    <div class="ces-mwo-v3030-filter-card">
+      <div class="ces-mwo-v3030-search"><i class="fas fa-magnifying-glass"></i><input id="mwoSearch" placeholder="ค้นหาเลขเอกสาร / ลูกค้า / ผู้เสนอ" oninput="memoWorkOrderApply()"></div>
+
+  <div class="ces-mwo-api-status-row"><span id="mwoMemoApiStatus">MEMO API: Checking…</span><span id="mwoWorkApiStatus">WorkOrder API: Ready</span></div>
 
   <div class="ces-mwo-v3030-tabs" role="tablist" aria-label="Memo Work Order Service CSI tabs">
     <button id="mwoTabMemoV3030" class="active" onclick="switchMemoWorkOrderTab('memo')"><i class="fas fa-file-signature"></i> MEMO</button>
@@ -22,9 +28,6 @@
     <div id="mwoKpi" class="ces-mwo-v3030-kpis"></div>
     <div id="mwoTeamSummary" class="ces-mwo-v3030-team-grid"></div>
     <div class="ces-mwo-v3030-card mwo-team-cost-card"><div class="ces-mwo-v3030-card-head"><div><h3><i class="fas fa-wallet"></i> Monthly Total Cost by Team</h3><p>Summary from MEMO · updates with filters</p></div></div><div id="mwoMonthlyCostCardsV3031" class="mwo-team-cost-cards"></div></div>
-
-    <div class="ces-mwo-v3030-filter-card">
-      <div class="ces-mwo-v3030-search"><i class="fas fa-magnifying-glass"></i><input id="mwoSearch" placeholder="ค้นหาเลขเอกสาร / ลูกค้า / ผู้เสนอ" oninput="memoWorkOrderApply()"></div>
       <select id="mwoTeam" onchange="memoWorkOrderApply()"><option value="ALL">All Teams</option></select>
       <select id="mwoYear" onchange="memoWorkOrderApply()"><option value="ALL">All Years</option></select>
       <select id="mwoMonth" onchange="memoWorkOrderApply()"><option value="ALL">All Months</option></select>
@@ -53,5 +56,6 @@
 
 <style>
 .mwo-team-cost-cards{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:10px}.mwo-team-cost-item{display:flex;align-items:center;gap:9px;padding:12px;border:1px solid #dbe7f3;border-radius:14px;background:#f8fbff;min-width:0}.mwo-team-cost-icon{width:34px;height:34px;border-radius:10px;background:#eaf2ff;color:#2563eb;display:grid;place-items:center;flex:0 0 auto}.mwo-team-cost-main{min-width:0;display:flex;flex-direction:column}.mwo-team-cost-main b{font-size:12px;color:#17365b}.mwo-team-cost-main span{font-size:8px;color:#7b8da4;font-weight:800;margin-top:2px}.mwo-team-cost-values{margin-left:auto;text-align:right;display:flex;flex-direction:column;min-width:0}.mwo-team-cost-values small{font-size:7px;color:#8a9ab0;font-weight:800}.mwo-team-cost-values strong{font-size:14px;color:#004aad}.mwo-team-cost-values em{font-style:normal;font-size:7px;color:#64748b;margin-top:2px}@media(max-width:1100px){.mwo-team-cost-cards{grid-template-columns:repeat(3,minmax(0,1fr))}}@media(max-width:700px){.mwo-team-cost-cards{grid-template-columns:1fr 1fr}.mwo-team-cost-item{padding:9px}}
+<style>.ces-mwo-api-status-row{display:flex;gap:8px;flex-wrap:wrap;margin:0 0 10px}.ces-mwo-api-status-row span{padding:6px 10px;border-radius:999px;background:#ecfdf5;color:#047857;border:1px solid #bbf7d0;font-size:8px;font-weight:900}.ces-mwo-api-status-row span.error{background:#fee2e2;color:#b91c1c;border-color:#fecaca}.ces-mwo-v3030-filter-card{margin-top:0!important}</style>
 </style>
 </section>

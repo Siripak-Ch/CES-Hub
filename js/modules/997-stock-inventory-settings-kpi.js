@@ -92,7 +92,7 @@
   var teamChart=null,statusChart=null;
   function esc_(v){return String(v==null?'':v).replace(/[&<>"']/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});}
   function acc_(){return(typeof SI!=='undefined'&&Array.isArray(SI.acc))?SI.acc:[];}
-  function applySourceLink_(){var a=document.getElementById('siInventorySourceLink'),c=(typeof globalConfig!=='undefined'&&globalConfig)||{};if(a){var u=String(c.LINK_INVENTORY_SOURCE||'').trim();a.href=u||'#';a.classList.toggle('opacity-40',!u);}}
+  function applySourceLink_(){var a=document.getElementById('siInventorySourceLink'),c=(typeof globalConfig!=='undefined'&&globalConfig)||{};if(a){var u=String(c.LINK_INVENTORY_SOURCE||'').trim()||'https://docs.google.com/spreadsheets/d/1X7f6BatQ-y5ZW6VYTv2oT34rbsCLeNgac0APt7njFrk/edit#gid=772927789';a.href=u;a.classList.toggle('opacity-40',!u);}}
   function qty_(x){return Number(x.stockQty||x.stock_qty||x.qty||0)||0;}
   function min_(x){return Number(x.minStockQty||x.min_stock_qty||x.minStock||x.min_stock||0)||0;}
   function cost_(x){return Number(x.cost||x.unitCost||x.unit_cost||x.totalCost||x.total_cost||0)||0;}

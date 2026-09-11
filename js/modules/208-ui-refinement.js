@@ -1,22 +1,4 @@
-// CES Hub V22.9 — final UI refinement: reference spacing + no actions on Home/Management Overview.
-(function(w,d){'use strict';
-  var VERSION='V22.9';
-  function cleanNoActionViews(){
-    ['portal','management_overview'].forEach(function(tab){
-      var view=d.getElementById('view-'+tab);if(!view)return;
-      view.querySelectorAll('.ces-global-header-actions-v225,.ces-global-header-actions-v226').forEach(function(n){n.remove();});
-      view.setAttribute('data-ces-no-auto-actions','1');
-    });
-    var portalRefresh=d.querySelector('#view-portal .ces-portal-refresh-v186');
-    if(portalRefresh) portalRefresh.classList.add('ces-v229-hidden-home-resync');
-  }
-  function normalizeOuterSpacing(){
-    d.querySelectorAll('#app-main-content > [id^="view-"]').forEach(function(view){
-      view.classList.add('ces-v229-view-spacing');
-    });
-    ['view-ot','view-memo_workorder','view-car_booking','view-van_booking'].forEach(function(id){var v=d.getElementById(id);if(v)v.classList.add('ces-v229-job-reference-spacing');});
-  }
-  function run(){cleanNoActionViews();normalizeOuterSpacing();d.documentElement.setAttribute('data-ces-ui-refinement',VERSION);}
-  function init(){run();var root=d.getElementById('app-main-content');if(root&&w.MutationObserver)new MutationObserver(function(){setTimeout(run,20);}).observe(root,{childList:true,subtree:true});w.addEventListener('ces:tab-changed',run);w.CES_UI={version:VERSION,normalize:run};}
-  if(d.readyState==='loading')d.addEventListener('DOMContentLoaded',init,{once:true});else init();
-})(window,document);
+
+(function(){var st=document.createElement('style');st.id='ces-global-view-hidden-final';st.textContent='section[id^="view-"].hidden{display:none!important}section[id^="view-"]:not(.hidden){display:block}';document.head.appendChild(st);})();
+
+(function(){if(document.getElementById('ces-cross-module-mobile-refine'))return;var s=document.createElement('style');s.id='ces-cross-module-mobile-refine';s.textContent='@media(max-width:767px){#view-inventory,#view-check_stock,#view-stock_dashboard{padding:.35rem!important}#view-inventory .stockpro-header-card,#view-stock_dashboard .stockpro-header-card{gap:10px!important;align-items:flex-start!important}#view-inventory .stockpro-actions,#view-stock_dashboard .stockpro-actions{gap:6px!important;flex-wrap:wrap!important}#view-check_stock .stockpro-actions{gap:6px!important;flex-wrap:wrap!important}#view-inventory h1,#view-check_stock h1,#view-stock_dashboard h1{font-size:17px!important}#view-inventory .sp-tab,#view-stock_dashboard .sp-tab{white-space:nowrap;min-height:38px}#view-inventory .sp-btn,#view-check_stock .sp-btn,#view-stock_dashboard .sp-btn{min-height:36px}#view-inventory input,#view-inventory select,#view-check_stock input,#view-check_stock select,#view-stock_dashboard input,#view-stock_dashboard select{min-height:36px!important}#view-stock_dashboard .sp-action-group{display:flex;gap:5px;flex-wrap:wrap}#view-stock_dashboard .sp-icon-btn{min-width:34px;min-height:34px}}';document.head.appendChild(s);})();

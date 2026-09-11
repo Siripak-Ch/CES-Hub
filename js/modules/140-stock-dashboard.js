@@ -126,7 +126,7 @@ function spEnsureStyle(){
   const style=document.createElement('style');
   style.id='stockpro-style-v8';
   style.textContent=`
-    .stockpro-page{font-family:'Prompt',Inter,Arial,sans-serif!important}
+    .stockpro-page .ces-action-excel{background:#16a34a!important;color:#fff!important;border-color:#16a34a!important}.stockpro-page{font-family:'Prompt',Inter,Arial,sans-serif!important}
     .sp-mini-badge{background:#fff;color:#b45309;border-radius:999px;padding:2px 7px;margin-left:4px;font-size:10px;font-weight:1000}
     .sp-model-card.byond-sunfusion{border-color:#bfdbfe;background:linear-gradient(180deg,#ffffff,#eff6ff)}
     .sp-model-card.bbraun-infusomat{border-color:#bbf7d0;background:linear-gradient(180deg,#ffffff,#f0fdf4)}
@@ -224,19 +224,24 @@ function sdResetContractFilter(){
   if(f)f.value='all'; if(s)s.value='risk'; sd_renderContractSummary();
 }
 function sdContractRows(){
-  const active=sdFilteredDevices().filter(d=>['In-Use','Overdue'].includes(d.status)||Number(d.overdueDays||0)>0);
   const map={};
-  active.forEach(d=>{const loc=d.location||'Unknown';if(!map[loc])map[loc]={location:loc,total:0,inUse:0,overdue:0,completed:0,ids:[],modelMap:{},borrowDate:'',expectedReturn:'',maxOverdue:0,state:'active'};const x=map[loc];x.total++;if(d.status==='Overdue'||Number(d.overdueDays||0)>0){x.overdue++;x.state='overdue';}else x.inUse++;x.ids.push(d.idCode);const model=d.model||d.itemName||'Unknown';x.modelMap[model]=(x.modelMap[model]||0)+1;if(!x.borrowDate&&d.borrowDate)x.borrowDate=d.borrowDate;if(!x.expectedReturn&&d.expectedReturn)x.expectedReturn=d.expectedReturn;x.maxOverdue=Math.max(x.maxOverdue,Number(d.overdueDays||0));});
-  (SD_DASH.raw&&SD_DASH.raw.rentals||[]).forEach(r=>{const status=String(r.rentalStatus||r.rental_status||'').toUpperCase();const returned=!!(r.returnDate||r.return_date)||status==='RETURNED'||status==='COMPLETED'||status==='DONE';if(!returned)return;const loc=r.location||'Unknown';if(!map[loc])map[loc]={location:loc,total:0,inUse:0,overdue:0,completed:0,ids:[],modelMap:{},borrowDate:'',expectedReturn:'',maxOverdue:0,state:'completed'};const x=map[loc];x.completed++;x.total++;x.state=x.state==='overdue'?'overdue':(x.inUse?'active':'completed');const model=r.model||'Returned';x.modelMap[model]=(x.modelMap[model]||0)+1;if(!x.borrowDate&&r.borrowDate)x.borrowDate=r.borrowDate;if(!x.expectedReturn&&(r.returnDate||r.expectedReturnDate))x.expectedReturn=r.returnDate||r.expectedReturnDate;});
-  let rows=Object.values(map).map(x=>{x.modelList=Object.keys(x.modelMap).slice(0,6).map(m=>`${m} ×${x.modelMap[m]}`).join(', ');return x;});
-  const filter=spVal('sdContractFilter','all');
-  if(filter==='overdue')rows=rows.filter(x=>x.overdue>0||x.state==='overdue');
-  if(filter==='active')rows=rows.filter(x=>x.inUse>0&&x.overdue===0);
-  if(filter==='completed')rows=rows.filter(x=>x.completed>0&&x.inUse===0&&x.overdue===0);
-  const sort=spVal('sdContractSort','risk');
-  rows.sort((a,b)=>{if(sort==='location')return String(a.location).localeCompare(String(b.location));if(sort==='due_asc')return new Date(a.expectedReturn||'2999-12-31')-new Date(b.expectedReturn||'2999-12-31');if(sort==='due_desc')return new Date(b.expectedReturn||'1900-01-01')-new Date(a.expectedReturn||'1900-01-01');return (b.overdue-a.overdue)||(b.inUse-a.inUse)||(b.total-a.total);});
-  return rows;
+  const add=function(r,mode){
+    r=r||{};const loc=String(r.location||'Unknown').trim()||'Unknown',key=[loc,String(r.borrower||''),String(r.expectedReturnDate||r.expectedReturn||r.returnDate||'')].join('||');
+    if(!map[key])map[key]={location:loc,total:0,inUse:0,overdue:0,completed:0,ids:[],modelMap:{},borrowDate:'',expectedReturn:'',maxOverdue:0,state:'active'};
+    const x=map[key];x.total++;const returned=mode==='returned'||!!(r.returnDate||r.return_date)||/RETURNED|COMPLETED|DONE|CLOSED/i.test(String(r.rentalStatus||r.rental_status||''));
+    if(returned){x.completed++;if(!x.inUse&&x.state!=='overdue')x.state='completed';}
+    else if(Number(r.overdueDays||0)>0||/OVERDUE|เกินกำหนด/i.test(String(r.rentalStatus||r.rental_status||''))){x.overdue++;x.state='overdue';}
+    else{x.inUse++;if(x.state!=='overdue')x.state='active';}
+    if(r.idCode)x.ids.push(r.idCode);const model=r.model||r.itemName||r.contractDetail||'Infusion Pump';x.modelMap[model]=(x.modelMap[model]||0)+1;
+    if(!x.borrowDate&&r.borrowDate)x.borrowDate=r.borrowDate;var due=r.expectedReturn||r.expectedReturnDate||r.dueDate||r.returnDate;if(!x.expectedReturn&&due)x.expectedReturn=due;x.maxOverdue=Math.max(x.maxOverdue,Number(r.overdueDays||0));
+  };
+  (SD_DASH.raw&&SD_DASH.raw.rentals||[]).forEach(function(r){add(r,(r.returnDate||r.return_date)?'returned':'active');});
+  if(!(SD_DASH.raw&&SD_DASH.raw.rentals&&SD_DASH.raw.rentals.length)){sdFilteredDevices().filter(function(d){return ['In-Use','Overdue'].includes(d.status)||Number(d.overdueDays||0)>0;}).forEach(function(d){add(d,'active');});}
+  let rows=Object.values(map).map(function(x){x.modelList=Object.keys(x.modelMap).slice(0,6).map(function(m){return m+' ×'+x.modelMap[m];}).join(', ');return x;});
+  const filter=spVal('sdContractFilter','all');if(filter==='overdue')rows=rows.filter(function(x){return x.overdue>0||x.state==='overdue';});if(filter==='active')rows=rows.filter(function(x){return x.inUse>0&&x.overdue===0;});if(filter==='completed')rows=rows.filter(function(x){return x.completed>0&&x.inUse===0&&x.overdue===0;});
+  const sort=spVal('sdContractSort','risk');rows.sort(function(a,b){if(sort==='location')return String(a.location).localeCompare(String(b.location));if(sort==='due_asc')return new Date(a.expectedReturn||'2999-12-31')-new Date(b.expectedReturn||'2999-12-31');if(sort==='due_desc')return new Date(b.expectedReturn||'1900-01-01')-new Date(a.expectedReturn||'1900-01-01');return (b.overdue-a.overdue)||(b.inUse-a.inUse)||(b.total-a.total);});return rows;
 }
+
 function sd_showLocationDetail_(location){
   const rows=sdFilteredDevices().filter(d=>(d.location||'Unknown')===location);
   const html=`<div class="sp-detail-list-v11">${rows.map(d=>`<div class="sp-detail-item-v11"><div class="sp-detail-icon-v11"><i class="fas fa-microchip"></i></div><div><div class="sp-detail-title">${spEsc(d.idCode||'-')} ${spBadge(d.status)}</div><div class="sp-detail-sub">${spEsc(d.brand||'-')} ${spEsc(d.model||d.itemName||'-')} • SN:${spEsc(d.sn||'-')}</div><div class="sp-detail-sub">Borrower: ${spEsc(d.borrower||'-')} • Due: ${spFmtDate(d.expectedReturn||d.expectedReturnDate)}</div></div><div class="sp-action-group"><button class="sp-icon-btn orange" onclick='sd_bulkExtend([${JSON.stringify(d.idCode)}],"${spEsc(d.expectedReturn||'')}","")'><i class="fas fa-calendar-plus"></i></button><button class="sp-icon-btn green" onclick='sd_bulkReturn([${JSON.stringify(d.idCode)}])'><i class="fas fa-undo"></i></button></div></div>`).join('')}</div>`;
