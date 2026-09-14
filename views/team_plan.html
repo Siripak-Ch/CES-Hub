@@ -1,0 +1,22 @@
+<section id="view-team_plan" class="hidden animate-fade-in space-y-5 pb-20">
+  <div class="bg-white rounded-3xl border border-slate-100 shadow-sm p-5 flex flex-col md:flex-row md:items-center justify-between gap-4">
+    <div class="flex items-center gap-4"><div class="w-12 h-12 rounded-2xl bg-violet-50 text-violet-600 grid place-items-center"><i class="fas fa-calendar-days text-lg"></i></div><div><h2 class="text-xl font-black text-slate-800">Team Plan</h2><p class="text-xs font-bold text-slate-400">Training Plan 2026 · editable by authorized users</p></div></div>
+    <div class="ces-page-header-actions-v225 flex items-center gap-2"><button class="ces-standard-icon-btn ces-action-neutral" onclick="openTrainingPlanSource()" title="Open source"><i class="fas fa-link"></i></button></div>
+  </div>
+  <div class="bg-white rounded-3xl border border-slate-100 shadow-sm p-5">
+    <div class="flex flex-col xl:flex-row xl:items-center justify-between gap-3 mb-4">
+      <div><h3 class="font-black text-slate-800">Training Plan 2026</h3><p id="training-plan-meta" class="text-xs text-slate-400">Editable table from CES Staff List & Training Plan 2026</p></div>
+      <div class="flex flex-col xl:items-end gap-2">
+        <div class="ces-training-plan-tabs" role="tablist" aria-label="Training plan team">
+          <button type="button" class="ces-training-plan-tab active" data-training-plan-sheet="STEP FORWARD 2026" onclick="setTrainingPlanSheet('STEP FORWARD 2026')"><i class="fas fa-people-group"></i> STEP FORWARD</button>
+          <button type="button" class="ces-training-plan-tab" data-training-plan-sheet="2026 MED" onclick="setTrainingPlanSheet('2026 MED')">MED</button>
+          <button type="button" class="ces-training-plan-tab" data-training-plan-sheet="2026 LAB" onclick="setTrainingPlanSheet('2026 LAB')">LAB</button>
+          <button type="button" class="ces-training-plan-tab" data-training-plan-sheet="2026 EHS" onclick="setTrainingPlanSheet('2026 EHS')">EHS</button>
+        </div>
+        <div class="flex flex-wrap items-center gap-2 justify-end"><button id="training-plan-save" class="ces-training-btn primary" disabled onclick="saveTrainingPlan()"><i class="fas fa-floppy-disk"></i> Save changes</button></div>
+      </div>
+    </div>
+    <div class="rounded-2xl border border-slate-200 overflow-hidden"><div id="training-plan-grid" class="min-h-[360px] bg-slate-50"></div></div>
+    <p class="mt-3 text-[10px] text-slate-400">Header/formula cells are read-only. Changes are saved directly to the source Google Sheet.</p>
+  </div>
+</section>
