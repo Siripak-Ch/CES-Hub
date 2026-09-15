@@ -520,7 +520,7 @@
 
   const VALID_TABS = [
     'portal', 'management_overview', 'yearly', 'revenue', 'ot', 'service', 'report', 'memo_workorder', 'calendar',
-    'checkin', 'car_booking', 'van_booking', 'weekly', 'report_manage', 'kpi', 'stock_dashboard',
+    'checkin', 'car_booking', 'van_booking', 'weekly', 'report_manage', 'te_generate', 'kpi', 'stock_dashboard',
     'inventory', 'check_stock', 'team_information', 'team_plan', 'monthly_report', 'users', 'ces_evaluation', 'ces_ai_knowledge', 'setting', 'health'
   ];
 
@@ -539,6 +539,7 @@
     van_booking: 'Van Booking',
     weekly: 'Weekly Report',
     report_manage: 'OT Generate',
+    te_generate: 'TE Generate',
     kpi: 'KPI Tracking',
     stock_dashboard: 'Infusion Pump Dashboard',
     inventory: 'Inventory',
@@ -568,6 +569,7 @@
     van_booking: 'fa-van-shuttle',
     weekly: 'fa-calendar-check',
     report_manage: 'fa-file-invoice-dollar',
+    te_generate: 'fa-route',
     kpi: 'fa-chart-line',
     stock_dashboard: 'fa-chart-pie',
     inventory: 'fa-boxes-stacked',

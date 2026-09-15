@@ -471,7 +471,7 @@
       if (!id) return;
       if (seen[id]) duplicateIds.push(id); else seen[id] = true;
     });
-    var expectedTabs = ['portal','management_overview','yearly','revenue','ot','service','report','memo_workorder','calendar','checkin','car_booking','van_booking','weekly','report_manage','kpi','stock_dashboard','inventory','check_stock','team_information','team_plan','monthly_report','users','ces_evaluation','ces_ai_knowledge','setting','health'];
+    var expectedTabs = ['portal','management_overview','yearly','revenue','ot','service','report','memo_workorder','calendar','checkin','car_booking','van_booking','weekly','report_manage','te_generate','kpi','stock_dashboard','inventory','check_stock','team_information','team_plan','monthly_report','users','ces_evaluation','ces_ai_knowledge','setting','health'];
     var missingViews = expectedTabs.filter(function (tab) { return !document.getElementById('view-' + tab); });
     var failedViews = asArray(document.querySelectorAll('[data-ces-load-failed="1"]')).map(function (node) { return node.id || 'unknown'; });
     var requiredGlobals = ['switchTab','loadAllData'];

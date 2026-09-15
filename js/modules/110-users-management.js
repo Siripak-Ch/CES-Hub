@@ -29,6 +29,7 @@ let _userCache = null;
         { id:'weekly',name:'Weekly Report',group:'Operation',icon:'fa-calendar-check' },
         { id:'kpi',name:'KPI Tracking',group:'Operation',icon:'fa-chart-line' },
         { id:'report_manage',name:'OT Generate',group:'Operation',icon:'fa-file-invoice-dollar' },
+        { id:'te_generate',name:'TE Generate',group:'Operation',icon:'fa-route' },
         { id:'master_cal_pm_plan',name:'Master CAL/PM Plan',group:'Information',icon:'fa-screwdriver-wrench' },
         { id:'audit_log',name:'Audit Log',group:'Information',icon:'fa-clipboard-list' },
         { id:'stock_dashboard',name:'Infusion Pump Dashboard',group:'Inventory',icon:'fa-chart-pie' },
@@ -303,19 +304,19 @@ let _userCache = null;
             'MANAGER': [
                 'portal', 'management_overview', 'yearly', 'revenue', 'ot',
                 'service', 'report', 'memo_workorder',
-                'calendar', 'checkin', 'car_booking', 'van_booking', 'weekly', 'kpi', 'report_manage',
+                'calendar', 'checkin', 'car_booking', 'van_booking', 'weekly', 'kpi', 'report_manage', 'te_generate',
                 'stock_dashboard', 'inventory', 'check_stock',
                 'team_information', 'team_plan', 'monthly_report', 'ces_evaluation'
             ],
             'SUPERVISOR': [
                 'portal', 'management_overview', 'yearly', 'revenue', 'ot',
                 'service', 'report',
-                'calendar', 'checkin', 'car_booking', 'van_booking', 'weekly', 'kpi', 'report_manage',
+                'calendar', 'checkin', 'car_booking', 'van_booking', 'weekly', 'kpi', 'report_manage', 'te_generate',
                 'stock_dashboard', 'inventory', 'check_stock', 'team_information'
             ],
             'STAFF': [
                 'portal', 'management_overview',
-                'checkin', 'car_booking', 'van_booking', 'weekly', 'report_manage', 'kpi',
+                'checkin', 'car_booking', 'van_booking', 'weekly', 'report_manage', 'te_generate', 'kpi',
                 'stock_dashboard', 'inventory', 'check_stock', 'team_information'
             ],
             'ADMIN': getPermissionModules().map(m => m.id)

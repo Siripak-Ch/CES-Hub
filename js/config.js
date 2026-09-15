@@ -6,7 +6,7 @@
 
 window.CES_CONFIG = {
   // IMPORTANT: After deploying Apps Script backend, paste the latest /exec URL here.
-  GAS_API_URL: 'https://script.google.com/macros/s/AKfycbwBBlNKw-P7s0kpJkKhbFS_9EFN5VK0TK44PvgN00k1hyKqxd8qAoihGKS4QxSVpZX8/exec',
+  GAS_API_URL: 'https://script.google.com/macros/s/AKfycbyejS5B4dragEabqgIboRl_u4qL2NabXOHTJ_W0jZW2XpTSZJ73LL53d7fjyLB2L5oR/exec',
   // Optional extra /exec endpoints. The polyfill also accepts ?gasApiUrl=<url>
   // and persists that override, so a deployment URL can be corrected without
   // allowing every module to fail independently.
@@ -63,7 +63,7 @@ window.CES_CONFIG = {
   SYNC_POLICY: {
     HOME_FIRST: true,
     LIVE_TTL_MS: { calendar:60000, car_booking:30000, van_booking:30000, stock_dashboard:60000, inventory:60000, check_stock:30000 },
-    CACHE_SESSION_TABS: ['portal','management_overview','yearly','revenue','ot','service','report','memo_workorder','checkin','weekly','report_manage','kpi','team_information','team_plan','monthly_report','users','ces_evaluation','ces_ai_knowledge','setting','health']
+    CACHE_SESSION_TABS: ['portal','management_overview','yearly','revenue','ot','service','report','memo_workorder','checkin','weekly','report_manage','te_generate','kpi','team_information','team_plan','monthly_report','users','ces_evaluation','ces_ai_knowledge','setting','health']
   },
 
   PERFORMANCE: {

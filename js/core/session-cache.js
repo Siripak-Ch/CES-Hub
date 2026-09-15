@@ -120,6 +120,7 @@
     CHECKIN: 'checkin',
     WEEKLY: 'weekly_report',
     REPORT_MANAGE: 'report_manage',
+    TE_GENERATE: 'te_generate',
     KPI: 'kpi_tracking',
     STOCK_DASH: 'stock_dashboard',
     INVENTORY: 'inventory',

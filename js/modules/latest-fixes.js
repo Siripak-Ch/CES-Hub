@@ -29,6 +29,27 @@
     XLSX.writeFile(wb,fileName+'_'+new Date().toISOString().slice(0,10)+'.xlsx');return{success:true,count:rows.length};
   }
   function appendExactSheet(wb,sheet){var aoa=[sheet.headers||[]].concat(sheet.rows||[]),ws=XLSX.utils.aoa_to_sheet(aoa);XLSX.utils.book_append_sheet(wb,ws,String(sheet.sheetName||'Data').slice(0,31));}
+  function loadedRowsForExport(key){
+    var p=stockPayload()||{};
+    if(key==='equipment')return p.devices||p.inventory||[];
+    if(key==='contract')return p.rentals||[];
+    if(key==='accessories_data'||key==='accessories_dashboard')return p.accessories||[];
+    if(key==='summary')return p.devices||p.inventory||[];
+    return [];
+  }
+  function appendLoadedSheet(wb,spec){
+    var cached=exportSheetCache[spec.key];
+    if(cached&&Array.isArray(cached.rows)&&cached.rows.length){appendExactSheet(wb,{sheetName:cached.sheetName||spec.name,headers:cached.headers||[],rows:cached.rows});return cached.rows.length;}
+    var rows=loadedRowsForExport(spec.key);if(!rows.length)throw new Error('No loaded '+String(spec.name||spec.key)+' data is available. Press Refresh Data once and retry.');
+    var headers=[];rows.forEach(function(row){Object.keys(row||{}).forEach(function(k){if(headers.indexOf(k)<0)headers.push(k);});});
+    var aoa=[headers].concat(rows.map(function(row){return headers.map(function(k){var v=row&&row[k];return v&&typeof v==='object'&&!(v instanceof Date)?JSON.stringify(v):v;});}));
+    XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet(aoa),String(spec.name||'Data').slice(0,31));return rows.length;
+  }
+  function exportLoadedFallback(specs,fileName,cause){
+    var wb=XLSX.utils.book_new(),count=0;specs.forEach(function(spec){count+=appendLoadedSheet(wb,spec);});
+    XLSX.writeFile(wb,fileName+'_'+new Date().toISOString().slice(0,10)+'.xlsx');if(w.Swal)Swal.fire({icon:'warning',title:'Export completed from loaded data',text:'Apps Script was temporarily unavailable. Exported '+count.toLocaleString()+' loaded row(s) without waiting for the API.',timer:4200,showConfirmButton:false});
+    return{success:true,fallback:true,rows:count,apiMessage:String(cause&&cause.message||cause||'')};
+  }
   function exportExactApi(fn,args,fileName){
     if(!w.XLSX)return Promise.reject(new Error('XLSX library is unavailable.'));
     if(w.Swal)Swal.fire({title:'Preparing XLSX…',allowOutsideClick:false,showConfirmButton:false,didOpen:function(){Swal.showLoading();}});
@@ -57,7 +78,7 @@
         appendExactSheet(wb,{sheetName:sheetName,headers:headers,rows:rows});
       }
       XLSX.writeFile(wb,fileName+'_'+new Date().toISOString().slice(0,10)+'.xlsx');if(w.Swal)Swal.close();return{success:true,sheets:specs.length};
-    }catch(e){if(w.Swal)Swal.fire('Export Error',e.message||String(e),'error');throw e;}
+    }catch(e){try{return exportLoadedFallback(specs,fileName,e);}catch(fallbackError){if(w.Swal)Swal.fire('Export Error',(fallbackError&&fallbackError.message)||e.message||String(e),'error');return{success:false,message:(fallbackError&&fallbackError.message)||e.message||String(e)};}}
   }
   function equipmentRows(){var p=stockPayload()||{},rows=p.devices||p.inventory||[];return rows.map(function(x){return{
     id_code:x.idCode||x.id_code||'',serial_number:x.sn||x.serialNumber||x.serial_number||'','Equipment Status':x.status||x.equipmentStatus||'',brand:x.brand||'',model:x.model||'',location:x.location||'',rental_status:x.rentalStatus||x.rental_status||'',borrower:x.borrower||'',borrow_date:x.borrowDate||x.borrow_date||'',expected_return_date:x.expectedReturn||x.expectedReturnDate||x.expected_return_date||'',overdue_days:x.overdueDays||x.overdue_days||0,action_required:x.actionRequired||x.action_required||'',ac_plug_sn:x.acPlugSn||x.ac_plug_sn||'',clamp_sn:x.clampSn||x.clamp_sn||''};});}
