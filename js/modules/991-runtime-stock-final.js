@@ -68,8 +68,9 @@ window.CES_STOCK_BOOTSTRAP=null; // V35: live Google Sheet is the only source of
   function normalizeDevice(d){d=d||{};var status=statusName(d.status||d.displayStatus||d.display_status||d.baseStatus||d.base_status);return Object.assign({},d,{idCode:String(d.idCode||d.id_code||''),id_code:String(d.idCode||d.id_code||''),sn:String(d.sn||d.serialNumber||d.serial_number||''),serialNumber:String(d.sn||d.serialNumber||d.serial_number||''),brand:String(d.brand||''),model:modelName(d.model||d.displayModel||d.display_model||d.itemName||''),location:String(d.location||''),status:status,displayStatus:status,baseStatus:status,actionRequired:String(d.actionRequired||d.action_required||status),borrower:String(d.borrower||''),borrowerEmail:String(d.borrowerEmail||d.borrower_email||''),acPlugSn:String(d.acPlugSn||d.ac_plug_sn||''),clampSn:String(d.clampSn||d.clamp_sn||''),expectedReturn:String(d.expectedReturn||d.expectedReturnDate||d.expected_return_date||d.dueDate||''),overdueDays:num(d.overdueDays||d.overdue_days),isOverdue:!!d.isOverdue||num(d.overdueDays||d.overdue_days)>0});}
   function normalizePayload(p){p=p||{};var rows=(p.devices||p.inventory||[]).map(normalizeDevice);var accessories=p.accessories||[];var counts=countStatus(rows);return Object.assign({},p,{success:p.success!==false,devices:rows,inventory:rows,accessories:accessories,statuses:STATUS.slice(),filters:{brands:['B.Braun','BYOND'],models:['Infusomat Space','Spaceplus','Sunfusion 2'],statuses:STATUS.slice(),locations:unique(rows.map(function(d){return d.location;}))},kpi:{total:rows.length,ready:counts['พร้อมส่ง'],recheck:counts['รอสอบเทียบ'],rental:counts['เช่ายืม'],broken:counts['ใช้งานไม่ได้'],missing:counts['ไม่พบในรายการ'],stock:counts['พร้อมส่ง'],inUse:counts['เช่ายืม'],risk:counts['ใช้งานไม่ได้']+counts['ไม่พบในรายการ'],accessories:accessories.length,accLow:accessories.filter(function(a){return num(a.stockQty||a.qty)<=num(a.minStockQty||a.minStock);}).length}});}
 
-  var CLIENT_CACHE_KEY='CES_STOCK_SNAPSHOT_STABLE';
-  var LEGACY_CLIENT_CACHE_KEY='CES_STOCK_SNAPSHOT_V35';
+  /* V37 uses a new cache key because V36 snapshots omitted Cost/ea. */
+  var CLIENT_CACHE_KEY='CES_STOCK_SNAPSHOT_V37_COST';
+  var LEGACY_CLIENT_CACHE_KEY='CES_STOCK_SNAPSHOT_STABLE';
   var STOCK_REVISION_CHECK_INTERVAL=30000;
   var sharedRefreshPromise=null;
   var revisionCheckPromise=null;
@@ -84,7 +85,10 @@ window.CES_STOCK_BOOTSTRAP=null; // V35: live Google Sheet is the only source of
         var box=JSON.parse(raw);
         if(box&&box.data&&Array.isArray(box.data.devices)){
           clientCacheMeta={savedAt:Number(box.savedAt||0),source:legacy?'legacy cache':(box.source||'localStorage'),revision:String((box.data&&box.data.revision)||box.revision||''),legacy:legacy};
-          return normalizePayload(box.data);
+          var normalized=normalizePayload(box.data);
+          /* Never reuse a legacy snapshot whose Accessories rows lost Cost/ea. */
+          if(legacy&&normalized.accessories&&normalized.accessories.length&&!normalized.accessories.some(function(a){return Number(a.cost||a.unitCost||a.unit_cost||0)>0;}))return null;
+          return normalized;
         }
       }
     }catch(e){console.warn('[Stock cache read]',e);}
@@ -102,7 +106,8 @@ window.CES_STOCK_BOOTSTRAP=null; // V35: live Google Sheet is the only source of
     options=options||{};
     var moduleName=options.module||activeStockModule_();
     var priority=options.priority||(force?'active':'background');
-    sharedRefreshPromise=stockApiCall_('cesStock_getSnapshot',[!!force],{transport:'jsonp',timeoutMs:Number(options.timeoutMs||90000),dedupe:!force,priority:priority,background:priority==='background',silentLoading:priority==='background',userAction:priority==='active',module:moduleName}).then(function(res){
+    var stockCall=(moduleName==='inventory')?'si_getStockInventoryData':'cesStock_getSnapshot';
+    sharedRefreshPromise=stockApiCall_(stockCall,[!!force],{transport:'jsonp',timeoutMs:Number(options.timeoutMs||90000),dedupe:!force,priority:priority,background:priority==='background',silentLoading:priority==='background',userAction:priority==='active',module:moduleName}).then(function(res){
       if(!res||res.success===false)throw new Error((res&&res.message)||'Cannot load Stock snapshot');
       var p=normalizePayload(res);
       if(!hasUsefulStockSeed_(p)){

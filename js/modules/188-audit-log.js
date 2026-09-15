@@ -1,7 +1,7 @@
 (function(w,d){'use strict';
 var state={team:'EHS',headers:[],rows:[],weekly:[],weeklyHeaders:[],sourceHeaders:[],sourceRows:[],filtered:[],stats:{},loaded:{},charts:{},documentPlan:{},realtimeTimer:null};
 var DEFAULT_LINKS={
-  LAB:{primary:'https://bdmsgroup-my.sharepoint.com/:x:/r/personal/siripak_ch_bdms_co_th/Documents/Documents/4.%20Work%20YTD/Master-%E0%B9%81%E0%B8%9C%E0%B8%99%E0%B8%81%E0%B8%B2%E0%B8%A3%E0%B8%97%E0%B8%9A%E0%B8%97%E0%B8%A7%E0%B8%99%E0%B9%80%E0%B8%AD%E0%B8%81%E0%B8%AA%E0%B8%B2%E0%B8%A3%E0%B8%84%E0%B8%A7%E0%B8%9A%E0%B8%84%E0%B8%B8%E0%B8%A1.xlsx?d=w5c3d87a545704ce6a548efdeb2e3b192&csf=1&web=1&e=jHaq2S',secondary:''},
+  LAB:{primary:'https://bdmsgroup-my.sharepoint.com/:x:/r/personal/thippayawaree_kh_bdms_co_th/Documents/00%20Work/0.2%20Expand_New%20Scope%202026/Summary%20CAR_OBS%20-%20External%20Audit%20(ISO17025)%2024-25.08.2026.xlsx?d=wae2f2aa3db6148cebcc5de9d1ff59c4a&csf=1&web=1&e=NuPEAL',secondary:'https://docs.google.com/spreadsheets/d/1js3cGqlP9oGCYHcTrj-Wcrf5MMlJqkHj4Kcr1Mozug0/edit'},
   EHS:{primary:'https://docs.google.com/spreadsheets/d/1O7sWruE9VgGIjOWhvHB11RFfaAIosjpzOgr-Rxc2F8k/edit?gid=936287898#gid=936287898',secondary:'https://bdmsgroup-my.sharepoint.com/personal/siripak_ch_bdms_co_th/_layouts/15/onedrive.aspx?listurl=https%3A%2F%2Fbdmsgroup-my%2Esharepoint%2Ecom%2Fpersonal%2Fnathithon_ko_bdms_co_th%2FDocuments&id=%2Fpersonal%2Fnathithon_ko_bdms_co_th%2FDocuments%2FEHS%202026%2FInternal%20Audit&ct=1788956860001&or=Teams-HL&shareLink=1&ga=1&LOF=1'},
   MED:{primary:'https://bdmsgroup-my.sharepoint.com/:x:/r/personal/siripak_ch_bdms_co_th/Documents/Documents/4.%20Work%20YTD/Master-%E0%B9%81%E0%B8%9C%E0%B8%99%E0%B8%81%E0%B8%B2%E0%B8%A3%E0%B8%97%E0%B8%9A%E0%B8%97%E0%B8%A7%E0%B8%99%E0%B9%80%E0%B8%AD%E0%B8%81%E0%B8%AA%E0%B8%B2%E0%B8%A3%E0%B8%84%E0%B8%A7%E0%B8%9A%E0%B8%84%E0%B8%B8%E0%B8%A1.xlsx?d=w5c3d87a545704ce6a548efdeb2e3b192&csf=1&web=1&e=jHaq2S',secondary:''}
 };
@@ -90,11 +90,15 @@ var auditCurrentStyle=d.createElement('style');auditCurrentStyle.textContent='#v
     var file=input&&input.files&&input.files[0];if(!file)return;
     if(typeof XLSX==='undefined'){Swal.fire('Import Error','XLSX library is unavailable.','error');return;}
     var active=document.querySelector('#view-audit_log .audit-team-tab.primary');var team=String((active&&active.dataset&&active.dataset.team)||window.__CES_AUDIT_IMPORT_TEAM||'EHS').toUpperCase();
-    Swal.fire({title:'Import Audit Log',text:'Updating '+team+' working data…',allowOutsideClick:false,showConfirmButton:false,didOpen:function(){Swal.showLoading();}});
+    Swal.fire({title:'Import Audit Log',text:'Updating '+team+' Google Sheets working mirror only; the SharePoint source file is not changed.',allowOutsideClick:false,showConfirmButton:false,didOpen:function(){Swal.showLoading();}});
     file.arrayBuffer().then(function(buf){
       var wb=XLSX.read(buf,{type:'array',cellDates:false}),selected=null,rows=null,headerAt=-1;
-      var importSheets=team==='LAB'?wb.SheetNames.filter(function(n){return String(n).trim()==='รายละเอียดและแผนแก้ไข';}):wb.SheetNames.slice();
-      if(team==='LAB'&&!importSheets.length)throw new Error('LAB Import ต้องมีชีตชื่อ รายละเอียดและแผนแก้ไข');
+      var normalizeSheetName=function(n){return String(n||'').normalize('NFKC').replace(/[\s_\-]+/g,'').toLowerCase();};
+      var expected=normalizeSheetName('รายละเอียดและแผนแก้ไข');
+      var importSheets=team==='LAB'?wb.SheetNames.filter(function(n){var key=normalizeSheetName(n);return key===expected||key.indexOf('รายละเอียด')>=0&&key.indexOf('แผนแก้ไข')>=0;}):wb.SheetNames.slice();
+      /* Some Excel exports rename the tab. Fall back to content detection; the
+         backend still validates Finding/Responsible/Status before any write. */
+      if(team==='LAB'&&!importSheets.length)importSheets=wb.SheetNames.slice();
       importSheets.some(function(sheetName){
         var candidate=XLSX.utils.sheet_to_json(wb.Sheets[sheetName],{header:1,defval:'',raw:false});
         for(var hi=0;hi<Math.min(candidate.length,25);hi++){

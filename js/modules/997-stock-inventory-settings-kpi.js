@@ -92,10 +92,10 @@
   var teamChart=null,statusChart=null;
   function esc_(v){return String(v==null?'':v).replace(/[&<>"']/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});}
   function acc_(){return(typeof SI!=='undefined'&&Array.isArray(SI.acc))?SI.acc:[];}
-  function applySourceLink_(){var a=document.getElementById('siInventorySourceLink'),c=(typeof globalConfig!=='undefined'&&globalConfig)||{};if(a){var u=String(c.LINK_INVENTORY_SOURCE||'').trim();a.href=u||'#';a.classList.toggle('opacity-40',!u);}}
+  function applySourceLink_(){var a=document.getElementById('siInventorySourceLink');if(a){a.href='https://docs.google.com/spreadsheets/d/1X7f6BatQ-y5ZW6VYTv2oT34rbsCLeNgac0APt7njFrk/edit?usp=drivesdk';a.classList.remove('opacity-40');}}
   function qty_(x){return Number(x.stockQty||x.stock_qty||x.qty||0)||0;}
   function min_(x){return Number(x.minStockQty||x.min_stock_qty||x.minStock||x.min_stock||0)||0;}
-  function cost_(x){return Number(x.cost||x.unitCost||x.unit_cost||x.totalCost||x.total_cost||0)||0;}
+  function cost_(x){var v=x.cost!=null?x.cost:(x.unitCost!=null?x.unitCost:(x.unit_cost!=null?x.unit_cost:(x.costea!=null?x.costea:(x['Cost/ea']!=null?x['Cost/ea']:(x.totalCost||x.total_cost||0)))));return Number(String(v==null?'':v).replace(/[฿,\s]/g,''))||0;}
   function team_(x){return String(x.team||'GENERAL').trim()||'GENERAL';}
   function type_(x){return String(x.itemName||x.item_name||x.name||x.type||x.accessoriesType||x.accessories_type||'GENERAL').trim()||'GENERAL';}
   function status_(x){var raw=String(x.status||'').toUpperCase();if(raw.indexOf('PENDING')>=0)return'PENDING_APPROVAL';return qty_(x)<=min_(x)?'LOW_STOCK':'STOCK';}
@@ -111,7 +111,7 @@
   }
   function card_(label,value,sub,icon,cls,prefix){return'<div class="si-dash-kpi-icon-v3031 '+cls+'"><i class="fas '+icon+'"></i></div><div class="si-dash-kpi-copy-v3031"><span>'+label+'</span><b>'+(prefix||'')+Number(value||0).toLocaleString('en-US',{maximumFractionDigits:2})+'</b><small>'+sub+'</small></div>';}
   function renderKpi_(rows){
-    var types=unique_(rows,type_),total=rows.reduce(function(s,x){return s+qty_(x);},0),low=rows.filter(function(x){return status_(x)==='LOW_STOCK';}).length,cost=rows.reduce(function(s,x){return s+cost_(x);},0);
+    var types=unique_(rows,type_),total=rows.reduce(function(s,x){return s+qty_(x);},0),low=rows.filter(function(x){return status_(x)==='LOW_STOCK';}).length,cost=rows.reduce(function(s,x){return s+cost_(x);},0);if(!cost&&rows.length===acc_().length&&typeof SI!=='undefined'&&SI.raw&&SI.raw.costSummary)cost=Number(SI.raw.costSummary.sum||0);
     var vals=[['siDashTotalAccCurrent',card_('Accessories Type',types.length,'Unique types in current filter','fa-layer-group','blue')],['siDashTotalStockCurrent',card_('Total Stock',total,'Physical quantity in current filter','fa-boxes-stacked','green')],['siDashLowAccCurrent',card_('Low Stock',low,'Items at / below minimum','fa-triangle-exclamation','amber')],['siDashCostCurrent',card_('Cost',cost,'Sum of Cost column AA','fa-coins','violet','฿')]];
     vals.forEach(function(x){var n=document.getElementById(x[0]);if(n){var host=n.parentElement;host.classList.add('si-dash-kpi-card-v3031');host.innerHTML=x[1];}});
     var r=document.getElementById('siDashFilterResultV3031');if(r)r.textContent=rows.length.toLocaleString('en-US')+' items · '+total.toLocaleString('en-US')+' units';

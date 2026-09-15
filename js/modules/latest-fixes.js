@@ -15,6 +15,7 @@
   patchSwal();setTimeout(patchSwal,1000);
 
   function api(fn,args){return w.CES_API.callFunction(fn,args||[],{transport:'iframe',timeoutMs:120000,dedupe:false,priority:'active',userAction:true});}
+  function apiRead(fn,args){return w.CES_API.callFunction(fn,args||[],{transport:'jsonp',timeoutMs:20000,dedupe:false,priority:'active',userAction:true,module:'stock_dashboard'});}
   function stockPayload(){
     try{if(typeof SD_DASH!=='undefined'&&SD_DASH.raw&&Array.isArray(SD_DASH.raw.devices))return SD_DASH.raw;}catch(ignore){}
     try{if(typeof SI!=='undefined'&&SI.raw&&Array.isArray(SI.raw.devices))return SI.raw;}catch(ignore2){}
@@ -46,7 +47,7 @@
         while(!done){
           /* Use the long-standing allowlisted endpoint name.  Newer backends
              honor chunked/offset/limit; this avoids a new API-contract name. */
-          var res=await api('sd_getInfusionTabExportLatest',[{tab:spec.key,chunked:true,offset:offset,limit:500}]);
+          var res=await apiRead('sd_getInfusionTabExportLatest',[{tab:spec.key,chunked:true,offset:offset,limit:100}]);
           if(!res||res.success===false)throw new Error(res&&res.message||('Cannot export '+sheetName));
           if(!headers.length)headers=res.headers||[];Array.prototype.push.apply(rows,res.rows||[]);sheetName=res.sheetName||sheetName;
           done=res.done===true||res.nextOffset==null;offset=done?rows.length:Number(res.nextOffset||rows.length);
@@ -80,7 +81,10 @@
   };
 
   w.loadNotificationLog=function(){var root=d.getElementById('nc-log');if(!root)return Promise.resolve();root.innerHTML='<div class="py-8 text-center"><i class="fas fa-circle-notch fa-spin text-blue-600"></i></div>';return api('getNotificationLog',[{limit:100}]).then(function(r){if(!r||r.success===false)throw new Error(r&&r.message||'Cannot load log');var rows=r.rows||[];root.innerHTML=rows.length?'<table><thead><tr>'+(r.headers||[]).map(function(h){return'<th>'+esc(h)+'</th>';}).join('')+'</tr></thead><tbody>'+rows.map(function(row){return'<tr>'+row.map(function(v,i){var cls=i===7?String(v).toLowerCase():'';return'<td class="'+cls+'">'+esc(v)+'</td>';}).join('')+'</tr>';}).join('')+'</tbody></table>':'<div class="py-8 text-center text-slate-400">No notification history yet.</div>';}).catch(function(e){root.innerHTML='<div class="py-8 text-center text-red-600">'+esc(e.message||e)+'</div>';});};
-  var loadConfig=w.loadNotificationConfig;if(typeof loadConfig==='function')w.loadNotificationConfig=function(){var p=loadConfig.apply(this,arguments);Promise.resolve(p).finally(function(){w.loadNotificationLog();});return p;};
+  // Notification history is intentionally lazy-loaded from its own Refresh button.
+  // Loading it together with the automation cards caused a second Apps Script
+  // request to compete with the configuration request and made the page appear
+  // stuck on slower deployments.
 
   w.CES_captureElementPdfExact=async function(target,fileName){
     var el=typeof target==='string'?d.querySelector(target):target;if(!el)throw new Error('PDF target not found.');
