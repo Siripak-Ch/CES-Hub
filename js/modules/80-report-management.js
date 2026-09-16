@@ -19,9 +19,9 @@ const thaiHolidays = [
 
     let lastRMResult = null;
     let lastRMFormData = null;
-    const RM_ALLOWED_COST_CENTERS_V3015 = ['106130','106067','106206','106207','106154'];
+    const RM_ALLOWED_COST_CENTERS_V3015 = ['106207','106130','106206','106154','106067','103548'];
     const RM_TEAM_COST_CENTER_V3015 = { MED:'106130', LAB:'106067', EHS:'106206', ENV:'106207', MNG:'106154', TES:'106130', MANAGEMENT:'106154', OTHER:'106154' };
-    const RM_OLD_COST_CENTER_MAP_V3015 = { '6130':'106130', '6067':'106067', '6206':'106206', '6207':'106207', '6154':'106154' };
+    const RM_OLD_COST_CENTER_MAP_V3015 = { '6130':'106130', '6067':'106067', '6206':'106206', '6207':'106207', '6154':'106154', '3548':'103548' };
 
 
     function rmErrorMessage(value) {

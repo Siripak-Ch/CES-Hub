@@ -6,7 +6,7 @@
 
 window.CES_CONFIG = {
   // IMPORTANT: After deploying Apps Script backend, paste the latest /exec URL here.
-  GAS_API_URL: 'https://script.google.com/macros/s/AKfycbwBBlNKw-P7s0kpJkKhbFS_9EFN5VK0TK44PvgN00k1hyKqxd8qAoihGKS4QxSVpZX8/exec',
+  GAS_API_URL: 'https://script.google.com/macros/s/AKfycbwOGmqOV_FEmflnsc_tWQk2tIVrOTh3u8susQ8wHN3LYWOmZMdskxFVcJ0bYQjnjt-u/exec',
   // Optional extra /exec endpoints. The polyfill also accepts ?gasApiUrl=<url>
   // and persists that override, so a deployment URL can be corrected without
   // allowing every module to fail independently.
@@ -28,7 +28,7 @@ window.CES_CONFIG = {
   },
 
   DEBUG: false,
-  RELEASE: 'CES-HUB-V30.0.40-VAN35-TE-INVENTORY-AUDIT-NOTIFICATION-LINE',
+  RELEASE: 'CES-HUB-V30.0.41-VAN-TE-CART-AUDIT-NOTIFICATION',
 
   // External links are kept in one place. Config sheet values override these defaults at runtime.
   EXTERNAL_LINKS: {

@@ -1534,13 +1534,12 @@ function renderVanBookingDashboard_(result){
   cesVanRenderSourceWarning_(result);
   const root=document.getElementById('van-job-list-v55');if(!root)return;
   if(!result.events.length){root.innerHTML='<div class="py-14 text-center text-slate-400"><i class="fas fa-calendar-xmark text-3xl text-slate-300 mb-3"></i><div class="font-bold">No van bookings in this filter</div></div>';return;}
-  root.innerHTML='<div class="overflow-auto rounded-xl border border-slate-200 max-h-[560px]"><table class="w-full min-w-[1020px] text-xs text-left"><thead class="sticky top-0 z-10 bg-slate-50 text-[9px] uppercase tracking-wider text-slate-500"><tr><th class="p-3">Date / Time</th><th class="p-3">Team</th><th class="p-3">Booking / Route</th><th class="p-3 min-w-[250px]">Usage / Cost</th><th class="p-3 w-[115px]">Details</th></tr></thead><tbody class="divide-y divide-slate-100">'+result.events.map(item=>{
+  root.innerHTML='<div class="overflow-auto rounded-xl border border-slate-200 max-h-[560px]"><table class="w-full min-w-[1320px] table-fixed text-xs text-left"><colgroup><col style="width:150px"><col style="width:80px"><col style="width:110px"><col style="width:520px"><col style="width:105px"><col style="width:110px"><col style="width:210px"></colgroup><thead class="sticky top-0 z-10 bg-slate-50 text-[9px] uppercase tracking-wider text-slate-500"><tr><th class="p-3">Date / Time</th><th class="p-3">Team</th><th class="p-3">Cost Center</th><th class="p-3">Booking / Route Details</th><th class="p-3">Usage</th><th class="p-3">Cost</th><th class="p-3">Traveller / Driver</th></tr></thead><tbody class="divide-y divide-slate-100">'+result.events.map(item=>{
     const details=[item.jobId?`Job ID: ${item.jobId}`:'',item.traveller?`Traveller: ${item.traveller}`:'',item.driver?`Driver: ${item.driver}`:'',item.phone?`Phone: ${item.phone}`:''].filter(Boolean).join('<br>');
     const route=item.route||item.location||item.description||'-';
     const title=cesBookEsc_(item.title||'-');
-    const link=item.calendarUrl?`<button type="button" data-van-event-url="${cesBookEsc_(item.calendarUrl)}" onclick="event.stopPropagation();cesVanOpenCalendarEvent(this.dataset.vanEventUrl)" class="inline-flex items-center gap-1 text-[#003DA5] font-black mt-2"><i class="fas fa-arrow-up-right-from-square"></i>Open event</button>`:'';
     const billingDays=Number(item.billingDays||item.chargeDays||item.days||0);
-    return `<tr class="hover:bg-slate-50 align-top"><td class="p-3"><b class="whitespace-nowrap text-slate-700">${cesBookEsc_(item.dateLabel||'-')}</b><div class="text-[9px] text-slate-400 mt-1 whitespace-nowrap">${cesBookEsc_(item.timeLabel||'')}</div></td><td class="p-3"><span class="inline-flex px-2 py-1 rounded-full border text-[9px] font-black ${cesVanTeamBadge_(item.team)}">${cesBookEsc_(item.team||'MNG')}</span></td><td class="p-3 min-w-[330px]"><b class="text-slate-800">${title}</b><div class="mt-1 text-slate-500 whitespace-normal leading-relaxed">${cesBookEsc_(route)}</div>${link}</td><td class="p-3 min-w-[250px]"><b>${Number(item.days||0)} calendar day(s)</b><div class="text-[9px] text-slate-400 mt-1">${billingDays} billed date(s): departure / return</div><div class="text-amber-700 font-black mt-1">${cesVanMoney_(item.cost)}</div></td><td class="p-3 w-[115px] max-w-[115px] text-slate-500 leading-relaxed break-words">${details||'-'}</td></tr>`;
+    return `<tr class="hover:bg-slate-50 align-top"><td class="p-3"><b class="whitespace-nowrap text-slate-700">${cesBookEsc_(item.dateLabel||'-')}</b><div class="text-[9px] text-slate-400 mt-1 whitespace-nowrap">${cesBookEsc_(item.timeLabel||'')}</div></td><td class="p-3"><span class="inline-flex px-2 py-1 rounded-full border text-[9px] font-black ${cesVanTeamBadge_(item.team)}">${cesBookEsc_(item.team||'MNG')}</span></td><td class="p-3 font-black text-slate-600 break-words">${cesBookEsc_(item.costCenter||'-')}</td><td class="p-3"><b class="text-slate-800 break-words">${title}</b><div class="mt-1 text-slate-500 whitespace-normal leading-relaxed break-words">${cesBookEsc_(route)}</div></td><td class="p-3"><b>${Number(item.days||0)} day(s)</b><div class="text-[9px] text-slate-400 mt-1">${billingDays} billed date(s)</div></td><td class="p-3 text-amber-700 font-black">${cesVanMoney_(item.cost)}</td><td class="p-3 text-slate-500 leading-relaxed break-words">${details||'-'}</td></tr>`;
   }).join('')+'</tbody></table></div>';
 }
 window.cesVanOpenCalendarEvent=function(url){var value=String(url||'').trim();if(!value)return;var popup=window.open(value,'_blank','noopener,noreferrer');if(!popup)window.location.href=value;};
@@ -1594,10 +1593,10 @@ async function loadVanBookingDashboard(force){
 function exportVanBookingExcel(){
   if(!window.XLSX){if(window.Swal)Swal.fire('Van Booking Excel','XLSX library is not ready.','error');return;}
   var rows=(CES_VAN_V55.events||[]).map(function(item){return{
-    'Date':item.dateLabel||'', 'Time':item.timeLabel||'', 'Team':item.team||'', 'Booking / Job':item.title||'',
+    'Date':item.dateLabel||'', 'Time':item.timeLabel||'', 'Team':item.team||'', 'Cost Center':item.costCenter||'', 'Booking / Job':item.title||'',
     'Route / Location':item.route||item.location||item.description||'', 'Traveller':item.traveller||'', 'Driver':item.driver||'',
     'Phone':item.phone||'', 'Calendar Days':Number(item.days||0), 'Billed Dates':Number(item.billingDays||item.chargeDays||0),
-    'Cost (THB)':Number(item.cost||0), 'Calendar URL':item.calendarUrl||''
+    'Cost (THB)':Number(item.cost||0)
   };});
   if(!rows.length){if(window.Swal)Swal.fire('Van Booking Excel','No van booking records in the current filter.','info');return;}
   var ws=XLSX.utils.json_to_sheet(rows),wb=XLSX.utils.book_new();

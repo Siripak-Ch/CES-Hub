@@ -51,10 +51,11 @@
     <div class="ces-checkout-head-v3025"><div class="flex items-center gap-3"><span class="ces-checkout-head-icon-v3025"><i class="fas fa-cart-shopping"></i></span><div><h2>ตะกร้า Check-Out</h2><p><span id="siCartDrawerCount">0</span> รายการที่เลือก</p></div></div><button onclick="si_closeCart()" class="ces-checkout-close-v3025" aria-label="Close cart"><i class="fas fa-times"></i></button></div>
     <div class="ces-checkout-scroll-v3025"><section class="ces-checkout-section-v3025"><div class="ces-checkout-section-title-v3025"><span><i class="fas fa-list-check"></i> รายการเบิก</span><small>ตรวจสอบอุปกรณ์ก่อนยืนยัน</small></div><div id="siCartItems" class="ces-checkout-items-v3025"></div></section><div id="siCartDetailSummary" class="ces-checkout-summary-v3025"></div></div>
     <div class="ces-checkout-form-v3025">
-      <div class="ces-checkout-section-title-v3025"><span><i class="fas fa-address-card"></i> ข้อมูลการยืม</span><small><b>*</b> จำเป็น</small></div>
-      <label>ชื่อผู้ยืม / Borrower *<input id="siBorrower" class="stockpro-control" placeholder="ระบุชื่อผู้ยืม"></label><label>สถานที่ / Location *<input id="siCheckoutLocation" class="stockpro-control" placeholder="ระบุสถานที่ใช้งาน"></label>
-      <div class="grid grid-cols-2 gap-3"><label>วันที่เบิก<input id="siBorrowDate" class="stockpro-control" type="date"></label><label>กำหนดคืน *<input id="siDueDate" class="stockpro-control" type="date"></label></div>
-      <label>หมายเหตุ<input id="siNote" class="stockpro-control" placeholder="รายละเอียดเพิ่มเติม (ถ้ามี)"></label><button id="siCheckoutSubmitBtn" class="ces-checkout-submit-v3025" onclick="si_submitCheckout(this)"><i class="fas fa-paper-plane"></i><span>ยืนยัน Check-Out</span></button>
+      <div class="ces-checkout-section-title-v3025"><span><i class="fas fa-address-card"></i> ข้อมูลการเบิก</span><small><b>*</b> จำเป็น</small></div>
+      <div class="grid grid-cols-2 gap-3"><label>ชื่อผู้เบิก *<input id="siBorrower" class="stockpro-control" placeholder="Autofill current user"></label><label>รหัสพนักงาน *<input id="siCheckoutEmployeeId" class="stockpro-control" placeholder="Autofill employee ID"></label></div>
+      <label>สถานที่ / Location *<input id="siCheckoutLocation" class="stockpro-control" value="Warehouse" placeholder="Warehouse"></label>
+      <div class="grid grid-cols-2 gap-3"><label>วันที่เบิก<input id="siBorrowDate" class="stockpro-control" type="date"></label><label>Cost Center *<select id="siCheckoutCostCenter" class="stockpro-control"><option value="">Select Cost Center</option><option>106207</option><option>106130</option><option>106206</option><option>106154</option><option>106067</option><option>103548</option></select></label></div>
+      <input id="siDueDate" type="hidden"><label>หมายเหตุ<input id="siNote" class="stockpro-control" placeholder="รายละเอียดเพิ่มเติม (ถ้ามี)"></label><button id="siCheckoutSubmitBtn" class="ces-checkout-submit-v3025" onclick="si_submitCheckout(this)"><i class="fas fa-paper-plane"></i><span>ยืนยันการเบิก</span></button>
     </div>
   </div>
 </section>
