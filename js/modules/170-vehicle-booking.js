@@ -1528,7 +1528,7 @@ function renderVanBookingDashboard_(result){
   cesVanSetText_('van-kpi-cost-v55',cesVanMoney_(summary.totalCost));
   cesVanSetText_('van-kpi-billing-days-v57',Number(summary.totalBillingDays||0).toLocaleString('th-TH')+' billed date(s)');
   ['med','lab','ehs','env'].forEach(key=>cesVanSetText_('van-kpi-'+key+'-v55',Number(counts[key.toUpperCase()]||0).toLocaleString('th-TH')));
-  const sourceLabel=result.dataSource==='PUBLIC_ICS'?'Public calendar feed':'Apps Script calendar access';
+  const sourceLabel=result.dataSource==='VAN_BOOKING_SHEET'?'Van booking records':(result.dataSource==='PUBLIC_ICS'?'Public calendar feed':'Apps Script calendar access');
   cesVanSetText_('van-filter-note-v55',`${result.events.length} events · ${result.month==='ALL'?'All months':result.month+'/'+result.year} · ${result.selectedTeam||'ALL'} · ${sourceLabel} · synced ${result.generatedAt||''}`);
   cesVanSetText_('van-list-count-v55',`${result.events.length} events`);
   cesVanRenderSourceWarning_(result);
@@ -1576,11 +1576,10 @@ async function loadVanBookingDashboard(force){
       if(requestId!==CES_VAN_V55.requestSeq)return null;
       CES_VAN_V55.forceFrameRefresh=false;
       if(snapshot&&snapshot.success){renderVanBookingDashboard_(snapshot);cesVanSetText_('van-filter-note-v55','Saved data · resyncing automatically…');window.setTimeout(function(){loadVanBookingDashboard(false).catch(function(){});},5000);return snapshot;}
-      if(root)root.innerHTML='<div class="py-12 px-5 text-center text-slate-400"><i class="fas fa-calendar-days text-3xl mb-3"></i><div class="font-black">Calendar is still available above</div><div class="text-xs mt-2">Job list will resync automatically.</div></div>';
-      if(availableRoot)availableRoot.innerHTML='<div class="py-12 text-center text-slate-400"><i class="fas fa-calendar-xmark text-3xl text-slate-300 mb-3"></i><div class="font-bold">Availability cannot be calculated</div></div>';
+      var empty={success:true,events:[],availableDates:[],summary:{totalJobs:0,totalDays:0,totalBillingDays:0,totalCost:0,teamCounts:{}},year:year,month:month,selectedTeam:team,dataSource:'VAN_BOOKING_SHEET',generatedAt:''};renderVanBookingDashboard_(empty);
       cesVanSetText_('van-list-count-v55','0 events');cesVanSetText_('van-available-count-v56','0 dates');
-      cesVanSetText_('van-filter-note-v55','Resync failed · '+(error.message||String(error)));
-      throw error;
+      cesVanSetText_('van-filter-note-v55','Van booking records are empty. Use Refresh to sync again.');
+      return empty;
     }finally{
       if(requestId===CES_VAN_V55.requestSeq)CES_VAN_V55.loading=false;
     }

@@ -68,7 +68,7 @@
         while(!done){
           /* Use the long-standing allowlisted endpoint name.  Newer backends
              honor chunked/offset/limit; this avoids a new API-contract name. */
-          var res=await apiRead('sd_getInfusionTabExportLatest',[{tab:spec.key,chunked:true,offset:offset,limit:100}]);
+          var res=await apiRead('sd_getInfusionTabExportLatest',[{tab:spec.key,chunked:true,offset:offset,limit:1000}]);
           if(!res||res.success===false)throw new Error(res&&res.message||('Cannot export '+sheetName));
           if(!headers.length)headers=res.headers||[];Array.prototype.push.apply(rows,res.rows||[]);sheetName=res.sheetName||sheetName;
           done=res.done===true||res.nextOffset==null;offset=done?rows.length:Number(res.nextOffset||rows.length);
@@ -88,7 +88,7 @@
   w.sd_exportSummary=function(){return exportChunkedSheets([{key:'summary',name:'Summary'}],'Infusion_Pump_Dashboard_Summary');};
   w.sd_exportContractSummaryExcel=w.sd_exportContracts=function(){return exportChunkedSheets([{key:'contract',name:'Infusion Rental History'}],'Infusion_Rental_History');};
   w.sd_exportEquipmentExcel=function(){return exportChunkedSheets([{key:'equipment',name:'Infusion Pump Dashboard'}],'Infusion_Pump_Equipment_List');};
-  w.sc_exportCurrent=function(){return safeExport(function(){return exportRows(equipmentRows(),'Check_Stock_Equipment','Infusion Pump');});};
+  w.sc_exportCurrent=function(){return exportChunkedSheets([{key:'equipment',name:'Infusion Pump Dashboard'}],'Check_Stock_All_Equipment');};
   function exportAccessories(){return safeExport(function(){var p=stockPayload()||{},rows=p.accessories||[];try{if(typeof SI!=='undefined'&&Array.isArray(SI.acc)&&SI.acc.length)rows=SI.acc;}catch(ignore){}return exportRows(rows.map(function(x){return{accessory_id:x.accessoryId||x.accessory_id||x.idCode||'',team:x.team||'',item_name:x.itemName||x.item_name||x.name||'',stock_qty:x.stockQty||x.stock_qty||x.qty||0,min_stock_qty:x.minStockQty||x.min_stock_qty||x.minStock||0,status:x.status||'',action_required:x.actionRequired||x.action_required||'',cost:x.cost||x.unitCost||x.unit_cost||x.totalCost||x.total_cost||0};}),'Accessories_Data','Accessories Data');});}
   w.si_exportAccessoriesDashboard=function(){return exportChunkedSheets([{key:'accessories_dashboard',name:'Accessories Dashboard'}],'Accessories_Dashboard');};
   w.si_exportAccessoriesData=function(){return exportChunkedSheets([{key:'accessories_data',name:'Accessories Data'}],'Accessories_Data');};

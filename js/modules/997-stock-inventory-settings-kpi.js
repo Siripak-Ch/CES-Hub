@@ -97,7 +97,7 @@
   function min_(x){return Number(x.minStockQty||x.min_stock_qty||x.minStock||x.min_stock||0)||0;}
   function cost_(x){var v=x.cost!=null?x.cost:(x.unitCost!=null?x.unitCost:(x.unit_cost!=null?x.unit_cost:(x.costea!=null?x.costea:(x['Cost/ea']!=null?x['Cost/ea']:(x.totalCost||x.total_cost||0)))));return Number(String(v==null?'':v).replace(/[฿,\s]/g,''))||0;}
   function team_(x){return String(x.team||'GENERAL').trim()||'GENERAL';}
-  function type_(x){return String(x.itemName||x.item_name||x.name||x.type||x.accessoriesType||x.accessories_type||'GENERAL').trim()||'GENERAL';}
+  function type_(x){return String(x.type||x.accessoriesType||x.accessories_type||x['Accessories Type']||x.category||'GENERAL').trim()||'GENERAL';}
   function status_(x){var raw=String(x.status||'').toUpperCase();if(raw.indexOf('PENDING')>=0)return'PENDING_APPROVAL';return qty_(x)<=min_(x)?'LOW_STOCK':'STOCK';}
   function updated_(x){return String(x.lastCheckTimestamp||x.last_check_timestamp||x.lastCheckDate||x.last_check_date||x.addStockDate||x['Add Stock Date']||'').trim();}
   function unique_(rows,fn){var m={};(rows||[]).forEach(function(x){var v=fn(x);if(v)m[v]=1;});return Object.keys(m).sort(function(a,b){return a.localeCompare(b);});}

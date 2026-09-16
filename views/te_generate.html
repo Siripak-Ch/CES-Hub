@@ -1,28 +1,14 @@
-<section id="view-te_generate" class="hidden space-y-6 animate-fade-in pb-20">
-  <div class="bg-white p-5 rounded-3xl shadow-sm border border-gray-100 flex flex-wrap justify-between items-center gap-4 sticky top-0 z-30">
-    <div class="flex items-center gap-4">
-      <div class="p-3 bg-emerald-50 rounded-2xl text-emerald-700 ces-page-header-icon-v15"><i class="fas fa-route text-2xl"></i></div>
-      <div><h2 class="text-xl font-black text-gray-800 tracking-tight leading-none">TE Generate</h2><p class="text-[11px] text-gray-400 font-bold uppercase tracking-widest mt-1.5">Travel Expense · TE_Info</p></div>
-    </div>
-    <a class="ces-standard-icon-btn ces-external-link-btn" href="https://docs.google.com/spreadsheets/d/1E5vHiYaWB0OApyoc4tp7MfuUo9xg_546uFLhiKqrtgM/edit?gid=697308654#gid=697308654" target="_blank" rel="noopener" title="Open TE_Info" aria-label="Open TE Info"><i class="fas fa-table"></i></a>
-  </div>
-
-  <div class="bg-white p-6 md:p-8 rounded-3xl shadow-sm border border-gray-100 space-y-6">
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-      <label class="space-y-2"><span class="text-xs font-bold text-gray-500 uppercase">Employee ID</span><input id="te-page-employee-id" class="w-full border border-gray-200 rounded-xl p-3 text-sm" type="text"></label>
-      <label class="space-y-2"><span class="text-xs font-bold text-gray-500 uppercase">Employee name</span><input id="te-page-employee-name" class="w-full border border-gray-200 rounded-xl p-3 text-sm" type="text"></label>
-      <label class="space-y-2"><span class="text-xs font-bold text-gray-500 uppercase">Year</span><input id="te-page-year" class="w-full border border-gray-200 rounded-xl p-3 text-sm" type="number"></label>
-      <label class="space-y-2"><span class="text-xs font-bold text-gray-500 uppercase">Month</span><select id="te-page-month" class="w-full border border-gray-200 rounded-xl p-3 text-sm"></select></label>
-    </div>
-    <div class="flex flex-wrap gap-3">
-      <button type="button" class="px-5 py-3 rounded-xl bg-slate-600 text-white text-sm font-black" onclick="tePreview()"><i class="fas fa-magnifying-glass mr-2"></i>Preview TE_Info</button>
-      <button id="te-page-generate" type="button" class="px-5 py-3 rounded-xl bg-emerald-600 text-white text-sm font-black disabled:opacity-50" onclick="teGenerate()" disabled><i class="fas fa-file-export mr-2"></i>Generate PDF + XLSX</button>
-    </div>
-    <p class="text-xs text-slate-500">อ่านข้อมูลจาก TE_Info แบบ read-only, สรุปค่าใช้จ่ายตามเดือน และแนบรายการรูปตามวันที่ โดยไม่แก้ไขไฟล์ต้นฉบับ</p>
-  </div>
-
-  <div class="bg-white p-6 rounded-3xl shadow-sm border border-gray-100">
-    <div class="flex justify-between items-center mb-4"><h3 class="font-black text-slate-800"><i class="fas fa-list-check text-emerald-600 mr-2"></i>TE Preview</h3><span id="te-page-count" class="text-xs font-bold text-slate-400">0 rows</span></div>
-    <div id="te-page-preview" class="text-center text-slate-400 py-10">เลือกปีและเดือน แล้วกด Preview TE_Info</div>
-  </div>
+<section id="view-te_generate" class="hidden space-y-5 animate-fade-in pb-20">
+  <style>
+    #view-te_generate .te-card{background:#fff;border:1px solid #dbe5ef;border-radius:20px;box-shadow:0 7px 22px rgba(15,23,42,.05)}
+    #view-te_generate .te-input{width:100%;height:40px;border:1px solid #d5e0eb;border-radius:10px;background:#f8fbff;padding:0 10px;font-size:11px;font-weight:700;color:#334155;outline:none}#view-te_generate .te-input:focus{border-color:#60a5fa;background:#fff;box-shadow:0 0 0 3px #dbeafe}#view-te_generate .te-label{display:block;font-size:8px;font-weight:950;text-transform:uppercase;letter-spacing:.04em;color:#64748b;margin-bottom:5px}
+    #view-te_generate .te-table-wrap{overflow:auto;border:1px solid #dbe5ef;border-radius:14px}#view-te_generate table{border-collapse:separate;border-spacing:0;min-width:1880px;width:100%;font-size:10px}#view-te_generate th{position:sticky;top:0;background:#eaf2fa;color:#415b76;padding:9px;z-index:2;white-space:nowrap}#view-te_generate td{padding:6px;border-bottom:1px solid #e8eef5;background:#fff;vertical-align:top}#view-te_generate td input,#view-te_generate td textarea{width:100%;min-width:92px;border:1px solid #d6e1eb;border-radius:8px;background:#f9fbfd;padding:7px;font-size:10px;color:#334155;outline:none}#view-te_generate td textarea{min-width:180px;min-height:52px;resize:vertical}#view-te_generate td input[type=file]{min-width:185px;padding:5px}
+    #view-te_generate .te-money{min-width:88px;text-align:right}#view-te_generate .te-row-total{display:block;min-width:95px;text-align:right;font-weight:950;color:#0756b8;padding:8px 4px}#view-te_generate .te-action{height:38px;border:0;border-radius:10px;background:#64748b;color:#fff;padding:0 13px;font-size:10px;font-weight:950;cursor:pointer}#view-te_generate .te-action.primary{background:#0756b8}#view-te_generate .te-action.danger{background:#dc2626}#view-te_generate .te-action:disabled{opacity:.5;cursor:wait}
+  </style>
+  <div class="te-card p-4 flex flex-wrap justify-between items-center gap-4 sticky top-0 z-30"><div class="flex items-center gap-3"><div class="w-11 h-11 rounded-2xl bg-blue-50 text-[#004aad] border border-blue-100 grid place-items-center"><i class="fas fa-route"></i></div><div><h2 class="text-lg font-black text-slate-800">TE Generate</h2><p class="text-[10px] text-slate-400 font-bold mt-1">Travel Expense · TE_Template + TE_Info</p></div></div><div class="flex gap-2"><a class="ces-standard-icon-btn" href="https://docs.google.com/spreadsheets/d/1E5vHiYaWB0OApyoc4tp7MfuUo9xg_546uFLhiKqrtgM/edit?gid=697308654#gid=697308654" target="_blank" rel="noopener" title="Open TE_Info"><i class="fas fa-link"></i></a><button class="ces-standard-icon-btn" onclick="tePreview()" title="Load TE_Info"><i class="fas fa-rotate"></i></button></div></div>
+  <div class="te-card p-5 space-y-4"><div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-3">
+    <label><span class="te-label">สถานที่ปฏิบัติงาน</span><input id="te-page-workplace" class="te-input" value="BME-HQ"></label><label><span class="te-label">ชื่อพนักงาน</span><input id="te-page-employee-name" class="te-input"></label><label><span class="te-label">รหัสพนักงาน</span><input id="te-page-employee-id" class="te-input"></label><label><span class="te-label">รหัสไปรษณีย์</span><input id="te-page-postal-code" class="te-input"></label>
+    <label><span class="te-label">ชื่อหัวหน้าทีม</span><input id="te-page-supervisor" class="te-input"></label><label><span class="te-label">ผู้สำรองจ่าย</span><input id="te-page-advance-payer" class="te-input"></label><label><span class="te-label">Year</span><input id="te-page-year" class="te-input" type="number"></label><label><span class="te-label">Month</span><select id="te-page-month" class="te-input"></select></label>
+  </div><div class="flex flex-wrap gap-2"><button class="te-action" onclick="teAddRow()"><i class="fas fa-circle-plus mr-1"></i>Add row</button><button class="te-action" onclick="tePreview()"><i class="fas fa-download mr-1"></i>Load TE_Info</button><button id="te-page-save" class="te-action primary" onclick="teSave()"><i class="fas fa-floppy-disk mr-1"></i>Save TE_Info</button><button id="te-page-generate" class="te-action primary" onclick="teGenerate()"><i class="fas fa-file-export mr-1"></i>Save + Generate PDF / XLSX</button></div><p class="text-[10px] text-slate-500">กรอกข้อมูลตาม TE_Template ได้โดยตรง รูปแนบจะจัดเก็บตามวันที่และลิงก์ลง TE_Info ส่วน TE_Template ต้นฉบับจะไม่ถูกแก้ไข</p></div>
+  <div class="te-card p-4"><div class="flex items-center justify-between mb-3"><h3 class="font-black text-[#004aad] text-sm"><i class="fas fa-table-list mr-2"></i>TE Entries</h3><span id="te-page-count" class="text-[10px] font-black text-slate-500">0 rows · ฿0.00</span></div><div id="te-page-preview" class="text-center text-slate-400 py-10">กด Add row เพื่อเริ่มกรอก หรือ Load TE_Info เพื่อแก้ไขรายการเดิม</div></div>
 </section>
