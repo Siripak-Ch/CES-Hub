@@ -86,6 +86,34 @@
   document.addEventListener('DOMContentLoaded',function(){injectStyle();applyInventoryTab('equip');});
 })();
 
+/* V30.0.40 — paint Accessories dashboard from its small source immediately.
+   The full inventory request continues in parallel for the Accessories tab. */
+(function(){
+  'use strict';
+  var base=window.initStockInventoryModule,request=null;
+  function applyFast(r){
+    if(!r||r.success===false||!Array.isArray(r.accessories)||!r.accessories.length)return r;
+    if(typeof SI!=='undefined'){
+      SI.acc=r.accessories.slice();SI.accFiltered=SI.acc.slice();SI.loaded=true;
+      SI.raw=Object.assign({},SI.raw||{},r,{inventory:Array.isArray(SI.inv)?SI.inv:[]});
+    }
+    try{localStorage.setItem('CES_ACCESSORIES_DASHBOARD_V40',JSON.stringify({savedAt:Date.now(),data:r}));}catch(ignore){}
+    if(typeof window.si_renderAccessoriesDashboard==='function')window.si_renderAccessoriesDashboard();
+    var f=document.getElementById('siDataFreshness');if(f){f.className='csv6-freshness live';f.innerHTML='<i class="fas fa-database"></i> Accessories updated '+new Date().toLocaleTimeString('th-TH',{hour:'2-digit',minute:'2-digit'});}
+    return r;
+  }
+  function cached(){try{var x=JSON.parse(localStorage.getItem('CES_ACCESSORIES_DASHBOARD_V40')||'null');if(x&&x.data&&Date.now()-Number(x.savedAt||0)<86400000)return x.data;}catch(ignore){}return null;}
+  function load(force){
+    var c=cached();if(c)applyFast(c);
+    if(request&&!force)return request;
+    if(!window.CES_API||typeof window.CES_API.callFunction!=='function')return Promise.resolve(c);
+    request=window.CES_API.callFunction('si_getAccessoriesDashboardFast',[!!force],{transport:'jsonp',timeoutMs:30000,dedupe:!force,priority:'active',userAction:true,module:'inventory'}).then(applyFast).catch(function(e){console.warn('[Accessories dashboard fast]',e);return c;}).finally(function(){request=null;});
+    return request;
+  }
+  window.si_loadAccessoriesDashboardFast=load;
+  if(typeof base==='function')window.initStockInventoryModule=function(force){var fast=load(!!force),full=base.apply(this,arguments);if(full&&typeof full.then==='function')return Promise.allSettled([fast,full]).then(function(x){return x[1]&&x[1].status==='fulfilled'?x[1].value:(x[0]&&x[0].value);});return fast;};
+})();
+
 
 (function(){
   'use strict';

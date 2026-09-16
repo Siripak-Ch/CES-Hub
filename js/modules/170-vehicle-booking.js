@@ -1429,7 +1429,7 @@ function cesVanEnsureYearOption_(year){
 function cesVanInitFilters_(){
   const yearEl=document.getElementById('van-year-filter-v55'),monthEl=document.getElementById('van-month-filter-v55');
   if(yearEl&&!yearEl.options.length){const year=new Date().getFullYear();for(let y=year-1;y<=year+2;y++){const option=document.createElement('option');option.value=String(y);option.textContent=String(y);if(y===year)option.selected=true;yearEl.appendChild(option);}}
-  if(monthEl&&!monthEl.dataset.initialized){monthEl.dataset.initialized='1';if(!monthEl.options.length){for(let m=1;m<=12;m++){const option=document.createElement('option');option.value=String(m).padStart(2,'0');option.textContent=cesVanMonthName_(m);monthEl.appendChild(option);}}monthEl.value=String(new Date().getMonth()+1).padStart(2,'0');}
+  if(monthEl&&!monthEl.dataset.initialized){monthEl.dataset.initialized='1';monthEl.value=String(new Date().getMonth()+1).padStart(2,'0');}
 }
 function cesVanSelectedPeriod_(){
   cesVanInitFilters_();
@@ -1528,18 +1528,19 @@ function renderVanBookingDashboard_(result){
   cesVanSetText_('van-kpi-cost-v55',cesVanMoney_(summary.totalCost));
   cesVanSetText_('van-kpi-billing-days-v57',Number(summary.totalBillingDays||0).toLocaleString('th-TH')+' billed date(s)');
   ['med','lab','ehs','env'].forEach(key=>cesVanSetText_('van-kpi-'+key+'-v55',Number(counts[key.toUpperCase()]||0).toLocaleString('th-TH')));
-  const sourceLabel=result.dataSource==='VAN_BOOKING_SHEET'?'Van booking records':(result.dataSource==='PUBLIC_ICS'?'Public calendar feed':'Apps Script calendar access');
+  const sourceLabel=result.dataSource==='PUBLIC_ICS'?'Public calendar feed':'Apps Script calendar access';
   cesVanSetText_('van-filter-note-v55',`${result.events.length} events · ${result.month==='ALL'?'All months':result.month+'/'+result.year} · ${result.selectedTeam||'ALL'} · ${sourceLabel} · synced ${result.generatedAt||''}`);
   cesVanSetText_('van-list-count-v55',`${result.events.length} events`);
   cesVanRenderSourceWarning_(result);
   const root=document.getElementById('van-job-list-v55');if(!root)return;
   if(!result.events.length){root.innerHTML='<div class="py-14 text-center text-slate-400"><i class="fas fa-calendar-xmark text-3xl text-slate-300 mb-3"></i><div class="font-bold">No van bookings in this filter</div></div>';return;}
-  root.innerHTML='<div class="overflow-auto rounded-xl border border-slate-200 max-h-[560px]"><table class="w-full min-w-[1080px] text-xs text-left"><thead class="sticky top-0 z-10 bg-slate-50 text-[9px] uppercase tracking-wider text-slate-500"><tr><th class="p-3">Date / Time</th><th class="p-3">Team</th><th class="p-3">Booking / Route</th><th class="p-3 min-w-[150px]">Usage</th><th class="p-3 min-w-[110px]">Cost</th><th class="p-3 w-[115px]">Details</th></tr></thead><tbody class="divide-y divide-slate-100">'+result.events.map(item=>{
+  root.innerHTML='<div class="overflow-auto rounded-xl border border-slate-200 max-h-[560px]"><table class="w-full min-w-[1020px] text-xs text-left"><thead class="sticky top-0 z-10 bg-slate-50 text-[9px] uppercase tracking-wider text-slate-500"><tr><th class="p-3">Date / Time</th><th class="p-3">Team</th><th class="p-3">Booking / Route</th><th class="p-3 min-w-[250px]">Usage / Cost</th><th class="p-3 w-[115px]">Details</th></tr></thead><tbody class="divide-y divide-slate-100">'+result.events.map(item=>{
     const details=[item.jobId?`Job ID: ${item.jobId}`:'',item.traveller?`Traveller: ${item.traveller}`:'',item.driver?`Driver: ${item.driver}`:'',item.phone?`Phone: ${item.phone}`:''].filter(Boolean).join('<br>');
     const route=item.route||item.location||item.description||'-';
     const title=cesBookEsc_(item.title||'-');
+    const link=item.calendarUrl?`<button type="button" data-van-event-url="${cesBookEsc_(item.calendarUrl)}" onclick="event.stopPropagation();cesVanOpenCalendarEvent(this.dataset.vanEventUrl)" class="inline-flex items-center gap-1 text-[#003DA5] font-black mt-2"><i class="fas fa-arrow-up-right-from-square"></i>Open event</button>`:'';
     const billingDays=Number(item.billingDays||item.chargeDays||item.days||0);
-    return `<tr class="hover:bg-slate-50 align-top"><td class="p-3"><b class="whitespace-nowrap text-slate-700">${cesBookEsc_(item.dateLabel||'-')}</b><div class="text-[9px] text-slate-400 mt-1 whitespace-nowrap">${cesBookEsc_(item.timeLabel||'')}</div></td><td class="p-3"><span class="inline-flex px-2 py-1 rounded-full border text-[9px] font-black ${cesVanTeamBadge_(item.team)}">${cesBookEsc_(item.team||'MNG')}</span></td><td class="p-3 min-w-[330px]"><b class="text-slate-800">${title}</b><div class="mt-1 text-slate-500 whitespace-normal leading-relaxed">${cesBookEsc_(route)}</div></td><td class="p-3 min-w-[150px]"><b>${Number(item.days||0)} calendar day(s)</b><div class="text-[9px] text-slate-400 mt-1">${billingDays} billed date(s)</div></td><td class="p-3 min-w-[110px] text-amber-700 font-black">${cesVanMoney_(item.cost)}</td><td class="p-3 w-[115px] max-w-[115px] text-slate-500 leading-relaxed break-words">${details||'-'}</td></tr>`;
+    return `<tr class="hover:bg-slate-50 align-top"><td class="p-3"><b class="whitespace-nowrap text-slate-700">${cesBookEsc_(item.dateLabel||'-')}</b><div class="text-[9px] text-slate-400 mt-1 whitespace-nowrap">${cesBookEsc_(item.timeLabel||'')}</div></td><td class="p-3"><span class="inline-flex px-2 py-1 rounded-full border text-[9px] font-black ${cesVanTeamBadge_(item.team)}">${cesBookEsc_(item.team||'MNG')}</span></td><td class="p-3 min-w-[330px]"><b class="text-slate-800">${title}</b><div class="mt-1 text-slate-500 whitespace-normal leading-relaxed">${cesBookEsc_(route)}</div>${link}</td><td class="p-3 min-w-[250px]"><b>${Number(item.days||0)} calendar day(s)</b><div class="text-[9px] text-slate-400 mt-1">${billingDays} billed date(s): departure / return</div><div class="text-amber-700 font-black mt-1">${cesVanMoney_(item.cost)}</div></td><td class="p-3 w-[115px] max-w-[115px] text-slate-500 leading-relaxed break-words">${details||'-'}</td></tr>`;
   }).join('')+'</tbody></table></div>';
 }
 window.cesVanOpenCalendarEvent=function(url){var value=String(url||'').trim();if(!value)return;var popup=window.open(value,'_blank','noopener,noreferrer');if(!popup)window.location.href=value;};
@@ -1576,10 +1577,12 @@ async function loadVanBookingDashboard(force){
       if(requestId!==CES_VAN_V55.requestSeq)return null;
       CES_VAN_V55.forceFrameRefresh=false;
       if(snapshot&&snapshot.success){renderVanBookingDashboard_(snapshot);cesVanSetText_('van-filter-note-v55','Saved data · resyncing automatically…');window.setTimeout(function(){loadVanBookingDashboard(false).catch(function(){});},5000);return snapshot;}
-      var empty={success:true,events:[],availableDates:[],summary:{totalJobs:0,totalDays:0,totalBillingDays:0,totalCost:0,teamCounts:{}},year:year,month:month,selectedTeam:team,dataSource:'VAN_BOOKING_SHEET',generatedAt:''};renderVanBookingDashboard_(empty);
+      const explanation='The embedded Google Calendar uses the signed-in browser account, but Van Job List Details is loaded by the Apps Script deployment account. The patch also tries the public ICS feed; if both sources are unavailable, share the calendar with the deployment account using “See all event details”.';
+      if(root)root.innerHTML=`<div class="py-12 px-5 text-center text-red-500"><i class="fas fa-triangle-exclamation text-3xl mb-3"></i><div class="font-black">Van job details unavailable</div><div class="text-xs mt-2 text-slate-500">${cesBookEsc_(error.message||String(error))}</div><div class="text-[10px] mt-3 text-slate-400">${cesBookEsc_(explanation)}</div><button class="mt-4 px-3 py-2 rounded-xl bg-red-50 text-red-600 font-black text-xs" onclick="loadVanBookingDashboard(true)">Retry</button></div>`;
+      if(availableRoot)availableRoot.innerHTML='<div class="py-12 text-center text-slate-400"><i class="fas fa-calendar-xmark text-3xl text-slate-300 mb-3"></i><div class="font-bold">Availability cannot be calculated</div></div>';
       cesVanSetText_('van-list-count-v55','0 events');cesVanSetText_('van-available-count-v56','0 dates');
-      cesVanSetText_('van-filter-note-v55','Van booking records are empty. Use Refresh to sync again.');
-      return empty;
+      cesVanSetText_('van-filter-note-v55','Resync failed · '+(error.message||String(error)));
+      throw error;
     }finally{
       if(requestId===CES_VAN_V55.requestSeq)CES_VAN_V55.loading=false;
     }
@@ -1607,18 +1610,20 @@ function exportVanBookingExcel(){
 window.exportVanBookingExcel=exportVanBookingExcel;
 
 function initVanBookingCalendar(){
+  cesVanInitFilters_();
   const frame=document.getElementById('van-google-calendar-v55');
   if(frame){
     frame.dataset.baseSrc=frame.dataset.baseSrc||frame.dataset.src||frame.getAttribute('src')||'';
     CES_VAN_V55.baseEmbedUrl=CES_VAN_V55.baseEmbedUrl||frame.dataset.baseSrc;
   }
-  return Promise.resolve({success:true,mode:'GOOGLE_CALENDAR_ONLY'});
+  const period=cesVanSelectedPeriod_();
+  cesVanSetCalendarPeriod_(period.year,period.month);
+  loadVanBookingDashboard(false).catch(function(){});
 }
 function refreshVanBookingCalendar(button){
   const btn=button||document.getElementById('van-refresh-v55');if(btn){btn.disabled=true;btn.classList.add('animate-spin');}
-  const frame=document.getElementById('van-google-calendar-v55');
-  if(frame){var base=frame.dataset.baseSrc||frame.dataset.src||frame.getAttribute('src')||'';frame.src=base+(base.indexOf('?')>=0?'&':'?')+'_refresh='+Date.now();}
-  return new Promise(function(resolve){window.setTimeout(function(){if(btn){btn.disabled=false;btn.classList.remove('animate-spin');}resolve({success:true,mode:'GOOGLE_CALENDAR_ONLY'});},450);});
+  CES_VAN_V55.forceFrameRefresh=true;
+  return loadVanBookingDashboard(true).catch(function(){return null;}).finally(()=>{if(btn){btn.disabled=false;btn.classList.remove('animate-spin');}});
 }
 window.initVanBookingCalendar=initVanBookingCalendar;
 window.refreshVanBookingCalendar=refreshVanBookingCalendar;

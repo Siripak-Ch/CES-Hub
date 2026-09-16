@@ -1,17 +1,12 @@
 /* ============================================================
    CES Stock Pro V3 — Stock_Check_java.html
 ============================================================ */
-let SC = { mode:'CHECK-IN', logs:[], devices:[], devicesLoaded:false };
+let SC = { mode:'CHECK-IN', logs:[] };
 
 function initStockCheckModule(force=false){
   spEnsureStyle();
   sc_loadLogs(force===true);
-  sc_loadDeviceOptions(force===true);
   if(force===true&&window.CES_API&&typeof window.CES_API.callFunction==='function')window.CES_API.callFunction('sc_getAccessoryLookupOptions',[],{transport:'jsonp',timeoutMs:30000}).catch(function(){});
-}
-function sc_loadDeviceOptions(force=false){
-  if(SC.devicesLoaded&&!force)return;
-  window.CES_API.callFunction('sc_getDeviceLookupOptions',[],{transport:'jsonp',timeoutMs:30000,dedupe:!force,priority:'active',module:'stock_check'}).then(function(res){if(res&&res.success){SC.devices=res.data||[];SC.devicesLoaded=true;}}).catch(function(e){console.warn('[Check Stock preload]',e);});
 }
 function sc_setMode(mode){
   SC.mode=mode;
@@ -25,10 +20,6 @@ function sc_setMode(mode){
 function sc_lookup(){
   const q=spVal('scKeyword','').trim();
   if(!q){Swal.fire('กรุณากรอกรหัส','','info');return;}
-  if(SC.devicesLoaded){
-    const needle=q.toUpperCase(),rows=(SC.devices||[]).filter(d=>[d.idCode,d.sn,d.serialNumber,d.model].join(' ').toUpperCase().includes(needle)).slice(0,20);
-    sc_renderResult(rows);if(rows.length===1)setTimeout(()=>sc_openResultPopup(rows[0]),30);return;
-  }
   spSetHtml('scResult','<div class="stockpro-card"><div class="sp-muted">กำลังค้นหา...</div></div>');
   google.script.run.withSuccessHandler(res=>{
     if(!res||!res.success){Swal.fire('Check Stock Error',(res&&res.message)||'Lookup failed','error');return;}
@@ -73,7 +64,7 @@ function sc_field(k,v){return `<div class="sp-field"><div class="k">${spEsc(k)}<
 function sc_record(idCode,action,payload={}){
   const p=Object.assign({action,idCode},payload);
   google.script.run.withSuccessHandler(res=>{
-    if(res&&res.success){Swal.fire('สำเร็จ',res.message,'success');SC.devicesLoaded=false;sc_loadDeviceOptions(true);setTimeout(sc_lookup,350);sc_loadLogs();}
+    if(res&&res.success){Swal.fire('สำเร็จ',res.message,'success');sc_lookup();sc_loadLogs();}
     else Swal.fire('ไม่สำเร็จ',(res&&res.message)||'Action failed','error');
   }).withFailureHandler(err=>Swal.fire('Error',err.message||String(err),'error')).sc_recordCheckAction(p);
 }

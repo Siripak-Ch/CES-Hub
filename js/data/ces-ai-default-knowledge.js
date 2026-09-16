@@ -535,7 +535,7 @@ window.CES_AI_DEFAULT_KNOWLEDGE = [
       "calendar",
       "available dates"
     ],
-    "answer": "เข้า Van Booking เลือก Year, Month และ Team จากนั้นดู Van Booking Calendar, Van Job List Details และ Available Dates กด Today เพื่อกลับมาวันปัจจุบัน",
+    "answer": "เข้า Van Booking เพื่อดูปฏิทิน Google Calendar โดยตรง หรือกด Book Van เพื่อส่งแบบฟอร์มจองรถ",
     "targetTab": "van_booking",
     "allowedRoles": [],
     "allowedTeams": [],

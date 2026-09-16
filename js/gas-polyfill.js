@@ -589,15 +589,8 @@
     return /(save|create|update|delete|clear|sync|submit|record|process|send|upload|import|bulk|approve|reject|checkout|return|complete|extend|restock|issue|adjust|mark|edit|link|write)/i.test(String(fnName || ''));
   }
 
-  function isFastReadFunction(fnName) {
-    return /^(?:getNotificationAutomationConfig|getVanBookingDashboard|getMemoWorkOrderDashboard|si_getStockInventoryData|sd_getStockDashboardData|sc_lookupStockDevice|sc_getAccessoryLookupOptions|sc_getDeviceLookupOptions|getDocumentReviewPlan|getAuditLogData)$/i.test(String(fnName||''));
-  }
-
   function shouldUseIframe(fnName, args, options) {
     if (options && options.transport === 'jsonp') return false;
-    /* These endpoints are deliberately compact/read-only. Never put them in a
-       hidden iframe: third-party frame restrictions were reported as API timeouts. */
-    if (isFastReadFunction(fnName)) return false;
     if (options && options.transport === 'iframe') return true;
 
     const testUrl = buildJsonpUrl(fnName, args || [], 'x');

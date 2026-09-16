@@ -28,7 +28,7 @@ window.CES_CONFIG = {
   },
 
   DEBUG: false,
-  RELEASE: 'CES-HUB-V30.0.39-INVENTORY-TE-AUDIT-NOTIFICATION',
+  RELEASE: 'CES-HUB-V30.0.40-VAN35-TE-INVENTORY-AUDIT-NOTIFICATION-LINE',
 
   // External links are kept in one place. Config sheet values override these defaults at runtime.
   EXTERNAL_LINKS: {
