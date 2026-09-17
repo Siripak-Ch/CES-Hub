@@ -179,7 +179,7 @@ function fillUserInfoRM() {
     const ccInput = document.getElementById('rm-costCenter');
     if (ccInput && !ccInput.value) {
         const raw = costCenterValue.replace(/\D/g,'');
-        ccInput.value = RM_ALLOWED_COST_CENTERS_V3015.includes(raw) ? raw : (RM_OLD_COST_CENTER_MAP_V3015[raw] || RM_TEAM_COST_CENTER_V3015[String(targetCode || staffTeam || '').toUpperCase()] || '');
+        ccInput.value = '106067';
     }
 }
     function initReportManage() {
