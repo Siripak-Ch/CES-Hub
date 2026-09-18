@@ -293,14 +293,14 @@
 
 
 
-      window.CES_BUILD_HASH = 'CES-HUB-V30.0.37-20260909';
+      window.CES_BUILD_HASH = 'CES-HUB-V30.0.43-20260918';
       window.CES_BUILD_VERSION = 'LATEST';
 
       // CES_V221_CACHE_MIGRATION: force fresh shell/config/permissions after a release.
       try {
         var cesPrevBuildV221 = localStorage.getItem('CES_LAST_BUILD_HASH_V222') || '';
         if (cesPrevBuildV221 !== window.CES_BUILD_HASH) {
-          ['ces_role_permissions_v21','ces_system_settings_v21','CES_CORE_DATA_CACHE_V20'].forEach(function(k){ try{ localStorage.removeItem(k); }catch(ignore){} });
+          ['ces_role_permissions_v21','ces_system_settings_v21','CES_CORE_DATA_CACHE_V20','CES_STOCK_SNAPSHOT_STABLE','CES_STOCK_SNAPSHOT_V6','CES_STOCK_SNAPSHOT_V39_ACCESSORIES_AA','CES_STOCK_DASHBOARD_CACHE_V17','CES_STOCK_DASHBOARD_CACHE_V15'].forEach(function(k){ try{ localStorage.removeItem(k); }catch(ignore){} });
           try { sessionStorage.removeItem('CES_CAR_WORKSPACE_V204'); } catch(ignore2) {}
           localStorage.setItem('CES_LAST_BUILD_HASH_V222', window.CES_BUILD_HASH);
         }
