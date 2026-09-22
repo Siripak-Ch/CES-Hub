@@ -296,3 +296,19 @@
   var mRefresh=w.memoWorkOrderRefresh;if(typeof mRefresh==='function'){w.memoWorkOrderRefresh=function(force){if(force!==false){Object.keys(localStorage).forEach(function(k){if(/^CES_MWO_SNAPSHOT_V/i.test(k))try{localStorage.removeItem(k);}catch(e){}});Object.keys(sessionStorage).forEach(function(k){if(/^CES_MWO_SNAPSHOT_V/i.test(k))try{sessionStorage.removeItem(k);}catch(e){}});}return mRefresh.apply(this,arguments);};}
   if(typeof w.initMemoWorkOrder==='function'){var mInit=w.initMemoWorkOrder;w.initMemoWorkOrder=function(force){return mInit.call(this,true);};}
 })(window,document);
+
+
+/* V30.0.45 — Infusion cart fixed directly above AI CES launcher. */
+(function(w,d){'use strict';
+  function place(){var cart=d.getElementById('sdCartFabCurrent');if(!cart)return;cart.style.setProperty('position','fixed','important');cart.style.setProperty('right','18px','important');cart.style.setProperty('bottom','78px','important');cart.style.setProperty('left','auto','important');cart.style.setProperty('top','auto','important');cart.style.setProperty('width','52px','important');cart.style.setProperty('height','52px','important');cart.style.setProperty('border-radius','999px','important');cart.style.setProperty('z-index','10015','important');}
+  place();try{new MutationObserver(place).observe(d.body,{childList:true,subtree:true});}catch(e){}w.addEventListener('load',place);
+})(window,document);
+
+/* V30.0.45 — Calendar visible-month Sync: force server refresh, clear stale
+ * client snapshot, then re-read Calendar_Summary and redraw the active month. */
+(function(w,d){'use strict';var old=w.CES_refreshCalendarMonth;if(typeof old!=='function')return;
+  w.CES_refreshCalendarMonth=function(options){options=options&&typeof options==='object'?options:{};var y=Number(options.year||0),m=Number(options.month||0),label=(y&&m)?(String(y)+'-'+String(m).padStart(2,'0')):'selected month';
+    try{if(typeof localStorage!=='undefined'){['CES_CORE_DATA_V20','CES_CORE_DATA_V10','CES_ALLDATA_V1','CES_ALLDATA_V10','CES_ALLDATA_V11'].forEach(function(k){try{localStorage.removeItem(k);}catch(e){}});}}catch(e2){}
+    return Promise.resolve(old({year:y,month:m,force:true})).then(function(rows){if(!Array.isArray(rows))throw new Error('Calendar sync did not return Calendar_Summary data for '+label+'.');try{if(typeof initCalendar==='function')initCalendar(rows);}catch(e3){}return rows;}).catch(function(err){if(w.Swal)w.Swal.fire({icon:'error',title:'Calendar Sync',text:err&&err.message?err.message:String(err),confirmButtonColor:'#003DA5'});throw err;});
+  };
+})(window,document);
