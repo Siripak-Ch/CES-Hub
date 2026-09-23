@@ -144,7 +144,10 @@
             renderManagementOverviewDashboard();
             cesLoadCoreDataOnDemand_();
         }
-        else if (tab === 'calendar') cesRefreshCalendar_(false,typeof getCalendarSyncTarget==='function'?getCalendarSyncTarget():null);
+        else if (tab === 'calendar') {
+            if(typeof initCalendar==='function')initCalendar(globalCalData);
+            cesRunWhenForegroundIdle_(function(){cesRefreshCalendar_(false,typeof getCalendarSyncTarget==='function'?getCalendarSyncTarget():null);},900,5000);
+        }
         else if (tab === 'yearly'        && typeof renderYearlyStats === 'function') { cesLoadCoreDataOnDemand_().then(function(){renderYearlyStats(globalYearlyStats, globalConfig);}); }
         else if (tab === 'checkin'       && typeof initCheckin === 'function') initCheckin();
         else if (tab === 'revenue'       && typeof loadRevenueData === 'function') loadRevenueData();

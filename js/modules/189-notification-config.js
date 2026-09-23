@@ -55,6 +55,6 @@ w.exportNotificationConfigExcel=function(){
 };
 
 function saveNotificationCard(i,btn){if(state.saving)return state.saving;var rows=collect().rows,row=rows[Number(i)];if(!row)return Promise.resolve();var old=btn&&btn.innerHTML;if(btn){btn.disabled=true;btn.innerHTML='<i class=\"fas fa-circle-notch fa-spin\"></i>';}saveState('Saving card…','saving');if(w.Swal)w.Swal.fire({title:'Saving Notification Config…',text:'Writing configuration to Config sheet',allowOutsideClick:false,showConfirmButton:false,didOpen:function(){w.Swal.showLoading();}});state.saving=api('saveNotificationAutomationCard',[{adminTo:String((d.getElementById('nc-admin-to')||{}).value||'').trim(),row:row}],{transport:'iframe',timeoutMs:120000}).then(function(r){if(!r||r.success===false)throw new Error(r&&r.message||'Save failed');state.dirty=false;render(r);writeSnapshot(r);saveState('Saved to Config','saved');if(w.Swal)w.Swal.fire({icon:'success',title:'Save Finished',text:row.name+' · Config sheet updated and verified',timer:1600,showConfirmButton:false});return r;}).catch(function(e){saveState('Save error','error');if(w.Swal)w.Swal.fire('Notification Config',e.message||String(e),'error');return{success:false,message:e.message||String(e)};}).finally(function(){state.saving=null;if(btn){btn.disabled=false;btn.innerHTML=old;}});return state.saving;}
+w.saveNotificationCard=saveNotificationCard;
 })(window,document);
-
 
