@@ -4831,3 +4831,9 @@ body,input,select,textarea,button,table,th,td,.swal2-container,.swal2-popup,.swa
   .ces-vehicle-action span{max-width:112px}.ces-mwo-v3030-title h1,#view-inventory h2,#view-stock_dashboard h2{font-size:17px!important;line-height:1.2!important}
   .mwo-team-cost-cards{grid-template-columns:1fr!important}.swal2-title{font-size:20px!important}.swal2-actions{width:100%!important;padding:0 10px!important}.swal2-confirm,.swal2-cancel{flex:1 1 120px!important}
 }
+/* CES Hub current Daily Jobs card guardrails: keep IN/OUT inside every card. */
+#view-checkin #job-list-container{align-items:stretch}
+#view-checkin .ces-checkin-job-card{min-width:0;overflow:hidden}
+#view-checkin .ces-checkin-job-card>div:last-child{grid-template-columns:minmax(0,1fr) minmax(0,1fr)!important;width:100%}
+#view-checkin .ces-checkin-job-card>div:last-child button{min-width:0;width:100%;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;padding-left:.4rem!important;padding-right:.4rem!important}
+@media(max-width:420px){#view-checkin #job-list-container{grid-template-columns:1fr!important}#view-checkin .ces-checkin-job-card>div:last-child button{font-size:.625rem!important}}
