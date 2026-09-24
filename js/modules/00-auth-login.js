@@ -179,9 +179,6 @@ window.cesHydrateLoginMemory = cesHydrateLoginMemory;
     }
 
     function cesLoginApi(userId) {
-        // V24.9: hedge the normal JSONP login with a delayed POST/poll request.
-        // This avoids a single transport hanging for 30+ seconds in mobile/LIFF while
-        // keeping login read-only and idempotent. Whichever valid response arrives first wins.
         if (window.CES_API && typeof window.CES_API.callFunction === 'function') {
             return new Promise((resolve, reject) => {
                 let settled = false;
@@ -218,18 +215,17 @@ window.cesHydrateLoginMemory = cesHydrateLoginMemory;
                     }).then(finishOk).catch(finishErr);
                 }
 
-                launch('jsonp', 24000);
+                launch('jsonp', 12000);
                 timers.push(setTimeout(() => {
                     if (!settled) {
-                        cesLoginStatus('Connection is slower than usual — retrying securely…', 'warning');
-                        launch('iframe', 42000);
+                        launch('iframe', 18000);
                     }
-                }, 1800));
+                }, 600));
                 timers.push(setTimeout(() => {
                     if (settled) return;
                     settled = true;
                     reject(lastError || new Error('CES Hub login service did not respond. Please retry.'));
-                }, 46000));
+                }, 20000));
             });
         }
 
@@ -335,10 +331,10 @@ window.cesHydrateLoginMemory = cesHydrateLoginMemory;
     //  REGISTER MODAL
     // ──────────────────────────────────────────────────────────────────
     function cesResetRegisterForm() {
-        const ids = ['reg-id','reg-name-th','reg-name-eng','reg-email','reg-costCenter','reg-supervisor','reg-empType','reg-tel'];
+        const ids = ['reg-id','reg-name-th','reg-name-eng','reg-email','reg-position','reg-costCenter','reg-supervisor','reg-empType','reg-tel'];
         ids.forEach(id => { const el=document.getElementById(id); if(el) el.value=''; });
         const team=document.getElementById('reg-team'); if(team) team.value='';
-        const level=document.getElementById('reg-position'); if(level) level.value='';
+        const level=document.getElementById('reg-role'); if(level) level.value='';
     }
 
     function openRegisterModal() {
@@ -361,14 +357,14 @@ window.cesHydrateLoginMemory = cesHydrateLoginMemory;
             email:       String(document.getElementById('reg-email').value || '').trim(),
             team:        document.getElementById('reg-team').value,
             position:    document.getElementById('reg-position').value,
-            requestedRole: document.getElementById('reg-position').value,
+            requestedRole: document.getElementById('reg-role').value,
             costCenter:  String(document.getElementById('reg-costCenter').value || '').trim(),
             supervisor:  String(document.getElementById('reg-supervisor').value || '').trim(),
             empType:     String(document.getElementById('reg-empType').value || '').trim(),
             tel:         String(document.getElementById('reg-tel').value || '').trim()
         };
 
-        if (!form.id || !form.name_th || !form.name_eng || !form.email || !form.team || !form.position) {
+        if (!form.id || !form.name_th || !form.name_eng || !form.email || !form.team || !form.position || !form.requestedRole) {
             Swal.fire(
                 'Missing Information',
                 'Please fill in all required fields highlighted in red.',
