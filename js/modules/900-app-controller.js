@@ -101,8 +101,9 @@
     }
     function cesScheduleCalendarBackgroundSync_(){
         if(CES_CALENDAR_IDLE_SCHEDULED)return;
+        try{var last=Number(localStorage.getItem('CES_CALENDAR_BACKGROUND_SYNC_AT')||0);if(last&&Date.now()-last<21600000)return;}catch(ignoreLastSync){}
         CES_CALENDAR_IDLE_SCHEDULED=true;
-        cesRunWhenForegroundIdle_(function(){cesSyncCalendarRuntime_(false);},7500,12000);
+        cesRunWhenForegroundIdle_(function(){cesSyncCalendarRuntime_(false,false).then(function(result){if(result)try{localStorage.setItem('CES_CALENDAR_BACKGROUND_SYNC_AT',String(Date.now()));}catch(ignoreStoreSync){}});},30000,12000);
     }
     function cesSyncCalendarRuntime_(force, foreground, target){
         if(CES_CALENDAR_SYNC_PROMISE && !force) return CES_CALENDAR_SYNC_PROMISE;
@@ -119,8 +120,11 @@
     function cesRefreshCalendar_(force,target){
         if(typeof initCalendar==='function')initCalendar(globalCalData);
         if(!window.CES_API||typeof window.CES_API.callFunction!=='function')return Promise.resolve(null);
-        return cesSyncCalendarRuntime_(!!force,true,target).then(function(){
-            return window.CES_API.callFunction('getCalendarData',[true],{transport:'jsonp',timeoutMs:60000,dedupe:false,priority:'active',userAction:true,module:'calendar'});
+        var read=function(refresh){return window.CES_API.callFunction('getCalendarData',[!!refresh],{transport:'jsonp',timeoutMs:60000,dedupe:!refresh,priority:'active',userAction:true,module:'calendar'});};
+        var request=force?cesSyncCalendarRuntime_(true,true,target).then(function(){return read(true);}):read(false);
+        return request.then(function(rows){
+            if(!force)cesScheduleCalendarBackgroundSync_();
+            return rows;
         }).then(function(rows){
             if(Array.isArray(rows)){globalCalData=rows;if(typeof initCalendar==='function')initCalendar(globalCalData);try{var cache=JSON.parse(localStorage.getItem(CES_CORE_CACHE_KEY_V20)||'{}');if(cache.data){cache.data.calSummary=rows;cache.at=Date.now();localStorage.setItem(CES_CORE_CACHE_KEY_V20,JSON.stringify(cache));}}catch(ignore){}}
             return rows;
@@ -985,7 +989,7 @@
           // website Calendar maintenance sync start only after foreground work is idle.
           var status=document.getElementById('lastUpdateText');if(status)status.innerHTML='<i class="fas fa-check-circle text-[#003DA5]"></i> Active';
           cesScheduleDeferredModules_();
-          cesScheduleCalendarBackgroundSync_();
+          if(start==='calendar')cesScheduleCalendarBackgroundSync_();
         });
     }
 

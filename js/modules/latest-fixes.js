@@ -195,9 +195,9 @@
   function user(){var x=w.currentUser||w.CES_CURRENT_USER||w.loggedInUser||{};return{name:x.name_th||x.nameTh||x.thaiName||x.name||x.name_eng||'',id:String(x.id||x.userId||x.userid||x.empId||x.employeeId||''),email:x.email||'',team:x.team||'',costCenter:String(x.costCenter||x.cost_center||'')};}
   function cart(){return typeof SI!=='undefined'&&Array.isArray(SI.cart)?SI.cart:[];}function acCost(x){return num(x.cost||x.unitCost||x.unit_cost||x.costea||x['Cost/ea']||0);}function acQty(x){return Math.max(1,num(x.issueQty||x.qty||1));}
   function renderInventoryCart(){
-    var root=d.getElementById('siCartItems');if(!root)return;var c=cart(),grand=0,html='';
+    var root=d.getElementById('siCartItems');if(!root)return;var c=cart(),subtotal=0,html='';
     c.forEach(function(x,i){
-      var a=x.kind==='accessory',q=a?acQty(x):1,unit=a?acCost(x):0,total=unit*q;grand+=total;
+      var a=x.kind==='accessory',q=a?acQty(x):1,unit=a?acCost(x):0,total=unit*q;subtotal+=total;
       var title=a?(x.itemName||x.name||x.accessoryId||'-'):(x.idCode||x.sn||'-');
       var sub=a?('Accessory • '+(x.team||'-')+' • Qty '+q+' pcs'):((x.brand||'-')+' '+(x.model||x.itemName||'-')+' • SN '+(x.sn||'-'));
       html+='<div class="sp-cart-detail-card"><div class="sp-cart-detail-title">'+(a?'🔌 ':'⚙️ ')+esc(title)+'</div><div class="sp-cart-detail-sub">'+esc(sub)+'</div>';
@@ -205,8 +205,8 @@
       html+='<button class="sp-btn ghost" style="margin-top:7px;padding:6px 10px" onclick="SI.cart.splice('+i+',1);si_updateCart()"><i class="fas fa-times"></i> Remove</button></div>';
     });
     root.innerHTML=html||'<div class="sp-muted text-center py-10">ตะกร้าว่าง</div>';
-    var eq=c.filter(function(x){return x.kind==='equipment';}).length,aq=c.filter(function(x){return x.kind==='accessory';}).reduce(function(sum,x){return sum+acQty(x);},0),sum=d.getElementById('siCartDetailSummary');
-    if(sum)sum.innerHTML='<div class="sp-cart-detail-card"><b>Accessories Check-Out Summary</b><div class="sp-cart-detail-sub">Equipment '+eq+' รายการ · Accessories '+aq+' pcs</div><div style="margin-top:8px;text-align:right;font-size:18px;font-weight:1000;color:#0756b8">Total Cost: ฿'+money(grand)+'</div></div>';
+    var eq=c.filter(function(x){return x.kind==='equipment';}).length,aq=c.filter(function(x){return x.kind==='accessory';}).reduce(function(sum,x){return sum+acQty(x);},0),vat=Math.round(subtotal*0.07*100)/100,grand=Math.round((subtotal+vat)*100)/100,sum=d.getElementById('siCartDetailSummary');
+    if(sum)sum.innerHTML='<div class="sp-cart-detail-card"><b>Accessories Check-Out Summary</b><div class="sp-cart-detail-sub">Equipment '+eq+' รายการ · Accessories '+aq+' pcs</div><div style="margin-top:8px;display:grid;grid-template-columns:1fr auto;gap:5px 12px;font-size:13px"><span>Subtotal</span><b>฿'+money(subtotal)+'</b><span>VAT 7%</span><b>฿'+money(vat)+'</b><span style="font-size:16px;font-weight:900;color:#0756b8">Grand Total</span><b style="font-size:18px;color:#0756b8">฿'+money(grand)+'</b></div></div>';
     var titleEl=d.querySelector('#siCartDrawer .ces-checkout-head-v3025 h2');if(titleEl)titleEl.textContent='Accessories Check-Out';var icon=d.querySelector('#siCartDrawer .ces-checkout-head-icon-v3025 i');if(icon)icon.className='fas fa-plug';
   }
 
