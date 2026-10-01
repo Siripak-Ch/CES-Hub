@@ -198,7 +198,6 @@
     const CES_AUTH_SESSION_KEY_V50 = 'CES_AUTH_SESSION_V50';
     const CES_LAST_USAGE_KEY_V50 = 'CES_LAST_USAGE_V50';
     const CES_AUTH_SESSION_TTL_V50 = 30 * 24 * 60 * 60 * 1000;
-    const CES_LINE_FAST_SESSION_TTL_V48 = 24 * 60 * 60 * 1000;
     const CES_ACTIVE_TAB_KEY_V60 = 'CES_ACTIVE_TAB_V60';
     const CES_VALID_TABS_V60 = ['portal','management_overview','yearly','revenue','ot','service','report','memo_workorder','calendar','checkin','car_booking','van_booking','weekly','report_manage','te_generate','kpi','stock_dashboard','inventory','check_stock','team_information','team_plan','master_cal_pm_plan','audit_log','monthly_report','users','ces_evaluation','ces_ai_knowledge','setting','notification_config','health'];
     let cesUsageHeartbeatV50 = null;
@@ -1269,56 +1268,34 @@
 
             pendingLineIdToken = idToken;
 
-            // A LIFF page is opened repeatedly from the Rich Menu. When the
-            // verified LINE account is unchanged, restore the cached CES user
-            // immediately and revalidate silently in the background. This
-            // removes the Apps Script round trip from normal LINE navigation
-            // without ever reusing a session from a different LINE userId.
-            const rememberedLineSession = cesReadRememberedSession_();
-            const rememberedLineUser = rememberedLineSession && rememberedLineSession.user;
-            const rememberedLineId = String(rememberedLineUser && rememberedLineUser.lineUserId || '').trim();
-            const rememberedVerifiedAt = Date.parse(rememberedLineUser && rememberedLineUser._lineVerifiedAt || 0) || 0;
-            const canFastRestoreLine = !!(
-                lineUserId && rememberedLineUser && rememberedLineUser.id &&
-                rememberedLineId === lineUserId &&
-                rememberedVerifiedAt && Date.now() - rememberedVerifiedAt < CES_LINE_FAST_SESSION_TTL_V48
-            );
-
-            function verifyLineAccount_(backgroundOnly) {
-                google.script.run
-                    .withSuccessHandler((res) => {
-                        if (res && res.success && res.user) {
-                            res.user._lineVerifiedAt = new Date().toISOString();
-                            cesStoreCurrentUser_(res.user);
-                            cesPersistSession_(res.user, cesRememberedTab_() || 'portal', 'LINE_VERIFIED');
-                            if (res.user.id) localStorage.setItem('ces_last_employee_id', String(res.user.id));
-                            if (!backgroundOnly) onLoginSuccess(res.user, true, 'LINE_AUTO_LOGIN');
-                        } else if (!backgroundOnly) {
-                            pendingLineProfile = { userId: lineUserId, displayName: lineName || 'LINE User' };
-                            showLoginForm();
-                            if (typeof refreshLineNotice === 'function') refreshLineNotice();
-                        }
-                    })
-                    .withFailureHandler((err) => {
-                        console.error('[LIFF] checkUserByLineToken error:', err && err.message ? err.message : err);
-                        if (backgroundOnly) return;
+            // IMPORTANT Clean Release: gas-polyfill forces this credential call through POST.
+            google.script.run
+                .withSuccessHandler((res) => {
+                    if (res && res.success && res.user) {
+                        console.log('[LIFF] Verified auto-login for empId:', res.user.id);
+                        cesStoreCurrentUser_(res.user);
+                        if (res.user && res.user.id) localStorage.setItem('ces_last_employee_id', String(res.user.id));
+                        onLoginSuccess(res.user, true, 'LINE_AUTO_LOGIN');
+                    } else {
+                        console.log('[LIFF] No linked CES account — Employee ID required once.');
                         pendingLineProfile = { userId: lineUserId, displayName: lineName || 'LINE User' };
                         showLoginForm();
                         if (typeof refreshLineNotice === 'function') refreshLineNotice();
-                        Swal.fire({icon:'warning',title:'LINE connection needs attention',text:'LINE identity could not be verified automatically. You can sign in with Employee ID and retry after the backend is deployed.',confirmButtonColor:'#004aad'});
-                    })
-                    .checkUserByLineToken(idToken);
-            }
-
-            if (canFastRestoreLine) {
-                pendingLineProfile = null;
-                onLoginSuccess(rememberedLineUser, true, 'LINE_SESSION_RESTORED');
-                setTimeout(function(){ verifyLineAccount_(true); }, 50);
-                return;
-            }
-
-            // IMPORTANT Clean Release: gas-polyfill forces this credential call through POST.
-            verifyLineAccount_(false);
+                    }
+                })
+                .withFailureHandler((err) => {
+                    console.error('[LIFF] checkUserByLineToken error:', err && err.message ? err.message : err);
+                    pendingLineProfile = { userId: lineUserId, displayName: lineName || 'LINE User' };
+                    showLoginForm();
+                    if (typeof refreshLineNotice === 'function') refreshLineNotice();
+                    Swal.fire({
+                        icon:'warning',
+                        title:'LINE connection needs attention',
+                        text:'LINE identity could not be verified automatically. You can sign in with Employee ID and retry after the backend is deployed.',
+                        confirmButtonColor:'#004aad'
+                    });
+                })
+                .checkUserByLineToken(idToken);
 
         } catch (err) {
             console.error('[LIFF] Init error:', err);

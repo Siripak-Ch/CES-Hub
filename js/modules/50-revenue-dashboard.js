@@ -11,9 +11,6 @@ let revenueChart = null;
 let revenueCache = null;
 let revenueLoading = false;
 let currentEditTeam = '';
-const CES_REVENUE_CACHE_PREFIX_V48 = 'CES_REVENUE_DASHBOARD_V48_';
-function revenueReadLocal_(year){try{const x=JSON.parse(localStorage.getItem(CES_REVENUE_CACHE_PREFIX_V48+year)||'null');return x&&x.data&&Date.now()-Number(x.at||0)<1800000?x.data:null;}catch(e){return null;}}
-function revenueWriteLocal_(year,data){try{localStorage.setItem(CES_REVENUE_CACHE_PREFIX_V48+year,JSON.stringify({at:Date.now(),data:data}));}catch(e){}}
 
 (function initRevenueSystem() {
   // Deferred HTML is pre-created/warmed independently from business code.
@@ -72,7 +69,6 @@ function fetchRevenueDataBackground(showLoading) {
     .withSuccessHandler(function (data) {
       revenueSetLoading(false);
       revenueCache = normalizeRevenueResponse(data, year);
-      revenueWriteLocal_(year,revenueCache);
       const view = document.getElementById('view-revenue');
       if (view && !view.classList.contains('hidden')) renderRevenueFromCache();
     })
@@ -86,11 +82,7 @@ function fetchRevenueDataBackground(showLoading) {
 function loadRevenueData() {
   const selectedYear = revenueSelectedYear();
   if (revenueCache && String(revenueCache.year) === String(selectedYear)) renderRevenueFromCache();
-  else {
-    const cached = revenueReadLocal_(selectedYear);
-    if (cached) { revenueCache = normalizeRevenueResponse(cached, selectedYear); renderRevenueFromCache(); fetchRevenueDataBackground(false); }
-    else fetchRevenueDataBackground(true);
-  }
+  else fetchRevenueDataBackground(true);
 }
 
 function forceReloadRevenue() {

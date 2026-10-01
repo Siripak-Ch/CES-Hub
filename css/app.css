@@ -4945,7 +4945,7 @@ body,input,select,textarea,button,table,th,td,.swal2-container,.swal2-popup,.swa
 #view-checkin .ces-checkin-card-actions{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:7px!important;padding-top:8px!important;border-top:1px solid #eef2f7!important}
 #view-checkin .ces-checkin-card-actions button{display:flex!important;width:100%!important;min-width:0!important;min-height:40px!important;position:relative!important;z-index:2!important;pointer-events:auto!important;font-size:10px!important;touch-action:manipulation!important}
 #view-checkin #actionModal>div{max-height:calc(100dvh - 24px)!important;overflow-y:auto!important}
-@media(max-width:900px){#view-checkin #job-list-container{grid-template-columns:repeat(2,minmax(0,1fr))!important}}
+@media(max-width:1100px){#view-checkin #job-list-container{grid-template-columns:repeat(2,minmax(0,1fr))!important}}
 @media(max-width:700px){
   #view-checkin #job-list-container{grid-template-columns:1fr!important;max-height:none!important;overflow:visible!important;padding-right:0!important}
   #view-checkin .ces-checkin-job-card{min-height:178px!important}

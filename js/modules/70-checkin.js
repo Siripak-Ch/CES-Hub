@@ -152,13 +152,7 @@ function loadCheckinData(forceRefresh) {
     if (cached) checkinApplyData_(cached, dateStr);
     else document.getElementById('job-list-container').innerHTML = `<div class="col-span-full flex flex-col items-center justify-center py-12 text-gray-300"><i class="fas fa-circle-notch fa-spin text-3xl mb-3"></i><span class="text-xs font-bold">Loading Daily Jobs...</span></div>`;
 
-    const userCtx = {
-        id: currentUser ? (currentUser.id || currentUser.userId || currentUser.employeeId || '') : '',
-        name: currentUser ? (currentUser.name_th || currentUser.name_eng || currentUser.name || '') : '',
-        role: currentUser ? currentUser.role : 'USER',
-        team: currentUser ? (currentUser.team || 'General') : 'General',
-        forceRefresh:forceRefresh === true
-    };
+    const userCtx = { role: currentUser ? currentUser.role : 'USER', team: currentUser ? (currentUser.team || 'General') : 'General', forceRefresh:forceRefresh === true };
     const serial = ++checkinLoadSerial;
     const request = checkinApiCall_(dateStr, userCtx, forceRefresh === true);
     checkinLoadPromise = Promise.resolve(request).then(data => {
@@ -230,9 +224,7 @@ function renderJobList() {
             statusBadge = `<span class="bg-gray-100 text-gray-600 px-2 py-0.5 rounded-md text-[9px] font-bold border border-gray-200 uppercase"><i class="fas fa-clock"></i> Wait</span>`;
         }
 
-        const viewerStatus = String(job.viewerStatus || 'Wait');
-        let hasIN = viewerStatus === 'On-going';
-        const canCheckIn = viewerStatus !== 'On-going';
+        let hasIN = (statusText === 'On-going' || statusText === 'Finished');
         let outBtn = '';
         if (hasIN) {
             outBtn = `<button type="button" aria-label="Check out from this job" onclick="event.stopPropagation();openActionModal(decodeURIComponent('${encodedKey}'), 'OUT')" class="ces-checkin-out-btn py-2 bg-[#E4002B] hover:bg-[#B91C1C] text-white rounded-lg text-[9px] font-bold shadow transition-transform active:scale-95 flex items-center justify-center gap-1"><i class="fas fa-sign-out-alt"></i> OUT</button>`;
@@ -249,7 +241,7 @@ function renderJobList() {
                 <button type="button" onclick="event.stopPropagation();showDetailModal(JSON.parse(decodeURIComponent('${encodedPeople}')))" class="text-[9px] text-indigo-500 font-bold hover:bg-indigo-50 px-2 py-0.5 rounded transition-colors">View</button>
             </div>
             <div class="ces-checkin-card-actions grid grid-cols-2 gap-1.5 pt-2 border-t border-gray-50">
-                <button type="button" aria-label="Check in to this job" ${canCheckIn ? `onclick="event.stopPropagation();openActionModal(decodeURIComponent('${encodedKey}'), 'IN')"` : `onclick="event.stopPropagation();Swal.fire('Notice', 'คุณ Check-in งานนี้แล้ว กรุณากด OUT ก่อน', 'warning')"`} class="ces-checkin-in-btn py-2 ${canCheckIn ? 'bg-[#0057B8] hover:bg-[#003DA5] text-white' : 'bg-gray-200 text-gray-400'} rounded-lg text-[9px] font-bold shadow transition-transform active:scale-95 flex items-center justify-center gap-1"><i class="fas fa-sign-in-alt"></i> IN</button>
+                <button type="button" aria-label="Check in to this job" onclick="event.stopPropagation();openActionModal(decodeURIComponent('${encodedKey}'), 'IN')" class="ces-checkin-in-btn py-2 bg-[#0057B8] hover:bg-[#003DA5] text-white rounded-lg text-[9px] font-bold shadow transition-transform active:scale-95 flex items-center justify-center gap-1"><i class="fas fa-sign-in-alt"></i> IN</button>
                 ${outBtn}
             </div>
         </div>`;
