@@ -1,0 +1,94 @@
+<!-- CES Hub Stock Inventory — V26.0 Dashboard / Contract tabs -->
+<section id="view-stock_dashboard" class="hidden stockpro-page ces-stock-v5-page ces-stock-v7-page">
+  <div class="stockpro-shell">
+    <div class="stockpro-header-card">
+      <div class="stockpro-title-wrap">
+        <div class="stockpro-icon blue ces-page-header-icon-v15"><i class="fas fa-chart-pie"></i></div>
+        <div><h1>Infusion Pump Dashboard</h1></div>
+      </div>
+      <div class="stockpro-actions"><button class="sp-btn primary csv5-icon-btn ces-action-primary" onclick="sd_toggleInfusionCart()" title="Infusion Pump Checkout Cart"><i class="fas fa-shopping-cart"></i><span id="sdCartCountCurrent" class="sp-mini-badge">0</span></button>
+        <button id="sdInfusionAlertBtnV3029" class="sp-btn csv5-icon-btn ces-action-warning ces-ready-stock-alert-v263" onclick="sd_openInfusionAlerts()" title="Infusion Pump Alerts · Return, CAL/PM, Ready Stock and Contract"><i class="fas fa-bell"></i><span id="sdInfusionAlertCountV3029" class="ces-ready-stock-badge-v263">0</span></button><button class="sp-btn ghost csv5-icon-btn ces-action-neutral" onclick="initStockDashboardModule(true)" title="Refresh"><i class="fas fa-sync-alt"></i></button>
+        <a id="sdCleanInventorySourceLinkV3028" class="sp-btn ghost csv5-icon-btn ces-action-neutral" href="https://docs.google.com/spreadsheets/d/1X7f6BatQ-y5ZW6VYTv2oT34rbsCLeNgac0APt7njFrk/edit?usp=drivesdk" target="_blank" rel="noopener" title="07/09/2026 Final Stock Inventory" aria-label="07/09/2026 Final Stock Inventory"><i class="fas fa-link"></i></a>
+        <button class="sp-btn ghost csv5-icon-btn ces-action-neutral" onclick="si_triggerBulkUpload()" title="Upload latest clean Inventory workbook"><i class="fas fa-arrow-up-from-bracket"></i></button>
+        <button class="sp-btn csv5-icon-btn ces-action-excel" onclick="sd_exportSummary()" title="Export Dashboard Excel"><i class="fas fa-file-excel"></i></button>
+        <button class="sp-btn csv5-icon-btn ces-action-pdf-danger" onclick="sd_printDashboard()" title="Export Dashboard PDF"><i class="fas fa-file-pdf"></i></button>
+      </div>
+    </div>
+
+    <div class="ces-stock-tabs-v260" role="tablist" aria-label="Infusion Pump sections">
+      <button id="sdTabDashboardV260" type="button" class="active" onclick="sd_switchStockTab('dashboard')"><i class="fas fa-chart-pie"></i><span>Dashboard</span></button>
+      <button id="sdTabContractV260" type="button" onclick="sd_switchStockTab('contract')"><i class="fas fa-file-contract"></i><span>Contract</span></button><button id="sdTabEquipmentCurrent" type="button" onclick="sd_switchStockTab('equipment')"><i class="fas fa-microchip"></i><span>Equipment List</span></button>
+    </div>
+
+    <div id="sdDashboardPanelV260" class="ces-stock-tab-panel-v260">
+      <div id="sdModelCards" class="stockpro-model-grid"></div>
+
+      <div class="stockpro-filter-card csv5-dashboard-filters">
+        <div class="sp-search"><i class="fas fa-search"></i><input id="sdSearch" oninput="sd_renderFiltered()" placeholder="ค้นหา ID / SN / สถานที่"></div>
+        <select id="sdBrand" onchange="sd_onBrandChange()"><option value="all">ทุกแบรนด์</option></select>
+        <select id="sdModel" onchange="sd_renderFiltered()"><option value="all">ทุกโมเดล</option></select>
+        <select id="sdStatus" onchange="sd_renderFiltered()"><option value="all">ทุกสถานะ</option></select>
+        <select id="sdLocation" onchange="sd_renderFiltered()"><option value="all">ทุกสถานที่</option></select>
+        <button type="button" class="sp-btn ghost ces-stock-filter-reset-v226 ces-filter-reset-word-v227" onclick="sd_resetMainFilters()" title="Reset Filters" aria-label="Reset Filters"><i class="fas fa-rotate-left"></i><span>Reset Filter</span></button>
+      </div>
+
+      <div id="sdKpiGrid" class="stockpro-kpi-grid csv7-kpi-four"></div>
+
+      <div class="stockpro-two-col">
+        <div class="stockpro-card"><h3><i class="fas fa-chart-pie text-blue-500"></i> Status Share</h3><div class="stockpro-chart-box"><canvas id="sdStatusChart"></canvas></div></div>
+        <div class="stockpro-card"><h3><i class="fas fa-chart-column text-indigo-500"></i> Model × Status</h3><div class="stockpro-chart-box"><canvas id="sdModelStatusChart"></canvas></div></div>
+      </div>
+
+      <div class="stockpro-two-col">
+        <div class="stockpro-card"><h3><i class="fas fa-chart-bar text-cyan-500"></i> Brand Share</h3><div class="stockpro-chart-box"><canvas id="sdBrandChart"></canvas></div></div>
+        <div class="stockpro-card"><div class="stockpro-card-head"><h3><i class="fas fa-location-dot text-blue-500"></i> Top Location</h3><span id="sdLocationCount" class="sp-pill">0 locations</span></div><div id="sdTopLocationTable"></div></div>
+      </div>
+
+      <div class="csv7-summary-grid ces-stock-summary-single-v263">
+        <div class="stockpro-card"><h3><i class="fas fa-layer-group text-blue-500"></i> Summary by Model / Brand / Status</h3><div id="sdSummaryTable"></div></div>
+      </div>
+    </div>
+
+    <div id="sdContractPanelV260" class="ces-stock-tab-panel-v260 hidden">
+      <div class="stockpro-card csv7-contract-card">
+        <div class="stockpro-card-head csv7-contract-head">
+          <div><h3><i class="fas fa-file-contract text-blue-500"></i> รายการสัญญา / Rental Contract Summary</h3><span id="sdContractCount" class="sp-pill">0 locations</span></div>
+          <button id="sdContractExportBtn" class="sp-btn csv5-icon-btn ces-action-excel ces-contract-export-icon" onclick="sd_exportContractSummaryExcel()" title="Export Contract Excel" aria-label="Export Contract Excel"><i class="fas fa-file-excel"></i></button>
+        </div>
+        <div class="stockpro-filter-card csv7-contract-filters">
+          <div class="sp-search"><i class="fas fa-search"></i><input id="sdContractSearch" oninput="sd_renderContractSummary()" placeholder="ค้นหา Location / ID / SN / Model / Borrower"></div>
+          <select id="sdContractFilter" onchange="sd_renderContractSummary()"><option value="all">ทุกสัญญา</option><option value="active">กำลังใช้งาน</option><option value="overdue">เกินกำหนด</option></select>
+          <select id="sdContractSort" onchange="sd_renderContractSummary()"><option value="risk">Sort: Risk first</option><option value="location">Sort: Location A-Z</option><option value="due_asc">Sort: Due date ↑</option><option value="due_desc">Sort: Due date ↓</option></select>
+          <button class="sp-btn ghost" onclick="sd_resetContractFilter()"><i class="fas fa-rotate-left"></i> Reset Filter</button>
+        </div>
+        <div id="sdContractTable"></div>
+      </div>
+
+      <div class="stockpro-card ces-rental-workflow-v248 ces-rental-workflow-v260">
+        <div class="stockpro-card-head ces-rental-workflow-head-v248">
+          <div><h3><i class="fas fa-envelope-open-text text-blue-500"></i> Rental Contract Follow-up</h3><div class="ces-rental-workflow-summary-v248" id="sdRentalWorkflowSummaryV248">Loading contract workflow…</div></div>
+          <div class="ces-rental-workflow-actions-v248"><button class="sp-btn ghost ces-action-neutral csv5-icon-btn" onclick="sd_testRentalNotification()" title="Test weekly HTML email" aria-label="Test weekly HTML email"><i class="fas fa-envelope-circle-check"></i></button><button class="sp-btn soft csv5-icon-btn" onclick="sd_loadRentalWorkflow(true)" title="Refresh follow-up" aria-label="Refresh follow-up"><i class="fas fa-rotate"></i></button></div>
+        </div>
+        <div id="sdRentalWorkflowCardsV248" class="ces-rental-workflow-table-v260"><div class="sp-muted">Loading rental workflow…</div></div>
+      </div>
+    </div>
+
+    <div id="sdEquipmentPanelCurrent" class="ces-stock-tab-panel-v260 hidden"><div class="stockpro-card"><div class="stockpro-card-head"><div><h3><i class="fas fa-microchip text-blue-500"></i> Infusion Pump Equipment List</h3><span id="sdEquipmentCountCurrent" class="sp-pill">0 records</span></div><div class="stockpro-actions"><button class="sp-btn ces-action-excel csv5-icon-btn" onclick="sd_exportEquipmentExcel()" title="Export Infusion Pump sheet"><i class="fas fa-file-excel"></i></button></div></div><div class="stockpro-filter-card csv7-contract-filters"><div class="sp-search"><i class="fas fa-search"></i><input id="sdEquipmentSearchCurrent" oninput="sd_renderEquipmentListCurrent()" placeholder="ค้นหา ID / SN / Brand / Model / Location / Borrower"></div><select id="sdEquipmentBrandCurrent" onchange="sd_renderEquipmentListCurrent()"><option value="all">ทุก Brand</option></select><select id="sdEquipmentLocationCurrent" onchange="sd_renderEquipmentListCurrent()"><option value="all">ทุก Location</option></select><select id="sdEquipmentStatusCurrent" onchange="sd_renderEquipmentListCurrent()"><option value="all">ทุกสถานะ</option></select><select id="sdEquipmentRentalCurrent" onchange="sd_renderEquipmentListCurrent()"><option value="all">ทุก Rental Status</option></select><button class="sp-btn ghost" onclick="['sdEquipmentSearchCurrent','sdEquipmentBrandCurrent','sdEquipmentLocationCurrent','sdEquipmentStatusCurrent','sdEquipmentRentalCurrent'].forEach(function(id){var el=document.getElementById(id);if(el)el.value=id==='sdEquipmentSearchCurrent'?'':'all';});sd_renderEquipmentListCurrent()"><i class="fas fa-rotate-left"></i> Reset Filter</button></div><div id="sdEquipmentTableCurrent"></div><div id="sdEquipmentPaginationCurrent" class="sp-pagination"></div></div></div>
+
+    <div id="sdAlertTable" class="hidden"></div>
+    <span id="sdAlertCount" class="hidden">0</span>
+  </div>
+  <button id="sdCartFabCurrent" class="sd-cart-fab-current" type="button" onclick="sd_toggleInfusionCart()" title="Infusion Pump Checkout Cart" aria-label="Infusion Pump Checkout Cart"><i class="fas fa-shopping-cart"></i><span id="sdCartFabCountCurrent">0</span></button>
+  <div id="sdInfusionCartOverlayV41" class="hidden fixed inset-0 bg-slate-900/40 z-[182]" onclick="sd_closeInfusionCart()"></div>
+  <div id="sdInfusionCartDrawerV41" class="ces-checkout-drawer-v3025 hidden fixed top-0 w-[min(560px,100vw)] h-screen bg-white z-[183] shadow-2xl transition-all duration-300 flex-col" aria-hidden="true" style="right:-600px;display:none">
+    <div class="ces-checkout-head-v3025"><div class="flex items-center gap-3"><span class="ces-checkout-head-icon-v3025"><i class="fas fa-pump-medical"></i></span><div><h2>Infusion Pump Check-Out</h2><p><span id="sdInfusionCartCountV41">0</span> รายการที่เลือก</p></div></div><button onclick="sd_closeInfusionCart()" class="ces-checkout-close-v3025" aria-label="Close cart"><i class="fas fa-times"></i></button></div>
+    <div class="ces-checkout-scroll-v3025"><section class="ces-checkout-section-v3025"><div class="ces-checkout-section-title-v3025"><span><i class="fas fa-list-check"></i> รายการ Infusion Pump</span><small>ตรวจสอบก่อนยืนยัน</small></div><div id="sdInfusionCartItemsV41" class="ces-checkout-items-v3025"></div></section><section class="ces-checkout-section-v3025"><div class="ces-checkout-section-title-v3025"><span><i class="fas fa-plug"></i> Accessories (เลือกได้)</span><small>เลือกและระบุจำนวน</small></div><div id="sdInfusionAccessoriesV41"></div></section></div>
+    <div class="ces-checkout-form-v3025"><div class="ces-checkout-section-title-v3025"><span><i class="fas fa-address-card"></i> ข้อมูลการยืม</span><small><b>*</b> จำเป็น</small></div>
+      <div class="grid grid-cols-2 gap-3"><label>ชื่อผู้ยืม *<input id="sdInfusionBorrowerV41" class="stockpro-control"></label><label>รหัสพนักงาน *<input id="sdInfusionEmployeeIdV41" class="stockpro-control"></label></div>
+      <label>สถานที่ / Location *<input id="sdInfusionLocationV41" class="stockpro-control" value="Warehouse"></label>
+      <div class="grid grid-cols-2 gap-3"><label>วันที่เบิก<input id="sdInfusionBorrowDateV41" class="stockpro-control" type="date"></label><label>กำหนดคืน *<input id="sdInfusionDueDateV41" class="stockpro-control" type="date"></label></div><div class="grid grid-cols-3 gap-3"><label>Clamp amount<input id="sdInfusionClampAmountV41" class="stockpro-control" type="number" min="0" step="1" value="0"></label><label>Pole amount<input id="sdInfusionPoleAmountV41" class="stockpro-control" type="number" min="0" step="1" value="0"></label><label>AC Plug amount<input id="sdInfusionAcPlugAmountV41" class="stockpro-control" type="number" min="0" step="1" value="0"></label></div>
+      <label>Cost Center *<select id="sdInfusionCostCenterV41" class="stockpro-control"><option value="">Select Cost Center</option><option>106207</option><option>106130</option><option>106206</option><option>106154</option><option>106067</option><option>103548</option></select></label>
+      <label>หมายเหตุ<input id="sdInfusionNoteV41" class="stockpro-control" placeholder="รายละเอียดเพิ่มเติม (ถ้ามี)"></label><button id="sdInfusionSubmitV41" class="ces-checkout-submit-v3025" onclick="sd_submitInfusionCheckout(this)"><i class="fas fa-paper-plane"></i><span>ยืนยัน Check-Out</span></button>
+    </div>
+  </div>
+</section>

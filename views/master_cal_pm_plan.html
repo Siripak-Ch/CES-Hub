@@ -1,0 +1,33 @@
+<div class="hidden animate-fade-in space-y-5 pb-20" id="view-master_cal_pm_plan">
+  <div class="bg-white p-5 rounded-3xl shadow-sm border border-slate-100 flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+    <div class="flex items-center gap-4"><div class="p-3 bg-blue-50 rounded-xl text-[#003DA5]"><i class="fas fa-screwdriver-wrench text-2xl"></i></div><div><h2 class="text-xl font-black text-slate-800">Master CAL/PM Plan</h2><p class="text-xs text-slate-400 font-bold">Standard master calibration and preventive-maintenance plan</p></div></div>
+    <div class="flex flex-wrap items-center gap-2">
+      <a id="mcp-source-link" class="ces-standard-icon-btn ces-external-link-btn" href="https://bdmsgroup-my.sharepoint.com/:x:/g/personal/siripak_ch_bdms_co_th/IQDrst6isjeFTofMLFyktxb_Af59VdXzAsk3Fxnn9Zu4Prs?e=nPKbnH" target="_blank" rel="noopener" title="Open Master Plan CAL-PM 2026" aria-label="Open Master Plan CAL-PM 2026"><i class="fas fa-arrow-up-right-from-square"></i></a>
+      <label class="ces-header-action-btn ces-action-upload cursor-pointer" title="Import Plan cal.xlsx"><i class="fas fa-file-arrow-up"></i><input id="mcp-import-file" class="hidden" type="file" accept=".xlsx,.xls,.csv" onchange="mcpImportFile(this.files[0])"></label>
+      <button class="ces-standard-icon-btn" onclick="mcpAddRow()" title="Add row"><i class="fas fa-plus"></i></button>
+      <button class="ces-standard-icon-btn ces-action-save" onclick="mcpSave()" title="Save"><i class="fas fa-floppy-disk"></i></button>
+      <button class="ces-standard-icon-btn ces-action-excel" onclick="mcpExportExcel()" title="Export Excel"><i class="fas fa-file-excel"></i></button>
+      <button class="ces-standard-icon-btn ces-action-pdf" onclick="mcpExportPdf()" title="Export PDF"><i class="fas fa-file-pdf"></i></button>
+    </div>
+  </div>
+  <div class="bg-white p-3 rounded-2xl border border-slate-100"><div class="mcp-team-tabs" role="tablist" aria-label="Master CAL PM Source Sheet"><button type="button" class="mcp-team-tab ehs active" data-team="EHS" onclick="mcpSelectTeam('EHS')">EHS</button><button type="button" class="mcp-team-tab env" data-team="ENV" onclick="mcpSelectTeam('ENV')">ENV</button><button type="button" class="mcp-team-tab med" data-team="MED" onclick="mcpSelectTeam('MED')">MED</button><button type="button" class="mcp-team-tab lab" data-team="LAB" onclick="mcpSelectTeam('LAB')">LAB</button></div></div>
+  <div class="bg-white rounded-3xl border border-slate-100 shadow-sm p-4 min-w-0">
+    <div class="flex justify-between items-center mb-3"><h3 class="font-black text-slate-800"><i class="fas fa-table text-[#003DA5] mr-2"></i>CAL/PM Plan Data</h3><span id="mcp-count" class="sp-pill">0 rows</span></div>
+    <div class="overflow-auto border border-slate-100 rounded-2xl min-h-[560px] max-h-[76vh]" id="mcp-table-wrap"><table class="mcp-table min-w-[2600px] w-full text-[10px] text-left"><thead id="mcp-head" class="sticky top-0 z-10 bg-slate-50"></thead><tbody id="mcp-body"></tbody></table></div>
+    <div class="flex items-center justify-end gap-2 pt-3">
+      <button id="mcp-prev" class="ces-standard-icon-btn" onclick="mcpPrevPage()" title="Previous page" aria-label="Previous page"><i class="fas fa-chevron-left"></i></button>
+      <span id="mcp-page-info" class="sp-pill min-w-[92px] text-center">Page 1 / 1</span>
+      <button id="mcp-next" class="ces-standard-icon-btn" onclick="mcpNextPage()" title="Next page" aria-label="Next page"><i class="fas fa-chevron-right"></i></button>
+    </div>
+  </div>
+  <style>
+    #view-master_cal_pm_plan .mcp-table th{padding:10px 8px;border-bottom:1px solid #1d4ed8;color:#fff;background:#003DA5;white-space:nowrap;font-weight:900}
+    #view-master_cal_pm_plan .mcp-table td{padding:4px;border-bottom:1px solid #eef2f7;vertical-align:middle}
+    #view-master_cal_pm_plan .mcp-cell{width:100%;min-width:100px;border:1px solid transparent;border-radius:8px;padding:7px 8px;background:transparent;color:#0f172a}
+    #view-master_cal_pm_plan .mcp-table th:nth-child(5),#view-master_cal_pm_plan .mcp-table td:nth-child(5) .mcp-cell{min-width:260px}
+    #view-master_cal_pm_plan .mcp-table th:nth-child(7),#view-master_cal_pm_plan .mcp-table td:nth-child(7) .mcp-cell{min-width:180px}
+    #view-master_cal_pm_plan .mcp-cell:hover,#view-master_cal_pm_plan .mcp-cell:focus{border-color:#93c5fd;background:#fff;outline:none}
+    #view-master_cal_pm_plan .mcp-delete{width:30px;height:30px;border-radius:9px;background:#fff1f2;color:#e11d48;border:1px solid #fecdd3}
+    #view-master_cal_pm_plan #mcp-prev:disabled,#view-master_cal_pm_plan #mcp-next:disabled{opacity:.35;cursor:not-allowed}
+  </style>
+</div>
