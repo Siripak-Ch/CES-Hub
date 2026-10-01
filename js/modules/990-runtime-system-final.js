@@ -1206,6 +1206,7 @@
       var normalized = normalizeRevenue(res, year);
       try { window.revenueCache = normalized; } catch (e) {}
       try { revenueCache = normalized; } catch (e2) {}
+      try { localStorage.setItem('CES_REVENUE_DASHBOARD_V48_'+year, JSON.stringify({at:Date.now(),data:normalized})); } catch (ignoreRevenueCache) {}
       renderRevenue(normalized);
       if (typeof window.revenueSetLoading === 'function') window.revenueSetLoading(false);
       return normalized;
@@ -1224,7 +1225,12 @@
   function patchRevenue() {
     window.fetchRevenueDataBackground = function (showLoading) { return refreshRevenue(showLoading); };
     window.forceReloadRevenue = function () { try { revenueCache = null; } catch (e) {} return refreshRevenue(true); };
-    window.loadRevenueData = function () { return refreshRevenue(true); };
+    window.loadRevenueData = function () {
+      var year=getYear(),cached=null;
+      try { var box=JSON.parse(localStorage.getItem('CES_REVENUE_DASHBOARD_V48_'+year)||'null'); if(box&&box.data&&Date.now()-Number(box.at||0)<1800000)cached=box.data; } catch(ignoreCache) {}
+      if(cached){try{window.revenueCache=cached;revenueCache=cached;}catch(ignoreAssign){}renderRevenue(cached);return refreshRevenue(false);}
+      return refreshRevenue(true);
+    };
     var yearSel = $('#rev-filter-year');
     if (yearSel && !yearSel.dataset.cesFinalRevenue) {
       yearSel.dataset.cesFinalRevenue = '1';

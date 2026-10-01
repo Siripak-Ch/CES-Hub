@@ -4931,9 +4931,10 @@ body,input,select,textarea,button,table,th,td,.swal2-container,.swal2-popup,.swa
   touch-action:pan-y!important;overscroll-behavior:contain!important
 }
 #view-checkin .ces-checkin-job-card{
-  min-width:0!important;min-height:186px!important;max-height:none!important;height:auto!important;
-  padding:11px!important;display:flex!important;flex-direction:column!important;gap:7px!important;
-  overflow:visible!important;cursor:default!important
+  min-width:0!important;min-height:190px!important;max-height:190px!important;height:190px!important;
+  padding:11px!important;display:grid!important;
+  grid-template-rows:auto minmax(30px,auto) minmax(24px,auto) 30px 40px!important;
+  align-content:stretch!important;gap:6px!important;overflow:hidden!important;cursor:default!important
 }
 #view-checkin .ces-checkin-card-head,#view-checkin .ces-checkin-card-title,
 #view-checkin .ces-checkin-job-location,#view-checkin .ces-checkin-card-staff,
@@ -4941,15 +4942,16 @@ body,input,select,textarea,button,table,th,td,.swal2-container,.swal2-popup,.swa
 #view-checkin .ces-checkin-card-head{display:flex!important;align-items:center!important;justify-content:space-between!important}
 #view-checkin .ces-checkin-card-title{display:-webkit-box!important;min-height:30px!important;-webkit-line-clamp:2!important;-webkit-box-orient:vertical!important;overflow:hidden!important}
 #view-checkin .ces-checkin-job-location{display:flex!important;min-height:25px!important}
-#view-checkin .ces-checkin-card-staff{display:flex!important;margin-top:auto!important}
-#view-checkin .ces-checkin-card-actions{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:7px!important;padding-top:8px!important;border-top:1px solid #eef2f7!important}
-#view-checkin .ces-checkin-card-actions button{display:flex!important;width:100%!important;min-width:0!important;min-height:40px!important;position:relative!important;z-index:2!important;pointer-events:auto!important;font-size:10px!important;touch-action:manipulation!important}
+#view-checkin .ces-checkin-card-staff{display:flex!important;height:30px!important;margin:0!important}
+#view-checkin .ces-checkin-card-actions{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:7px!important;height:40px!important;margin:0!important;padding:5px 0 0!important;border-top:1px solid #eef2f7!important;overflow:hidden!important}
+#view-checkin .ces-checkin-card-actions button{display:flex!important;width:100%!important;min-width:0!important;height:34px!important;min-height:34px!important;position:static!important;z-index:auto!important;pointer-events:auto!important;font-size:10px!important;touch-action:manipulation!important}
 #view-checkin #actionModal>div{max-height:calc(100dvh - 24px)!important;overflow-y:auto!important}
-@media(max-width:1100px){#view-checkin #job-list-container{grid-template-columns:repeat(2,minmax(0,1fr))!important}}
+@media(max-width:900px){#view-checkin #job-list-container{grid-template-columns:repeat(2,minmax(0,1fr))!important}}
 @media(max-width:700px){
   #view-checkin #job-list-container{grid-template-columns:1fr!important;max-height:none!important;overflow:visible!important;padding-right:0!important}
-  #view-checkin .ces-checkin-job-card{min-height:178px!important}
-  #view-checkin .ces-checkin-card-actions button{min-height:44px!important;font-size:11px!important}
+  #view-checkin .ces-checkin-job-card{min-height:196px!important;max-height:196px!important;height:196px!important;grid-template-rows:auto minmax(34px,auto) minmax(25px,auto) 32px 44px!important}
+  #view-checkin .ces-checkin-card-actions{height:44px!important}
+  #view-checkin .ces-checkin-card-actions button{height:38px!important;min-height:38px!important;font-size:11px!important}
 }
 
 /* Shared mobile usability: compact cards, scrollable actions and readable forms. */
@@ -4987,3 +4989,39 @@ body,input,select,textarea,button,table,th,td,.swal2-container,.swal2-popup,.swa
   .stockpro-kpi-grid,.csv5-kpi-six,.csv7-kpi-four,.stockpro-model-grid{grid-template-columns:1fr 1fr!important}
   #app-main-content{padding:8px!important}
 }
+
+/* V30.0.49 R3 — canonical header order and self-contained Daily Check-in cards. */
+#view-master_cal_pm_plan .mcp-header-actions,
+#view-audit_log .audit-header-actions,
+#view-inventory .stockpro-actions{display:flex!important;align-items:center!important;justify-content:flex-end!important;gap:7px!important;flex-wrap:wrap!important}
+#view-master_cal_pm_plan .ces-action-reset-v48,
+#view-audit_log .ces-action-reset-v48,
+#view-inventory .ces-action-reset-v48{order:50!important;background:#dc2626!important;border-color:#dc2626!important;color:#fff!important}
+#view-master_cal_pm_plan .ces-action-excel-v48,
+#view-master_cal_pm_plan .ces-action-excel,
+#view-audit_log .ces-action-excel-v48,
+#view-inventory .ces-action-excel-v48{order:40!important;background:#059669!important;border-color:#059669!important;color:#fff!important}
+#view-master_cal_pm_plan .ces-action-pdf,
+#view-audit_log .ces-action-pdf-v48,
+#view-inventory .ces-action-pdf-v48{order:30!important;background:#f59e0b!important;border-color:#f59e0b!important;color:#fff!important}
+#view-checkin #job-list-container{grid-template-columns:repeat(3,minmax(0,1fr))!important;gap:12px!important;max-height:590px!important;overflow-y:auto!important;align-content:start!important;padding:2px 5px 10px 2px!important}
+#view-checkin .ces-checkin-job-card{position:relative!important;min-width:0!important;height:218px!important;min-height:218px!important;max-height:218px!important;padding:13px!important;display:grid!important;grid-template-rows:25px minmax(68px,1fr) 34px 45px!important;gap:8px!important;overflow:hidden!important;background:#fff!important;border:1px solid #dce6f1!important;border-radius:18px!important;box-shadow:0 8px 22px rgba(15,52,96,.07)!important;cursor:default!important;transition:transform .18s ease,box-shadow .18s ease!important}
+#view-checkin .ces-checkin-job-card:hover{transform:translateY(-2px)!important;box-shadow:0 13px 28px rgba(15,52,96,.12)!important}
+#view-checkin .ces-checkin-card-accent{position:absolute!important;inset:0 auto 0 0!important;width:4px!important;background:var(--checkin-team,#2563eb)!important}
+#view-checkin .ces-checkin-card-head{display:flex!important;align-items:center!important;justify-content:space-between!important;gap:6px!important;margin:0!important;min-width:0!important}
+#view-checkin .ces-checkin-team-chip{display:inline-flex!important;align-items:center!important;height:22px!important;padding:0 9px!important;border-radius:999px!important;color:#fff!important;font-size:9px!important;font-weight:900!important}
+#view-checkin .ces-checkin-card-main{min-width:0!important;overflow:hidden!important}
+#view-checkin .ces-checkin-card-title{margin:0!important;color:#14213d!important;font-size:12px!important;font-weight:900!important;line-height:1.4!important;display:-webkit-box!important;-webkit-box-orient:vertical!important;-webkit-line-clamp:2!important;overflow:hidden!important;min-height:34px!important}
+#view-checkin .ces-checkin-job-location{display:flex!important;align-items:flex-start!important;gap:6px!important;margin:6px 0 0!important;color:#718096!important;font-size:9px!important;line-height:1.35!important;min-width:0!important}
+#view-checkin .ces-checkin-job-location i{color:var(--checkin-team,#2563eb)!important;margin-top:1px!important;flex:none!important}
+#view-checkin .ces-checkin-job-location span{white-space:nowrap!important;overflow:hidden!important;text-overflow:ellipsis!important}
+#view-checkin .ces-checkin-card-staff{height:34px!important;margin:0!important;padding:5px 7px!important;display:flex!important;align-items:center!important;justify-content:space-between!important;background:#f7f9fc!important;border:1px solid #e8eef5!important;border-radius:10px!important}
+#view-checkin .ces-checkin-view-btn{height:23px!important;padding:0 8px!important;border:0!important;border-radius:7px!important;background:#eaf2ff!important;color:#004aad!important;font-size:9px!important;font-weight:900!important}
+#view-checkin .ces-checkin-card-actions{height:45px!important;margin:0!important;padding-top:7px!important;display:grid!important;grid-template-columns:1fr 1fr!important;gap:8px!important;border-top:1px solid #edf2f7!important;overflow:hidden!important;position:static!important}
+#view-checkin .ces-checkin-card-actions button{height:37px!important;min-height:37px!important;margin:0!important;padding:0 10px!important;display:flex!important;align-items:center!important;justify-content:center!important;gap:6px!important;border:0!important;border-radius:10px!important;color:#fff!important;font-size:10px!important;font-weight:900!important;pointer-events:auto!important;position:static!important;z-index:1!important;box-shadow:none!important}
+#view-checkin .ces-checkin-in-btn.is-ready{background:#0756b8!important}
+#view-checkin .ces-checkin-in-btn.is-disabled{background:#cbd5e1!important;color:#64748b!important}
+#view-checkin .ces-checkin-out-btn{background:#dc2626!important}
+#view-checkin .ces-checkin-card-actions button:not(.ces-checkin-out-btn):not(.ces-checkin-in-btn){background:#e2e8f0!important;color:#94a3b8!important}
+@media(max-width:1050px){#view-checkin #job-list-container{grid-template-columns:repeat(2,minmax(0,1fr))!important}}
+@media(max-width:700px){#view-checkin #job-list-container{grid-template-columns:1fr!important;max-height:none!important;overflow:visible!important;padding-right:2px!important}#view-checkin .ces-checkin-job-card{height:210px!important;min-height:210px!important;max-height:210px!important;grid-template-rows:25px minmax(60px,1fr) 34px 47px!important}#view-checkin .ces-checkin-card-actions{height:47px!important}#view-checkin .ces-checkin-card-actions button{height:39px!important;min-height:39px!important}}
