@@ -228,7 +228,9 @@ function renderJobList() {
         if (jobDate) secondaryParts.push(jobDate);
         if (rawTitle && !titleLooksLikeDate && rawTitle.toLowerCase() !== primaryName.toLowerCase()) secondaryParts.push(rawTitle);
         const safePrimaryName = checkinSafe_(primaryName);
-        const safeSecondary = checkinSafe_(secondaryParts.join(' · ') || jobDate || rawTitle || '-');
+        const safeSecondary = checkinSafe_(secondaryParts.join(' · ') || rawTitle || '-');
+        const safeJobTitle = checkinSafe_(rawTitle || primaryName || '-');
+        const safeJobDate = checkinSafe_(jobDate || '-');
         
         let statusText = job.status || 'Wait';
         let statusBadge = '';
@@ -256,7 +258,8 @@ function renderJobList() {
             <div class="ces-checkin-card-head"><span class="ces-checkin-team-chip" style="background:${teamStyle.bg}">${safeTeam}</span>${statusBadge}</div>
             <div class="ces-checkin-card-main">
               <h4 class="ces-checkin-card-title" title="${safePrimaryName}">${safePrimaryName}</h4>
-              <p class="ces-checkin-job-location"><i class="far fa-calendar-alt"></i><span>${safeSecondary}</span></p>
+              <p class="ces-checkin-job-name" title="${safeJobTitle}"><i class="fas fa-briefcase"></i><span>${safeJobTitle}</span></p>
+              <p class="ces-checkin-job-location"><i class="far fa-calendar-alt"></i><span>${safeJobDate}</span></p>
             </div>
             <div class="ces-checkin-card-staff">
                 <div class="flex items-center gap-1"><div class="w-4 h-4 rounded-full bg-white border border-gray-200 flex items-center justify-center text-[9px] font-bold text-gray-600 shadow-sm">${count}</div><span class="text-[8px] text-gray-500 font-bold">Staff</span></div>
