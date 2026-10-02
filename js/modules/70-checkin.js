@@ -101,6 +101,8 @@ const MAX_GPS_ATTEMPTS = 3;
 const ACCEPTABLE_ACCURACY = 500; // meters
 
 function initCheckin() {
+    const checkinView = document.getElementById('view-checkin');
+    if (checkinView) checkinView.classList.add('ces-checkin-active-view');
     window.scrollTo({ top: 0, behavior: 'smooth' });
     const input = document.querySelector('#checkin-datepicker');
     const trigger = document.getElementById('btn-date-trigger');
@@ -195,6 +197,8 @@ function renderKPIs() {
 }
 
 function renderJobList() {
+    const view = document.getElementById('view-checkin');
+    if (view) view.classList.add('ces-checkin-active-view');
     const container = document.getElementById('job-list-container');
     if (!container) return;
     const teamFilterEl = document.getElementById('ck-team-select'), statusFilterEl = document.getElementById('ck-status-filter');
