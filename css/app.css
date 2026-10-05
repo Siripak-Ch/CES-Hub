@@ -5024,3 +5024,71 @@ body,input,select,textarea,button,table,th,td,.swal2-container,.swal2-popup,.swa
 #view-checkin .ces-checkin-out-btn.is-disabled{background:#e2e8f0!important;color:#94a3b8!important}
 @media(max-width:1050px){#view-checkin #job-list-container{grid-template-columns:repeat(2,minmax(0,1fr))!important}}
 @media(max-width:700px){#view-checkin #job-list-container{grid-template-columns:1fr!important;max-height:none!important;overflow:visible!important;padding-right:2px!important}#view-checkin .ces-checkin-job-card{height:210px!important;min-height:210px!important;max-height:210px!important;grid-template-rows:25px minmax(60px,1fr) 34px 47px!important}#view-checkin .ces-checkin-card-actions{height:47px!important}#view-checkin .ces-checkin-card-actions button{height:39px!important;min-height:39px!important}}
+
+/* V30.0.52 — single authoritative Daily Jobs layout; no overlapping text/actions. */
+#view-checkin #job-list-container{
+  display:grid!important;grid-template-columns:repeat(3,minmax(0,1fr))!important;
+  grid-auto-rows:auto!important;gap:12px!important;max-height:620px!important;
+  padding:3px 6px 12px 3px!important;overflow-x:hidden!important;overflow-y:auto!important;
+  align-items:start!important;align-content:start!important
+}
+#view-checkin .ces-checkin-job-card{
+  position:relative!important;isolation:isolate!important;display:flex!important;flex-direction:column!important;
+  width:100%!important;min-width:0!important;height:226px!important;min-height:226px!important;max-height:226px!important;
+  padding:13px 13px 12px 16px!important;gap:8px!important;overflow:hidden!important;
+  border:1px solid #dce6f1!important;border-radius:18px!important;background:#fff!important;
+  box-shadow:0 6px 18px rgba(22,56,96,.07)!important
+}
+#view-checkin .ces-checkin-card-accent{
+  display:block!important;position:absolute!important;z-index:0!important;top:0!important;bottom:0!important;
+  left:0!important;right:auto!important;width:5px!important;height:auto!important;min-width:5px!important;
+  margin:0!important;padding:0!important;background:var(--checkin-team,#2563eb)!important;
+  border-radius:18px 0 0 18px!important;pointer-events:none!important
+}
+#view-checkin .ces-checkin-card-head,#view-checkin .ces-checkin-card-main,
+#view-checkin .ces-checkin-card-staff,#view-checkin .ces-checkin-card-actions{
+  position:relative!important;z-index:1!important;flex:none!important;width:100%!important;min-width:0!important;margin:0!important
+}
+#view-checkin .ces-checkin-card-head{
+  height:25px!important;display:flex!important;align-items:center!important;justify-content:space-between!important;
+  gap:7px!important;overflow:hidden!important
+}
+#view-checkin .ces-checkin-card-head>span{
+  flex:0 1 auto!important;min-width:0!important;max-width:55%!important;white-space:nowrap!important;
+  overflow:hidden!important;text-overflow:ellipsis!important
+}
+#view-checkin .ces-checkin-card-main{display:block!important;height:82px!important;min-height:82px!important;overflow:hidden!important}
+#view-checkin .ces-checkin-card-title{
+  display:-webkit-box!important;width:100%!important;min-height:50px!important;max-height:50px!important;
+  margin:0!important;overflow:hidden!important;color:#17233c!important;font-size:12px!important;
+  font-weight:900!important;line-height:1.38!important;overflow-wrap:anywhere!important;word-break:break-word!important;
+  -webkit-box-orient:vertical!important;-webkit-line-clamp:3!important
+}
+#view-checkin .ces-checkin-job-location{
+  display:flex!important;align-items:flex-start!important;width:100%!important;height:27px!important;min-height:27px!important;
+  margin:5px 0 0!important;gap:6px!important;overflow:hidden!important;color:#718096!important;font-size:9px!important;line-height:1.35!important
+}
+#view-checkin .ces-checkin-job-location span{
+  display:-webkit-box!important;min-width:0!important;white-space:normal!important;overflow:hidden!important;
+  overflow-wrap:anywhere!important;-webkit-box-orient:vertical!important;-webkit-line-clamp:2!important
+}
+#view-checkin .ces-checkin-card-staff{
+  display:flex!important;align-items:center!important;justify-content:space-between!important;height:34px!important;min-height:34px!important;
+  padding:5px 7px!important;overflow:hidden!important;border:1px solid #e7edf5!important;border-radius:10px!important;background:#f8fafc!important
+}
+#view-checkin .ces-checkin-card-actions{
+  display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;height:48px!important;min-height:48px!important;
+  margin-top:auto!important;padding:8px 0 0!important;gap:8px!important;overflow:hidden!important;border-top:1px solid #edf2f7!important
+}
+#view-checkin .ces-checkin-card-actions button{
+  display:inline-flex!important;align-items:center!important;justify-content:center!important;width:100%!important;min-width:0!important;
+  height:39px!important;min-height:39px!important;margin:0!important;padding:0 8px!important;gap:6px!important;
+  overflow:hidden!important;border:0!important;border-radius:10px!important;font-size:10px!important;font-weight:900!important;
+  white-space:nowrap!important;pointer-events:auto!important;touch-action:manipulation!important
+}
+@media(max-width:1100px){#view-checkin #job-list-container{grid-template-columns:repeat(2,minmax(0,1fr))!important}}
+@media(max-width:700px){
+  #view-checkin #job-list-container{grid-template-columns:1fr!important;max-height:none!important;padding-right:2px!important;overflow:visible!important}
+  #view-checkin .ces-checkin-job-card{height:220px!important;min-height:220px!important;max-height:220px!important}
+  #view-checkin .ces-checkin-card-actions button{height:41px!important;min-height:41px!important;font-size:11px!important}
+}
