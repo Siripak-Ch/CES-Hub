@@ -150,7 +150,7 @@
       <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
         <div class="ces-token-card med"><label>OA Basic ID</label><input id="cfg-line-oa-basic-id" type="text" class="ces-secret-input" value="@032jntyw"></div>
         <div class="ces-token-card lab"><label>Cloudflare Gateway URL</label><input id="cfg-line-gateway-url" type="url" class="ces-secret-input"></div>
-        <div class="ces-token-card ehs"><label>Channel Secret <span id="cfg-line-secret-status" class="text-emerald-600"></span></label><input id="cfg-line-channel-secret" type="password" autocomplete="new-password" class="ces-secret-input" placeholder="Blank = keep current secret"></div>
+        <div class="ces-token-card ehs"><label>Channel Secret <span id="cfg-line-secret-status" class="text-emerald-600"></span></label><div class="ces-secret-input flex items-center text-slate-500 text-[10px]">Configure <b class="mx-1">LINE_CHANNEL_SECRET</b> in Cloudflare Worker Secrets only</div></div>
       </div>
     </div>
 

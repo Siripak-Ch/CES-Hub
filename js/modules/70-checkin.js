@@ -101,8 +101,6 @@ const MAX_GPS_ATTEMPTS = 3;
 const ACCEPTABLE_ACCURACY = 500; // meters
 
 function initCheckin() {
-    const checkinView = document.getElementById('view-checkin');
-    if (checkinView) checkinView.classList.add('ces-checkin-active-view');
     window.scrollTo({ top: 0, behavior: 'smooth' });
     const input = document.querySelector('#checkin-datepicker');
     const trigger = document.getElementById('btn-date-trigger');
@@ -197,8 +195,6 @@ function renderKPIs() {
 }
 
 function renderJobList() {
-    const view = document.getElementById('view-checkin');
-    if (view) view.classList.add('ces-checkin-active-view');
     const container = document.getElementById('job-list-container');
     if (!container) return;
     const teamFilterEl = document.getElementById('ck-team-select'), statusFilterEl = document.getElementById('ck-status-filter');
@@ -221,9 +217,6 @@ function renderJobList() {
         const encodedKey = encodeURIComponent(String(job.uniqueKey || '')).replace(/'/g,'%27');
         const encodedPeople = encodeURIComponent(JSON.stringify(Array.isArray(job.people) ? job.people : [])).replace(/'/g,'%27');
         const safeTeam = checkinSafe_(job.team || '-');
-        // Calendar_Summary can contain the date in Title. Daily Jobs must use
-        // the actual work location as the card name and keep the date/details
-        // as secondary information.
         const primaryName = String(job.location || job.title || 'Unknown').trim();
         const jobDate = String(job.date || '').trim();
         const rawTitle = String(job.title || '').trim();
@@ -232,9 +225,7 @@ function renderJobList() {
         if (jobDate) secondaryParts.push(jobDate);
         if (rawTitle && !titleLooksLikeDate && rawTitle.toLowerCase() !== primaryName.toLowerCase()) secondaryParts.push(rawTitle);
         const safePrimaryName = checkinSafe_(primaryName);
-        const safeSecondary = checkinSafe_(secondaryParts.join(' · ') || rawTitle || '-');
-        const safeJobTitle = checkinSafe_(rawTitle || primaryName || '-');
-        const safeJobDate = checkinSafe_(jobDate || '-');
+        const safeSecondary = checkinSafe_(secondaryParts.join(' · ') || jobDate || rawTitle || '-');
         
         let statusText = job.status || 'Wait';
         let statusBadge = '';
@@ -252,18 +243,17 @@ function renderJobList() {
         const canCheckIn = !hasIN && !hasFinished;
         let outBtn = '';
         if (hasIN) {
-            outBtn = `<button type="button" aria-label="Check out from this job" onclick="event.stopPropagation();openActionModal(decodeURIComponent('${encodedKey}'), 'OUT')" class="ces-checkin-out-btn py-2 bg-[#E4002B] hover:bg-[#B91C1C] text-white rounded-lg text-[9px] font-bold shadow transition-transform active:scale-95 flex items-center justify-center gap-1"><i class="fas fa-sign-out-alt"></i> OUT</button>`;
+            outBtn = `<button type="button" aria-label="Check out from this job" onclick="event.stopPropagation();openActionModal(decodeURIComponent('${encodedKey}'), 'OUT')" class="ces-checkin-out-btn is-ready"><i class="fas fa-sign-out-alt"></i><span>OUT</span></button>`;
         } else {
-            outBtn = `<button type="button" onclick="event.stopPropagation();Swal.fire('Notice', 'กรุณากด Check-in ก่อนทำการ Check-out นะครับ', 'warning')" class="py-2 bg-gray-200 hover:bg-gray-300 text-gray-400 cursor-not-allowed rounded-lg text-[9px] font-bold shadow flex items-center justify-center gap-1"><i class="fas fa-sign-out-alt"></i> OUT</button>`;
+            outBtn = `<button type="button" onclick="event.stopPropagation();Swal.fire('Notice', '${hasFinished ? 'งานนี้ Check-out เรียบร้อยแล้ว' : 'กรุณากด Check-in ก่อนทำการ Check-out'}', 'warning')" class="ces-checkin-out-btn is-disabled"><i class="fas fa-sign-out-alt"></i><span>OUT</span></button>`;
         }
 
-        return `<article class="ces-checkin-job-card group" role="group" aria-label="${safePrimaryName}" style="--checkin-team:${teamStyle.bg}">
+        return `<article class="ces-checkin-job-card" role="group" aria-label="${safePrimaryName}" style="--checkin-team:${teamStyle.bg}">
             <div class="ces-checkin-card-accent" aria-hidden="true"></div>
             <div class="ces-checkin-card-head"><span class="ces-checkin-team-chip" style="background:${teamStyle.bg}">${safeTeam}</span>${statusBadge}</div>
             <div class="ces-checkin-card-main">
               <h4 class="ces-checkin-card-title" title="${safePrimaryName}">${safePrimaryName}</h4>
-              <p class="ces-checkin-job-name" title="${safeJobTitle}"><i class="fas fa-briefcase"></i><span>${safeJobTitle}</span></p>
-              <p class="ces-checkin-job-location"><i class="far fa-calendar-alt"></i><span>${safeJobDate}</span></p>
+              <p class="ces-checkin-job-location"><i class="far fa-calendar-alt"></i><span>${safeSecondary}</span></p>
             </div>
             <div class="ces-checkin-card-staff">
                 <div class="flex items-center gap-1"><div class="w-4 h-4 rounded-full bg-white border border-gray-200 flex items-center justify-center text-[9px] font-bold text-gray-600 shadow-sm">${count}</div><span class="text-[8px] text-gray-500 font-bold">Staff</span></div>

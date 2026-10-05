@@ -6,17 +6,16 @@
         <div class="stockpro-icon blue ces-page-header-icon-v15"><i class="fas fa-boxes-stacked"></i></div>
         <div><h1>Inventory</h1><span id="siDataFreshness" class="sr-only" aria-live="polite">Loading</span></div>
       </div>
-      <div class="stockpro-actions ces-page-header-actions-v226">
+      <div class="stockpro-actions">
         <a id="siInventorySourceLink" class="sp-btn ghost csv5-icon-btn ces-action-neutral" href="#" target="_blank" rel="noopener" title="Open Accessories Dashboard source"><i class="fas fa-link"></i></a><button class="sp-btn ghost csv5-icon-btn ces-action-neutral" onclick="initStockInventoryModule(true)" title="Refresh"><i class="fas fa-sync-alt"></i></button>
         <button class="sp-btn ghost csv5-icon-btn ces-action-neutral" onclick="si_openInventoryHistory()" title="Activity History"><i class="fas fa-history"></i></button>
         <button class="sp-btn warn csv5-icon-btn ces-action-warning ces-notification-icon-btn" onclick="si_openAccessoryLowStockAlerts()" title="Accessory Alerts"><i class="fas fa-bell"></i><span id="siLowStockHeaderCount" class="sp-mini-badge ces-notification-count">0</span></button>
         <button class="sp-btn primary csv5-icon-btn ces-action-primary" onclick="si_toggleCart()" title="Checkout Cart"><i class="fas fa-shopping-cart"></i><span id="siCartCount" class="sp-mini-badge">0</span></button>
-        <button class="ces-standard-icon-btn ces-action-template" onclick="si_downloadBulkTemplate()" title="Download Bulk Upload Template" aria-label="Download Bulk Upload Template"><i class="fas fa-file-arrow-down"></i></button>
+        <button class="ces-standard-icon-btn ces-action-excel" onclick="si_downloadBulkTemplate()" title="Download Bulk Upload Excel Template" aria-label="Download Bulk Upload Excel Template"><i class="fas fa-file-arrow-down"></i></button>
         <button class="ces-standard-icon-btn ces-upload-icon-btn" onclick="si_triggerBulkUpload()" title="Upload clean Inventory XLSX or bulk equipment file" aria-label="Upload Inventory Data"><i class="fas fa-arrow-up-from-bracket"></i></button>
         <input id="siBulkEquipmentFile" type="file" class="hidden" accept=".csv,.xlsx,.xls" onchange="si_handleBulkUpload(this.files && this.files[0]);this.value=''">
-        <button class="ces-standard-icon-btn ces-excel-icon-btn ces-action-excel-v48" onclick="si_exportCurrent()" title="Export Excel" aria-label="Export current Inventory tab"><i class="fas fa-file-excel"></i></button>
-        <button class="sp-btn csv5-icon-btn ces-action-pdf-v48" onclick="si_printInventory()" title="Export PDF"><i class="fas fa-file-pdf"></i></button>
-        <button class="ces-standard-icon-btn ces-action-reset-v48" onclick="si_resetHeaderFields()" title="Reset Fields" aria-label="Reset Fields"><i class="fas fa-rotate-left"></i></button>
+        <button class="ces-standard-icon-btn ces-excel-icon-btn" onclick="si_exportCurrent()" title="Export current Inventory tab (.xlsx)" aria-label="Export current Inventory tab"><i class="fas fa-file-excel"></i></button>
+        <button class="sp-btn csv5-icon-btn ces-action-pdf-danger" onclick="si_printInventory()" title="Export PDF"><i class="fas fa-file-pdf"></i></button>
       </div>
     </div>
 

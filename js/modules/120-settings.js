@@ -112,7 +112,7 @@
         // 5. One current CES Hub OA. Secret is never returned to the browser.
         setVal('cfg-line-oa-basic-id', data.LINE_OA_BASIC_ID || '@032jntyw');
         setVal('cfg-line-gateway-url', data.LINE_GATEWAY_URL || 'https://ces-hub-line-gateway.siripak-chat.workers.dev');
-        const secretStatus = document.getElementById('cfg-line-secret-status'); if(secretStatus) secretStatus.textContent = String(data.LINE_CHANNEL_SECRET_CONFIGURED).toUpperCase()==='TRUE' ? '· configured' : '· not configured';
+        const secretStatus = document.getElementById('cfg-line-secret-status'); if(secretStatus) secretStatus.textContent = '· stored in Cloudflare Worker Secrets';
         setVal('cfg-line-channel-secret', '');
         setVal('cfg-mail-admin', data.ADMIN_NOTIFY_EMAIL || 'Siripak.Ch@nhealth-asia.com');
         setVal('cfg-mail-admin-cc', data.SERVICE_CSI_ADMIN_CC || 'cesmanagement@bdms.co.th');
@@ -258,7 +258,7 @@
         try {
             let res = await saveSettingsViaJsonp_(patch);
             if (String(section).toLowerCase() === 'line') {
-                res = await window.CES_API.callFunction('saveLineOaRuntimeConfig',[{basicId:all.LINE_OA_BASIC_ID,gatewayUrl:all.LINE_GATEWAY_URL,channelSecret:(document.getElementById('cfg-line-channel-secret')||{}).value||''}],{transport:'iframe',timeoutMs:90000,dedupe:false,priority:'active',userAction:true,module:'settings'});
+                res = await window.CES_API.callFunction('saveLineOaRuntimeConfig',[{basicId:all.LINE_OA_BASIC_ID,gatewayUrl:all.LINE_GATEWAY_URL}],{transport:'iframe',timeoutMs:90000,dedupe:false,priority:'active',userAction:true,module:'settings'});
                 const secretInput=document.getElementById('cfg-line-channel-secret');if(secretInput)secretInput.value='';
             }
             if (!(res === 'Saved' || (res && res.success))) throw new Error((res && res.message) || 'Save failed');
