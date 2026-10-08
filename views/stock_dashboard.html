@@ -94,7 +94,14 @@
       <div class="grid grid-cols-2 gap-3"><label>AC Plug SN *<input id="sdInfusionAcPlugSnV54" class="stockpro-control" placeholder="Serial Number"></label><label>Clamp SN *<input id="sdInfusionClampSnV54" class="stockpro-control" placeholder="Serial Number"></label></div>
       <div class="grid grid-cols-3 gap-3"><label>Clamp amount<input id="sdInfusionClampAmountV41" class="stockpro-control" type="number" min="1" step="1" value="1"></label><label>Pole amount<input id="sdInfusionPoleAmountV41" class="stockpro-control" type="number" min="1" step="1" value="1"></label><label>AC Plug amount<input id="sdInfusionAcPlugAmountV41" class="stockpro-control" type="number" min="1" step="1" value="1"></label></div>
       <label>Cost Center *<select id="sdInfusionCostCenterV41" class="stockpro-control"><option value="">Select Cost Center</option><option>106207</option><option>106130</option><option>106206</option><option>106154</option><option>106067</option><option>103548</option></select></label>
-      <label>หมายเหตุ<input id="sdInfusionNoteV41" class="stockpro-control" placeholder="รายละเอียดเพิ่มเติม (ถ้ามี)"></label><button id="sdInfusionSubmitV41" class="ces-checkout-submit-v3025" onclick="sd_submitInfusionCheckout(this)"><i class="fas fa-paper-plane"></i><span>ยืนยัน Check-Out</span></button>
+      <label>หมายเหตุ<input id="sdInfusionNoteV41" class="stockpro-control" placeholder="รายละเอียดเพิ่มเติม (ถ้ามี)"></label>
+      <div class="sd-infusion-evidence-v55">
+        <div class="sd-infusion-evidence-head-v55"><span><i class="fas fa-paperclip"></i> หลักฐานการเช่า/ยืม</span><a href="https://bdmsgroup-my.sharepoint.com/:f:/g/personal/siripak_ch_bdms_co_th/IgAEjE2gT3dzQ6t5iyar_emjAWpDshQyskFbuX6z4O2gXHE?e=3dqoRy" target="_blank" rel="noopener"><i class="fab fa-microsoft"></i> เปิดโฟลเดอร์ SharePoint</a></div>
+        <input id="sdInfusionEvidenceFilesV55" class="stockpro-control" type="file" multiple accept=".pdf,.jpg,.jpeg,.png,.webp,.doc,.docx,.xls,.xlsx" onchange="sdInfusionEvidenceChanged()">
+        <small>สูงสุด 3 ไฟล์ · ไม่เกิน 4 MB ต่อไฟล์ · ระบบตั้งชื่อ Brand_Borrower_Date_ลำดับ และแนบไปกับอีเมลแจ้งเตือน</small>
+        <div id="sdInfusionEvidencePreviewV55" class="sd-infusion-evidence-preview-v55">ยังไม่ได้เลือกไฟล์</div>
+      </div>
+      <button id="sdInfusionSubmitV41" class="ces-checkout-submit-v3025" onclick="sd_submitInfusionCheckout(this)"><i class="fas fa-paper-plane"></i><span>ยืนยัน Check-Out</span></button>
     </div>
   </div>
 </section>
