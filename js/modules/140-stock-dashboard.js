@@ -270,7 +270,8 @@ function sd_showAlertDetail(id){
    Additive only; public function names remain available.
 ============================================================ */
 const SD_CACHE_KEY_V15 = 'CES_STOCK_DASHBOARD_CACHE_V15';
-const SD_CACHE_TTL_MS_V15 = 5 * 60 * 1000;
+const SD_CACHE_TTL_MS_V15 = 10 * 60 * 1000;
+const SD_CACHE_STALE_MS_V15 = 24 * 60 * 60 * 1000;
 
 function sdApplyThemeStyle(){
   if(document.getElementById('stockpro-dashboard-v15-style')) return;
@@ -298,16 +299,16 @@ function sdApplyThemeStyle(){
   document.head.appendChild(st);
 }
 
-function sdSaveCache_(res){try{sessionStorage.setItem(SD_CACHE_KEY_V15,JSON.stringify({ts:Date.now(),data:res}));}catch(e){}}
-function sdReadCache_(){try{const x=JSON.parse(sessionStorage.getItem(SD_CACHE_KEY_V15)||'null');if(x&&x.data&&(Date.now()-x.ts)<SD_CACHE_TTL_MS_V15)return x.data;}catch(e){}return null;}
+function sdSaveCache_(res){const value=JSON.stringify({ts:Date.now(),data:res});try{sessionStorage.setItem(SD_CACHE_KEY_V15,value);}catch(e){}try{localStorage.setItem(SD_CACHE_KEY_V15,value);}catch(e){}}
+function sdReadCache_(allowStale=false){for(const store of [sessionStorage,localStorage]){try{const x=JSON.parse(store.getItem(SD_CACHE_KEY_V15)||'null'),age=x&&x.ts?Date.now()-x.ts:Infinity;if(x&&x.data&&age<(allowStale?SD_CACHE_STALE_MS_V15:SD_CACHE_TTL_MS_V15))return x.data;}catch(e){}}return null;}
 
 if(typeof window.sdOriginalInitBeforeCachePatch === 'undefined' && typeof initStockDashboardModule === 'function'){
   window.sdOriginalInitBeforeCachePatch = initStockDashboardModule;
   initStockDashboardModule = function(force=false){
     sdApplyThemeStyle();
-    const cached = !force ? sdReadCache_() : null;
+    const cached = !force ? (sdReadCache_()||sdReadCache_(true)) : null;
     if(cached){SD_DASH.loaded=true;SD_DASH.raw=cached;try{sd_fillFilters();sd_renderAll();}catch(e){console.warn(e);} }
-    const refreshStock=()=>window.CES_API.callFunction('sd_getStockDashboardData',[force===true],{priority:cached&&!force?'background':'user',background:!!(cached&&!force),dedupe:true}).then(res=>{
+    const refreshStock=()=>window.CES_API.callFunction('sd_getStockDashboardData',[force===true],{transport:'iframe',timeoutMs:120000,module:'stock_dashboard',priority:cached&&!force?'background':'active',background:!!(cached&&!force),silentLoading:!!cached,dedupe:!force}).then(res=>{
       if(!res||!res.success){if(!cached)Swal.fire('Stock Dashboard Error',(res&&res.message)||'Cannot load dashboard','error');return;}
       SD_DASH.loaded=true;SD_DASH.raw=res;sdSaveCache_(res);sd_fillFilters();sd_renderAll();
     }).catch(err=>{if(!cached)Swal.fire('Stock Dashboard Error',err.message||String(err),'error');});

@@ -56,9 +56,12 @@
           <button id="sdContractExportBtn" class="sp-btn csv5-icon-btn ces-action-excel ces-contract-export-icon" onclick="sd_exportContractSummaryExcel()" title="Export Contract Excel" aria-label="Export Contract Excel"><i class="fas fa-file-excel"></i></button>
         </div>
         <div class="stockpro-filter-card csv7-contract-filters">
-          <div class="sp-search"><i class="fas fa-search"></i><input id="sdContractSearch" oninput="sd_renderContractSummary()" placeholder="ค้นหา Location / ID / SN / Model / Borrower"></div>
-          <select id="sdContractFilter" onchange="sd_renderContractSummary()"><option value="all">ทุกสัญญา</option><option value="active">กำลังใช้งาน</option><option value="overdue">เกินกำหนด</option></select>
-          <select id="sdContractSort" onchange="sd_renderContractSummary()"><option value="risk">Sort: Risk first</option><option value="location">Sort: Location A-Z</option><option value="due_asc">Sort: Due date ↑</option><option value="due_desc">Sort: Due date ↓</option></select>
+          <div class="sp-search"><i class="fas fa-search"></i><input id="sdContractSearch" oninput="sd_renderContractSummary()" placeholder="ค้นหา Location / ID / SN / Borrower"></div>
+          <select id="sdContractBrand" onchange="sd_renderContractSummary()"><option value="all">ทุก Brand</option></select>
+          <select id="sdContractModel" onchange="sd_renderContractSummary()"><option value="all">ทุก Model</option></select>
+          <select id="sdContractType" onchange="sd_renderContractSummary()"><option value="all">ทุก Contract</option></select>
+          <select id="sdContractFilter" onchange="sd_renderContractSummary()"><option value="all">ทุกสถานะ</option><option value="active">Active</option><option value="due_soon">ใกล้ครบกำหนด ≤30 วัน</option><option value="overdue">Overdue</option></select>
+          <select id="sdContractSort" onchange="sd_renderContractSummary()"><option value="latest">Sort: Latest contract</option><option value="risk">Sort: Risk first</option><option value="location">Sort: Location A-Z</option><option value="due_asc">Sort: Due date ↑</option><option value="due_desc">Sort: Due date ↓</option></select>
           <button class="sp-btn ghost" onclick="sd_resetContractFilter()"><i class="fas fa-rotate-left"></i> Reset Filter</button>
         </div>
         <div id="sdContractTable"></div>
@@ -87,19 +90,19 @@
       <div class="grid grid-cols-2 gap-3"><label>ชื่อผู้ยืม *<input id="sdInfusionBorrowerV41" class="stockpro-control"></label><label>รหัสพนักงาน *<input id="sdInfusionEmployeeIdV41" class="stockpro-control"></label></div>
       <label>สถานที่ / Location *<input id="sdInfusionLocationV41" class="stockpro-control" value="Warehouse"></label>
       <div class="grid grid-cols-2 gap-3"><label>วันที่เบิก *<input id="sdInfusionBorrowDateV41" class="stockpro-control" type="date"></label><label>กำหนดคืน *<input id="sdInfusionDueDateV41" class="stockpro-control" type="date"></label></div>
-      <label>รายละเอียดสัญญาเช่า / ระยะ *<input id="sdInfusionContractDetailV54" class="stockpro-control" placeholder="เช่น เช่า 12 เดือน / DEMO 3 เดือน"></label>
-      <div class="grid grid-cols-2 gap-3"><label>ผู้ประสานงาน *<input id="sdInfusionCoordinatorV54" class="stockpro-control" placeholder="ชื่อผู้ประสานงาน"></label><label>Email ผู้ประสานงาน *<input id="sdInfusionCoordinatorEmailV54" class="stockpro-control" type="email" placeholder="name@company.com"></label></div>
-      <label>สัญญา CAL,PM *<select id="sdInfusionCalPmV54" class="stockpro-control"><option value="">เลือกเงื่อนไข CAL/PM</option><option value="PM Due (6 Month)">PM Due (6 Month)</option><option value="CAL/PM Due (12 Month)">CAL/PM Due (12 Month)</option><option value="PM Due (6 Month) + CAL/PM Due (12 Month)">PM Due (6 Month) + CAL/PM Due (12 Month)</option><option value="ไม่มีสัญญา CAL/PM">ไม่มีสัญญา CAL/PM</option></select></label>
-      <div class="grid grid-cols-2 gap-3"><label>PLAN CAL,PM *<input id="sdInfusionPlanCalPmV54" class="stockpro-control" placeholder="เดือน / แผน CAL,PM"></label><label>PLAN PM *<input id="sdInfusionPlanPmV54" class="stockpro-control" placeholder="เดือน / แผน PM"></label></div>
-      <div class="grid grid-cols-2 gap-3"><label>AC Plug SN *<input id="sdInfusionAcPlugSnV54" class="stockpro-control" placeholder="Serial Number"></label><label>Clamp SN *<input id="sdInfusionClampSnV54" class="stockpro-control" placeholder="Serial Number"></label></div>
+      <label>รายละเอียดสัญญาเช่า / ระยะ *<input id="sdInfusionContractDetailCurrent" class="stockpro-control" placeholder="เช่น เช่า 12 เดือน / DEMO 3 เดือน"></label>
+      <div class="grid grid-cols-2 gap-3"><label>ผู้ประสานงาน *<input id="sdInfusionCoordinatorCurrent" class="stockpro-control" placeholder="ชื่อผู้ประสานงาน"></label><label>Email ผู้ประสานงาน *<input id="sdInfusionCoordinatorEmailCurrent" class="stockpro-control" type="email" placeholder="name@company.com"></label></div>
+      <label>สัญญา CAL,PM *<select id="sdInfusionCalPmCurrent" class="stockpro-control"><option value="">คำนวณอัตโนมัติจากวันที่เบิก/คืน</option><option value="PM Due (6 Month)">PM Due (6 Month)</option><option value="PM Due (6 Month) + CAL/PM Due (12 Month)">PM Due (6 Month) + CAL/PM Due (12 Month)</option><option value="ไม่มีสัญญา CAL/PM">ไม่มีสัญญา CAL/PM</option></select></label>
+      <div class="grid grid-cols-2 gap-3"><label>PLAN CAL,PM *<input id="sdInfusionPlanCalPmCurrent" class="stockpro-control" type="date"></label><label>PLAN PM *<input id="sdInfusionPlanPmCurrent" class="stockpro-control" type="date"></label></div>
+      <div class="grid grid-cols-2 gap-3"><label>AC Plug SN <small>(optional)</small><input id="sdInfusionAcPlugSnCurrent" class="stockpro-control" placeholder="Serial Number"></label><label>Clamp SN <small>(optional)</small><input id="sdInfusionClampSnCurrent" class="stockpro-control" placeholder="Serial Number"></label></div>
       <div class="grid grid-cols-3 gap-3"><label>Clamp amount<input id="sdInfusionClampAmountV41" class="stockpro-control" type="number" min="1" step="1" value="1"></label><label>Pole amount<input id="sdInfusionPoleAmountV41" class="stockpro-control" type="number" min="1" step="1" value="1"></label><label>AC Plug amount<input id="sdInfusionAcPlugAmountV41" class="stockpro-control" type="number" min="1" step="1" value="1"></label></div>
       <label>Cost Center *<select id="sdInfusionCostCenterV41" class="stockpro-control"><option value="">Select Cost Center</option><option>106207</option><option>106130</option><option>106206</option><option>106154</option><option>106067</option><option>103548</option></select></label>
       <label>หมายเหตุ<input id="sdInfusionNoteV41" class="stockpro-control" placeholder="รายละเอียดเพิ่มเติม (ถ้ามี)"></label>
-      <div class="sd-infusion-evidence-v55">
-        <div class="sd-infusion-evidence-head-v55"><span><i class="fas fa-paperclip"></i> หลักฐานการเช่า/ยืม</span><a href="https://bdmsgroup-my.sharepoint.com/:f:/g/personal/siripak_ch_bdms_co_th/IgAEjE2gT3dzQ6t5iyar_emjAWpDshQyskFbuX6z4O2gXHE?e=3dqoRy" target="_blank" rel="noopener"><i class="fab fa-microsoft"></i> เปิดโฟลเดอร์ SharePoint</a></div>
-        <input id="sdInfusionEvidenceFilesV55" class="stockpro-control" type="file" multiple accept=".pdf,.jpg,.jpeg,.png,.webp,.doc,.docx,.xls,.xlsx" onchange="sdInfusionEvidenceChanged()">
+      <div class="sd-infusion-evidence-current">
+        <div class="sd-infusion-evidence-head-current"><span><i class="fas fa-paperclip"></i> หลักฐานการเช่า/ยืม</span><a href="https://bdmsgroup-my.sharepoint.com/:f:/g/personal/siripak_ch_bdms_co_th/IgAEjE2gT3dzQ6t5iyar_emjAWpDshQyskFbuX6z4O2gXHE?e=3dqoRy" target="_blank" rel="noopener"><i class="fab fa-microsoft"></i> เปิดโฟลเดอร์ SharePoint</a></div>
+        <input id="sdInfusionEvidenceFilesCurrent" class="stockpro-control" type="file" multiple accept=".pdf,.jpg,.jpeg,.png,.webp,.doc,.docx,.xls,.xlsx" onchange="sdInfusionEvidenceChanged()">
         <small>สูงสุด 3 ไฟล์ · ไม่เกิน 4 MB ต่อไฟล์ · ระบบตั้งชื่อ Brand_Borrower_Date_ลำดับ และแนบไปกับอีเมลแจ้งเตือน</small>
-        <div id="sdInfusionEvidencePreviewV55" class="sd-infusion-evidence-preview-v55">ยังไม่ได้เลือกไฟล์</div>
+        <div id="sdInfusionEvidencePreviewCurrent" class="sd-infusion-evidence-preview-current">ยังไม่ได้เลือกไฟล์</div>
       </div>
       <button id="sdInfusionSubmitV41" class="ces-checkout-submit-v3025" onclick="sd_submitInfusionCheckout(this)"><i class="fas fa-paper-plane"></i><span>ยืนยัน Check-Out</span></button>
     </div>

@@ -422,7 +422,7 @@
             google.script.run
                 .withSuccessHandler(resolve)
                 .withFailureHandler(reject)
-                .updateStaffLineDataByToken(user.id, token);
+                .updateStaffLineDataByToken(user.id, token, cesLineAccountLinkCode_());
         }).then(async (res) => {
             console.log('[LIFF] Account link result:', res);
             if (String(res || '').indexOf('Linked:') !== 0) {
@@ -432,7 +432,9 @@
             // token in memory on failure lets the user retry without reopening LIFF.
             pendingLineProfile = null;
             pendingLineIdToken = null;
-            currentUser.lineUserId = profile.userId;
+            const canonicalMatch=String(res||'').match(/\|OA_USER_ID:(U[0-9a-f]{32})\|/i);
+            currentUser.lineUserId = canonicalMatch ? canonicalMatch[1] : profile.userId;
+            currentUser.lineLoginUserId = profile.userId;
             currentUser.lineName = profile.displayName;
             cesStoreCurrentUser_(currentUser);
             cesPersistSession_(currentUser, currentTab || 'portal', 'LINE_LINKED');
@@ -1191,6 +1193,23 @@
         return (!cfg || cfg.ENABLED !== false) && isLineEnvironment();
     }
 
+    function cesLineAccountLinkCode_() {
+        function read(raw) {
+            try {
+                const text=decodeURIComponent(String(raw||''));
+                return String(new URLSearchParams(text.replace(/^[?#]/,'')).get('cesLineLink')||'').trim();
+            } catch(ignore) { return ''; }
+        }
+        try {
+            const query=new URLSearchParams(window.location.search||'');
+            const direct=String(query.get('cesLineLink')||'').trim();
+            if(direct)return direct;
+            const state=read(query.get('liff.state'));
+            if(state)return state;
+            return read(window.location.hash||'');
+        } catch(ignore) { return ''; }
+    }
+
     /** Show the login form UI */
     function showLoginForm() {
         document.getElementById('login-container').classList.remove('hidden');
@@ -1277,10 +1296,11 @@
             const rememberedLineSession = cesReadRememberedSession_();
             const rememberedLineUser = rememberedLineSession && rememberedLineSession.user;
             const rememberedLineId = String(rememberedLineUser && rememberedLineUser.lineUserId || '').trim();
+            const rememberedLoginLineId = String(rememberedLineUser && rememberedLineUser.lineLoginUserId || '').trim();
             const rememberedVerifiedAt = Date.parse(rememberedLineUser && rememberedLineUser._lineVerifiedAt || 0) || 0;
             const canFastRestoreLine = !!(
                 lineUserId && rememberedLineUser && rememberedLineUser.id &&
-                rememberedLineId === lineUserId &&
+                (rememberedLineId === lineUserId || rememberedLoginLineId === lineUserId) &&
                 rememberedVerifiedAt && Date.now() - rememberedVerifiedAt < CES_LINE_FAST_SESSION_TTL_V48
             );
 
@@ -1307,7 +1327,7 @@
                         if (typeof refreshLineNotice === 'function') refreshLineNotice();
                         Swal.fire({icon:'warning',title:'LINE connection needs attention',text:'LINE identity could not be verified automatically. You can sign in with Employee ID and retry after the backend is deployed.',confirmButtonColor:'#004aad'});
                     })
-                    .checkUserByLineToken(idToken);
+                    .checkUserByLineToken(idToken, cesLineAccountLinkCode_());
             }
 
             if (canFastRestoreLine) {

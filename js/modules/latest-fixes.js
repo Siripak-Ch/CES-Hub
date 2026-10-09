@@ -236,6 +236,23 @@
   @media(max-width:700px){#view-checkin #job-list-container{grid-template-columns:1fr!important;max-height:none!important;overflow-y:visible!important}#view-checkin .ces-checkin-job-card{height:220px!important;min-height:220px!important;max-height:220px!important}}
 `;d.head.appendChild(st);w.CES_CHECKIN_UI_RECHECK=function(){var cards=d.querySelectorAll('#view-checkin .ces-checkin-job-card'),buttons=d.querySelectorAll('#view-checkin .ces-checkin-card-actions button,#view-checkin .ces-checkin-job-card .grid.grid-cols-2 button');return{success:cards.length===0||buttons.length>=cards.length*2,cards:cards.length,actionButtons:buttons.length,expectedButtons:cards.length*2};};})(window,document);
 
+/* Current Check-in layout: compact 3-column cards with the two actions always
+   contained in the final row.  The tablet breakpoint starts below 900px. */
+(function(d){'use strict';var st=d.createElement('style');st.id='ces-checkin-current-layout';st.textContent=`
+  #view-checkin #job-list-container{display:grid!important;grid-template-columns:repeat(3,minmax(0,1fr))!important;gap:9px!important;max-height:560px!important;overflow-y:auto!important;overflow-x:hidden!important;align-content:start!important;padding:2px 5px 8px 2px!important}
+  #view-checkin .ces-checkin-job-card{position:relative!important;height:198px!important;min-height:198px!important;max-height:198px!important;padding:10px 10px 9px 13px!important;display:flex!important;flex-direction:column!important;gap:5px!important;overflow:hidden!important;box-sizing:border-box!important}
+  #view-checkin .ces-checkin-card-accent{position:absolute!important;inset:0 auto 0 0!important;width:4px!important;height:auto!important;pointer-events:none!important}
+  #view-checkin .ces-checkin-card-head{height:23px!important;min-height:23px!important;flex:0 0 23px!important;overflow:hidden!important}
+  #view-checkin .ces-checkin-card-main{height:64px!important;min-height:0!important;flex:1 1 64px!important;overflow:hidden!important}
+  #view-checkin .ces-checkin-card-title{font-size:11px!important;line-height:1.35!important;-webkit-line-clamp:2!important}
+  #view-checkin .ces-checkin-job-location{font-size:8px!important;margin-top:4px!important}
+  #view-checkin .ces-checkin-card-staff{height:29px!important;min-height:29px!important;flex:0 0 29px!important;padding:4px 7px!important;overflow:hidden!important}
+  #view-checkin .ces-checkin-card-actions{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;width:100%!important;height:40px!important;min-height:40px!important;flex:0 0 40px!important;padding-top:5px!important;gap:6px!important;overflow:hidden!important;margin:0!important;position:static!important}
+  #view-checkin .ces-checkin-card-actions button{height:34px!important;min-height:34px!important;padding:0 6px!important;font-size:9px!important;border-radius:8px!important}
+  @media(max-width:899px){#view-checkin #job-list-container{grid-template-columns:repeat(2,minmax(0,1fr))!important}}
+  @media(max-width:620px){#view-checkin #job-list-container{grid-template-columns:1fr!important;max-height:none!important;overflow-y:visible!important}#view-checkin .ces-checkin-job-card{height:196px!important;min-height:196px!important;max-height:196px!important}}
+`;d.head.appendChild(st);})(document);
+
 /* V30.0.41-ENHANCED — safe rental return action; avoids null.value and keeps RETURN → รอสอบเทียบ. */
 (function(w,d){'use strict';
   function esc(v){return String(v==null?'':v).replace(/[&<>"']/g,function(c){return({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[c];});}
