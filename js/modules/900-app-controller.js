@@ -1248,6 +1248,29 @@
         } catch(ignore) { try{return String(sessionStorage.getItem('ces_line_account_link_code')||'').trim();}catch(ignore2){return '';} }
     }
 
+    async function cesStartLineOaAccountLink_() {
+        const message = 'เชื่อมบัญชี';
+        try {
+            const until = String(Date.now() + (15 * 60 * 1000));
+            sessionStorage.setItem(CES_LINE_CONNECT_PENDING_KEY_V3062, until);
+            localStorage.setItem(CES_LINE_CONNECT_PENDING_KEY_V3062, until);
+        } catch (ignorePending) {}
+        try {
+            if (window.liff && typeof liff.isInClient === 'function' && liff.isInClient() && typeof liff.sendMessages === 'function') {
+                await liff.sendMessages([{type:'text',text:message}]);
+                if (window.Swal) await Swal.fire({icon:'success',title:'ส่งคำขอเชื่อมบัญชีแล้ว',text:'กลับไปที่แชต CES Hub และเปิดลิงก์ Connect Account ที่บอทส่งให้',confirmButtonColor:'#004aad'});
+                if (typeof liff.closeWindow === 'function') liff.closeWindow();
+                return true;
+            }
+        } catch (sendError) {
+            console.warn('[LINE LINK] sendMessages unavailable; opening OA chat.', sendError);
+        }
+        const target='https://line.me/R/oaMessage/%40032jntyw/?'+encodeURIComponent(message);
+        try { window.location.href=target; } catch (ignoreNav) { window.open(target,'_blank','noopener'); }
+        return false;
+    }
+    window.cesStartLineOaAccountLink=cesStartLineOaAccountLink_;
+
     /** Show the login form UI */
     function showLoginForm() {
         document.getElementById('login-container').classList.remove('hidden');
@@ -1344,7 +1367,7 @@
 
             function verifyLineAccount_(backgroundOnly) {
                 cesLineCredentialCall_('checkUserByLineToken', [idToken, cesLineAccountLinkCode_()])
-                    .then((res) => {
+                    .then(async (res) => {
                         if (res && res.success && res.user) {
                             res.user._lineVerifiedAt = new Date().toISOString();
                             cesStoreCurrentUser_(res.user);
@@ -1352,19 +1375,28 @@
                             if (res.user.id) localStorage.setItem('ces_last_employee_id', String(res.user.id));
                             cesClearLineConnectPending_();
                             if (!backgroundOnly) onLoginSuccess(res.user, true, 'LINE_AUTO_LOGIN');
-                        } else if (!backgroundOnly) {
+                        } else if (!backgroundOnly && cesLineAccountLinkCode_()) {
                             pendingLineProfile = { userId: lineUserId, displayName: lineName || 'LINE User' };
                             showLoginForm();
                             if (typeof refreshLineNotice === 'function') refreshLineNotice();
+                        } else if (!backgroundOnly) {
+                            pendingLineProfile = null;
+                            pendingLineIdToken = null;
+                            showLoginForm();
+                            if (window.Swal) {
+                                const choice=await Swal.fire({icon:'info',title:'เชื่อมบัญชีผ่าน LINE OA ก่อน',html:'ครั้งแรกต้องเริ่มจากแชต <b>CES Hub LINE OA</b> เพื่อยืนยัน LINE Messaging user ID แล้วจึงกรอก Employee ID เพียงครั้งเดียว',confirmButtonText:'เปิด LINE OA',showCancelButton:true,cancelButtonText:'เข้าสู่ระบบด้วย Employee ID',confirmButtonColor:'#06c755'});
+                                if(choice.isConfirmed)await cesStartLineOaAccountLink_();
+                            }
                         }
                     })
                     .catch((err) => {
                         console.error('[LIFF] checkUserByLineToken error:', err && err.message ? err.message : err);
                         if (backgroundOnly) return;
-                        pendingLineProfile = { userId: lineUserId, displayName: lineName || 'LINE User' };
+                        pendingLineProfile = null;
+                        pendingLineIdToken = null;
                         showLoginForm();
                         if (typeof refreshLineNotice === 'function') refreshLineNotice();
-                        Swal.fire({icon:'warning',title:'LINE connection needs attention',text:'LINE identity could not be verified automatically. You can sign in with Employee ID and retry after the backend is deployed.',confirmButtonColor:'#004aad'});
+                        Swal.fire({icon:'warning',title:'LINE connection needs attention',text:'LINE identity could not be verified. Open CES Hub LINE OA and send “เชื่อมบัญชี”, then use the signed Connect Account link.',showCancelButton:true,confirmButtonText:'Open LINE OA',cancelButtonText:'Close',confirmButtonColor:'#06c755'}).then(function(choice){if(choice.isConfirmed)cesStartLineOaAccountLink_();});
                     });
             }
 

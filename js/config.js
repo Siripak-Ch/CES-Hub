@@ -28,7 +28,7 @@ window.CES_CONFIG = {
   },
 
   DEBUG: false,
-  RELEASE: 'CES-HUB-V30.0.63-INFUSION-FOLLOWUP-LINE-LOG',
+  RELEASE: 'CES-HUB-V30.0.64-FILTER-LINE-LOG-BRIDGE',
 
   // External links are kept in one place. Config sheet values override these defaults at runtime.
   EXTERNAL_LINKS: {

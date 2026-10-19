@@ -4,7 +4,7 @@
   var KEY='CES_HUB_LANGUAGE_V20';
   var lang=(localStorage.getItem(KEY)||'EN').toUpperCase()==='TH'?'TH':'EN';
   var nav={
-    portal:['หน้าแรก','Home'],management_overview:['ภาพรวมผู้บริหาร','Management Overview'],yearly:['แดชบอร์ดงาน','Job Dashboard'],revenue:['แดชบอร์ดรายได้','Revenue Dashboard'],ot:['แดชบอร์ด OT','OT Dashboard'],service:['แบบประเมินการใช้บริการ','Service CSI'],report:['แบบประเมินรายงานผล','Report CSI'],memo_workorder:['Memo และ Work Order','Memo & Work Order'],calendar:['ปฏิทิน','Calendar'],checkin:['เช็กอิน','Check-in'],car_booking:['จองรถยนต์','Car Booking'],van_booking:['จองรถตู้','Van Booking'],weekly:['รายงานประจำสัปดาห์','Weekly Report'],kpi:['ติดตาม KPI','KPI Tracking'],report_manage:['สร้าง OT','OT Generate'],te_generate:['สร้าง TE','TE Generate'],stock_dashboard:['แดชบอร์ด Infusion Pump','Infusion Pump Dashboard'],inventory:['คลังอุปกรณ์','Inventory'],check_stock:['ตรวจสอบสต็อก','Check Stock'],team_information:['ข้อมูลทีม','Team Information'],team_plan:['แผนทีม','Team Plan'],master_cal_pm_plan:['แผน CAL/PM Master','Master CAL/PM Plan'],audit_log:['บันทึกการตรวจประเมิน','Audit Log'],monthly_report:['รายงานประจำเดือน','Monthly Report'],users:['จัดการผู้ใช้','User Management'],ces_evaluation:['แบบประเมิน CES Hub','CES Hub Evaluation'],ces_ai_knowledge:['ฐานความรู้ CES AI','CES AI Knowledge'],health:['สุขภาพระบบ','System Health'],setting:['ตั้งค่า','Setting']
+    portal:['หน้าแรก','Home'],management_overview:['ภาพรวมผู้บริหาร','Management Overview'],yearly:['แดชบอร์ดงาน','Job Dashboard'],revenue:['แดชบอร์ดรายได้','Revenue Dashboard'],ot:['แดชบอร์ด OT','OT Dashboard'],service:['แบบประเมินการใช้บริการ','Service CSI'],report:['แบบประเมินรายงานผล','Report CSI'],memo_workorder:['Memo และ Work Order','Memo & Work Order'],calendar:['ปฏิทิน','Calendar'],checkin:['เช็กอิน','Check-in'],car_booking:['จองรถยนต์','Car Booking'],van_booking:['จองรถตู้','Van Booking'],weekly:['รายงานประจำสัปดาห์','Weekly Report'],kpi:['ติดตาม KPI','KPI Tracking'],report_manage:['สร้าง OT','OT Generate'],te_generate:['สร้าง TE','TE Generate'],stock_dashboard:['แดชบอร์ด Infusion Pump','Infusion Pump Dashboard'],inventory:['คลังอุปกรณ์','Inventory'],check_stock:['ตรวจสอบสต็อก','Check Stock'],team_information:['ข้อมูลทีม','Team Information'],team_plan:['แผนทีม','Team Plan'],master_cal_pm_plan:['แผน CAL/PM Master','Master CAL/PM Plan'],audit_log:['บันทึกการตรวจประเมิน','Audit Log'],monthly_report:['รายงานประจำเดือน','Monthly Report'],users:['จัดการผู้ใช้','User Management'],notification_config:['ตั้งค่าการแจ้งเตือน','Notification Config'],user_log:['สรุปการใช้งานระบบ','Log Summary'],ces_evaluation:['แบบประเมิน CES Hub','CES Hub Evaluation'],ces_ai_knowledge:['ฐานความรู้ CES AI','CES AI Knowledge'],health:['สุขภาพระบบ','System Health'],setting:['ตั้งค่า','Setting']
   };
   var scopedTextMap={
     'Service CSI':['แบบประเมินการใช้บริการ','Service CSI'],
@@ -40,8 +40,16 @@
     root.querySelectorAll('input[placeholder],textarea[placeholder]').forEach(function(n){var p=n.getAttribute('placeholder')||'';if(!n.dataset.cesEnglishPlaceholder&&scopedPlaceholderMap[p])n.dataset.cesEnglishPlaceholder=p;var key=n.dataset.cesEnglishPlaceholder;if(key&&scopedPlaceholderMap[key])n.placeholder=lang==='TH'?scopedPlaceholderMap[key][0]:scopedPlaceholderMap[key][1];});
   }
   function txt(selector,th,en){var n=document.querySelector(selector);if(n)n.textContent=lang==='TH'?th:en;}
+  function translateAllOptions(){
+    document.querySelectorAll('select option[value="all"]').forEach(function(option){
+      var select=option.parentElement,id=String(select&&select.id||select&&select.name||'').toLowerCase(),pair=['ทั้งหมด','All'];
+      if(/year/.test(id))pair=['ทุกปี','All years'];else if(/month/.test(id))pair=['ทุกเดือน','All months'];else if(/team/.test(id))pair=['ทุกทีม','All teams'];else if(/brand/.test(id))pair=['ทุกแบรนด์','All brands'];else if(/model/.test(id))pair=['ทุกโมเดล','All models'];else if(/status/.test(id))pair=['ทุกสถานะ','All statuses'];else if(/location|site/.test(id))pair=['ทุกสถานที่','All locations'];else if(/module/.test(id))pair=['ทุกโมดูล','All modules'];else if(/action/.test(id))pair=['ทุกการดำเนินการ','All actions'];else if(/customer/.test(id))pair=['ลูกค้าทั้งหมด','All customers'];
+      option.textContent=lang==='TH'?pair[0]:pair[1];
+    });
+  }
   function apply(){
     document.documentElement.lang=lang==='TH'?'th':'en';
+    document.documentElement.setAttribute('data-ces-language',lang);document.body&&document.body.setAttribute('data-ces-language',lang);
     document.querySelectorAll('[data-i18n-th][data-i18n-en]').forEach(function(node){
       var value=lang==='TH'?node.getAttribute('data-i18n-th'):node.getAttribute('data-i18n-en');
       // Never replace textContent on a container because doing so removes all
@@ -78,6 +86,7 @@
     var input=document.getElementById('ces-ai-local-input');if(input)input.placeholder=lang==='TH'?'พิมพ์คำถามเกี่ยวกับ CES Hub...':'Ask about CES Hub...';
     var suggestion=document.getElementById('ces-ai-eval-suggestion');if(suggestion)suggestion.placeholder='แนะนำการพัฒนาเพิ่มเติม (ไม่บังคับ)';
     translateScopedText(document.getElementById('view-service'));translateScopedText(document.getElementById('view-report'));
+    translateAllOptions();
     var evalSubmit=document.getElementById('ces-ai-eval-submit');if(evalSubmit&&!evalSubmit.disabled)evalSubmit.innerHTML='<i class="fas fa-paper-plane"></i> ส่งแบบประเมิน';
     window.dispatchEvent(new CustomEvent('ces:language-applied',{detail:{language:lang}}));document.dispatchEvent(new CustomEvent('ces:language-applied',{detail:{language:lang}}));
     // Home contains dynamic bilingual cards. Re-prime them after applying the
@@ -91,5 +100,6 @@
   window.toggleCesLanguage=toggle;
   window.addEventListener('ces:app-ready',function(){setTimeout(apply,0);});
   document.addEventListener('DOMContentLoaded',function(){setTimeout(apply,0);});
-  window.addEventListener('ces:tab-changed',function(e){var t=e&&e.detail&&e.detail.tab;if(t==='service'||t==='report')setTimeout(apply,30);});
+  window.addEventListener('ces:tab-changed',function(){setTimeout(apply,30);});
+  window.addEventListener('ces:deferred-ready',function(){setTimeout(apply,40);});
 })();
