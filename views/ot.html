@@ -1,0 +1,92 @@
+<div class="hidden ces-ot-page animate-fade-in" id="view-ot">
+  <section class="ces-ot-header">
+    <div class="ces-ot-title-wrap">
+      <div class="ces-ot-title-icon"><i class="fas fa-clock text-xl"></i></div>
+      <div class="min-w-0">
+        <h2 class="ces-ot-title">OT Dashboard</h2>
+        <p class="ces-ot-subtitle">Overtime Analysis &amp; Performance Tracking</p>
+      </div>
+    </div>
+    <div class="ces-ot-toolbar">
+      <span class="ces-ot-state" id="ot-data-state"><i class="fas fa-circle-notch fa-spin"></i> Loading data</span>
+      <div class="ces-ot-team-tabs" aria-label="OT team filter">
+        <button class="ot-team-btn active" id="ot-btn-ALL" onclick="setOTTeamFilter('ALL')">ALL</button>
+        <button class="ot-team-btn" id="ot-btn-MED" onclick="setOTTeamFilter('MED')">MED</button>
+        <button class="ot-team-btn" id="ot-btn-LAB" onclick="setOTTeamFilter('LAB')">LAB</button>
+        <button class="ot-team-btn" id="ot-btn-EHS" onclick="setOTTeamFilter('EHS')">EHS</button>
+      </div>
+      <button class="ces-ot-icon-btn ces-action-neutral" type="button" title="Refresh OT data" onclick="fetchOTData(true)"><i class="fas fa-sync-alt"></i></button>
+      <button class="ces-ot-icon-btn ces-action-excel" type="button" title="Export OT summary" onclick="exportOTData()"><i class="fas fa-file-excel"></i></button>
+    </div>
+  </section>
+
+  <section class="ces-ot-filter-grid">
+    <div class="ces-ot-filter-card">
+      <label for="ot-filter-year">Fiscal Year</label>
+      <select id="ot-filter-year" onchange="applyOTFilters()">
+        <option value="2025">2025</option>
+        <option value="2026">2026</option>
+        <option value="2027">2027</option>
+      </select>
+    </div>
+    <div class="ces-ot-filter-card">
+      <label for="ot-filter-month">Monthly Period</label>
+      <select id="ot-filter-month" onchange="applyOTFilters()"></select>
+    </div>
+  </section>
+
+  <section class="ces-ot-kpi-grid">
+    <article class="ces-ot-kpi-card" style="--ot-accent:#003DA5">
+      <div class="ces-ot-kpi-label">Total OT Hours</div>
+      <div><span class="ces-ot-kpi-value" id="card-total-ot">0</span><span class="ces-ot-kpi-unit">HRS</span></div>
+    </article>
+    <article class="ces-ot-kpi-card" style="--ot-accent:#004AAD">
+      <div class="ces-ot-kpi-label">MED Team OT</div>
+      <div><span class="ces-ot-kpi-value" id="card-med-ot">0</span><span class="ces-ot-kpi-unit">HRS</span></div>
+    </article>
+    <article class="ces-ot-kpi-card" style="--ot-accent:#19A7CE">
+      <div class="ces-ot-kpi-label">LAB Team OT</div>
+      <div><span class="ces-ot-kpi-value" id="card-lab-ot">0</span><span class="ces-ot-kpi-unit">HRS</span></div>
+    </article>
+    <article class="ces-ot-kpi-card" style="--ot-accent:#0FC1A1">
+      <div class="ces-ot-kpi-label">EHS Team OT</div>
+      <div><span class="ces-ot-kpi-value" id="card-ehs-ot">0</span><span class="ces-ot-kpi-unit">HRS</span></div>
+    </article>
+  </section>
+
+  <section class="ces-ot-chart-grid">
+    <article class="ces-ot-chart-card">
+      <div class="ces-ot-card-heading"><span><i class="fas fa-chart-column text-[#003DA5] mr-2"></i>OT Monthly Trend</span><span class="text-[9px] text-slate-400">Hours by team</span></div>
+      <div class="ces-ot-chart" id="ot-trend-chart"></div>
+    </article>
+    <article class="ces-ot-chart-card">
+      <div class="ces-ot-card-heading"><span><i class="fas fa-chart-pie text-[#003DA5] mr-2"></i>Service Share</span><span class="text-[9px] text-slate-400">Selected period</span></div>
+      <div class="ces-ot-chart" id="ot-team-chart"></div>
+    </article>
+  </section>
+
+  <section class="ces-ot-table-card">
+    <div class="ces-ot-table-head">
+      <div>
+        <h3 class="text-sm font-black text-slate-700">Staff Performance Summary</h3>
+        <p class="text-[10px] text-slate-400 font-semibold mt-0.5" id="ot-table-subtitle">0 staff records</p>
+      </div>
+      <span class="text-[10px] font-black text-[#003DA5] bg-blue-50 border border-blue-100 rounded-full px-3 py-1" id="ot-period-badge">—</span>
+    </div>
+    <div class="ces-ot-table-wrap custom-scrollbar">
+      <table class="w-full text-sm text-left">
+        <thead class="bg-slate-50 sticky top-0 z-10">
+          <tr class="text-[10px] font-black text-slate-400 uppercase tracking-wider">
+            <th class="px-5 py-3">Staff Name</th>
+            <th class="px-4 py-3 text-center">Team</th>
+            <th class="px-4 py-3 text-center">Working Hrs</th>
+            <th class="px-5 py-3 text-center">OT Hrs</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-slate-100" id="ot-table-body">
+          <tr><td colspan="4" class="ces-ot-empty">Loading OT records…</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+</div>
