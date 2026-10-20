@@ -315,9 +315,9 @@ window.cesHydrateLoginMemory = cesHydrateLoginMemory;
     }
 
 
-    // V30.0.64 — first link must start from the OA chat so the signed
-    // Messaging API user ID is available. A generic LIFF URL contains only
-    // the LINE Login user ID and cannot safely populate Staff_Data.lineUserId.
+    // V30.0.65 — open LIFF directly. The server verifies the ID token before
+    // writing Staff_Data.lineUserId/lineName. A signed OA code is preferred
+    // when present, while channels under the same Provider can link directly.
     function cesConnectLineOA() {
         // Remember the intent before leaving GitHub Pages. LINE Login returns
         // through an OAuth URL whose query can contain only code/state, so the
@@ -331,7 +331,8 @@ window.cesHydrateLoginMemory = cesHydrateLoginMemory;
             window.cesStartLineOaAccountLink();
             return;
         }
-        const target = 'https://line.me/R/oaMessage/%40032jntyw/?' + encodeURIComponent('เชื่อมบัญชี');
+        const liffId = String(window.CES_CONFIG && window.CES_CONFIG.LINE_OA && window.CES_CONFIG.LINE_OA.LIFF_ID || '2009944147-iluulCQj');
+        const target = 'https://liff.line.me/' + encodeURIComponent(liffId) + '/?cesTab=portal&source=signin-connect&intent=connect';
         try { window.location.href = target; }
         catch (e) { window.open(target, '_blank', 'noopener'); }
     }

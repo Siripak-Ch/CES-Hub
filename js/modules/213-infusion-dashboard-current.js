@@ -1,4 +1,4 @@
-/* CES Hub V30.0.64 — Infusion Dashboard, workbook-driven filters and Rental Follow-up UX */
+/* CES Hub V30.0.65 — Infusion Dashboard, interval-aware contract filters */
 (function(w,d){'use strict';
   var followState={cards:[],summary:{},sourceSheetUrl:'',defaultEmail:''};
   function esc(v){return String(v==null?'':v).replace(/[&<>"']/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});}
@@ -64,8 +64,9 @@
   var contractRenderBase=w.sd_renderContractSummary;
   w.sd_renderContractSummary=function(){
     fill('sdContractYear',lang()==='TH'?'ทุกปี':'All years',['2025','2026','2027']);fill('sdContractMonth',lang()==='TH'?'ทุกเดือน':'All months',['01','02','03','04','05','06','07','08','09','10','11','12'],function(v){return months()[Number(v)-1];});if(typeof contractRenderBase==='function')contractRenderBase();translateFilters_();
-    var year=val('sdContractYear'),month=val('sdContractMonth'),rows=Array.from(d.querySelectorAll('#sdContractTable tbody tr')),shown=0;
-    rows.forEach(function(row){var dates=(row.textContent||'').match(/20\d{2}-\d{2}-\d{2}/g)||[],match=dates.some(function(date){return(year==='all'||date.slice(0,4)===year)&&(month==='all'||date.slice(5,7)===month);});var visible=(year==='all'&&month==='all')||match;row.style.display=visible?'':'none';if(visible)shown++;});
+    var year=val('sdContractYear'),month=val('sdContractMonth'),table=d.querySelector('#sdContractTable table'),headers=table?Array.from(table.querySelectorAll('thead th')):[],dateIndex=headers.findIndex(function(th){return /Borrow\s*\/\s*Due/i.test(th.textContent||'');}),rows=Array.from(d.querySelectorAll('#sdContractTable tbody tr')),shown=0;
+    function monthBounds(y,m){return{start:new Date(Number(y),Number(m)-1,1),end:new Date(Number(y),Number(m),0,23,59,59,999)};}
+    rows.forEach(function(row){var dateText=dateIndex>=0&&row.cells[dateIndex]?row.cells[dateIndex].textContent:(row.textContent||''),dates=(dateText||'').match(/20\d{2}-\d{2}-\d{2}/g)||[],visible=true;if(year!=='all'||month!=='all'){var targetYear=year==='all'?null:Number(year),targetMonth=month==='all'?null:Number(month),start=dates[0]?new Date(dates[0]+'T00:00:00'):null,end=dates[1]?new Date(dates[1]+'T23:59:59'):start;if(targetYear&&targetMonth){var bounds=monthBounds(targetYear,targetMonth);visible=!!(start&&end&&start<=bounds.end&&end>=bounds.start);}else if(targetYear){var yearStart=new Date(targetYear,0,1),yearEnd=new Date(targetYear,11,31,23,59,59);visible=!!(start&&end&&start<=yearEnd&&end>=yearStart);}else if(targetMonth){visible=dates.some(function(date){return Number(date.slice(5,7))===targetMonth;});}}row.style.display=visible?'':'none';if(visible)shown++;});
     var count=el('sdContractCount');if(count&&rows.length)count.textContent=shown+' contracts · latest first';
   };
 
