@@ -473,8 +473,15 @@
             cesPersistSession_(currentUser, currentTab || 'portal', 'LINE_LINKED');
             cesClearLineConnectPending_();
             if (typeof refreshLineNotice === 'function') refreshLineNotice();
-            const pushOk = String(res || '').indexOf('|PUSH_OK') >= 0;
-            await cesLineReturnToChatAfterLink_(!pushOk);
+            /* Keep the user inside CES Hub after linking.  Closing LIFF here
+               looked like a redirect/bounce and made a successful save feel
+               slow.  The webhook menu remains available in the LINE chat. */
+            try {
+                const clean = new URL(window.location.href);
+                ['code','state','liff.state','intent','source'].forEach(function(key){ clean.searchParams.delete(key); });
+                window.history.replaceState({}, document.title, clean.pathname + clean.search + clean.hash);
+            } catch (ignoreCleanUrl) {}
+            if (window.Swal) Swal.fire({toast:true,position:'top-end',icon:'success',title:'LINE account connected',text:'Saved '+String(currentUser.lineName||profile.displayName||'LINE user')+' to Staff_Data',timer:1800,showConfirmButton:false});
             return res;
         }).catch((error) => {
             console.error('[LIFF] Account linking failed:', error);
@@ -1277,9 +1284,10 @@
         const loginInputV38 = document.getElementById('loginId');
         if (loginInputV38) {
             if (pendingLineProfile) {
-                // First-time LINE linking must require an explicit Employee ID.
-                // Never auto-fill a cached browser identity into a new LINE account link.
-                loginInputV38.value = '';
+                /* The employee already entered this ID on the same browser.
+                   Reuse it for the verified LINE identity instead of clearing
+                   the field and forcing a second manual sign-in. */
+                loginInputV38.value = localStorage.getItem('ces_last_employee_id') || sessionStorage.getItem('ces_last_employee_id') || loginInputV38.value || '';
             } else if (!loginInputV38.value) {
                 loginInputV38.value = localStorage.getItem('ces_last_employee_id') || sessionStorage.getItem('ces_last_employee_id') || '';
             }
@@ -1377,6 +1385,18 @@
                             pendingLineProfile = { userId: lineUserId, displayName: lineName || 'LINE User' };
                             showLoginForm();
                             if (typeof refreshLineNotice === 'function') refreshLineNotice();
+                            /* Fast first-link: verify the remembered employee ID
+                               through the normal login button, then persist the
+                               signed LINE identity in the background. */
+                            try {
+                                const rememberedId=localStorage.getItem('ces_last_employee_id')||sessionStorage.getItem('ces_last_employee_id')||'';
+                                const once='CES_LINE_FAST_LINK_ATTEMPT_V3066';
+                                if(rememberedId&&!sessionStorage.getItem(once)){
+                                    sessionStorage.setItem(once,'1');
+                                    const input=document.getElementById('loginId');if(input)input.value=rememberedId;
+                                    setTimeout(function(){var button=document.getElementById('btnLogin');if(button&&!button.disabled)button.click();},80);
+                                }
+                            } catch (ignoreFastLink) {}
                         } else if (!backgroundOnly) {
                             pendingLineProfile = null;
                             pendingLineIdToken = null;

@@ -6,7 +6,7 @@
 
 window.CES_CONFIG = {
   // IMPORTANT: After deploying Apps Script backend, paste the latest /exec URL here.
-  GAS_API_URL: 'https://script.google.com/macros/s/AKfycbzKclCNKwC-XWnes2nCW6mYBGoXqNOSYxk0zOY0fH3Ox1ROAnJK1Hmr8U25EMqbMCCI/exec',
+  GAS_API_URL: 'https://script.google.com/macros/s/AKfycbxJYMzW2CXcplrvh0x-cHYj2wFTLMxiU3gej9-rpkyhuH6Wjiw_3aMBhfzTYinoNfoF/exec',
   // Optional extra /exec endpoints. The polyfill also accepts ?gasApiUrl=<url>
   // and persists that override, so a deployment URL can be corrected without
   // allowing every module to fail independently.
@@ -28,7 +28,7 @@ window.CES_CONFIG = {
   },
 
   DEBUG: false,
-  RELEASE: 'CES-HUB-V30.0.65-LINE-LOG-INFUSION-REPAIR',
+  RELEASE: 'CES-HUB-V30.0.66-LINE-LOG-RENTAL-FLEX',
 
   // External links are kept in one place. Config sheet values override these defaults at runtime.
   EXTERNAL_LINKS: {

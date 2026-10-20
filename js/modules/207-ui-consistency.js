@@ -20,7 +20,11 @@
   function isVisibleView(v){return v && !v.classList.contains('hidden');}
 
   function normalizeHeader(view){
-    if(!view || view.id==='view-portal') return;
+    /* Some modules (notably User Log) own a complete dashboard layout rather
+       than a compact function header.  Never promote their first wrapper into
+       `.ces-function-header`: the global header CSS has a fixed compact height
+       and would hide every chart/table below the title. */
+    if(!view || view.id==='view-portal' || view.hasAttribute('data-ces-no-standard')) return;
     var h=view.querySelector(':scope > .ces-function-header,:scope > [data-ces-function-header="1"],:scope > .ces-standard-header,.stockpro-shell > .stockpro-header-card.ces-function-header,.stockpro-shell > .stockpro-header-card[data-ces-function-header="1"]');
     if(!h){
       var title=view.querySelector('h1,h2');
@@ -114,6 +118,7 @@
   function normalizeView(view){
     if(!view || !view.id || view.id.indexOf('view-')!==0) return;
     view.classList.add('ces-v228-view');
+    if(view.hasAttribute('data-ces-no-standard')) return;
     normalizeHeader(view); normalizeTabs(view); normalizeFilters(view); normalizeIcons(view);
   }
   function run(){
