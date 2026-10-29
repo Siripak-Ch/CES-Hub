@@ -1,0 +1,33 @@
+<section id="view-user_log" data-ces-no-standard class="hidden ces-user-log-page">
+  <div class="ces-log-shell" data-user-log-static-fallback="true">
+    <header class="ces-log-hero">
+      <div class="ces-log-hero-copy"><span class="ces-log-icon"><i class="fas fa-chart-line"></i></span><div><p class="ces-log-eyebrow">SYSTEM ANALYTICS</p><h1>User Log Dashboard</h1><p>Weekly, monthly and yearly usage by user, module and team</p></div></div>
+      <button class="ces-log-refresh ces-action-neutral" type="button" onclick="initUserLogDashboard(true)" title="Resync user log"><i class="fas fa-rotate-right"></i><span>Resync</span></button>
+    </header>
+    <div class="ces-log-filters">
+      <label><span>Year</span><select id="ulogYear" onchange="initUserLogDashboard(true)"><option value="all">All Years</option></select></label>
+      <label><span>Month</span><select id="ulogMonth" onchange="initUserLogDashboard(true)"><option value="all">All Months</option></select></label>
+      <label><span>Team</span><select id="ulogTeam" onchange="initUserLogDashboard(true)"><option value="all">All Teams</option></select></label>
+      <label><span>Module</span><select id="ulogModule" onchange="initUserLogDashboard(true)"><option value="all">All Modules</option></select></label>
+      <label><span>Action</span><select id="ulogAction" onchange="initUserLogDashboard(true)"><option value="all">All Actions</option></select></label>
+      <button type="button" onclick="resetUserLogFilters()"><i class="fas fa-rotate-left"></i> Reset</button>
+    </div>
+    <div id="ulogState" class="ces-log-state"><i class="fas fa-circle-notch fa-spin"></i><span>Loading user activity…</span></div>
+    <div id="ulogKpis" class="ces-log-kpis"></div>
+    <div class="ces-log-grid ces-log-trend-grid">
+      <article class="ces-log-card"><div class="ces-log-card-head"><h3><i class="fas fa-calendar-week"></i> Weekly Usage</h3><span>Latest 16 weeks</span></div><div class="ces-log-chart"><canvas id="ulogWeeklyChart"></canvas></div></article>
+      <article class="ces-log-card"><div class="ces-log-card-head"><h3><i class="fas fa-calendar-days"></i> Monthly Usage</h3><span id="ulogGeneratedAt">—</span></div><div class="ces-log-chart"><canvas id="ulogMonthlyChart"></canvas></div></article>
+      <article class="ces-log-card"><div class="ces-log-card-head"><h3><i class="fas fa-chart-column"></i> Yearly Usage</h3><span>All available years</span></div><div class="ces-log-chart"><canvas id="ulogYearlyChart"></canvas></div></article>
+    </div>
+    <div class="ces-log-grid ces-log-overview-grid">
+      <article class="ces-log-card"><h3><i class="fas fa-circle-user"></i> User Adoption</h3><div class="ces-log-chart compact"><canvas id="ulogUserChart"></canvas></div></article>
+      <article class="ces-log-card"><h3><i class="fas fa-cubes"></i> Module Usage</h3><div class="ces-log-chart compact"><canvas id="ulogModuleChart"></canvas></div></article>
+    </div>
+    <div class="ces-log-grid ces-log-summary-grid">
+      <article class="ces-log-card"><h3><i class="fas fa-users"></i> Usage by Team</h3><div id="ulogTeamTable"></div></article>
+      <article class="ces-log-card"><h3><i class="fas fa-layer-group"></i> Each Module</h3><div id="ulogModuleTable"></div></article>
+      <article class="ces-log-card"><h3><i class="fas fa-ranking-star"></i> Top Active Users</h3><div id="ulogUserTable"></div></article>
+    </div>
+    <article class="ces-log-card ces-log-detail-card"><div class="ces-log-card-head"><h3><i class="fas fa-table-list"></i> Activity Detail</h3><span id="ulogDetailCount">0 events</span></div><div id="ulogDetailTable"></div></article>
+  </div>
+</section>
