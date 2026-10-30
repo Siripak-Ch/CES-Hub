@@ -190,26 +190,32 @@ function fillUserInfoRM() {
         try{cachedSignatures=JSON.parse(localStorage.getItem(signatureCacheKey)||'null');}catch(ignoreCache){}
         if (select && cachedSignatures && Array.isArray(cachedSignatures.data) && cachedSignatures.data.length) {
             select.innerHTML = cachedSignatures.data.map(s => `<option value="${rmEscapeHtml(s.id)}">${rmEscapeHtml(s.name)}</option>`).join('');
-            if(select) { const staff=window.currentUser||{},t=String(staff.supervisorName||staff.supervisor_name||staff['Supervisor Name']||'').trim().toLowerCase(); if(t) {const m=cachedSignatures.data.find(s=>String(s.name||'').toLowerCase()===t);if(m)select.value=m.id;} }
+            
         } else if (select) select.innerHTML = '<option value="none">Blank (No Signature)</option>';
-        const ces69AutoSupervisorSignature = sigs => {
-            const staff=window.currentUser||{}, target=String(staff.supervisorName||staff.supervisor_name||staff['Supervisor Name']||staff.supervisor||staff.reportingManager||'').trim().toLocaleLowerCase();
-            if (!target || !Array.isArray(sigs) || !select) return;
-            const match=sigs.find(s=>String(s.name||'').trim().toLocaleLowerCase()===target);
-            if(match)select.value=String(match.id);
+        let selectedSupervisor = String((window.currentUser||{}).supervisorName||(window.currentUser||{}).supervisor_name||(window.currentUser||{})['Supervisor Name']||(window.currentUser||{}).supervisor||'');
+        let signatureOptions = [];
+        const normName = x => String(x||'').normalize('NFKC').toLocaleLowerCase().replace(/^(นาย|นางสาว|นาง|mr\.?|mrs\.?|ms\.?|dr\.?)\s*/i,'').replace(/[^a-z0-9ก-๙]+/g,'');
+        const applySupervisor = () => {
+          if(!select || !selectedSupervisor || !signatureOptions.length)return;
+          const want=normName(selectedSupervisor);
+          const match=signatureOptions.find(x => normName(x.name)===want) || signatureOptions.find(x => {
+            const key=normName(x.name);return key.length>5&&(key.includes(want)||want.includes(key));
+          });
+          if(match){select.value=String(match.id);select.dataset.autoSupervisor=selectedSupervisor;}
+          else {select.value='none';select.title='No signature file found for supervisor: '+selectedSupervisor;}
         };
         const applySignatures = sigs => {
-            sigs = Array.isArray(sigs) && sigs.length ? sigs : [{name:'Blank (No Signature)',id:'none'}];
-            if (select) select.innerHTML = sigs.map(s => `<option value="${rmEscapeHtml(s.id)}">${rmEscapeHtml(s.name)}</option>`).join('');
-            ces69AutoSupervisorSignature(sigs);
-            try{localStorage.setItem(signatureCacheKey,JSON.stringify({at:Date.now(),data:sigs}));}catch(ignoreStore){}
+          signatureOptions = Array.isArray(sigs) && sigs.length ? sigs : [{name:'Blank (No Signature)',id:'none'}];
+          if(select)select.innerHTML=signatureOptions.map(x=>`<option value="${rmEscapeHtml(x.id)}">${rmEscapeHtml(x.name)}</option>`).join('');
+          applySupervisor();
+          try{localStorage.setItem(signatureCacheKey,JSON.stringify({at:Date.now(),data:signatureOptions}));}catch(ignoreStore){}
         };
         // Fetch authoritative Supervisor Name from Staff_Data, not a manually selected signature.
         try {
           const staff=window.currentUser||{}, empId=String(staff.id||staff.empId||staff.employeeId||staff.userId||'');
           if(empId&&window.CES_API&&window.CES_API.callFunction){
             window.CES_API.callFunction('getTECurrentUserProfile',[{employeeId:empId}],{transport:'jsonp',timeoutMs:24000,dedupe:true,priority:'background',module:'report_manage',silentLoading:true})
-              .then(result=>{if(!result?.success)return;const teamSelect=document.getElementById('rm-mainTeam');if(teamSelect&&result.team){const raw=String(result.team).toUpperCase().trim(),canon={'CAL-MED':'MED','CAL-LAB':'LAB','EHS+ENV':'EHS','ENV':'EHS','INNOVATION':'MNG'}[raw]||raw;const hit=Array.from(teamSelect.options).find(x=>x.value===canon);if(hit)teamSelect.value=canon;}if(!result.supervisorNameTh||!select)return;const norm=x=>String(x||'').toLocaleLowerCase().replace(/[^a-z0-9ก-๙]+/g,'');const wanted=norm(result.supervisorNameTh);const match=Array.from(select.options).find(x=>norm(x.textContent)===wanted||norm(x.textContent).includes(wanted)||wanted.includes(norm(x.textContent)));if(match)select.value=match.value;});
+              .then(result=>{if(!result?.success)return;const teamSelect=document.getElementById('rm-mainTeam');if(teamSelect&&result.team){const raw=String(result.team).toUpperCase().trim(),canon={'CAL-MED':'MED','CAL-LAB':'LAB','EHS+ENV':'EHS','ENV':'EHS','INNOVATION':'MNG'}[raw]||raw;const hit=Array.from(teamSelect.options).find(x=>x.value===canon);if(hit)teamSelect.value=canon;}if(result.supervisorNameTh){selectedSupervisor=String(result.supervisorNameTh);applySupervisor();}});
           }
         }catch(ignoreSupervisor){}
         const signatureFail = err => {

@@ -40,22 +40,6 @@
       var n=el(x[0]);if(!n)return;n.classList.toggle('hidden',!x[1]);n.classList.toggle('ces-v31-hidden',!x[1]);n.style.setProperty('display',x[1]?'grid':'none','important');
     });
   }
-  var priorSwitch=window.si_switchTab;
-  window.si_switchTab=function(tab){
-    tab=tab==='acc'?'acc':'equip';applyInventoryTab(tab);
-    try{if(typeof si_applyFilters==='function')si_applyFilters();else if(typeof priorSwitch==='function')priorSwitch(tab);if(tab==='equip'&&typeof si_renderTable==='function')si_renderTable();if(tab==='acc'&&typeof si_renderAccCards==='function')si_renderAccCards();}catch(e){console.warn('[Inventory V31 tab]',e);}
-    requestAnimationFrame(function(){applyInventoryTab(tab);});
-  };
-  var priorInit=window.initStockInventoryModule;
-  if(typeof priorInit==='function')window.initStockInventoryModule=function(force){
-    var desired='equip';try{if(typeof SI!=='undefined'&&SI.tab)desired=SI.tab;}catch(e){}if(desired!=='acc')desired='equip';
-    var result=priorInit.apply(this,arguments);
-    var restore=function(){var title=document.querySelector('#view-inventory .stockpro-title-wrap h1');if(title)title.textContent='Inventory';applyInventoryTab(desired);};
-    if(result&&typeof result.then==='function')return result.then(function(v){restore();setTimeout(restore,80);return v;},function(e){restore();throw e;});
-    restore();setTimeout(restore,80);return result;
-  };
-  var inventoryView=el('view-inventory');if(inventoryView){new MutationObserver(function(){if(!inventoryView.classList.contains('hidden')){var tab='equip';try{if(typeof SI!=='undefined'&&SI.tab)tab=SI.tab;}catch(e){}applyInventoryTab(tab);}}).observe(inventoryView,{attributes:true,attributeFilter:['class']});}
-
   // Rental contract detail is owned by 140-stock-dashboard.js / 991 runtime stock layer.
   // Do not override it in this mixed Stock/Settings/KPI compatibility patch.
 
@@ -83,7 +67,7 @@
     var out={version:VERSION,reportIconBorder:el('view-report')?getComputedStyle(document.querySelector('#view-report .ces-report-icon-v31')).borderStyle:'-',inventoryTitle:(document.querySelector('#view-inventory h1')||{}).textContent||'',inventoryVisibleBlocks:visible,contractDetail:typeof window.sd_contractDetail==='function',kpiDriveDefaults:window.CES_KPI_DRIVE_DEFAULTS};console.log('[CES V31 Recheck]',out);return out;
   };
   injectStyle();
-  document.addEventListener('DOMContentLoaded',function(){injectStyle();applyInventoryTab('equip');});
+  document.addEventListener('DOMContentLoaded',injectStyle);
 })();
 
 /* V30.0.40 — paint Accessories dashboard from its small source immediately.
@@ -176,30 +160,6 @@
 })();
 
 
-/* CES Hub V30.0.31 follow-up — Inventory Dashboard / Accessories strict tab isolation. */
-(function(){
-  'use strict';
-  function el(id){return document.getElementById(id);}
-  function apply(tab){
-    tab=String(tab||'dashboard').toLowerCase();
-    if(tab!=='acc')tab='dashboard';
-    var dash=el('siInventoryDashboardCurrent'),accFilter=el('siAccFilters'),accSection=el('siAccSection');
-    if(dash){dash.classList.toggle('hidden',tab!=='dashboard');dash.style.display=tab==='dashboard'?'':'none';}
-    [accFilter,accSection].forEach(function(n){if(n){n.classList.toggle('hidden',tab!=='acc');n.style.display=tab==='acc'?'':'none';}});
-    var b1=el('siTabDashboardCurrent'),b2=el('siTabAcc');if(b1)b1.classList.toggle('active',tab==='dashboard');if(b2)b2.classList.toggle('active',tab==='acc');
-    try{if(typeof SI!=='undefined')SI.tab=tab;}catch(e){}
-    if(tab==='dashboard'&&typeof window.si_renderAccessoriesDashboard==='function')setTimeout(function(){window.si_renderAccessoriesDashboard();},0);
-    if(tab==='acc'&&typeof window.si_renderAccCards==='function')setTimeout(function(){window.si_renderAccCards();},0);
-  }
-  window.si_switchTab=function(tab){apply(tab);};
-  var init=window.initStockInventoryModule;
-  if(typeof init==='function'&&!window._CES_INV_TAB_ISOLATION){
-    window._CES_INV_TAB_ISOLATION=true;
-    window.initStockInventoryModule=function(force){var r=init.apply(this,arguments);var restore=function(){apply((typeof SI!=='undefined'&&SI.tab==='acc')?'acc':'dashboard');};if(r&&typeof r.then==='function'){return r.then(function(v){restore();setTimeout(restore,80);return v;},function(e){restore();throw e;});}restore();setTimeout(restore,100);return r;};
-  }
-  document.addEventListener('DOMContentLoaded',function(){setTimeout(function(){apply('dashboard');},120);});
-})();
-
 // ===== Accessories inventory and allocation =====
 /* CES Hub — Accessories allocation, checkout and inventory dashboard. */
 (function(w,d){'use strict';
@@ -253,7 +213,7 @@
  const issued=movement.reduce((a,x)=>a+n(x.issued),0),restocked=movement.reduce((a,x)=>a+n(x.restocked),0),spent=movement.reduce((a,x)=>a+n(x.issuedCost),0);
  const kpis=[['Issued units',issued],['Restocked units',restocked],['Issued cost',money(spent)],['Recent transactions',tx.length]];$('ces69DashKpis').innerHTML=kpis.map(([l,v])=>'<div class="ces69-kpi">'+l+'<b>'+v+'</b></div>').join('');if(w.Chart){if(state.chart)state.chart.destroy();state.chart=new w.Chart($('ces69UsageChart'),{type:'bar',data:{labels:series.map(x=>x.period),datasets:[{label:'Issued',data:series.map(x=>x.issued),backgroundColor:'#2563eb'},{label:'Restocked',data:series.map(x=>x.restocked),backgroundColor:'#10b981'}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom'}}}});}const fields=['Date','Type','Team','Item','Qty','Balance','Note'];$('ces69Recent').innerHTML='<table class="ces69-mini-table"><thead><tr>'+fields.map(x=>'<th>'+x+'</th>').join('')+'</tr></thead><tbody>'+tx.slice(0,40).map(x=>'<tr>'+[x.date,x.type,x.team,x.item,x.qty,x.after,x.note].map(v=>'<td>'+esc(v)+'</td>').join('')+'</tr>').join('')+'</tbody></table>';};
  // Lightweight initial read: inventory page does not need infusion/equipment, approvals and history.
- w.initStockInventoryModule=async function(force=false){if(state.pending&&!force)return state.pending;style();ensureFilters();const previous=(w.SI&&w.SI.acc||[]);if(previous.length&&!force){filters();w.si69_renderAccessories();dashboardShell();return Promise.resolve({success:true,cached:true});}state.pending=call('si_getAccessoriesDashboardFast',force===true,55000).then(data=>{if(!data||!data.success)throw Error(data?.message||'Accessories unavailable');w.SI=w.SI||{};w.SI.loaded=true;w.SI.acc=data.accessories||[];w.SI.raw=data;w.SI.accPage=1;w.SI.cart=w.SI.cart||[];const teams=[...new Set(w.SI.acc.map(x=>x.team))],items=[...new Set(w.SI.acc.map(x=>x.itemName))],statuses=['STOCK','LOW_STOCK','UNALLOCATED'],actions=[...new Set(w.SI.acc.map(x=>x.actionRequired))];data.filters={accessoryTeams:teams,accessoryItems:items,accessoryStatuses:statuses,accessoryActions:actions};filters();opt('siAccAction',actions,'All Actions');w.si69_renderAccessories();dashboardShell();if(w.si_renderAccessoriesDashboard)w.si_renderAccessoriesDashboard(); if($('siInventoryDashboardCurrent')&&$('siInventoryDashboardCurrent').offsetParent!==null)w.si69_loadDashboard();w.si_updateCart?.();const info=$('siDataFreshness');if(info)info.textContent='Updated '+new Date().toLocaleTimeString();return data;}).catch(e=>{if($('siAccCards'))$('siAccCards').innerHTML='<div role="alert" style="padding:22px;color:#a11">'+esc(e.message)+' <button class="ces69-btn" onclick="initStockInventoryModule(true)">Retry</button></div>';return{success:false,message:e.message};}).finally(()=>state.pending=null);return state.pending;};
+ w.initStockInventoryModule=async function(force=false){if(state.pending&&!force)return state.pending;style();ensureFilters();const previous=(w.SI&&w.SI.acc||[]);if(previous.length&&!force){filters();w.si69_renderAccessories();dashboardShell();if(w.si69_loadDashboard&&$('siInventoryDashboardCurrent')?.offsetParent!==null)w.si69_loadDashboard(false);return Promise.resolve({success:true,cached:true});}state.pending=call('si_getAccessoriesDashboardFast',force===true,55000).then(data=>{if(!data||!data.success)throw Error(data?.message||'Accessories unavailable');w.SI=w.SI||{};w.SI.loaded=true;w.SI.acc=data.accessories||[];w.SI.raw=data;if(!w.SI.acc.length){const host=$('siAccCards');if(host)host.innerHTML='<p role="status" style="padding:22px;color:#b45309">No Accessories Data rows were returned. Verify SPREADSHEET_ID, source sheet "Accessories Data", sharing permissions, and import the cleaned stock sheet before retrying.</p>';}w.SI.accPage=1;w.SI.cart=w.SI.cart||[];const teams=[...new Set(w.SI.acc.map(x=>x.team))],items=[...new Set(w.SI.acc.map(x=>x.itemName))],statuses=['STOCK','LOW_STOCK','UNALLOCATED'],actions=[...new Set(w.SI.acc.map(x=>x.actionRequired))];data.filters={accessoryTeams:teams,accessoryItems:items,accessoryStatuses:statuses,accessoryActions:actions};filters();opt('siAccAction',actions,'All Actions');w.si69_renderAccessories();dashboardShell();if(w.si_renderAccessoriesDashboard)w.si_renderAccessoriesDashboard(); if($('siInventoryDashboardCurrent')&&$('siInventoryDashboardCurrent').offsetParent!==null)w.si69_loadDashboard();w.si_updateCart?.();const info=$('siDataFreshness');if(info)info.textContent='Updated '+new Date().toLocaleTimeString();return data;}).catch(e=>{if($('siAccCards'))$('siAccCards').innerHTML='<div role="alert" style="padding:22px;color:#a11">'+esc(e.message)+' <button class="ces69-btn" onclick="initStockInventoryModule(true)">Retry</button></div>';return{success:false,message:e.message};}).finally(()=>state.pending=null);return state.pending;};
  const ces69OriginalFastInit=w.initStockInventoryModule;
  w.CES69_installInventoryOverrides=function(){
    w.initStockInventoryModule=ces69OriginalFastInit;
@@ -283,4 +243,20 @@
  function tab(t){if(t!=='restock')return;['siInventoryDashboardCurrent','siAccFilters','siAccSection'].forEach(id=>{const node=el(id);if(node){node.style.display='none';node.classList.add('hidden');}});let n=el('siRestockSection');if(n){n.style.display='block';n.classList.remove('hidden');}['siTabDashboardCurrent','siTabAcc','siTabRestock'].forEach(id=>el(id)?.classList.toggle('active',id==='siTabRestock'));w.siLatestRestockRender();}
  const original=w.si_switchTab;w.si_switchTab=function(t){if(t==='restock')return tab(t);const node=el('siRestockSection');if(node){node.classList.add('hidden');node.style.display='none';}el('siTabRestock')?.classList.remove('active');return original?.apply(this,arguments);};
  const init=w.initStockInventoryModule;if(typeof init==='function')w.initStockInventoryModule=function(){const output=init.apply(this,arguments);const then=()=>{if(el('siRestockSection')?.style.display==='block')tab('restock');};if(output?.then)return output.then(v=>{then();return v;});then();return output;};
+})(window,document);
+
+/* Canonical Inventory navigation. Replaces obsolete 2-tab and equipment-oriented overrides. */
+(function(w,d){'use strict';
+ function node(id){return d.getElementById(id);}
+ function visible(id,yes){const x=node(id);if(!x)return;x.classList.toggle('hidden',!yes);x.style.display=yes?'':'none';}
+ w.si_switchTab=function(mode){mode=mode==='acc'?'acc':mode==='restock'?'restock':'dashboard';
+   if(w.SI)w.SI.tab=mode;
+   visible('siInventoryDashboardCurrent',mode==='dashboard');visible('siAccFilters',mode==='acc');visible('siAccKpiGrid',mode==='acc');visible('siAccSection',mode==='acc');visible('siRestockSection',mode==='restock');
+   ['siTabDashboardCurrent','siTabAcc','siTabRestock'].forEach((id,i)=>{const b=node(id);if(b){b.classList.toggle('active',i===(mode==='dashboard'?0:mode==='acc'?1:2));b.setAttribute('aria-selected',String(i===(mode==='dashboard'?0:mode==='acc'?1:2)));}});
+   if(mode==='restock'&&typeof w.siLatestRestockRender==='function')w.siLatestRestockRender();
+   if(mode==='acc'&&typeof w.si69_renderAccessories==='function')w.si69_renderAccessories();
+   if(mode==='dashboard'){if(typeof w.si_renderAccessoriesDashboard==='function')w.si_renderAccessoriesDashboard();if(typeof w.si69_loadDashboard==='function')w.si69_loadDashboard(false);}
+ };
+ if(w.SI)w.SI.tab='dashboard';
+ d.addEventListener('DOMContentLoaded',function(){w.si_switchTab('dashboard');},{once:true});
 })(window,document);

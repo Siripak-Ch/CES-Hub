@@ -5092,3 +5092,12 @@ body,input,select,textarea,button,table,th,td,.swal2-container,.swal2-popup,.swa
   #view-checkin .ces-checkin-job-card{height:220px!important;min-height:220px!important;max-height:220px!important}
   #view-checkin .ces-checkin-card-actions button{height:41px!important;min-height:41px!important;font-size:11px!important}
 }
+
+/* Inventory three-tab layout — canonical styles; no JS style injection required. */
+#view-inventory .ces-inventory-mode-tabs{display:grid!important;grid-template-columns:repeat(3,minmax(0,1fr))!important;gap:5px!important;padding:5px!important;background:#eaf2fc!important;border:1px solid #dce8f6!important;border-radius:13px!important;margin:14px 0 16px!important}
+#view-inventory .ces-inventory-mode-tabs .sp-tab{width:100%;min-height:41px!important;border:0!important;border-radius:10px!important;padding:10px!important;text-align:center!important;background:transparent!important;color:#56718e!important;font-size:12px!important;font-weight:800!important;box-shadow:none!important}
+#view-inventory .ces-inventory-mode-tabs .sp-tab.active{background:#fff!important;color:#004aad!important;box-shadow:0 2px 8px rgba(15,65,120,.08)!important}
+#view-inventory .stockpro-shell{max-width:100%;min-width:0}#view-inventory .stockpro-header-card{border-radius:16px!important;box-shadow:0 4px 16px rgba(24,64,102,.05)!important}#view-inventory .ces69-access-table-scroll,#view-inventory #siRestockTable{border:1px solid #dfe8f3!important;border-radius:13px!important;background:#fff!important;overflow:auto!important;max-width:100%;scrollbar-gutter:stable}
+#view-inventory .ces69-access-table{min-width:1050px!important}#view-inventory .ces69-access-table th,#view-inventory #siRestockTable th{position:sticky;top:0;background:#edf5ff!important;font-size:11px!important;font-weight:800!important;color:#35577a!important;padding:12px!important}#view-inventory .ces69-access-table td,#view-inventory #siRestockTable td{font-size:11px!important;padding:11px 12px!important;line-height:1.5!important}#view-inventory .ces69-access-table tbody tr:nth-child(even) td{background:#fbfdff}
+#view-inventory #siInventoryDashboardCurrent,#view-inventory #siAccSection,#view-inventory #siRestockSection{min-width:0}#view-inventory .stockpro-card{border:1px solid #e1eaf5;border-radius:16px!important;box-shadow:0 4px 14px rgba(31,74,111,.04)!important}
+@media(max-width:680px){#view-inventory .ces-inventory-mode-tabs .sp-tab{font-size:10px!important}#view-inventory .stockpro-actions{gap:4px}#view-inventory .stockpro-title-wrap h1{font-size:18px}}

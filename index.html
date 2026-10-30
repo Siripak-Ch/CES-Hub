@@ -87,7 +87,7 @@
 
 
 
-    <link rel="stylesheet" href="css/app.css?v=20261005-v30052-checkin-line-token">
+    <link rel="stylesheet" href="css/app.css?v=CES-HUB-CLEAN-20261029">
     <link rel="stylesheet" href="css/v3029.css?v=20260902-v3029-infusion-workflow">
     <link rel="stylesheet" href="css/ai-local-assistant.css?v=20260818-v268-priority-concurrency">
 
@@ -293,7 +293,7 @@
 
 
 
-      window.CES_BUILD_HASH = 'CES-HUB-20261020-V30.0.67-LINE-FLEX-RENTAL-ACTION-LOG';
+      window.CES_BUILD_HASH = 'CES-HUB-CLEAN-20261029';
       window.CES_BUILD_VERSION = 'LATEST';
 
       // CES_V221_CACHE_MIGRATION: force fresh shell/config/permissions after a release.
@@ -562,7 +562,7 @@
         management_overview:['js/modules/10-management-overview-dashboard.js','js/modules/990-runtime-system-final.js'],
         service:['js/modules/20-service-csi.js','js/modules/990-runtime-system-final.js'],
         report:['js/modules/30-report-csi.js','js/modules/990-runtime-system-final.js','js/modules/995-report-csi.js','js/modules/996-report-csi-upload.js'],
-        memo_workorder:['js/modules/20-service-csi.js','js/modules/185-memo-workorder.js'],
+        memo_workorder:['js/modules/185-memo-workorder.js'],
         pr_gr_dashboard:['js/modules/PR%20dashboard.js'],
         yearly:['js/modules/40-yearly-dashboard.js','js/modules/990-runtime-system-final.js'],
         revenue:['js/modules/50-revenue-dashboard.js','js/modules/990-runtime-system-final.js'],
@@ -682,7 +682,7 @@
         if(cesDeferredBackgroundWarmPromise)return cesDeferredBackgroundWarmPromise;
         activeTab=String(activeTab||window.CES_ACTIVE_TAB||window.currentTab||'portal').trim();
         var allTabs=Object.keys(CES_DEFERRED_TAB_SCRIPTS),seen=Object.create(null),ordered=[];
-        cesReadDeferredOpenedTabs_().concat(allTabs).forEach(function(tab){if(tab&&tab!==activeTab&&!seen[tab]){seen[tab]=true;ordered.push(tab);}});
+        cesReadDeferredOpenedTabs_().slice(0,3).forEach(function(tab){if(tab&&tab!==activeTab&&!seen[tab]){seen[tab]=true;ordered.push(tab);}});
         cesDeferredBackgroundWarmPromise=new Promise(function(resolve){
           var index=0;
           function next(){
