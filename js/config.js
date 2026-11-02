@@ -6,7 +6,7 @@
 
 window.CES_CONFIG = {
   // IMPORTANT: After deploying Apps Script backend, paste the latest /exec URL here.
-  GAS_API_URL: 'https://script.google.com/macros/s/AKfycbyOi8NXm1MKWgBFAydHBsdqbx0GzOWzwQNKQgJlSu_6qtQ3pozgepdw3jPg-cH9r6we/exec',
+  GAS_API_URL: 'https://script.google.com/macros/s/AKfycbwNL3q704G3-7H48wb7ysE9T96tVzDBRBTBl8lKg4Pj9yFZmycdpQdmDbowvnBg1HOw/exec',
   // Optional extra /exec endpoints. The polyfill also accepts ?gasApiUrl=<url>
   // and persists that override, so a deployment URL can be corrected without
   // allowing every module to fail independently.
@@ -45,7 +45,7 @@ window.CES_CONFIG = {
     TRAINING_PLAN_2026: 'https://docs.google.com/spreadsheets/d/1qBR-KQ5cxVWw6iGWIxmYI9aXr3oTlhcu51JaQeBnxcw/edit?usp=sharing',
     VAN_BOOKING_FORM: 'https://forms.gle/Tra5UBHtbMWpXvhr7',
     E_REQUEST: 'https://forms.cloud.microsoft/pages/responsepage.aspx?id=vkBcMittBkCyxQeJR8hW0rSvo_9RxKxPlvy4TSI-BLZUMVlZMjhaR1MwU1NPSDVKU0ZVTEdFMDNHVS4u&route=shorturl',
-    CAR_BOOKING_DRIVE: 'https://drive.google.com/drive/folders/16B-1JX6RfyxTQRz7KMMgaAA13kOgSbvm?usp=drive_link',
+    CAR_BOOKING_DRIVE: 'https://drive.google.com/drive/folders/1rZyBY-g0h3QkVI2H2LD1x2ER5oWDueyx?usp=drive_link',
     VAN_GOOGLE_CALENDAR: 'https://calendar.google.com/calendar/u/0/r?cid=4a66f8df81e68d752715957a3805219e951d91c7b1c375e8996424ca2c55fef6%40group.calendar.google.com',
     VAN_LG_BOOKING: 'https://bdmsgroup-my.sharepoint.com/:x:/g/personal/nathithon_ko_bdms_co_th/IQDvxgTh2ZXUR6isdhw9DQ8uAfEp1IaZyZB-UmJPt6yqqYc?e=AhAlaw',
     VAN_NMOBILE: 'https://nmobileplus.nhealth-asia.com/login',
@@ -86,3 +86,16 @@ window.CES_CONFIG = {
     STOCK: '1X7f6BatQ-y5ZW6VYTv2oT34rbsCLeNgac0APt7njFrk'
   }
 };
+
+// CES Hub Drive destinations (links may require an authorised Google account).
+window.CES_STORAGE_LINKS = {
+  "PORTAL_EVENTS": "https://drive.google.com/drive/folders/1Tq1LA_HlQQPPOpkCsuY4SLZldmtwv5YO",
+  "CHECKIN": "https://drive.google.com/drive/folders/1AyLx6qYpMKm5_x4GxILnbzTZ2JMiWtCg",
+  "WEEKLY": "https://drive.google.com/drive/folders/1IXyynAMSpWd3BmStkD1mNXL3XUMwcT6q",
+  "OT": "https://drive.google.com/drive/folders/1WAyDcMvH86V1l4zoX9OEjENhWvE071EG",
+  "SERVICE": "https://drive.google.com/drive/folders/1GZhfAHbSG4nlvkfMYRCy0rnUfT9sEeiy",
+  "SIGNATURE": "https://drive.google.com/drive/folders/1GZhfAHbSG4nlvkfMYRCy0rnUfT9sEeiy",
+  "TE": "https://drive.google.com/drive/folders/1-aF5DW2DnK_a1RTwY5Y-e1opbx6kmzhv",
+  "VEHICLE": "https://drive.google.com/drive/folders/1rZyBY-g0h3QkVI2H2LD1x2ER5oWDueyx"
+};
+window.CES_STORAGE_LINKS.LOGO = "https://drive.google.com/file/d/1J4juLHqH9JJOD7pnsZBccX0w5X02ph4-/view";
