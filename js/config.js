@@ -6,7 +6,7 @@
 
 window.CES_CONFIG = {
   // IMPORTANT: After deploying Apps Script backend, paste the latest /exec URL here.
-  GAS_API_URL: 'https://script.google.com/macros/s/AKfycbzBl2JR4XkV0RMgJLquxZrl8Jg-RdB7N4n7vMpHLFLi8S-ZllysFOgIH2McxU242coV/exec',
+  GAS_API_URL: 'https://script.google.com/macros/s/AKfycbyOi8NXm1MKWgBFAydHBsdqbx0GzOWzwQNKQgJlSu_6qtQ3pozgepdw3jPg-cH9r6we/exec',
   // Optional extra /exec endpoints. The polyfill also accepts ?gasApiUrl=<url>
   // and persists that override, so a deployment URL can be corrected without
   // allowing every module to fail independently.
