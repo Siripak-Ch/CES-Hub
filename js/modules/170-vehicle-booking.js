@@ -751,7 +751,7 @@ function renderVehicleSummary(type) {
     if (status === 'COMPLETED') { completedKm += rowKm; totalBill += Number(row.electricBill || 0); (usageDates.length?usageDates:[p.key]).filter(Boolean).forEach(function(key){completedDates[key]=true;}); }
   });
   var completedUsageDays = Object.keys(completedDates).length;
-  var regularCost = completedUsageDays * 850;
+  var regularCost = completedUsageDays * 932;
   var feeSaved = Math.max(0, regularCost - totalBill);
   var feeSavedPercent = regularCost > 0 ? Math.round(feeSaved * 1000 / regularCost) / 10 : 0;
   var usedDays = Object.keys(dates).length;
@@ -761,7 +761,7 @@ function renderVehicleSummary(type) {
   var values = { bill:cesBookMoney_(totalBill), km:cesBookNumber_(totalKm), regular:cesBookMoney_(regularCost), saved:cesBookMoney_(feeSaved), days:cesBookNumber_(usedDays), jobs:cesBookNumber_(totalJobs), working:cesBookNumber_(workingDays) };
   var regularNote = document.getElementById(prefix + '-summary-regular-note');
   if (regularNote) {
-    regularNote.innerHTML = '<span>฿850/day</span><span>'+completedUsageDays+' completed day(s)</span>';
+    regularNote.innerHTML = '<span>฿932/day</span><span>'+completedUsageDays+' completed day(s)</span>';
     regularNote.className = 'ces-car-rate-note-v4';
   }
   var savedNote = document.getElementById(prefix + '-summary-saved-note');
@@ -877,7 +877,7 @@ function exportVehicleUsageExcel(type) {
       '<Row>' + cesBookingExcelCell_('Electric Bill (THB)') + cesBookingExcelCell_(totalBill,'Number') + '</Row>' +
       '<Row>' + cesBookingExcelCell_('Regular Car Fee (THB)') + cesBookingExcelCell_(regularFee,'Number') + '</Row>' +
       '<Row>' + cesBookingExcelCell_('Total Fee Saved (THB)') + cesBookingExcelCell_(totalFeeSaved,'Number') + '</Row>' +
-      '<Row>' + cesBookingExcelCell_('Rate Reference') + cesBookingExcelCell_('Car 850 Baht/day | EV charging reference 0.16 x 8 x km | Van 2,000 Baht/day (fuel excluded)') + '</Row>' +
+      '<Row>' + cesBookingExcelCell_('Rate Reference') + cesBookingExcelCell_('Car 932 Baht/day | EV charging reference 1.28 x km | Van 2,000 Baht/day (fuel excluded)') + '</Row>' +
     '</Table></Worksheet>' +
     '<Worksheet ss:Name="Usage Data"><Table>' +
       '<Row>' + headers.map(function(value){ return '<Cell ss:StyleID="Header"><Data ss:Type="String">'+cesBookingXmlEsc_(value)+'</Data></Cell>'; }).join('') + '</Row>' +
@@ -1327,9 +1327,10 @@ async function cesVehicleSaveReturnEvaluation_(type,bookingId,ratings,comment){
 }
 async function showVehicleReturnSuccess_(type,result,payload){
   result=result||{};payload=payload||{};
-  var km=Number(result.actualTotalKm||payload.actualTotalKm||0),bill=Number(result.electricBill||payload.electricBill||0),billableDays=Math.max(1,Number(result.billableDays||1)),normal=Number(result.normalCost||billableDays*850),saving=Number(result.saving!=null?result.saving:normal-bill),isSaving=saving>=0,pct=normal?Math.round(Math.abs(saving)*10000/normal)/100:0;
+  var km=Number(result.actualTotalKm||payload.actualTotalKm||0),bill=Number(result.electricBill||payload.electricBill||0),billableDays=Math.max(1,Number(result.billableDays||1)),normal=Number(result.normalCost||billableDays*932),toll=Number(result.tollFee!=null?result.tollFee:payload.tollFee||0),other=Number(result.otherExpense!=null?result.otherExpense:payload.otherExpense||0),referenceCharge=Math.round(km*1.28*100)/100,totalExpense=Number(result.totalExpense!=null?result.totalExpense:normal+bill+toll+other),saving=Number(result.saving!=null?result.saving:normal-bill),isSaving=saving>=0,pct=normal?Math.round(Math.abs(saving)*10000/normal)/100:0;
   var values={performance:0,comfort:0,value:0,comment:''};
-  var html='<div class="text-left"><div class="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-4"><div class="rounded-xl border bg-slate-50 p-3"><div class="text-[10px] font-black text-slate-400">REGULAR CAR FEE</div><div class="text-xl font-black text-slate-700">'+cesBookMoney_(normal)+'</div><div class="text-[10px] text-slate-400">'+billableDays+' day(s) × 850 THB/day</div></div><div class="rounded-xl border border-emerald-100 bg-emerald-50 p-3"><div class="text-[10px] font-black text-emerald-600">ELECTRIC BILL</div><div class="text-xl font-black text-emerald-700">'+cesBookMoney_(bill)+'</div><div class="text-[10px] text-emerald-600">Reference '+km+' km × 0.16 × 8</div></div><div class="rounded-xl '+(isSaving?'bg-green-600':'bg-red-600')+' p-3 text-white"><div class="text-[10px] font-black opacity-80">'+(isSaving?'TOTAL SAVING':'ADDITIONAL COST')+'</div><div class="text-xl font-black">'+cesBookMoney_(Math.abs(saving))+'</div><div class="text-[10px] opacity-80">'+pct+'% '+(isSaving?'lower':'higher')+' than regular fee</div></div></div>'+
+  var html='<div class="text-left"><div class="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-4"><div class="rounded-xl border bg-slate-50 p-3"><div class="text-[10px] font-black text-slate-400">REGULAR CAR FEE</div><div class="text-xl font-black text-slate-700">'+cesBookMoney_(normal)+'</div><div class="text-[10px] text-slate-400">'+billableDays+' day(s) × 932 THB/day</div></div><div class="rounded-xl border border-emerald-100 bg-emerald-50 p-3"><div class="text-[10px] font-black text-emerald-600">ELECTRIC BILL</div><div class="text-xl font-black text-emerald-700">'+cesBookMoney_(bill)+'</div><div class="text-[10px] text-emerald-600">Reference '+km+' km × 1.28</div></div><div class="rounded-xl '+(isSaving?'bg-green-600':'bg-red-600')+' p-3 text-white"><div class="text-[10px] font-black opacity-80">'+(isSaving?'TOTAL SAVING':'ADDITIONAL COST')+'</div><div class="text-xl font-black">'+cesBookMoney_(Math.abs(saving))+'</div><div class="text-[10px] opacity-80">'+pct+'% '+(isSaving?'lower':'higher')+' than regular fee</div></div></div>'+
+    '<div style="padding:13px;margin:8px 0 16px;background:#f0f7ff;border:1px solid #dbeafe;border-radius:12px;font-size:12px"><b>Return Expense Summary</b><br>ค่าเช่ารถ: '+cesBookMoney_(normal)+' ('+billableDays+' × ฿932 รวม VAT)<br>ค่าชาร์จอ้างอิง: '+cesBookMoney_(referenceCharge)+' ('+km+' กม. × ฿1.28)<br>บิลค่าชาร์จ/น้ำมันตามจริง: '+cesBookMoney_(bill)+'<br>ค่าทางด่วน: '+cesBookMoney_(toll)+'<br>ค่าใช้จ่ายอื่น: '+cesBookMoney_(other)+'<hr style="margin:8px 0;border-color:#bfdbfe"><strong style="font-size:16px;color:#004aad">ค่าใช้จ่ายรวม: '+cesBookMoney_(totalExpense)+'</strong><br><small>ค่าชาร์จอ้างอิงแสดงเพื่อเทียบเท่านั้น ไม่บวกซ้ำกับบิลจริง</small></div>'+
     '<div class="text-xs font-black text-slate-700 mb-2">ประเมินการใช้งานรถ 1–5 ดาว</div><div class="ces-return-rating-grid-v209">'+
     cesVehicleReturnRatingRow_('performance','1. สมรรถนะและการขับขี่','อัตราเร่ง การเบรก และการทรงตัว')+
     cesVehicleReturnRatingRow_('comfort','2. ความสะดวกสบายและฟังก์ชัน','เบาะนั่ง แอร์ หน้าจอ และพื้นที่โดยสาร')+

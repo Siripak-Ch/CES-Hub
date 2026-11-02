@@ -167,7 +167,7 @@ function fillUserInfoRM() {
             'OTHER': 'MNG',      // ถ้าใน Sheet เขียนว่า Other ให้เลือก OTHER
             'TECHNICAL ENGINEERING SERVICE': 'TES',
             'TECHNICAL ENGINEERING SERVICES': 'TES',
-            'MED': 'MED', 'LAB': 'LAB', 'EHS': 'EHS', 'TES':'TES'
+            'MED': 'MED', 'LAB': 'LAB', 'EHS': 'EHS', 'TES':'TES', 'INNO':'INNO','INNOVATION':'INNO','ENV':'ENV','CAL-MED':'MED','CAL-LAB':'LAB'
         };
         
         targetCode = mapping[teamVal] || teamVal;
@@ -215,7 +215,7 @@ function fillUserInfoRM() {
           const staff=window.currentUser||{}, empId=String(staff.id||staff.empId||staff.employeeId||staff.userId||'');
           if(empId&&window.CES_API&&window.CES_API.callFunction){
             window.CES_API.callFunction('getTECurrentUserProfile',[{employeeId:empId}],{transport:'jsonp',timeoutMs:24000,dedupe:true,priority:'background',module:'report_manage',silentLoading:true})
-              .then(result=>{if(!result?.success)return;const teamSelect=document.getElementById('rm-mainTeam');if(teamSelect&&result.team){const raw=String(result.team).toUpperCase().trim(),canon={'CAL-MED':'MED','CAL-LAB':'LAB','EHS+ENV':'EHS','ENV':'EHS','INNOVATION':'MNG'}[raw]||raw;const hit=Array.from(teamSelect.options).find(x=>x.value===canon);if(hit)teamSelect.value=canon;}if(result.supervisorNameTh){selectedSupervisor=String(result.supervisorNameTh);applySupervisor();}});
+              .then(result=>{if(!result?.success)return;const teamSelect=document.getElementById('rm-mainTeam');if(teamSelect&&result.team){const raw=String(result.team).toUpperCase().trim(),canon={'CAL-MED':'MED','CAL-LAB':'LAB','EHS+ENV':'EHS','ENV':'ENV','INNOVATION':'INNO'}[raw]||raw;const hit=Array.from(teamSelect.options).find(x=>x.value===canon);if(hit)teamSelect.value=canon;}if(result.supervisorNameTh){selectedSupervisor=String(result.supervisorNameTh);applySupervisor();}});
           }
         }catch(ignoreSupervisor){}
         const signatureFail = err => {

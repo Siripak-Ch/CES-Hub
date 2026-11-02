@@ -5,6 +5,7 @@
       <a id="pr69SourceLink" class="pr69-btn" title="Open linked Google Sheet" href="#" target="_blank" rel="noopener noreferrer" aria-disabled="true"><i class="fas fa-link"></i><span>Sheet</span></a>
       <button type="button" class="pr69-btn primary" onclick="document.getElementById('pr69File').click()" title="Import Excel"><i class="fas fa-file-arrow-up"></i><span>Import</span></button>
       <input id="pr69File" type="file" accept=".xlsx,.xls" hidden onchange="ces69UploadPrGr(this)">
+      <button type="button" class="pr69-btn" onclick="cesPrSyncSource()" title="Sync linked PR/GR Google Sheet"><i class="fas fa-cloud-arrow-down"></i><span>Sync Sheet</span></button>
       <button type="button" class="pr69-btn" onclick="ces69LoadPrGr(true)" title="Refresh data"><i class="fas fa-rotate"></i><span>Refresh</span></button>
       <button type="button" class="pr69-btn" onclick="ces69ExportPrGrPdf()" title="Export PDF"><i class="fas fa-file-pdf"></i><span>PDF</span></button>
       <button type="button" class="pr69-btn" onclick="ces69ExportPrGrExcel()" title="Export filtered Excel"><i class="fas fa-file-excel"></i><span>Excel</span></button>
